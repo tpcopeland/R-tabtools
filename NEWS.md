@@ -1,0 +1,116 @@
+# tabtools 0.1.0
+
+First release: an R implementation of the Stata `tabtools` commands
+`table1_tc`, `regtab`, `puttab`, `stacktab`, `stratetab`, `effecttab`,
+`comptab` and `hrcomptab` (Stata tabtools 2.1.14), and a weight-diagnostics
+table for inverse probability weighting. Everything a reader sees targets
+cell-for-cell parity with Stata, checked against 272 Stata-generated golden
+scenarios and the sheets of the Stata demo.
+
+## Descriptive tables
+
+* `table1_tc()` (alias `desctab()`) builds a baseline-characteristics
+  table. Variables are auto-typed or declared (`contn`, `contln`, `conts`,
+  `cat`, `cate`, `bin`, `bine`), in any of the three `vars` forms (names,
+  named type specifications, or the Stata string). It supports every Stata
+  cell-content option, totals, SMDs, missing-data rows, importance weights
+  (`wt`, `wtcompare`, `wtn`, effective sample size), frequency weights
+  (`fweight`) and small-cell suppression (`smallcells`).
+
+## Regression tables
+
+* `regtab()` builds a regression table from one or more fitted models:
+  `lm`, `glm` (every family and link), `MASS::glm.nb`, `survival::coxph`
+  (including Fine-Gray fits on `finegray()` data) and `clogit`,
+  `survival::survreg`, `AER::tobit`, `cmprsk::crr`, `MASS::polr`,
+  `ordinal::clm`, `nnet::multinom`, `pscl::zeroinfl`, `pscl::hurdle`,
+  `lme4::lmer`/`glmer`, `nlme::lme`, `glmmTMB::glmmTMB`,
+  `geepack::geeglm`, `survey::svyglm` (Stata's `svy:`) and
+  `WeightIt::glm_weightit` (Stata's `teffects ipw`). Any other model can be
+  passed as a `broom.helpers::tidy_plus_plus()`-shaped data frame, or as a
+  modelsummary list through `tt_from_modelsummary()`.
+* Effect labels (OR, HR, IRR, RRR, TR, SHR) and the methods sentence are
+  built from the models. Intercept, cutpoint and ancillary rows are
+  identified from the model, never by label. Multi-model row union,
+  `keep`/`drop` with Stata keys (`2.treat`), fvgen-style or native
+  interactions, random-effects rows, model statistics (`stats`), `addrow`,
+  `stat_fun`, stars and `dimnonsig`.
+* Standard errors are those Stata reports by default (`vce = "stata"`), or
+  `"model"`, `"robust"` (Stata's `vce(robust)`/`[pweight]`), `"cluster"`
+  with `cluster = ~id`, or a user-supplied variance (a function or matrix).
+  `vce` can be set per model and `vce_note = TRUE` names each model's
+  variance in the footnote. `tt_vcov()` returns the matrix;
+  `tt_vce_types()` and `tt_ci_methods()` list what a fit supports.
+* Multiply imputed models are pooled by Rubin's rules: a `mice` `mira` or
+  `tt_mi()` of a list of fits, as Stata's `mi estimate:`.
+* `regtab_uv()` fits one model per covariate from a formula template and
+  shows them as one column, for crude-and-adjusted tables.
+* Unconverged or unidentifiable fits are refused with a hint rather than
+  shown with misleading numbers.
+
+## Incidence rates and the cohort "Table 2"
+
+* `tt_rates()` (Stata `strate`) computes events, person-time, rates and
+  log-normal intervals per group.
+* `stratetab()` (Stata `stratetab`) combines rate blocks per outcome and
+  exposure into one table, optionally with incidence rate ratios.
+* `comptab()` and `hrcomptab()` (Stata `comptab` and `hrcomptab`) put
+  hazard ratios beside events, person-years and rates, or stack selected
+  rows of several `regtab()` or `effecttab()` tables. Rows are placed by
+  label and outcome identity, never by position.
+
+## Treatment effects and margins
+
+* `effecttab()` (Stata `effecttab`) formats treatment effects and margins
+  from marginaleffects results, data frames (including Stata's
+  `r(table)`) and matrices. `tt_effect_rows()` is its S3 input stage.
+
+## Weight diagnostics
+
+* `wttab()` tabulates inverse probability weights: distribution summaries
+  and Kish's effective sample size, overall, by treatment group, by
+  follow-up period and after truncation. It reads weight vectors, data
+  frame columns, `WeightIt::weightit()` objects and `ipw` results.
+
+## Composing and exporting tables
+
+* `puttab()` (Stata `puttab`) writes a data frame, matrix or `tt_table` as
+  one house-styled sheet.
+* `stacktab()` (Stata `stacktab`) assembles blocks of existing sheets or
+  `tt_table`s into one composite sheet.
+* `tt_merge()` puts tables side by side, joining rows on their keys;
+  `tt_stack()` stacks tables with the same columns as row groups.
+* `as_forest_data()` gives the rows for a forest plot (Stata's
+  `eplotframe()`).
+
+## Output
+
+* Every command returns a `tt_table`, printed as Stata's console listing;
+  its stored results (Stata's `r()`) are in `$stored`, and analytical
+  tables carry a sample-accounting ledger in `$meta$sample_accounting`.
+* `xlsx =`, `csv =` and `markdown =` write the table as the Stata options
+  do; `tt_write_xlsx()`, `tt_write_csv()` and `tt_write_markdown()` write
+  it later, and `as.data.frame()` is Stata's `frame()`.
+* `flextable::as_flextable()`, `tt_as_gt()`, `tt_as_gtsummary()` and
+  `tt_as_tinytable()` carry the house style to Word, HTML, LaTeX, Typst
+  and Quarto.
+* `tabtools_options()` sets persistent defaults (Stata's `tabtools set`).
+  `tt_as_factor()` converts haven-labelled columns to factors that keep
+  Stata's value codes.
+* `tt_table()` and `validate_tt_table()` expose the table object for other
+  renderers. They are experimental: the object may gain fields.
+* Numbers are rounded for display by the package's own exact
+  binary-to-decimal conversion (Stata's rule), so the cells are identical
+  on Linux, macOS and Windows.
+
+## Where R differs from Stata on purpose
+
+* Hypothesis tests use R's conventional tests (Welch t, Welch ANOVA,
+  Wilcoxon, Kruskal-Wallis, uncorrected Pearson chi-squared, Fisher's
+  exact); `test_args` changes them.
+* regtab does not reproduce Stata output that is wrong or misleading, and
+  R refuses input Stata cannot represent (infinite values, dates) or fits
+  whose data changed after fitting.
+
+`vignette("coming-from-stata")` lists every difference;
+`vignette("compared-with-gtsummary")` sets the tables beside gtsummary's.

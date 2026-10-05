@@ -1,0 +1,12 @@
+name,kind,row,col,value
+_golden_id,meta,,,T30c
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,3
+markdown_rows,scalar,,,16
+markdown,macro,,,T30c.md
+sheet,macro,,,T30c
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age female education income_quintile born_abroad diabetes hypertension
+Dapa,macro,,,"Weighted data are presented as mean±SD for continuous measures, and % for categorical measures. P-values suppressed."

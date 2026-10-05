@@ -1,0 +1,7 @@
+"Education, two reference levels",,,,,,
+,Base Primary,,,Base Secondary,,
+,OR,95% CI,p-value,OR,95% CI,p-value
+Education level,,,,,,
+  Primary,Reference,,,0.98,"(0.90, 1.07)",0.66
+  Secondary,1.02,"(0.94, 1.11)",0.66,Reference,,
+  Tertiary,1.09,"(1.00, 1.18)",0.053,1.07,"(0.99, 1.15)",0.093

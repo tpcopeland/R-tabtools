@@ -1,0 +1,9 @@
+,Poisson,,,ZIP,,
+,IRR,95% CI,p-value,Coef.,95% CI,p-value
+Event count: Treatment,0.90,"(0.82, 0.99)",0.029,-0.14,"(-0.25, -0.04)",0.006
+Event count: Female,,,,,,
+Event count:   0,Reference,,,Reference,,
+Event count:   1,1.18,"(1.08, 1.30)",<0.001,0.24,"(0.13, 0.34)",<0.001
+Event count: Intercept,1.16,"(1.07, 1.27)",<0.001,0.63,"(0.54, 0.73)",<0.001
+Inflation equation: Structural-zero risk,,,,0.72,"(0.57, 0.88)",<0.001
+Inflation equation: Intercept,,,,-0.48,"(-0.62, -0.33)",<0.001

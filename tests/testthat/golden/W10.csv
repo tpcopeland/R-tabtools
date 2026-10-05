@@ -1,0 +1,4 @@
+,Crude,,,Adjusted,,,IPTW,,
+,HR,95% CI,p-value,HR,95% CI,p-value,HR,95% CI,p-value
+Treatment group,1.05,"(0.99, 1.11)",0.094,1.05,"(0.99, 1.11)",0.11,1.04,"(0.98, 1.10)",0.19
+Subjects,"15,000",,,"15,000",,,"30,000",,

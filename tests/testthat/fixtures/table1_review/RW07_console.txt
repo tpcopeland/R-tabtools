@@ -1,0 +1,20 @@
+(1 real change made)
+(1 real change made, 1 to missing)
+(1 real change made)
+(1 real change made, 1 to missing)
+  +---------------------------------------------------------+
+  |                  Control       Active        p-value    |
+  |---------------------------------------------------------|
+  | No. (Column %)   10 (50.0 %)   10 (50.0 %)              |
+  |---------------------------------------------------------|
+  | Clinical stage                               Suppressed |
+  |    Stage I       <3            <3                       |
+  |    Stage II      ≥3            3                        |
+  |    Stage III     3             4                        |
+  |    Missing       <3            <3                       |
+  |---------------------------------------------------------|
+  | Female sex       6             8             Suppressed |
+  |    Missing       <3            0                        |
+  +---------------------------------------------------------+
+Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to tests/testthat/fixtures/table1_review/RW07.csv

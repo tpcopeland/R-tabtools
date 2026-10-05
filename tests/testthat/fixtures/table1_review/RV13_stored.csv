@@ -1,0 +1,11 @@
+name,kind,row,col,value
+_golden_id,meta,,,RV13
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,x1 x2 c2 c3
+Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures."
+table,matrix,Marker,p_value,.
+table,matrix,Marker_2,p_value,.
+table,matrix,Stage,p_value,.
+table,matrix,Stage_2,p_value,.

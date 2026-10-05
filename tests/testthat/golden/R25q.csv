@@ -1,0 +1,12 @@
+Table 5l. Negative Binomial Regression -- Prior Hospitalizations,,,
+,Negative binomial,,
+,IRR,95% CI,p-value
+Treatment group,1.00,"(0.98, 1.02)",0.97
+Age at cohort entry (years),1.00,"(1.00, 1.00)",0.81
+Female sex,1.00,"(0.98, 1.02)",>0.99
+Diabetes,1.00,"(0.98, 1.03)",0.82
+Hypertension,1.00,"(0.98, 1.03)",0.89
+Observations,"15,000",,
+AIC,49371.13,,
+BIC,49424.44,,
+Log-likelihood,-24678.57,,

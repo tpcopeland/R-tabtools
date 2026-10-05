@@ -1,0 +1,11 @@
+  +------------------------------------------------------------------+
+  |                        Three clusters                            |
+  |                                 Coef.           95% CI   p-value |
+  |      Treatment group             0.00    (-0.68, 0.68)      0.98 |
+  |           Female sex            -0.16    (-0.89, 0.57)      0.45 |
+  | Cardiovascular event             0.52    (-0.19, 1.23)     0.088 |
+  |            Intercept            58.28   (57.72, 58.83)    <0.001 |
+  +------------------------------------------------------------------+
+
+Markdown exported to W06b.md
+Exported 7 rows × 5 cols to regtab.xlsx, sheet W06b

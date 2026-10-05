@@ -1,0 +1,28 @@
+  +----------------------------------------------------------------+
+  |                         Native                                 |
+  |                          Coef.                95% CI   p-value |
+  |         Car origin                                             |
+  |           Domestic   Reference                                 |
+  |            Foreign     2088.17   (-2614.64, 6790.97)      0.38 |
+  | Repair record 1978                                             |
+  |                  1   Reference                                 |
+  |                  2     1403.12   (-3352.82, 6159.07)      0.56 |
+  |                  3     2042.57   (-2366.01, 6451.16)      0.36 |
+  |                  4     1317.06   (-3385.75, 6019.86)      0.58 |
+  |                  5     -360.00   (-6375.85, 5655.85)      0.91 |
+  |      foreign#rep78                                             |
+  |  0.foreign#1.rep78   Reference                                 |
+  |  0.foreign#2.rep78   Reference                                 |
+  |  0.foreign#3.rep78   Reference                                 |
+  |  0.foreign#4.rep78   Reference                                 |
+  |  0.foreign#5.rep78   Reference                                 |
+  |  1.foreign#1.rep78       Empty                                 |
+  |  1.foreign#2.rep78       Empty                                 |
+  |  1.foreign#3.rep78    -3866.57   (-9826.46, 2093.31)      0.20 |
+  |  1.foreign#4.rep78    -1708.28   (-7199.97, 3783.42)      0.54 |
+  |  1.foreign#5.rep78     Omitted                                 |
+  |          Intercept     4564.50     (310.65, 8818.35)     0.036 |
+  +----------------------------------------------------------------+
+
+Markdown exported to R13.md
+Exported 24 rows × 5 cols to regtab.xlsx, sheet R13

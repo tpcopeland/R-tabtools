@@ -1,0 +1,78 @@
+Package: tabtools
+Title: Publication-Ready Descriptive and Regression Tables
+Version: 0.1.0
+Date: 2026-10-05
+Authors@R: c(
+    person("Timothy P", "Copeland", role = c("aut", "cre"),
+           email = "timothy.copeland@ki.se"),
+    person("Makoto", "Matsumoto", role = c("ctb", "cph"),
+           comment = "Mersenne Twister MT19937-64 reference code in src/stata_mt64.c"),
+    person("Takuji", "Nishimura", role = c("ctb", "cph"),
+           comment = "Mersenne Twister MT19937-64 reference code in src/stata_mt64.c")
+  )
+Copyright: See file inst/COPYRIGHTS
+Description: R implementation of the 'Stata' 'tabtools' commands
+    'table1_tc', 'regtab', 'puttab', 'stacktab', 'stratetab', 'effecttab',
+    'comptab' and 'hrcomptab' (version 2.1.14), and a weight-diagnostics
+    table for inverse probability weighting. Produces baseline
+    characteristics tables, regression tables, incidence-rate tables (with
+    the rates of 'Stata' 'strate'), cohort-study tables of incidence rates
+    beside hazard ratios, tables of treatment effects and margins, tables
+    of the distribution of inverse probability weights, and composite
+    sheets assembled from them, with row-level control over variable labels, category
+    indentation, reference rows, and house-styled 'Excel', Markdown, and CSV
+    output. Descriptive statistics, layout, and formatting target
+    cell-for-cell parity with the 'Stata' commands; hypothesis tests use R's
+    conventional defaults.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Language: en-GB
+Roxygen: list(markdown = TRUE)
+Depends: R (>= 4.1.0)
+Imports:
+    broom.helpers (>= 1.15.0),
+    cli,
+    methods,
+    openxlsx2 (>= 1.29),
+    stats,
+    tools,
+    utils,
+    withr
+Suggests:
+    AER,
+    callr,
+    cmprsk,
+    flextable,
+    geepack,
+    glmmTMB,
+    gt,
+    gtsummary (>= 2.3.0),
+    haven,
+    jsonlite,
+    knitr,
+    lme4,
+    lmerTest,
+    marginaleffects,
+    mice,
+    MASS,
+    Matrix,
+    mgcv,
+    nlme,
+    nnet,
+    officer,
+    ordinal,
+    pscl,
+    rlang,
+    rmarkdown,
+    sandwich,
+    survey,
+    survival,
+    testthat (>= 3.0.0),
+    tidyxl,
+    tinytable,
+    WeightIt,
+    xml2
+VignetteBuilder: knitr
+NeedsCompilation: yes
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

@@ -1,0 +1,9 @@
+  +------------------------------------------------+
+  |                 Model                          |
+  |                    OR         95% CI   p-value |
+  | Mileage (mpg)    1.17   (1.06, 1.30)     0.002 |
+  |  Observations      74                          |
+  +------------------------------------------------+
+
+Markdown exported to ST02.md
+Exported 5 rows × 5 cols to regtab.xlsx, sheet ST02

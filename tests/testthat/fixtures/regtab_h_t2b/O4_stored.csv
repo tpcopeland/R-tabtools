@@ -1,0 +1,14 @@
+name,kind,row,col,value
+_golden_id,meta,,,O4
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+n_1,scalar,,,400
+ll_1,scalar,,,-581.14354720429787
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,7
+methods,macro,,,"Incidence rate ratios with 95% confidence intervals from univariable Poisson regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,IRR
+table,matrix,x,c1,1.355478740851157

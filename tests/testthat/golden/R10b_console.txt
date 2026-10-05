@@ -1,0 +1,9 @@
+  +--------------------------------------------------------------------+
+  |                               Label match                          |
+  |                                        OR         95% CI   p-value |
+  |             Treatment group          1.03   (0.96, 1.10)      0.39 |
+  | Age at cohort entry (years)          1.00   (1.00, 1.01)     0.038 |
+  +--------------------------------------------------------------------+
+
+Markdown exported to R10b.md
+Exported 5 rows × 5 cols to regtab.xlsx, sheet R10b

@@ -1,0 +1,7 @@
+  +------------------------------------------------------------------------------------+
+  |       Any HRT (primary)             HR (CI)    Low dose (dose)             HR (CI) |
+  | Former smoker (primary)   1.14 (0.97, 1.34)   High dose (dose)   0.73 (0.58, 0.92) |
+  +------------------------------------------------------------------------------------+
+
+Side by side without a title.
+stacktab: 2 blocks -> 2 rows written -> sheet K07

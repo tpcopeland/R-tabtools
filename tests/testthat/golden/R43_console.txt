@@ -1,0 +1,12 @@
+  +---------------------------------------------------+
+  |                   no ref                          |
+  |                       OR         95% CI   p-value |
+  | Education level                                   |
+  |         Primary     0.51   (0.48, 0.55)    <0.001 |
+  |       Secondary     0.54   (0.51, 0.57)    <0.001 |
+  |        Tertiary     0.54   (0.51, 0.57)    <0.001 |
+  | Treatment group     1.03   (0.96, 1.10)      0.37 |
+  +---------------------------------------------------+
+
+Markdown exported to R43.md
+Exported 8 rows × 5 cols to regtab.xlsx, sheet R43

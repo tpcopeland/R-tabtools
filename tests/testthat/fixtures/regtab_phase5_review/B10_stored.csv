@@ -1,0 +1,15 @@
+name,kind,row,col,value
+_golden_id,meta,,,B10
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+n_1,scalar,,,17944
+ll_1,scalar,,,-19432.992695173569
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,7
+methods,macro,,,"Odds ratios with 95% confidence intervals from multivariable ordered logistic regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Age_at_cohort_entry_(years),c1,.99962357627042631
+table,matrix,Female_sex,c1,1.00189664851194

@@ -1,0 +1,13 @@
+  +------------------------------------------------------------+
+  |                  SAS base                                  |
+  |                     Coef.                 95% CI   p-value |
+  |   Price class                                              |
+  |        Budget    -4963.87   (-6069.58, -3858.16)    <0.001 |
+  |     Mid-range    -4116.73   (-5146.08, -3087.39)    <0.001 |
+  |       Premium   Reference                                  |
+  | Mileage (mpg)      -81.75       (-160.04, -3.45)     0.041 |
+  |     Intercept    10974.02    (9393.22, 12554.82)    <0.001 |
+  +------------------------------------------------------------+
+
+Markdown exported to R51a.md
+Exported 9 rows × 5 cols to regtab.xlsx, sheet R51a

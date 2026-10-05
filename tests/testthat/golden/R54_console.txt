@@ -1,0 +1,15 @@
+  +------------------------------------------------------------------------------------------------------------------+
+  |                                               Base                             Adjusted                          |
+  |                                                RRR         95% CI   p-value         RRR         95% CI   p-value |
+  | Secondary: Age at cohort entry (years)        1.00   (1.00, 1.00)      0.75        1.00   (1.00, 1.00)      0.75 |
+  |                  Secondary: Female sex        1.08   (1.00, 1.18)     0.062        1.08   (1.00, 1.18)     0.062 |
+  |                    Secondary: Diabetes                                             1.01   (0.93, 1.09)      0.87 |
+  |  Tertiary: Age at cohort entry (years)        1.00   (1.00, 1.00)      0.78        1.00   (1.00, 1.00)      0.76 |
+  |                   Tertiary: Female sex        1.02   (0.93, 1.11)      0.71        1.02   (0.93, 1.11)      0.71 |
+  |                     Tertiary: Diabetes                                             1.03   (0.95, 1.12)      0.50 |
+  |                           Observations      15,000                               15,000                          |
+  |                         Log-likelihood   -16255.33                            -16255.06                          |
+  +------------------------------------------------------------------------------------------------------------------+
+
+Markdown exported to R54.md
+Exported 11 rows × 8 cols to regtab.xlsx, sheet R54

@@ -1,0 +1,18 @@
+name,kind,row,col,value
+_golden_id,meta,,,F1
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,age marker marker female stage
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3) for continuous measures, and No./total (row %) for categorical measures and No./total (column %) for binary measures. P-values were calculated using independent t-test, Wilcoxon rank-sum test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3) for continuous measures, and No./total (row %) for categorical measures and No./total (column %) for binary measures."
+table,matrix,Age_at_entry,p_value,8.87570738447000e-06
+table,matrix,Age_at_entry,smd,3.0580519078270099
+table,matrix,Inflammation_marker,p_value,.001582939913251
+table,matrix,Inflammation_marker,smd,1.7777148584428031
+table,matrix,Inflammation_marker_2,p_value,.0036637511444784
+table,matrix,Inflammation_marker_2,smd,1.863039541894201
+table,matrix,Female_sex,p_value,.79984610566247305
+table,matrix,Female_sex,smd,.1199520287808136
+table,matrix,Clinical_stage,p_value,.78812762774531109
+table,matrix,Clinical_stage,smd,.35028472205202937

@@ -1,0 +1,11 @@
+ ,Total
+"No. (Column %) or Median (Q1, Q3)",N=74
+Repair record 1978,
+   1,<5
+   2,8
+   3,30
+   4,18
+   5,11
+Car origin,22 (30)
+Mileage (mpg),"20 (18, 25)"
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.,

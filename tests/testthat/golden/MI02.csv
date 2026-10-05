@@ -1,0 +1,12 @@
+,MI logit,,
+,OR,95% CI,p-value
+Treatment group,0.88,"(0.57, 1.37)",0.58
+Age at cohort entry (years),1.00,"(0.98, 1.02)",0.88
+Female sex,1.74,"(1.11, 2.74)",0.016
+Education level,,,
+  Primary,Reference,,
+  Secondary,1.04,"(0.60, 1.80)",0.90
+  Tertiary,0.97,"(0.53, 1.79)",0.92
+Observations,400,,
+Imputations,5,,
+Largest FMI,0.2052,,

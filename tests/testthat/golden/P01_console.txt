@@ -1,0 +1,2 @@
+Markdown exported to P01.md
+puttab: wrote 5 data rows x 10 cols (matrix source) to sheet P01 in puttab.xlsx

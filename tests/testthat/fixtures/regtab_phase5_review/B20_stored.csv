@@ -1,0 +1,15 @@
+name,kind,row,col,value
+_golden_id,meta,,,B20
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,7
+methods,macro,,,"Incidence rate ratios with 95% confidence intervals from univariable mixed-effects negative binomial regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,IRR
+table,matrix,Exposure_score,c1,1.408047515924393
+table,matrix,lnalpha,c1,-.5066866343821359
+table,matrix,Intercept,c1,1.3098531717318851
+table,matrix,var(_cons[clinic]),c1,.23362989643867069

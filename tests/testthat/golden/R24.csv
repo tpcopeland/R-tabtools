@@ -1,0 +1,11 @@
+,CDISC,,
+,OR,95% CI,p-value
+Age at cohort entry (years),1.0014,"(0.9989, 1.0038)",0.27
+Female sex,0.9930,"(0.9291, 1.0613)",0.84
+Education level,,,
+  Primary,Reference,,
+  Secondary,1.0190,"(0.9379, 1.1072)",0.66
+  Tertiary,1.0871,"(0.9988, 1.1832)",0.053
+Diabetes,1.0082,"(0.9440, 1.0768)",0.81
+Hypertension,1.0973,"(1.0275, 1.1718)",0.006
+Observations,"15,000",,

@@ -1,0 +1,10 @@
+,Multilevel logistic,,
+,OR,95% CI,p-value
+Age (years),1.05,"(1.05, 1.05)",<0.001
+Sex,,,
+  Male,Reference,,
+  Female,0.64,"(0.58, 0.69)",<0.001
+Median Odds Ratio (Location (stand office ID)),1.57,"(1.44, 1.73)",
+Observations,"10,351",,
+Groups,62,,
+ICC,0.063,,

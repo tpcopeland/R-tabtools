@@ -1,0 +1,10 @@
+Table 5b. Poisson Regression -- Incidence Rate Ratios,,,
+,Poisson,,
+,IRR,95% CI,p-value
+Treatment group,1.03,"(0.97, 1.09)",0.30
+Age at cohort entry (years),1.00,"(1.00, 1.00)",0.019
+Female sex,1.01,"(0.96, 1.07)",0.72
+Diabetes,1.27,"(1.21, 1.35)",<0.001
+Hypertension,1.22,"(1.15, 1.28)",<0.001
+Observations,"15,000",,
+AIC,21215.80,,

@@ -1,0 +1,9 @@
+Table S2. Selected Risk Factors (Name-Based Selection),,
+,Cox PH,
+,HR 95% CI,p-value
+Treatment group,"1.04 (0.98, 1.10)",0.18
+Diabetes,"1.53 (1.45, 1.62)",<0.001
+Hypertension,"1.50 (1.42, 1.59)",<0.001
+  Secondary,"1.08 (1.00, 1.15)",0.038
+  Tertiary,"1.05 (0.98, 1.13)",0.18
+Rows selected by label pattern using rownames() option.,,

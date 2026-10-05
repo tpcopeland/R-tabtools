@@ -1,0 +1,22 @@
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+Table 3. Risk Factors for Cardiovascular Events
+  +------------------------------------------------+
+  |                               Cox PH           |
+  |                            HR 95% CI   p-value |
+  | Treatment Effect                               |
+  |  Treatment group   1.04 (0.98, 1.10)      0.18 |
+  |         Diabetes   1.53 (1.45, 1.62)    <0.001 |
+  |     Hypertension   1.50 (1.42, 1.59)    <0.001 |
+  | Anxiety disorder   1.69 (1.59, 1.80)    <0.001 |
+  |  Education Level                               |
+  |  Education level                               |
+  |          Primary           Reference           |
+  |        Secondary   1.08 (1.00, 1.15)     0.038 |
+  |         Tertiary   1.05 (0.98, 1.13)      0.18 |
+  +------------------------------------------------+
+
+Markdown exported to C02.md
+Exported 13 rows × 4 cols to comptab.xlsx, sheet C02

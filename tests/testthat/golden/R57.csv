@@ -1,0 +1,5 @@
+,Estimate overflows,,,Upper bound overflows,,
+,OR,95% CI,p-value,OR,95% CI,p-value
+"Age (per 300,000 years)",,,0.024,,,
+Female sex,1.01,"(0.94, 1.08)",0.84,1.01,"(0.94, 1.08)",0.84
+"Age (per 171,000 years)",,,,1.25e+216,,0.024

@@ -1,0 +1,9 @@
+name,value
+tabtools_model_label_1,"Constrained"
+tabtools_effect_scale_1,"Coef."
+tabtools_outcome_id_1,"price"
+tabtools_model_id_1,"regress price mpg mpg_dup i.foreign##i.rep78"
+tabtools_statistic_ids,"estimate ci pvalue"
+tabtools_n_models,"1"
+tabtools_ci_level,"95"
+tabtools_source,"regtab"

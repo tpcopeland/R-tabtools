@@ -1,0 +1,11 @@
+  +--------------------------------------------------------+
+  |                  Pr(Diabetes)         95% CI   p-value |
+  |     sex#highbp                                         |
+  | 1.sex#0.highbp           0.04   (0.03, 0.05)    <0.001 |
+  | 1.sex#1.highbp           0.05   (0.04, 0.06)    <0.001 |
+  | 2.sex#0.highbp           0.05   (0.04, 0.05)    <0.001 |
+  | 2.sex#1.highbp           0.06   (0.05, 0.06)    <0.001 |
+  +--------------------------------------------------------+
+
+Markdown exported to E23.md
+Exported 8 rows × 5 cols to effecttab.xlsx, sheet E23

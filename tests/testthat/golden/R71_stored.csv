@@ -1,0 +1,22 @@
+name,kind,row,col,value
+_golden_id,meta,,,R71
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,7
+markdown_rows,scalar,,,3
+ci_level,scalar,,,95
+N_models,scalar,,,2
+N_cols,scalar,,,8
+N_rows,scalar,,,6
+sheet,macro,,,R71
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R71.md
+methods,macro,,,"Incidence rate ratios with 95% confidence intervals from multivariable Poisson regression and negative binomial regression across 2 models. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,IRR
+table,matrix,alpha,c1,1.4395618416229019
+table,matrix,alpha,c2,.
+table,matrix,Mid_group,c1,1.0725238116942319
+table,matrix,Mid_group,c2,1.03354591792488
+table,matrix,High_group,c1,.92273262469837236
+table,matrix,High_group,c2,1.0026563005808999

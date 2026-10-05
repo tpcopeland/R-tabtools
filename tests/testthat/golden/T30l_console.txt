@@ -1,0 +1,12 @@
+  +-------------------------------------------------------------+
+  |                  Control   Treatment   Total     p-value    |
+  |-------------------------------------------------------------|
+  | No. (Column %)   N=5       N=5         N=10                 |
+  |-------------------------------------------------------------|
+  | Characteristic                                   Suppressed |
+  |    Absent        <5        <5          5                    |
+  |    Present       <5        <5          5                    |
+  +-------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to T30l.csv
+Markdown exported to T30l.md

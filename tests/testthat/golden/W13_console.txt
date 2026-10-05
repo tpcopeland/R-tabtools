@@ -1,0 +1,9 @@
+  +-------------------------------------------------------+
+  |                          RD          95% CI   p-value |
+  | Treatment group                                       |
+  |            SSRI   Reference                           |
+  |            SNRI        0.01   (-0.01, 0.02)      0.37 |
+  +-------------------------------------------------------+
+
+Markdown exported to W13.md
+Exported 6 rows × 5 cols to effecttab.xlsx, sheet W13

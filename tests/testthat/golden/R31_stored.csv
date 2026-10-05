@@ -1,0 +1,21 @@
+name,kind,row,col,value
+_golden_id,meta,,,R31
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,5
+n_1,scalar,,,74
+ll_1,scalar,,,-27.742768622768171
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,8
+sheet,macro,,,R31
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R31.md
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable complementary log-log regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Mileage_(mpg),c1,-.14229109356851341
+table,matrix,Weight_(lbs_),c1,-.0029152845441402001
+table,matrix,Intercept,c1,10.09693574275393

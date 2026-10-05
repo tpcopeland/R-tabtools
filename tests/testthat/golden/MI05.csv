@@ -1,0 +1,13 @@
+,Adjusted,,,Crude,,
+,Coef.,95% CI,p-value,Coef.,95% CI,p-value
+Treatment group,-0.09,"(-0.86, 0.67)",0.81,-0.08,"(-0.84, 0.68)",0.83
+Age at cohort entry (years),0.00,"(-0.03, 0.03)",0.89,,,
+Female sex,-0.73,"(-1.51, 0.04)",0.064,-0.74,"(-1.51, 0.03)",0.060
+Education level,,,,,,
+  Primary,Reference,,,,,
+  Secondary,0.29,"(-0.67, 1.24)",0.55,,,
+  Tertiary,0.29,"(-0.71, 1.30)",0.57,,,
+Intercept,26.34,"(24.32, 28.36)",<0.001,26.68,"(26.00, 27.35)",<0.001
+Observations,400,,,400,,
+Imputations,5,,,5,,
+Largest FMI,0.1156,,,0.0000,,

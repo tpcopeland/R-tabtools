@@ -1,0 +1,8 @@
+,Model,,
+,Coef.,95% CI,p-value
+Age in current year,0.03,"(0.03, 0.04)",<0.001
+1 if not SMSA,-0.10,"(-0.15, -0.05)",<0.001
+1 if south,-0.11,"(-0.17, -0.06)",<0.001
+Intercept,11.73,"(11.64, 11.82)",<0.001
+Observations,"26,200",,
+Groups,"4,434",,

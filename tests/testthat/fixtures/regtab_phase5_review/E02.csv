@@ -1,0 +1,6 @@
+,Model,,
+,Coef.,95% CI,p-value
+Event count: Treatment,-0.12,"(-0.23, -0.01)",0.028
+Event count: Age z-score,0.42,"(0.36, 0.49)",<0.001
+Event count: treatment#age_z,-0.07,"(-0.17, 0.03)",0.16
+Inflation equation: Structural-zero risk,0.81,"(0.64, 0.99)",<0.001

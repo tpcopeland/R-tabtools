@@ -1,0 +1,659 @@
+---
+title: "Regression tables with regtab()"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Regression tables with regtab()}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+# Every example uses survival (Suggests): without it the code is shown,
+# not run.
+has <- function(...) all(vapply(c("survival", ...), requireNamespace, TRUE, quietly = TRUE))
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = has())
+```
+
+`regtab()` turns one or more fitted models into a regression table: one
+block of estimate, confidence-interval and p-value columns per model, a label
+row and indented level rows for each factor, a Reference row for each base
+level, and optional model statistics below. This article covers which models
+it reads and how it labels them, how rows from several models are combined,
+the options that select and label rows, the standard errors, the numbers
+behind the table, and what to do with a model regtab does not support.
+
+```{r setup}
+library(tabtools)
+library(survival)
+```
+
+## Supported models and their effect measures
+
+regtab reads the effect measure from the model, as Stata's `regtab` reads it
+from the estimation command. Ratio measures are exponentiated, with
+exponentiated confidence limits; everything else is shown on the scale of the
+linear predictor, labelled `Coef.`. The intercept row is dropped by default
+when every model in the table is on a ratio scale.
+
+| Family | R fit | Header |
+|---|---|---|
+| Linear | `lm()` | Coef. |
+| Binary | `glm(family = binomial)` (logit), `quasibinomial` | OR |
+| | `glm(binomial(link = "probit"))`, `"cloglog"`, `"log"` | Coef. |
+| | `survival::clogit()` (conditional logistic) | OR |
+| Other GLMs | `glm()` with any other family or link (Gamma, Gaussian with a log link, ...) | Coef. |
+| Count | `glm(family = poisson)` (log), `quasipoisson`, `MASS::glm.nb()` | IRR |
+| | `pscl::zeroinfl()`, `pscl::hurdle()` | Coef. |
+| Survival | `survival::coxph()` | HR |
+| | `coxph()` on `survival::finegray()` data, `cmprsk::crr()` | SHR |
+| | `survival::survreg()`: Weibull, exponential, lognormal, log-logistic (accelerated failure time) | TR |
+| | `survreg(dist = "gaussian")` (Stata `intreg`), `AER::tobit()` | Coef. |
+| Ordinal | `MASS::polr()`, `ordinal::clm()` with a logit link | OR |
+| | the same with a probit or other link | Coef. |
+| Multinomial | `nnet::multinom()` | RRR |
+| Mixed | `lme4::lmer()`, `nlme::lme()` | Coef. |
+| | `lme4::glmer()`, `lme4::glmer.nb()`, `glmmTMB::glmmTMB()` | by family and link, as the GLMs above |
+| GEE | `geepack::geeglm()` | by family and link, as the GLMs above (Stata `xtgee`) |
+| Survey | `survey::svyglm()` | as the GLMs above; t with the design degrees of freedom |
+| Weighting | `WeightIt::glm_weightit()` | as the GLMs above, with the M-estimation variance |
+| Anything else | a data frame shaped like `broom.helpers::tidy_plus_plus()` output | from its attributes (see [below](#data-frame-input)) |
+
+Three consequences are worth knowing before you fit:
+
+- A **log-binomial** model (`binomial(link = "log")`) is shown as log risk
+  ratios under `Coef.`, not as risk ratios, because Stata's `regtab` does
+  the same for `glm, link(log)`. For a risk ratio table, fit a Poisson
+  model with robust standard errors ("modified Poisson"; Zou G, 2004,
+  *American Journal of Epidemiology* 159(7), 702-706) and
+  relabel the header with `coef = "RR"`; see
+  [Standard errors](#standard-errors).
+- `coef` changes only the header, never whether estimates are
+  exponentiated.
+- **GEE** fits follow Stata's `xtgee`, which Stata's `regtab` classifies
+  like `glm`: odds ratios for a binomial logit, rate ratios for a Poisson log
+  link, coefficients otherwise; an independence-correlation fit can instead
+  be read as Stata's `glm [pw], vce(cluster id)` with `gee_as = "glm"`.
+
+The methods sentence stored with each table (`tab$stored$methods`) names the
+model and its effect measure.
+
+### Survival models
+
+Cox and accelerated failure-time (AFT) models can share a table. An AFT model
+reports time ratios, `exp()` of the log-time coefficients: a time ratio above
+1 means longer survival, so it points the opposite way from a hazard ratio.
+
+```{r survival}
+d <- lung
+d$sex <- factor(d$sex, 1:2, c("Male", "Female"))
+d$dead <- as.integer(d$status == 2)
+attr(d$sex, "label") <- "Sex"
+attr(d$age, "label") <- "Age (years)"
+
+cox <- coxph(Surv(time, dead) ~ sex + age, data = d, ties = "breslow")
+weib <- survreg(Surv(time, dead) ~ sex + age, data = d, dist = "weibull")
+regtab(cox, weib, models = c("Cox", "Weibull AFT"))
+```
+
+The Weibull shape parameters (`ln_p`, `p`, `1/p`) and the intercept appear
+with `keepintercept = TRUE`, on their own scale. The lognormal and
+log-logistic scale rows (`lnsigma`, `sigma`, `lngamma`, `gamma`) are kept
+even without it, as in Stata.
+
+For competing risks, the Fine-Gray subdistribution hazard ratio can come
+from `coxph()` on `finegray()` data or from `cmprsk::crr()`. regtab
+recognises a Fine-Gray `coxph()` fit from its structure (weighted, a
+`Surv(start, stop, status)` response, data produced by `finegray()`) and
+uses a sandwich variance clustered by subject; keep the subject id in the
+`finegray()` call and pass it as `cluster`. `crr()` takes a covariate
+matrix, so its rows are named by the matrix's column names.
+
+```{r finegray, eval = has("cmprsk")}
+m <- mgus2
+m$etime <- with(m, ifelse(pstat == 0, futime, ptime))
+m$event <- factor(with(m, ifelse(pstat == 0, 2 * death, 1)), 0:2,
+                  c("censored", "progression", "death"))
+m$id <- seq_len(nrow(m))
+attr(m$age, "label") <- "Age at diagnosis"
+
+fg <- finegray(Surv(etime, event) ~ age + sex + id, data = m,
+               etype = "progression")
+fg_cox <- coxph(Surv(fgstart, fgstop, fgstatus) ~ age + sex, data = fg,
+                weights = fgwt, cluster = id)
+fg_crr <- cmprsk::crr(m$etime, as.integer(m$event) - 1,
+                      cov1 = cbind(age = m$age, male = as.integer(m$sex == "M")),
+                      failcode = 1, cencode = 0)
+regtab(fg_cox, fg_crr, models = c("coxph + finegray()", "cmprsk::crr()"))
+```
+
+The `crr()` column's `age` row joins the `coxph()` fit's age row because
+their keys match (`age`); its `male` column has no factor structure, so it
+gets its own row. `crr()` reproduces Stata's `stcrreg` exactly; the weighted
+Cox fit approximates it.
+
+### Ordinal and multinomial models
+
+Ordered logistic models give odds ratios, with the cutpoints dropped
+together with the intercept. `keepintercept = TRUE` shows them on the raw
+scale, without p-values, and `cutlabels` names them. The outcome must be an
+ordered factor, but a predictor must not be one (see
+[What regtab refuses](#what-regtab-refuses)).
+
+```{r ordinal, eval = has("MASS")}
+h <- MASS::housing
+h$Infl <- factor(h$Infl, ordered = FALSE)
+h$Cont <- factor(h$Cont, ordered = FALSE)
+attr(h$Infl, "label") <- "Perceived influence"
+attr(h$Cont, "label") <- "Contact with other residents"
+po <- MASS::polr(Sat ~ Infl + Cont, weights = Freq, data = h, Hess = TRUE)
+regtab(po, keepintercept = TRUE, cutlabels = c("Low | Medium", "Medium | High"))
+```
+
+(`polr()` weights are frequency weights here, one row per cell of the
+contingency table, which is what they are.)
+
+A multinomial model has one equation per non-base outcome. Its rows read
+`<outcome>: <term>`, and factor levels are written as Stata's keys
+(`2.Infl`), as Stata's `mlogit` table shows them:
+
+```{r multinom, eval = has("MASS", "nnet")}
+hs <- h[rep(seq_len(nrow(h)), h$Freq), ]
+hs$Sat <- factor(hs$Sat, ordered = FALSE)
+mn <- nnet::multinom(Sat ~ Infl + Cont, data = hs, trace = FALSE)
+regtab(mn)
+```
+
+### Mixed models
+
+For `lmer()`, `glmer()` and `nlme::lme()` fits, the random-effects
+parameters follow the fixed effects: variances, covariances and the
+residual variance, with Wald intervals computed on the log standard
+deviation. `relabel = TRUE` gives them readable names; `noreeffects = TRUE`
+drops them. Fit linear mixed models with `REML = FALSE` (`lmer()`) or
+`method = "ML"` (`lme()`) to match Stata's `mixed` (maximum likelihood).
+
+```{r mixed, eval = has("lme4")}
+ss <- lme4::sleepstudy
+attr(ss$Days, "label") <- "Days of sleep deprivation"
+mx <- lme4::lmer(Reaction ~ Days + (Days | Subject), data = ss, REML = FALSE)
+regtab(mx, relabel = TRUE, stats = c("n", "groups", "icc"))
+```
+
+## Several models in one table
+
+A simulated cohort is used from here on: myocardial infarction (MI) in
+patients from 30 clinics, with smoking status as the exposure.
+
+```{r cohort}
+set.seed(20260926)
+n <- 1200
+clinic <- sample(1:30, n, replace = TRUE)
+rural <- rbinom(30, 1, 0.4)
+u <- rnorm(30, 0, 0.5)
+cohort <- data.frame(
+  clinic  = clinic,
+  rural   = rural[clinic],
+  smoking = factor(sample(c("Never", "Former", "Current"), n, TRUE,
+                          c(0.5, 0.3, 0.2)),
+                   levels = c("Never", "Former", "Current")),
+  age     = round(rnorm(n, 60, 10)),
+  bmi     = round(rnorm(n, 27, 4), 1)
+)
+lp <- with(cohort, -1.3 + u[clinic] + 0.4 * rural +
+             0.4 * (smoking == "Former") + 0.9 * (smoking == "Current") +
+             0.03 * (age - 60) + 0.05 * (bmi - 27))
+cohort$mi <- rbinom(n, 1, plogis(lp))
+labs <- c(smoking = "Smoking status", age = "Age (years)",
+          bmi = "Body-mass index (kg/m2)", rural = "Rural clinic",
+          mi = "Myocardial infarction")
+for (v in names(labs)) attr(cohort[[v]], "label") <- labs[[v]]
+```
+
+Pass the models in order and name them with `models` (or pass a named list).
+The rows are the union of all models' rows in order of first appearance,
+with blank cells where a model lacks a term.
+
+```{r multi}
+crude <- glm(mi ~ smoking, family = binomial, data = cohort)
+adjusted <- glm(mi ~ smoking + age + bmi, family = binomial, data = cohort)
+full <- glm(mi ~ smoking + age + bmi + rural, family = binomial, data = cohort)
+regtab(list(Crude = crude, Adjusted = adjusted, Full = full))
+```
+
+Factor levels are joined **by level**, not by position. A model with a
+different reference level puts its Reference on that level's row, and a
+model fitted on a subset that lacks a level leaves that row blank:
+
+```{r join}
+releveled <- cohort
+releveled$smoking <- relevel(releveled$smoking, ref = "Current")
+m_ref <- glm(mi ~ smoking + age, family = binomial, data = releveled)
+
+no_former <- droplevels(subset(cohort, smoking != "Former"))
+m_sub <- glm(mi ~ smoking + age, family = binomial, data = no_former)
+
+regtab(adjusted, m_ref, m_sub,
+       models = c("Never as reference", "Current as reference", "No former smokers"),
+       keep = c("smoking", "age"))
+```
+
+Base R's `relevel()`, `subset()` and row indexing with `[` drop the
+`"label"` attribute, and a row takes its label from the first model in which
+it appears. Here that is the first model, fitted on the labelled data; put
+the relabelled or subset model first, or table it alone, and its rows show
+the column names until the labels are set again.
+
+## Choosing and labelling rows
+
+### keep and drop
+
+`keep` and `drop` (not both) take Stata-style keys: a variable name selects
+its label row, its levels and every interaction containing it; `2.smoking`
+selects one level (its position, or its Stata value code for data read with
+`tt_as_factor()`); `_cons` is the intercept. R coefficient names such as
+`smokingCurrent` also work, and `labelmatch = TRUE` matches the displayed
+labels as case-insensitive substrings instead.
+
+```{r keep}
+regtab(crude, adjusted, full, models = c("Crude", "Adjusted", "Full"),
+       keep = "smoking")
+```
+
+A `keep` that matches nothing is an error. A `drop` that matches nothing is
+silently ignored, as in Stata. The key of a term written as a function call
+in the formula is the call itself, so with `factor(period)` in a formula it
+is `drop = "factor(period)"`, not `"period"`. Converting the column to a
+factor before fitting gives both a plain key and a readable header row.
+
+### Labels
+
+Row labels come from the `"label"` attribute of each variable, level rows
+from the factor levels. Other text is set by arguments:
+
+| Argument | Sets |
+|---|---|
+| `models` | the model headers |
+| `coef` | the estimate header for every model (`"RR"`, `"aOR"`, ...) |
+| `refcat`, `omitlabel`, `emptylabel` | the text of base-level, collinear and empty rows |
+| `cutlabels` | ordinal cutpoint labels |
+| `relabel` | readable random-effects labels |
+| `title`, `footnote` | the title and footnote carried to every output |
+| `xsymbol`, `vsref` | interaction labels (`interactions = "fvgen"`, the default) |
+
+### Model statistics and extra rows
+
+`stats` adds rows below the estimates, always in Stata's order: `n`
+(Observations, or Subjects for survival models), `events` (failures of a
+Cox, Fine-Gray or parametric survival model), `groups`, `mi_m` (the number
+of imputations), `aic`, `qic`, `bic`, `ll`, `icc`, `r2` (R-squared for
+linear models, the pseudo R-squared for the models Stata reports one for),
+and for linear regression `r2_a` (adjusted R-squared), `rmse` (root mean
+squared error) and `F` (the model F statistic, never shown for a logistic
+or other generalized linear model), then `fmi` (the largest fraction of
+missing information of a multiply imputed model). The R-only `vce` adds a
+"Standard errors" row naming each model's variance ("model-based",
+"robust", "robust, clustered by id", ...). `stat_fun` adds rows of
+your own, computed from each fit. `addrow` adds
+free-text rows, one value per model, such as a test for trend.
+
+```{r stats}
+# Test for trend: smoking entered as a score (0, 1, 2).
+cohort$smoke_score <- as.integer(cohort$smoking) - 1L
+p_trend <- c(
+  coef(summary(glm(mi ~ smoke_score, binomial, cohort)))["smoke_score", 4],
+  coef(summary(glm(mi ~ smoke_score + age + bmi, binomial, cohort)))["smoke_score", 4]
+)
+p_trend <- ifelse(p_trend < 0.001, "<0.001", sprintf("%.3f", p_trend))
+
+regtab(crude, adjusted, models = c("Crude", "Adjusted"),
+       stats = c("n", "aic", "bic", "r2"),
+       addrow = list("P for trend" = p_trend))
+```
+
+Numbers given to `addrow` are printed in full decimal form, so format
+p-values as text first, as above.
+
+### Multiple imputation
+
+A multiply imputed analysis is one model: a `mice` `mira`
+(`with(imp, glm(...))`), or `tt_mi()` of a list of fits, one per completed
+dataset. regtab pools it as Stata's `mi estimate` does (Rubin's rules, with
+Barnard and Rubin's small-sample degrees of freedom for linear regression
+and the large-sample ones for logistic and Cox models), takes the rows and
+labels from the first imputation, and adds the Imputations and Largest FMI
+rows on request. Here BMI is missing for a fifth of the cohort, and filled
+in five times by a crude random draw (use `mice` in practice):
+
+```{r mi}
+miss <- runif(nrow(cohort)) < 0.2
+imputed <- lapply(1:5, function(m) {
+  d <- cohort
+  d$bmi[miss] <- round(rnorm(sum(miss), mean(cohort$bmi), sd(cohort$bmi)), 1)
+  glm(mi ~ smoking + age + bmi, family = binomial, data = d)
+})
+regtab(adjusted, tt_mi(imputed), models = c("Complete data", "Imputed BMI"),
+       stats = c("n", "mi_m", "fmi"))
+```
+
+### Intercepts and display
+
+The intercept is dropped by default when every model is on a ratio scale
+(`nointercept = TRUE`) and kept otherwise; `keepintercept = TRUE` or
+`nointercept = TRUE` overrides that. `digits` sets the decimals of estimates
+and limits, `compact = TRUE` puts the estimate and interval in one column,
+`nopvalue = TRUE` removes the p-values, `stars = TRUE` adds significance
+stars, and `dimnonsig = TRUE` greys rows whose interval includes the null in
+every model (in the workbook, Word and HTML output).
+
+```{r display}
+lin <- lm(bmi ~ smoking + age, data = cohort)
+regtab(lin, digits = 3, compact = TRUE, stars = TRUE)
+```
+
+## Standard errors {#standard-errors}
+
+`vce` chooses the variance behind the standard errors, intervals and
+p-values:
+
+| `vce` | Variance | Stata |
+|---|---|---|
+| `"stata"` (default) | what the Stata command reports by default: observed information for GLMs, OLS for `lm`, the model-based variance for GEE | default `vce(oim)`/`vce(ols)` |
+| `"model"` | the fit's own `vcov()`, with R's `summary()` reference distribution | |
+| `"robust"` | the sandwich with Stata's small-sample factor: HC0 times N/(N - 1) for GLMs (z), HC1 for `lm` (t) | `vce(robust)`, `[pweight]` |
+| `"cluster"` | clustered on `cluster = ~id`, times G/(G - 1) (and (N - 1)/(N - k) for `lm`, with t on G - 1 degrees of freedom) | `vce(cluster id)` |
+
+For most classes `"stata"` and `"model"` give the same numbers to display
+precision; they differ, for example, for non-canonical links, where R's
+`vcov()` uses the expected information. `vce` takes one value or one per
+model, and `cluster` one variable or a list with one entry per model.
+Giving `cluster` alone implies `vce = "cluster"`.
+
+```{r vce}
+regtab(full, full, full,
+       models = c("Model-based", "Robust", "Clustered by clinic"),
+       vce = c("stata", "robust", "cluster"), cluster = ~clinic,
+       keep = c("smoking", "rural"), vce_note = TRUE)
+```
+
+Rural clinic is a clinic-level variable, so its clustered interval is much
+wider; smoking varies within clinics and changes little. `vce_note = TRUE`
+appends a sentence naming each model's non-default variance to the
+footnote, which is written to the workbook, Word and HTML (the console
+listing does not print it):
+
+```{r vce_note}
+tab <- regtab(full, full, full,
+              models = c("Model-based", "Robust", "Clustered by clinic"),
+              vce = c("stata", "robust", "cluster"), cluster = ~clinic,
+              vce_note = TRUE)
+tab$footnote
+```
+
+Not every class has a robust variance. `tt_vce_types()` lists the `vce`
+values a fit accepts, and `tt_ci_methods()` the interval methods:
+
+```{r vce-types}
+tt_vce_types(full)
+tt_vce_types(po)
+tt_ci_methods(full)
+tt_ci_methods(cox)
+```
+
+Confidence intervals are Wald intervals by default, consistent with the
+p-values. `ci_method = "profile"` gives profile-likelihood intervals for
+`lm`, `glm` and `glm.nb` fits with a model-based variance; it is refused with
+a robust or clustered variance, whose intervals would then not match the
+p-values.
+
+`tt_vcov()` returns the matrix regtab uses, so other tools can share it. For
+example, the modified Poisson risk ratio mentioned above, and a marginal
+risk difference from the same robust variance with marginaleffects:
+
+```{r modified-poisson}
+mp <- glm(mi ~ smoking + age + bmi, family = poisson, data = cohort)
+regtab(mp, vce = "robust", coef = "RR", keep = "smoking")
+```
+
+```{r marginaleffects, eval = has("marginaleffects")}
+lg <- glm(mi ~ smoking + age + bmi, family = binomial, data = cohort)
+marginaleffects::avg_comparisons(lg, variables = "smoking",
+                                 vcov = tt_vcov(lg, "robust"))
+```
+
+Pass the matrix, not a string: marginaleffects' own `vcov = "stata"` is
+HC1, which is not the variance Stata's `logit, vce(robust)` reports.
+`effecttab()` (Stata's `effecttab`) lays such results out as a table; see
+[Weighted analyses](weighted-analyses.html) for treatment effects and
+margins.
+
+## The numbers behind the table {#forest-plots}
+
+`as_forest_data()` returns one row per displayed estimate and model, at full
+precision on the display scale, plus the Reference rows (with missing
+numbers). It is Stata's `regtab, eplotframe()`, and the input for a forest
+plot:
+
+```{r forest-data}
+fd <- as_forest_data(regtab(crude, adjusted, models = c("Crude", "Adjusted"),
+                            keep = "smoking"))
+fd
+```
+
+```{r forest-plot, fig.width = 6, fig.height = 2.8, fig.alt = "Forest plot of odds ratios for former and current smoking, crude and adjusted."}
+est <- fd[fd$rowtype == "effect", ]
+y <- rev(seq_len(nrow(est)))
+op <- par(mar = c(4, 12, 1, 1))
+plot(est$estimate, y, log = "x", xlim = range(est$ll, est$ul, 1), pch = 15,
+     yaxt = "n", ylab = "", xlab = "Odds ratio (95% CI)")
+segments(est$ll, y, est$ul, y)
+abline(v = 1, lty = 2)
+axis(2, at = y, labels = paste(trimws(est$label), est$model_label, sep = ", "),
+     las = 1)
+par(op)
+```
+
+`as.data.frame(tab)` gives the table itself as text cells, as it is written
+to CSV.
+
+## A cohort-study Table 2: rates beside hazard ratios {#table-2}
+
+The usual second table of a cohort study shows, for each exposure category,
+the number of events, the person-time and the incidence rate, next to the
+hazard ratio from a Cox model. `stratetab()` builds the rate part and
+`regtab()` the models; `hrcomptab()` (Stata's `hrcomptab`) puts the selected
+model rows beside the rates, each on the category with the same label,
+and marks the category left over as the reference.
+
+```{r table2-data}
+lung2 <- lung
+lung2$dead <- as.integer(lung2$status == 2)
+lung2$years <- lung2$time / 365.25
+lung2$sex <- factor(lung2$sex, 1:2, c("Male", "Female"))
+lung2$ecog <- factor(pmin(lung2$ph.ecog, 2), 0:2, c("0", "1", "2 or more"))
+lung2 <- lung2[!is.na(lung2$ecog), ]
+attr(lung2$sex, "label") <- "Sex"
+attr(lung2$ecog, "label") <- "ECOG performance status"
+attr(lung2$age, "label") <- "Age (years)"
+
+# Events, person-years and deaths per 100 person-years, by sex and by ECOG
+# status: one block per exposure. outcomeids names the event variable, which
+# hrcomptab() matches to the outcome of each coxph() model.
+rates <- stratetab(list(tt_rates(lung2, "years", "dead", by = "sex"),
+                        tt_rates(lung2, "years", "dead", by = "ecog")),
+                   outcomes = 1, outlabels = "Death", outcomeids = "dead",
+                   explabels = c("Sex", "ECOG performance status"),
+                   ratescale = 100, unitlabel = "100")
+```
+
+The adjusted model holds both exposures. Its non-reference rows are
+selected by label (`rownames`) or by row number (`rows`); they are taken
+block by block in the rate table's order (one row for the two sexes, two for
+the three ECOG groups) and placed by label:
+
+```{r table2-adjusted}
+adj <- regtab(coxph(Surv(years, dead) ~ sex + ecog + age, data = lung2,
+                    ties = "breslow"), coef = "HR")
+adj
+
+hrcomptab(rates, adj, rownames = c("female", "1", "2 or more"),
+          title = "Table 2. Deaths by sex and ECOG status",
+          footnote = "aHR: hazard ratio adjusted for sex, ECOG status and age.")
+```
+
+`rownames` are case-insensitive patterns matched as *parts* of the row
+labels, with `*` and `?` as wildcards: `"female"` selects Female only, while
+`"male"` would select both Male and Female (as `"treated"` would match
+Untreated). When one label contains another, match whole labels with
+`rownames_exact = TRUE` (R only; `"male"` then selects Male alone), or
+select by row number with `rows`, as below.
+
+Crude hazard ratios come from one model per exposure, so there are two model
+tables, one selection each:
+
+```{r table2-crude}
+crude_sex <- regtab(coxph(Surv(years, dead) ~ sex, data = lung2, ties = "breslow"),
+                    coef = "HR")
+crude_ecog <- regtab(coxph(Surv(years, dead) ~ ecog, data = lung2, ties = "breslow"),
+                     coef = "HR")
+hrcomptab(rates, list(crude_sex, crude_ecog), rows = list(3, 3:4), effect = "HR")
+```
+
+The models are matched to the rate table's outcomes by identity, never by
+position: the rate table's `outcomeids` against each model's outcome (for a
+`coxph()` fit, the event variable). With several outcomes, each model table
+holds one model per outcome (`regtab(list(fit_death, fit_relapse))`), and
+`outcomemap` names the model for each outcome when the identities differ
+(model labels will do). Anything that cannot be placed exactly -- a heading
+or reference row, a level no category is labelled with, a reference category
+that is not the model's base level, models at another confidence level or on
+another scale -- is an error rather than a guess.
+
+`comptab()` without a rate table stacks selected rows of several model
+tables, here the crude and adjusted estimates for sex, with section headings
+and the estimate and interval in one column:
+
+```{r table2-vertical}
+comptab(list(crude_sex, adj), rownames = list("female", "female"),
+        section = c("Crude", "Adjusted for ECOG status and age"), compact = TRUE)
+```
+
+Both write the workbook, CSV and Markdown files like the other commands
+(`xlsx =`, `csv =`, `markdown =`, after which the table is returned
+invisibly: assign it to print it), convert with `as_flextable()` and
+`tt_as_gt()`, and give their estimates to `as_forest_data()`, with the
+section and reference rows of the composite.
+
+## Models regtab does not support: data-frame input {#data-frame-input}
+
+regtab accepts only the classes listed above; any other model, including a
+subclass of a supported one, is refused with an error that names it. Such a
+model can still be tabled: pass a data frame shaped like
+`broom.helpers::tidy_plus_plus()` output. `survey::svycoxph()`, a Cox model
+for survey data, is one example:
+
+```{r svycoxph-refused, error = TRUE, eval = has("survey")}
+set.seed(1)
+d$w <- runif(nrow(d), 0.5, 2)
+design <- survey::svydesign(ids = ~1, weights = ~w, data = d)
+svy_cox <- survey::svycoxph(Surv(time, dead) ~ sex + age, design = design)
+regtab(svy_cox)
+```
+
+```{r svycoxph-tidy, eval = has("survey"), results = "hide"}
+svy_df <- broom.helpers::tidy_plus_plus(svy_cox, exponentiate = TRUE)
+```
+
+```{r svycoxph-df, eval = has("survey")}
+regtab(cox, svy_df, models = c("coxph, unweighted", "svycoxph"))
+```
+
+The data frame joined the fitted model's rows because `tidy_plus_plus()`
+records the variable, its levels and the reference level, and regtab keys
+them the same way (`2.sex`). `tidy_plus_plus()` also records that it
+exponentiated the estimates, which sets the header (`HR`) and the null
+value.
+
+regtab takes a data frame's numbers as they are and never transforms them.
+Two things it cannot know, and will not guess:
+
+- **The effect scale.** Whether `estimate` holds ratios or coefficients
+  sets the header, the null value (1 or 0) for derived p-values and for
+  `dimnonsig`, and whether the intercept is dropped. It is read from
+  `attr(x, "effect_scale")` (`"OR"`, `"HR"`, `"RR"`, `"Coef."`, ...), else
+  from `attr(x, "stata_cmd")`, else from broom.helpers' record of
+  exponentiating. Output of `broom::tidy(exponentiate = TRUE)` with no
+  declared scale is refused: its `statistic` column shows that the
+  estimates were exponentiated, and taking them as coefficients would test
+  them against 0.
+- **The scale of `std.error`.** When a ratio row has no interval (or the
+  data frame has no p-values), regtab derives them from `std.error`. For
+  broom, `std.error` is the standard error of log(estimate); for the
+  parameters package it is the standard error of the ratio itself (delta
+  method). The two give different intervals and p-values, so on a ratio
+  scale regtab requires `attr(x, "se_scale")`: `"link"` or `"estimate"`.
+
+```{r se-scale, error = TRUE}
+b <- coef(cox)
+se <- sqrt(diag(vcov(cox)))
+hr <- data.frame(term = names(b), estimate = exp(b), std.error = se)
+attr(hr, "effect_scale") <- "HR"
+regtab(hr)
+
+attr(hr, "se_scale") <- "link"
+regtab(hr)
+```
+
+Declaring the wrong scale gives wrong intervals (here `"estimate"` would
+put the interval at the hazard ratio plus or minus 1.96 times the standard
+error of its logarithm), which is why regtab asks rather than guesses.
+Supplied `conf.low`/`conf.high` and `p.value` columns are shown as they
+are; note that `tidy_plus_plus()` computes a `glm`'s intervals by profile
+likelihood (from `confint()`), so a data frame from a `glm` can differ from
+regtab's Wald interval for the same fit in the last digit. `?regtab`,
+section "Data-frame input", lists every column and attribute.
+
+## What regtab refuses {#what-regtab-refuses}
+
+regtab refuses a model or an option rather than print a table whose rows
+could be misread. Each error names the problem and, where there is one, the
+alternative.
+
+- **Unsupported classes and subclasses** (`mgcv::gam`,
+  `survey::svycoxph`, penalised or frailty `coxph`, mixed-effects Cox
+  models from `coxme`): their variance has not been checked against a
+  Stata command. Pass a data frame, as above.
+- **Ordered factors and non-treatment contrasts as predictors**: a
+  Reference row claims a contrast against the base level, which polynomial,
+  sum or Helmert contrasts do not estimate. Convert the predictor with
+  `factor(x, ordered = FALSE)`.
+- **A variance a class does not have**: `vce = "robust"` or `"cluster"` for
+  `polr`, `clm`, `multinom`, `zeroinfl`, `hurdle` and mixed models, and any
+  `vce` outside the four names (there is no `"HC3"`).
+- **Profile intervals beside a robust variance**, or for classes other
+  than `lm`, `glm` and `glm.nb`.
+- **A pooled `mice` result** (`mipo`): its degrees of freedom are not
+  Stata's `mi estimate`'s. Pass the `mira` (or `tt_mi()` of the fits), which
+  regtab pools itself (see "Multiple imputation" above); `fit$analyses` as
+  a list shows the imputations side by side. Imputed fits of classes other
+  than `lm`, `glm`, `coxph` and `crr` are refused.
+- **Fits whose data changed**: a fit that keeps no copy of its data
+  (`coxph`, `survreg`, `multinom`, `model = FALSE` fits) is refused when the
+  data it was fitted on were filtered or edited afterwards, since its
+  labels, reference rows and N would come from other data than its
+  estimates. Refit, or fit with `model = TRUE`.
+
+```{r refusals, error = TRUE}
+mt <- mtcars
+mt$cyl <- factor(mt$cyl, ordered = TRUE)
+regtab(lm(mpg ~ cyl, data = mt))
+
+regtab(po, vce = "robust")
+
+regtab(full, vce = "robust", ci_method = "profile")
+```
+
+Weighted fits are not refused, but regtab does not guess what kind of
+weight they carry; see
+[Weighted analyses: IPTW and marginal structural models](weighted-analyses.html).
+For the Stata command each R model stands for, and every deliberate
+difference from Stata's output, see [Coming from Stata](coming-from-stata.html).

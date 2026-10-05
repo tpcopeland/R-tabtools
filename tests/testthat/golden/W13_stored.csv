@@ -1,0 +1,18 @@
+name,kind,row,col,value
+_golden_id,meta,,,W13
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,3
+ci_level,scalar,,,95
+N_cols,scalar,,,5
+N_rows,scalar,,,6
+sheet,macro,,,W13
+xlsx,macro,,,effecttab.xlsx
+markdown,macro,,,W13.md
+methods,macro,,,"Marginal effects estimated using the margins command with 95% confidence intervals. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+type,macro,,,margins
+effect_label,macro,,,RD
+table,matrix,__SNRI,c1,.0071123306386191004
+table,matrix,__SNRI,c2,.3708599103410562

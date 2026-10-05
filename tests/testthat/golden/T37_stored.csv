@@ -1,0 +1,12 @@
+name,kind,row,col,value
+_golden_id,meta,,,T37
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,9
+markdown,macro,,,T37.md
+sheet,macro,,,T37
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,price mpg rep78
+Dapa,macro,,,"Weighted data are presented as mean±SD or median (Q1, Q3) for continuous measures, and % (No.) for categorical measures. P-values suppressed."

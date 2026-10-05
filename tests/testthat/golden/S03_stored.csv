@@ -1,0 +1,26 @@
+name,kind,row,col,value
+_golden_id,meta,,,S03
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,90
+N_outcomes,scalar,,,3
+N_exposures,scalar,,,1
+N_rows,scalar,,,7
+markdown_cols,scalar,,,10
+markdown_rows,scalar,,,4
+sheet,macro,,,S03
+xlsx,macro,,,stratetab.xlsx
+methods,macro,,,Incidence rates and confidence intervals were formatted at the 90% level; rate-ratio intervals use an independent-rate log-normal approximation at the same level.
+outcome_ids,macro,,,Stroke \ Myocardial infarction \ Any event
+markdown,macro,,,S03.md
+csv,macro,,,S03.csv
+rates,matrix,Low,Stroke,7.87683
+rates,matrix,Low,Myocardial_infarction,3.2820100000000001
+rates,matrix,Low,Any_event,28.881699999999999
+rates,matrix,Medium,Stroke,14.026400000000001
+rates,matrix,Medium,Myocardial_infarction,8.1443399999999997
+rates,matrix,Medium,Any_event,27.600200000000001
+rates,matrix,High,Stroke,7.7820999999999998
+rates,matrix,High,Myocardial_infarction,3.3351899999999999
+rates,matrix,High,Any_event,32.240099999999998

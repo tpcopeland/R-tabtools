@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,T32b
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,5
+markdown_rows,scalar,,,3
+markdown,macro,,,T32b.md
+sheet,macro,,,T32b
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,price mpg foreign
+methods,macro,,,"Baseline characteristics were compared between groups defined by Size class. Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values were calculated using one-way ANOVA, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures."
+table,matrix,Price,p_value,6.89520233133000e-06
+table,matrix,Mileage_(mpg),p_value,1.56379343369000e-14
+table,matrix,Car_origin,p_value,3.41933937573000e-07

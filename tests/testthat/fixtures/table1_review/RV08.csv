@@ -1,0 +1,11 @@
+ ,Control,Active,p-value
+No. (Column %) or Mean±SD,6 (50.0 %),6 (50.0 %),
+Clinical stage,,,0.72
+   Stage I,2 (40%),1 (20%),
+   Stage II,2 (40%),2 (40%),
+   Stage III,1 (20%),2 (40%),
+   Missing,1 (17 %),1 (17 %),
+Female sex,3 (60%),4 (67%),0.82
+   Missing,1 (17 %),0,
+Age at entry,53±4,66±5,<0.001
+   Missing,1 (17 %),0,

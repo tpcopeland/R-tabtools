@@ -1,0 +1,8 @@
+,Cox,,,ML,,
+,HR,95% CI,p-value,RRR,95% CI,p-value
+Analysis time when record ends: Age at cohort entry (years),1.00,"(1.00, 1.01)",0.002,,,
+Analysis time when record ends: Female sex,1.01,"(0.95, 1.07)",0.78,,,
+Secondary: Age at cohort entry (years),,,,1.00,"(1.00, 1.00)",0.75
+Secondary: Female sex,,,,1.08,"(1.00, 1.18)",0.062
+Tertiary: Age at cohort entry (years),,,,1.00,"(1.00, 1.00)",0.78
+Tertiary: Female sex,,,,1.02,"(0.93, 1.11)",0.71

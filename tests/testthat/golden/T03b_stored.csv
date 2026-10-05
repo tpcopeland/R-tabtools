@@ -1,0 +1,23 @@
+name,kind,row,col,value
+_golden_id,meta,,,T03b
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,13
+markdown,macro,,,T03b.md
+sheet,macro,,,T03b
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age crp prior_hosp iptw follow_up cost_sek lab_value bmi female education
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures. P-values were calculated using independent t-test, Wilcoxon rank-sum test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures."
+table,matrix,Age_at_cohort_entry_(years),p_value,.82529550441130417
+table,matrix,C-reactive_protein_(mg/L),p_value,.99601270651048701
+table,matrix,Prior_hospitalizations,p_value,.0164965444807058
+table,matrix,IPTW_weight,p_value,0
+table,matrix,Follow-up_(days),p_value,.032181187626998502
+table,matrix,Lifetime_healthcare_cost_(SEK),p_value,.84826159491122399
+table,matrix,Lab_value_(non-positive_allowed),p_value,.1618946618728849
+table,matrix,Body_mass_index,p_value,.57374640274211619
+table,matrix,Female_sex,p_value,.93587287758325299
+table,matrix,Education_level,p_value,.051786907971219501

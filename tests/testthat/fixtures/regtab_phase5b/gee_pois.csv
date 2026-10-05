@@ -1,0 +1,9 @@
+,Model,,
+,IRR,95% CI,p-value
+Age in current year,1.01,"(1.00, 1.01)",<0.001
+Current grade completed,1.05,"(1.03, 1.07)",<0.001
+1 if not SMSA,0.90,"(0.83, 0.98)",0.020
+1 if south,0.63,"(0.58, 0.69)",<0.001
+Observations,"26,200",,
+Groups,"4,434",,
+QICu,17044.76,,

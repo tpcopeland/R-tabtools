@@ -1,0 +1,11 @@
+name,kind,row,col,value
+_golden_id,meta,,,W6
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,index_age female income_quintile bmi
+Dapa,macro,,,"Weighted data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures. P-values suppressed. SMD reflects weighted comparison."
+table,matrix,Age_at_cohort_entry_(years),smd,.0015309893926374
+table,matrix,Female_sex,smd,.039064412105323999
+table,matrix,Disposable_income_quintile,smd,.2064877346257091
+table,matrix,Body_mass_index,smd,.0055619970642452003

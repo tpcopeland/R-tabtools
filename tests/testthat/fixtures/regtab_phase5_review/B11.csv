@@ -1,0 +1,8 @@
+,Model,,
+,RRR,95% CI,p-value
+Secondary: Age at cohort entry (years),1.00,"(1.00, 1.00)",0.13
+Secondary: Female sex,1.05,"(0.98, 1.14)",0.17
+Tertiary: Age at cohort entry (years),1.00,"(1.00, 1.00)",0.93
+Tertiary: Female sex,1.01,"(0.94, 1.09)",0.77
+Observations,"17,944",,
+Log-likelihood,-19430.05,,

@@ -1,0 +1,18 @@
+  +------------------------------------------------------------------------------+
+  |                                              REML                            |
+  |                                             Coef.           95% CI   p-value |
+  |                             Age (years)      0.01     (0.00, 0.01)     0.010 |
+  |                              Female sex     -0.19   (-0.35, -0.04)     0.016 |
+  |                                     BMI      0.07     (0.06, 0.09)    <0.001 |
+  |                               Intercept      2.76     (2.20, 3.33)    <0.001 |
+  | Variance: Healthcare Region (Intercept)      0.01     (0.00, 0.12)           |
+  |                       Residual Variance      0.96     (0.86, 1.08)           |
+  |                            Observations       600                            |
+  |                                  Groups         6                            |
+  |                                     AIC   1715.00                            |
+  |                          Log-likelihood   -851.50                            |
+  |                                     ICC     0.009                            |
+  +------------------------------------------------------------------------------+
+
+Markdown exported to R79.md
+Exported 14 rows × 5 cols to regtab.xlsx, sheet R79

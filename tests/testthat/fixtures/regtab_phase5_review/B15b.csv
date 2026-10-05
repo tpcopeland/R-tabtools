@@ -1,0 +1,8 @@
+,Model,,
+,HR,95% CI,p-value
+Dose (mg),1.63,"(1.53, 1.73)",<0.001
+Female,0.96,"(0.85, 1.08)",0.49
+Median Hazard Ratio (Site),1.90,"(1.70, 2.18)",
+Observations,"3,200",,
+Log-likelihood,-1889.99,,
+ICC,0.216,,

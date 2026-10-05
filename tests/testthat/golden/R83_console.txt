@@ -1,0 +1,16 @@
+  +-----------------------------------------------------+
+  |                      Model                          |
+  |                         OR         95% CI   p-value |
+  | Exposure score        1.61   (1.40, 1.86)    <0.001 |
+  | Current smoker        2.67   (1.95, 3.68)    <0.001 |
+  |          Group                                      |
+  |            Low   Reference                          |
+  |         Middle        1.23   (0.87, 1.73)      0.25 |
+  |           High        1.62   (1.15, 2.29)     0.005 |
+  |   Observations       1,055                          |
+  |            AIC      657.99                          |
+  | Log-likelihood     -324.99                          |
+  +-----------------------------------------------------+
+
+Markdown exported to R83.md
+Exported 12 rows × 5 cols to regtab.xlsx, sheet R83

@@ -1,0 +1,41 @@
+name,kind,row,col,value
+_golden_id,meta,,,RW07
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+N_derived_suppressed,scalar,,,2
+N_secondary_suppressed,scalar,,,1
+N_primary_suppressed,scalar,,,5
+smallcells,scalar,,,3
+varlist,macro,,,stage female
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as No. (%). P-values were calculated using Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,Data are presented as No. (%).
+suppression,matrix,r1,trt_0,0
+suppression,matrix,r1,trt_1,0
+suppression,matrix,r1,pvalue,0
+suppression,matrix,r2,trt_0,0
+suppression,matrix,r2,trt_1,0
+suppression,matrix,r2,pvalue,0
+suppression,matrix,r3,trt_0,0
+suppression,matrix,r3,trt_1,0
+suppression,matrix,r3,pvalue,3
+suppression,matrix,r4,trt_0,1
+suppression,matrix,r4,trt_1,1
+suppression,matrix,r4,pvalue,0
+suppression,matrix,r5,trt_0,2
+suppression,matrix,r5,trt_1,0
+suppression,matrix,r5,pvalue,0
+suppression,matrix,r6,trt_0,0
+suppression,matrix,r6,trt_1,0
+suppression,matrix,r6,pvalue,0
+suppression,matrix,r7,trt_0,1
+suppression,matrix,r7,trt_1,1
+suppression,matrix,r7,pvalue,0
+suppression,matrix,r8,trt_0,0
+suppression,matrix,r8,trt_1,0
+suppression,matrix,r8,pvalue,3
+suppression,matrix,r9,trt_0,1
+suppression,matrix,r9,trt_1,0
+suppression,matrix,r9,pvalue,0
+table,matrix,Clinical_stage,p_value,.d
+table,matrix,Female_sex,p_value,.d

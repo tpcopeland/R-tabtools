@@ -1,0 +1,17 @@
+  +------------------------------------------------------------------+
+  |                                  Cox PH                          |
+  |                                      HR         95% CI   p-value |
+  |             Treatment group        1.04   (0.98, 1.10)      0.17 |
+  | Age at cohort entry (years)        1.00   (1.00, 1.00)     0.053 |
+  |                  Female sex        1.01   (0.96, 1.07)      0.65 |
+  |             Education level                                      |
+  |                     Primary   Reference                          |
+  |                   Secondary        1.06   (0.99, 1.14)     0.077 |
+  |                    Tertiary        1.05   (0.97, 1.12)      0.22 |
+  |                    Diabetes        1.53   (1.45, 1.62)    <0.001 |
+  |                Hypertension        1.50   (1.42, 1.59)    <0.001 |
+  |            Anxiety disorder        1.69   (1.59, 1.80)    <0.001 |
+  +------------------------------------------------------------------+
+
+Markdown exported to R05.md
+Exported 13 rows × 5 cols to regtab.xlsx, sheet R05

@@ -1,0 +1,5 @@
+ ,large,medium,small,p-value
+No. (Column %) or Mean±SD,N=20,N=32,N=22,
+Price,8700±3647,5469±2395,4874±1067,<0.001
+Mileage (mpg),16±3,20±3,28±5,<0.001
+Car origin,0 (0),6 (19),16 (73),<0.001

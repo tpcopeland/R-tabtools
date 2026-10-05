@@ -1,0 +1,7 @@
+,Model,,
+,TR,95% CI,p-value
+Treatment group,0.98,"(0.96, 1.01)",0.19
+Age at cohort entry (years),1.00,"(1.00, 1.00)",0.002
+Female sex,1.00,"(0.98, 1.02)",0.92
+lngamma,-1.16,"(-1.18, -1.14)",<0.001
+gamma,0.31,"(0.31, 0.32)",

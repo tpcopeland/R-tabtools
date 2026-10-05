@@ -1,0 +1,12 @@
+name,kind,row,col,value
+_golden_id,meta,,,W1
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,age marker marker female stage
+Dapa,macro,,,"Weighted data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures. P-values suppressed. SMD reflects weighted comparison."
+table,matrix,Age_at_entry,smd,3.084393341060979
+table,matrix,Inflammation_marker,smd,1.848431873841037
+table,matrix,Inflammation_marker_2,smd,1.811986055821688
+table,matrix,Female_sex,smd,.12511735255283721
+table,matrix,Clinical_stage,smd,.70716857455244486

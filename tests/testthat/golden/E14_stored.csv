@@ -1,0 +1,20 @@
+name,kind,row,col,value
+_golden_id,meta,,,E14
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,2
+ci_level,scalar,,,95
+N_cols,scalar,,,5
+N_rows,scalar,,,5
+sheet,macro,,,E14
+xlsx,macro,,,effecttab.xlsx
+markdown,macro,,,E14.md
+methods,macro,,,"Marginal effects estimated using the margins command with 95% confidence intervals. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+type,macro,,,margins
+effect_label,macro,,,AME
+table,matrix,Age_(years),c1,.0024698635264433998
+table,matrix,Age_(years),c2,8.91524126955000e-39
+table,matrix,Body_mass_index_(BMI),c1,.0028925020718689001
+table,matrix,Body_mass_index_(BMI),c2,4.90010080337000e-14

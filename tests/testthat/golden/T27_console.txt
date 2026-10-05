@@ -1,0 +1,10 @@
+  +-------------------------------------------------------+
+  |                      Control   Treatment   p-value    |
+  |-------------------------------------------------------|
+  | No. (Column %)       N=50      N=50                   |
+  |-------------------------------------------------------|
+  | Rare adverse event   <5        <5          Suppressed |
+  +-------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to T27.csv
+Markdown exported to T27.md

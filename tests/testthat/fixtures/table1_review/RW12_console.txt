@@ -1,0 +1,29 @@
+(2 real changes made)
+  (1 observation in frame __000006 unmatched)
+(1 missing value generated)
+(1 missing value generated)
+(2 missing values generated)
+(3 missing values generated)
+(3 missing values generated)
+(2 missing values generated)
+(1 missing value generated)
+(1 missing value generated)
+(2 missing values generated)
+(3 missing values generated)
+(3 missing values generated)
+(2 missing values generated)
+(2 missing values generated)
+  (13 variables copied from linked frame)
+  +-------------------------------------------------------------------------+
+  |                             Crude b   Crude c   Weighted b   Weighted c |
+  |-------------------------------------------------------------------------|
+  | No. (Column %) or Mean±SD   N=3       N=3       N=3          N=3        |
+  |-------------------------------------------------------------------------|
+  | Effective sample size                           ESS=3        ESS=3      |
+  |-------------------------------------------------------------------------|
+  | x                           4±1       7±1       4±1          7±1        |
+  |-------------------------------------------------------------------------|
+  | c                           <3        <3        <3           <3         |
+  +-------------------------------------------------------------------------+
+Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to tests/testthat/fixtures/table1_review/RW12.csv

@@ -1,0 +1,6 @@
+,Model,,
+,TR,95% CI,p-value
+age,0.99,"(0.98, 1.00)",0.045
+sex,1.47,"(1.17, 1.84)",<0.001
+Subjects,227,,
+Log-likelihood,-272.11,,

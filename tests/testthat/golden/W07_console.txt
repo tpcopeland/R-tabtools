@@ -1,0 +1,10 @@
+  +--------------------------------------------------------------+
+  |                               Model                          |
+  |                                 IRR         95% CI   p-value |
+  |             Treatment group    1.04   (0.98, 1.09)      0.18 |
+  | Age at cohort entry (years)    1.00   (1.00, 1.01)     0.002 |
+  |                  Female sex    1.00   (0.95, 1.06)      0.87 |
+  +--------------------------------------------------------------+
+
+Markdown exported to W07.md
+Exported 6 rows × 5 cols to regtab.xlsx, sheet W07

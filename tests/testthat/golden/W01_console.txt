@@ -1,0 +1,11 @@
+  +---------------------------------------------------------------+
+  |                                 IPTW                          |
+  |                                   OR         95% CI   p-value |
+  |             Treatment group     1.03   (0.96, 1.10)      0.37 |
+  | Age at cohort entry (years)     1.00   (1.00, 1.01)     0.026 |
+  |                  Female sex     1.01   (0.95, 1.09)      0.70 |
+  |                Observations   15,000                          |
+  +---------------------------------------------------------------+
+
+Markdown exported to W01.md
+Exported 7 rows × 5 cols to regtab.xlsx, sheet W01

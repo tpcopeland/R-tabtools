@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,G28
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,8
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable zero-inflated Poisson regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Event_count_female=1,c1,.1931071110684616
+table,matrix,Event_count_Treatment,c1,-.21678449525828919
+table,matrix,Event_count_female=1_×_Treatmen,c1,.10528246961277429
+table,matrix,Event_count_Age_z-score,c1,.39147110961341469
+table,matrix,Inflation_equation_Structural-ze,c1,.81983494094032439

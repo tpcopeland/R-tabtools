@@ -1,0 +1,8 @@
+ ,Control,Active,Total,p-value
+Column % (No.),N=6,N=6,N=12,
+Clinical stage,,,,0.88
+   Stage I,33pct (2),17pct (1),25pct (3),
+   Stage II,33pct (2),33pct (2),33pct (4),
+   Stage III,17pct (1),33pct (2),25pct (3),
+   Missing,17pct (1),17pct (1),17pct (2),
+Female sex,60pct (3),67pct (4),64pct (7),0.82

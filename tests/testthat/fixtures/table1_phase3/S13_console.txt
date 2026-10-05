@@ -1,0 +1,19 @@
+(1 real change made)
+(1 real change made, 1 to missing)
+  +-------------------------------------------------------------------------+
+  |                          Domestic    Foreign     Total       p-value    |
+  |-------------------------------------------------------------------------|
+  | No. (Row %) or Mean±SD   N=52        N=22        N=74                   |
+  |-------------------------------------------------------------------------|
+  | Repair record 1978                                           Suppressed |
+  |    1                     <5          0/<5        <5                     |
+  |    2                     8/8         0/8         8/8                    |
+  |    3                     27/≥5       <5          ≥5                     |
+  |    4                     9/18        9/18        18/18                  |
+  |    5                     <5          9/≥5        ≥5                     |
+  |    Missing               <5          <5          5 (7)                  |
+  |-------------------------------------------------------------------------|
+  | Price                    6072±3097   6385±2622   6165±2949   0.68       |
+  +-------------------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to tests/testthat/fixtures/table1_phase3/S13.csv

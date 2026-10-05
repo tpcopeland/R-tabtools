@@ -1,0 +1,5 @@
+,Model,,
+,Coef.,95% CI,p-value
+Exposure score,1.48,"(1.05, 1.92)",<0.001
+Intercept,-3.90,"(-4.59, -3.21)",<0.001
+Variance (Residualyc),21.70,"(17.28, 27.25)",

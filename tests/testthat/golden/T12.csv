@@ -1,0 +1,13 @@
+ ,SSRI,SNRI,p-value
+No. (Column %) or Mean±SD,"N=8,934","N=6,066",
+Age at cohort entry (years),58.3±13.4,58.5±13.3,0.24
+Smoking status,,,0.97
+   Never,"4,857 (54)","3,299 (54)",
+   Former,"1,832 (21)","1,253 (21)",
+   Current,"1,383 (15)",942 (16),
+   Missing,862 (10),572 (9),
+Education level,,,0.11
+   Primary,"2,333 (26)","1,527 (25)",
+   Secondary,"3,530 (40)","2,354 (39)",
+   Tertiary,"3,071 (34)","2,185 (36)",
+Female sex,"5,351 (60)","3,621 (60)",0.80

@@ -1,0 +1,11 @@
+name,kind,row,col,value
+_golden_id,meta,,,W5
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,index_age lab_value bmi cost_sek
+Dapa,macro,,,"Weighted data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3). P-values suppressed. SMD reflects weighted comparison."
+table,matrix,Age_at_cohort_entry_(years),smd,.0000377679126828
+table,matrix,Lab_value_(non-positive_allowed),smd,.0011869613981536999
+table,matrix,Body_mass_index,smd,.0056851187189556002
+table,matrix,Lifetime_healthcare_cost_(SEK),smd,.0270321667277677

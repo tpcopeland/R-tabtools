@@ -1,0 +1,17 @@
+name,kind,row,col,value
+_golden_id,meta,,,T21
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,9
+markdown,macro,,,T21.md
+sheet,macro,,,T21
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age female education diabetes hypertension
+Dapa,macro,,,"Weighted data are presented as mean±SD for continuous measures, and % for categorical measures. P-values suppressed. SMD reflects weighted comparison."
+table,matrix,Age_at_cohort_entry_(years),smd,.0000377679126828
+table,matrix,Female_sex,smd,8.43571173105000e-06
+table,matrix,Education_level,smd,.0001872940435811
+table,matrix,Diabetes,smd,.0001127234125391
+table,matrix,Hypertension,smd,.0001301144651048

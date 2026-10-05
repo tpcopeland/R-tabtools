@@ -1,0 +1,696 @@
+---
+title: "Weighted analyses: IPTW and marginal structural models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Weighted analyses: IPTW and marginal structural models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+# Every example uses survival (Suggests): without it the code is shown,
+# not run.
+has <- function(...) all(vapply(c("survival", ...), requireNamespace, TRUE, quietly = TRUE))
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = has())
+```
+
+A paper that uses inverse probability of treatment weighting (IPTW), or a
+marginal structural model (MSM) fitted with time-varying weights, usually
+reports four things:
+
+1. covariate balance before and after weighting, as standardized mean
+   differences (SMDs), often with the effective sample size;
+2. the distribution of the weights, and how they were truncated, if they
+   were;
+3. the weighted effect estimate (a marginal odds, hazard or risk ratio, or
+   a risk difference) with a confidence interval that accounts for the
+   weighting, often beside crude and conventionally adjusted estimates;
+4. sensitivity analyses, such as truncated weights.
+
+tabtools makes a table for each: `table1_tc()` for (1); `wttab()` for (2),
+the distribution of the weights overall, by treatment group and by
+follow-up period, with the effective sample size and the effect of
+truncation; `regtab()` for (3) and (4); and `effecttab()` for treatment
+effects, standardized risks and risk differences computed by
+marginaleffects.
+
+The one thing to get right with weighted models in R is the variance. R's
+`glm(weights = w)` does not know whether `w` is a frequency weight, an
+analytic weight or an inverse-probability weight. Stata does: `[pweight]`
+always reports a robust variance. regtab therefore never guesses; the `vce`
+argument says which variance a model gets.
+
+```{r setup}
+library(tabtools)
+library(survival)
+```
+
+## Part 1: IPTW for a point treatment
+
+### Data and weights
+
+A simulated cohort of 2,000 patients starting one of two drugs. Older,
+frailer patients and those with chronic kidney disease (CKD) are more
+likely to get the new drug and also more likely to die. Follow-up is three
+years.
+
+```{r cohort}
+set.seed(20260926)
+n <- 2000
+d <- data.frame(
+  age     = round(rnorm(n, 62, 10)),
+  female  = rbinom(n, 1, 0.55),
+  ckd     = rbinom(n, 1, 0.25),
+  frailty = factor(sample(c("Low", "Medium", "High"), n, TRUE,
+                          c(0.5, 0.3, 0.2)),
+                   levels = c("Low", "Medium", "High"))
+)
+lp <- with(d, -0.5 + 0.04 * (age - 62) - 0.3 * female + 0.8 * ckd +
+             0.5 * (frailty == "Medium") + 1.0 * (frailty == "High"))
+d$treat <- factor(rbinom(n, 1, plogis(lp)), 0:1, c("Standard", "New drug"))
+hazard <- with(d, 0.15 * exp(0.04 * (age - 62) + 0.6 * ckd +
+                               0.4 * (frailty == "Medium") +
+                               0.8 * (frailty == "High") -
+                               0.35 * (treat == "New drug")))
+t_event <- rexp(n, hazard)
+d$time <- pmin(t_event, 3)
+d$died <- as.integer(t_event <= 3)
+d$died_1y <- as.integer(t_event <= 1)
+
+labs <- c(age = "Age (years)", female = "Female sex",
+          ckd = "Chronic kidney disease", frailty = "Frailty",
+          treat = "Treatment", died_1y = "Death within 1 year")
+for (v in names(labs)) attr(d[[v]], "label") <- labs[[v]]
+```
+
+Stabilized ATE weights from a logistic propensity score model: the marginal
+probability of the treatment received over its conditional probability.
+
+```{r weights}
+ps <- glm(treat ~ age + female + ckd + frailty, family = binomial,
+          data = d)$fitted.values
+p_new <- mean(d$treat == "New drug")
+d$sw <- ifelse(d$treat == "New drug", p_new / ps, (1 - p_new) / (1 - ps))
+```
+
+The WeightIt package gives the same weights and, in addition, an outcome
+model whose variance accounts for estimating them (used below):
+
+```{r weightit, eval = has("WeightIt"), message = FALSE}
+W <- WeightIt::weightit(treat ~ age + female + ckd + frailty, data = d,
+                        method = "glm", estimand = "ATE", stabilize = TRUE)
+all.equal(unname(W$weights), d$sw)
+```
+
+### The weights
+
+`wttab()` gives the usual summaries: the distribution overall and by
+treatment group (N, mean, SD, minimum, percentiles, maximum) and Kish's
+effective sample size, ESS = (sum w)^2 / sum w^2, also as a percentage of
+N. The percentiles are Stata's (`_pctile`), and the table writes to a
+workbook, Word or HTML like any other tabtools table.
+
+```{r weight-summary}
+wttab(d, "sw", by = "treat", digits = 3, title = "Stabilized weights")
+```
+
+A WeightIt object can be passed directly; its treatment gives the groups:
+
+```{r weight-summary-weightit, eval = has("WeightIt")}
+wttab(W, digits = 3)
+```
+
+Stabilized weights should average about 1 in each group. The effective
+sample size within a group does not depend on stabilization: stabilizing
+multiplies every weight in a group by the same constant, which cancels in
+the ratio.
+
+### Balance: Table 1 before and after weighting
+
+`wt` names the weight variable. With `wtcompare = TRUE` the unweighted and
+weighted columns sit side by side; `smd = TRUE` adds the SMD of the weighted
+comparison; `wtn = TRUE` shows the weighted cells as effective counts,
+(sum of weights in the cell / sum of weights in the group) times the group's
+N, instead of percentages alone.
+
+```{r balance}
+vars <- c(age = "contn %5.1f", female = "bin", ckd = "bin", frailty = "cat")
+bal <- table1_tc(d, by = "treat", vars = vars, wt = "sw", smd = TRUE,
+                 wtcompare = TRUE, wtn = TRUE)
+bal
+```
+
+Under `wt`, the N= row counts records and an "Effective sample size" row
+follows it. P-values and tests are not computed under `wt`, as in Stata;
+balance is judged from the SMDs. SMDs
+above `smdthreshold` (default 0.1) are highlighted in the workbook, Word
+and HTML output.
+
+The SMD column of a `wtcompare` table is the weighted one. For the SMDs
+before weighting, build the unweighted table as well; the SMDs of both are
+stored in `$stored$table`, which also gives the numbers for a balance
+("Love") plot:
+
+```{r smd-before-after}
+unw <- table1_tc(d, by = "treat", vars = vars, smd = TRUE, nopvalue = TRUE)
+smd <- data.frame(unweighted = unw$stored$table[, "smd"],
+                  weighted = bal$stored$table[, "smd"],
+                  row.names = labs[names(vars)])
+round(smd, 3)
+```
+
+```{r love-plot, fig.width = 6, fig.height = 2.6, fig.alt = "Standardized mean differences for four covariates before and after weighting; all fall below 0.1 after weighting."}
+op <- par(mar = c(4, 11, 1, 1))
+dotchart(smd$unweighted, labels = rownames(smd), xlim = c(0, 0.6), pch = 1,
+         xlab = "Absolute standardized mean difference")
+points(smd$weighted, seq_len(nrow(smd)), pch = 19)
+abline(v = 0.1, lty = 2)
+legend("topright", c("Unweighted", "Weighted"), pch = c(1, 19), bty = "n")
+par(op)
+```
+
+### The outcome model and its variance
+
+The weighted outcome model regresses the outcome on treatment alone (or
+with the covariates, for a doubly robust estimate). With `glm()` the
+weights enter as `weights = sw`; binomial fits then warn about non-integer
+successes, which is harmless here.
+
+```{r iptw-fit}
+iptw <- suppressWarnings(
+  glm(died_1y ~ treat, family = binomial, data = d, weights = sw)
+)
+```
+
+Under the default `vce = "stata"`, a weighted `glm()` gets Stata's
+analytic-weight (`[aweight]`) variance, which is not the IPTW variance.
+regtab says so when the weights look like inverse-probability weights
+(non-integer and not constant), but does not switch by itself:
+
+```{r iptw-default}
+regtab(iptw)
+```
+
+`vce = "robust"` is the variance Stata reports for `logit ... [pweight = sw]`:
+the sandwich estimator times N/(N - 1). Here it is shown beside the crude and
+conventionally adjusted models, which keep their model-based variance:
+
+```{r iptw-table}
+crude <- glm(died_1y ~ treat, family = binomial, data = d)
+adjusted <- glm(died_1y ~ treat + age + female + ckd + frailty,
+                family = binomial, data = d)
+t_or <- regtab(crude, adjusted, iptw,
+               models = c("Crude", "Adjusted", "IPTW"),
+               vce = c("stata", "stata", "robust"),
+               keep = "treat", stats = "n", vce_note = TRUE)
+t_or
+t_or$footnote
+```
+
+`vce_note = TRUE` names each model's non-default variance in the footnote,
+which goes to the workbook, Word and HTML output. The robust sandwich treats
+the weights as known; for the ATE this is usually conservative, because
+it ignores the estimation of the propensity score. `WeightIt::glm_weightit()` fits the same
+weighted model with an M-estimation variance that accounts for it, and
+regtab uses that variance as it is:
+
+```{r weightit-table, eval = has("WeightIt")}
+iptw_m <- WeightIt::glm_weightit(died_1y ~ treat, data = d, weightit = W,
+                                 family = binomial)
+regtab(iptw, iptw_m, models = c("glm()", "glm_weightit()"),
+       vce = c("robust", "stata"), keep = "treat", vce_note = TRUE)$footnote
+regtab(iptw, iptw_m, models = c("glm()", "glm_weightit()"),
+       vce = c("robust", "stata"), keep = "treat")
+```
+
+For `glm_weightit()` fits `vce = "stata"` and `"model"` both give the
+M-estimation variance; `"robust"` and `"cluster"` are not offered
+(`tt_vce_types(iptw_m)`).
+
+### Risk ratios, risk differences and hazard ratios
+
+The odds ratio is not collapsible, so the marginal odds ratio from IPTW
+differs from the conditional one even without confounding. Two other
+measures are common:
+
+- a **risk ratio** from a weighted Poisson model with the robust variance
+  (the log-binomial model is shown on the log scale by regtab, as in
+  Stata; see [Regression tables](regression-tables.html)), with the header
+  relabelled `RR`;
+- a **risk difference** from a weighted linear model: an `lm()` with
+  `vce = "robust"` (HC1 and t, as Stata's `regress [pweight]`), or a
+  Gaussian `glm_weightit()`.
+
+```{r rr-rd}
+rr <- suppressWarnings(glm(died_1y ~ treat, family = poisson, data = d,
+                           weights = sw))
+rd <- lm(died_1y ~ treat, data = d, weights = sw)
+regtab(rr, vce = "robust", coef = "RR", keep = "treat")
+regtab(rd, vce = "robust", coef = "RD", digits = 3, keep = "treat")
+```
+
+For a weighted Cox model, survival computes a robust variance by itself
+whenever the weights are not integers, and regtab applies Stata's G/(G - 1)
+factor to it, as Stata's `stcox` after `stset [pweight]` reports it. No `vce`
+argument is needed:
+
+```{r cox}
+# ties = "breslow": Stata's stcox refuses Efron ties with weights, so
+# regtab notes that a weighted Efron fit has no Stata analogue.
+cox_crude <- coxph(Surv(time, died) ~ treat, data = d, ties = "breslow")
+cox_adj <- coxph(Surv(time, died) ~ treat + age + female + ckd + frailty,
+                 data = d, ties = "breslow")
+cox_iptw <- coxph(Surv(time, died) ~ treat, data = d, weights = sw,
+                  ties = "breslow")
+t_hr <- regtab(cox_crude, cox_adj, cox_iptw,
+               models = c("Crude", "Adjusted", "IPTW"),
+               keep = "treat", vce_note = TRUE)
+t_hr
+t_hr$footnote
+```
+
+### teffects and margins in R
+
+Stata reports treatment effects with `teffects` and predictive margins or
+marginal effects with `margins`, and tabtools formats either collection with
+`effecttab`. R's `effecttab()` formats the same results from the
+[marginaleffects](https://marginaleffects.com) package (or from a data frame
+or a matrix). Like Stata's command, it fits nothing itself: it takes the
+estimates, intervals and p-values and lays them out as the other tables.
+
+#### Treatment effects: the ATE with its potential-outcome mean
+
+`teffects ipw (y) (treat x...), ate` reports the average treatment effect
+(ATE) and the potential-outcome mean of the control group. In R the IPW
+estimate is a weighted outcome model, and marginaleffects gives both rows:
+`avg_comparisons()` the contrast, `avg_predictions()` with the treatment set
+to the control level the potential-outcome mean. Passed together in one
+list, the two form one model, which `effecttab()` shows as Stata does:
+
+```{r effecttab-ate, eval = has("marginaleffects", "WeightIt")}
+fit_rd <- WeightIt::glm_weightit(died_1y ~ treat, data = d, weightit = W)
+ate <- marginaleffects::avg_comparisons(fit_rd, variables = "treat")
+po <- marginaleffects::avg_predictions(fit_rd,
+                                       variables = list(treat = "Standard"))
+effecttab(list(ate, po), clean = TRUE, effect = "RD", digits = 3,
+          title = "Risk difference of death within 1 year (IPTW)")
+```
+
+Without `clean` the rows show Stata's raw keys (`r2vs1.treat`, `1.treat`);
+`tlabels = c("Standard" = "Old drug")` relabels a level. The Gaussian
+`glm_weightit()` fit carries the M-estimation variance that accounts for
+estimating the weights, which is the variance `teffects ipw` reports, and
+`effecttab()` reads the estimator (IPW) from it for the methods sentence.
+On the Stata demo cohort and on Stata's `cattaneo2` data the table agrees
+with Stata's at every displayed digit. `avg_predictions(fit,
+variables = "treat")` gives both potential-outcome means, as
+`teffects ..., pomeans` does.
+
+#### Risk ratios
+
+The recommended route to a risk ratio is the log ratio, exponentiated
+(`comparison = "lnratioavg", transform = exp`): the p-value is the Wald test
+of the log ratio against 0, that is of the ratio against 1, and the interval
+is the exponentiated log-scale interval, so it stays positive and agrees
+with the test. This is how ratios are reported after Stata's `teffects`
+(`nlcom` or `margins` on the log scale, then exponentiated).
+
+```{r effecttab-rr, eval = has("marginaleffects", "WeightIt")}
+rr <- marginaleffects::avg_comparisons(fit_rd, variables = "treat",
+                                       comparison = "lnratioavg",
+                                       transform = exp)
+effecttab(list(rr, po), clean = TRUE, effect = "RR", digits = 3)
+```
+
+A plain ratio (`comparison = "ratio"`) has a delta-method standard error on
+the ratio scale, and marginaleffects tests it against 0. `effecttab()`
+recomputes that p-value against 1, keeps the interval, and says so in the
+footnote; the log-ratio route above needs no such repair.
+
+#### Several estimators side by side
+
+Several estimators go side by side as models, one list per model:
+
+```{r effecttab-models, eval = has("marginaleffects", "WeightIt")}
+fit_ra <- lm(died_1y ~ treat * (age + female + ckd + frailty), data = d)
+ra <- list(marginaleffects::avg_comparisons(fit_ra, variables = "treat",
+                                            vcov = "HC0"),
+           marginaleffects::avg_predictions(fit_ra,
+                                            variables = list(treat = "Standard"),
+                                            vcov = "HC0"))
+effecttab(list(IPW = list(ate, po), RA = ra), clean = TRUE, effect = "RD",
+          digits = 3)
+```
+
+The point estimates of regression adjustment agree with `teffects ra`. Its
+standard errors do too once the variance is robust: `teffects` reports a
+sandwich variance, and `lm()`'s default model-based variance is narrower (on
+Stata's `cattaneo2` example, 1.8% smaller for the ATE). With
+`vcov = "HC0"` the gap is about 0.1%, the part `teffects` adds for the
+sampling variation of the covariates, which the delta method treats as
+fixed. `effecttab()` says so once when an `lm()`/`glm()` result arrives with
+the default variance. AIPW and matching have no marginaleffects counterpart
+with Stata's variance; pass their estimates as a data frame.
+
+#### Margins: predictive margins and marginal effects
+
+`margins treat` after a logistic model gives the predictive margins,
+`margins, dydx(...)` the average marginal effects. In a margins table a
+factor is headed by its variable label with its levels beneath, and a
+comparison's base level is the Reference row, as `dydx(i.treat)` shows it:
+
+```{r effecttab-margins, eval = has("marginaleffects")}
+fit_lr <- glm(died_1y ~ treat + age + female + ckd + frailty,
+              family = binomial, data = d)
+effecttab(
+  marginaleffects::avg_predictions(fit_lr, variables = "treat"),
+  marginaleffects::avg_comparisons(fit_lr, variables = c("treat", "frailty")),
+  models = c("Predicted risk", "Risk difference"), effect = "Risk",
+  digits = 3
+)
+```
+
+A 0/1 variable that is not a factor (`female` here) is a discrete change in
+marginaleffects, also under `avg_slopes()`: that is Stata's `dydx(i.female)`.
+Stata's `dydx(female)` without `i.` is the derivative, which can be far from
+it (about 9% for a logit coefficient of 1.5 at a baseline risk near 30%); use
+`dydx(i.female)` in Stata for the same number.
+
+After a weighted model, pass the variance regtab uses and the estimation
+weights, as Stata's `margins` averages with them (`margins` after
+`logit [pweight]`; the two agree at every displayed digit):
+
+```{r effecttab-weighted, eval = has("marginaleffects")}
+effecttab(marginaleffects::avg_comparisons(iptw, variables = "treat",
+                                           vcov = tt_vcov(iptw, "robust"),
+                                           wts = d$sw),
+          effect = "RD", digits = 3)
+```
+
+Do not pass `vcov = "stata"` to marginaleffects: there it means HC1, which
+is not Stata's `logit [pweight]` variance.
+
+#### The Stata to R mapping
+
+| Stata (collected) | R input to `effecttab()` | Agreement |
+|---|---|---|
+| `teffects ipw (y) (t x), ate` | `glm_weightit(y ~ t, weightit = weightit(t ~ x))`; `list(avg_comparisons(fit, variables = "t"), avg_predictions(fit, variables = list(t = <control>)))` | estimates and M-estimation SEs, every displayed digit |
+| `teffects ipw ..., atet` | the same with `weightit(..., estimand = "ATT")` | estimates and SEs (to about 1e-7) |
+| `teffects ra ..., atet` | `lm(y ~ t * (x))` with `newdata = subset(d, t == 1)` | estimates; SEs a few percent apart (about 0.5% for the ATET, 4% for the potential-outcome mean on `cattaneo2`, with the default variance) |
+| `teffects ..., pomeans` | `avg_predictions(fit, variables = "t")` | as the estimator's row |
+| risk ratio after `teffects` (`nlcom` on the log scale) | `avg_comparisons(fit, variables = "t", comparison = "lnratioavg", transform = exp)` (recommended) | p-value against 1 and the exponentiated interval |
+| `teffects ra (y x) (t)` | `lm(y ~ t * (x))` + `avg_comparisons(..., vcov = "HC0")` / `avg_predictions(..., vcov = "HC0")` | estimates; SEs about 0.1% apart (covariate sampling); 1.8% without `vcov = "HC0"` |
+| `teffects ipwra` | `glm_weightit(y ~ t * (x), weightit = ...)` + marginaleffects | estimates; SEs 0.1-0.6% apart |
+| `teffects aipw`, `psmatch`, `nnmatch` | a data frame of the estimates (`term`, `estimate`, `conf.low`, `conf.high`, `p.value`) | as supplied |
+| multi-valued treatment, `control(#)` | a factor treatment, releveled to the control before fitting; `clean = TRUE` (a releveled factor's raw keys use its new positions, not Stata's codes) | estimates |
+| `margins t` (factor `t`) | `avg_predictions(fit, variables = "t")` | estimates and SEs |
+| `margins, dydx(x)` (continuous `x`) | `avg_slopes(fit, variables = "x")` | estimates and SEs |
+| `margins, dydx(i.f)` | `avg_comparisons(fit, variables = "f")` (base level shown as `refcat`) | estimates and SEs |
+| `margins, dydx(i.b)`, `b` a 0/1 variable | `avg_slopes(fit, variables = "b")` (the discrete change 1 - 0) | estimates and SEs |
+| `margins, dydx(b)`, `b` 0/1 without `i.` | no marginaleffects counterpart (it always takes the discrete change of a 0/1 variable) | differ, up to about 9% (0.1-0.3% on the Stata demo cohort) |
+| `margins, at(x = (...))` | `avg_predictions(fit, variables = list(x = c(...)))`: R shows the values under the variable label, Stata the raw `1._at` keys | estimates and SEs |
+| `margins a, over(g)` | `avg_predictions(fit, variables = "a", by = c("g", "a"))`: R shows value labels, Stata the raw `1.g#0.a` keys | estimates and SEs |
+| `margins` after `logit [pweight]` | `avg_*(..., vcov = tt_vcov(fit, "robust"), wts = w)` | estimates and SEs |
+| `margins` after `logit [pweight], vce(cluster id)` (MSM) | `avg_*(..., vcov = tt_vcov(fit, "cluster", cluster = ~id), wts = w)` | estimates and SEs |
+| `effecttab, from(M)` | the matrix: columns estimate, lower, upper, p; row names as labels | identical |
+
+The agreement is with the output of Stata's `effecttab` on the same data.
+Stata's `r(table)` of any of these commands, read into a data frame with its
+`equation` and `term` (`r1vs0.t`, `0.t`, `1b.f`, `1._at`) columns, gives
+Stata's table exactly, raw keys included.
+
+## Part 2: a marginal structural model with time-varying treatment
+
+When treatment varies over time and a time-varying risk factor both
+predicts later treatment and is affected by earlier treatment, adjusting
+for that factor in the outcome model removes part of the treatment effect,
+and not adjusting leaves confounding. An MSM fitted with inverse
+probability weights handles both (Robins, Hernán and Brumback 2000).
+
+### Person-period data
+
+1,000 people are followed for up to five periods. In each period a binary
+risk factor `L` is measured, treatment `A` may start (and then continues),
+and the outcome `Y` may occur, which ends follow-up. `L` raises the chance
+of starting treatment and of the outcome, and treatment lowers later `L`.
+
+```{r msm-data}
+set.seed(20260927)
+n_id <- 1000
+n_per <- 5
+V <- rbinom(n_id, 1, 0.4)                 # baseline risk factor
+A_prev <- L_prev <- integer(n_id)
+at_risk <- rep(TRUE, n_id)
+periods <- vector("list", n_per)
+for (k in seq_len(n_per)) {
+  i <- which(at_risk)
+  L <- rbinom(length(i), 1,
+              plogis(-1 + 0.8 * L_prev[i] - 0.7 * A_prev[i] + 0.5 * V[i]))
+  A <- ifelse(A_prev[i] == 1, 1L,
+              rbinom(length(i), 1, plogis(-1.5 + 1.2 * L + 0.3 * V[i] + 0.1 * k)))
+  Y <- rbinom(length(i), 1, plogis(-3.2 - 0.5 * A + 1.0 * L + 0.4 * V[i]))
+  periods[[k]] <- data.frame(id = i, period = k, V = V[i], L = L,
+                             A_prev = A_prev[i], A = A, Y = Y)
+  A_prev[i] <- A
+  L_prev[i] <- L
+  at_risk[i[Y == 1]] <- FALSE
+}
+pp <- do.call(rbind, periods)
+pp <- pp[order(pp$id, pp$period), ]
+c(rows = nrow(pp), people = length(unique(pp$id)), events = sum(pp$Y))
+```
+
+### Stabilized time-varying weights
+
+Treatment start is modelled among the rows still untreated at the end of
+the previous period: the denominator model includes the time-varying `L`,
+the numerator model only baseline `V` and period. Once treated, a person's
+factor is 1. The weight in period k is the product of the factors up to k.
+
+```{r msm-weights}
+msm_weights <- function(pp) {
+  untreated <- pp$A_prev == 0
+  den <- glm(A ~ L + V + factor(period), family = binomial,
+             data = pp[untreated, ])
+  num <- glm(A ~ V + factor(period), family = binomial,
+             data = pp[untreated, ])
+  p_den <- predict(den, pp, type = "response")
+  p_num <- predict(num, pp, type = "response")
+  f <- ifelse(untreated,
+              ifelse(pp$A == 1, p_num / p_den, (1 - p_num) / (1 - p_den)),
+              1)
+  ave(f, pp$id, FUN = cumprod)
+}
+pp$sw <- msm_weights(pp)
+```
+
+The ipw package (`ipw::ipwtm()`) builds the same kind of weights from the
+two model formulas; `wttab()` reads its result's `$ipw.weights` directly
+(tabtools does not depend on ipw).
+
+Diagnostics by period, with `period =` (one row per period, as Cole and
+Hernán 2008 tabulate them): the mean should stay close to 1, and a
+drifting mean or a long right tail signals a misspecified weight model or
+near-violations of positivity.
+
+```{r msm-weight-summary}
+wttab(pp, "sw", period = "period", digits = 3)
+```
+
+A common sensitivity analysis truncates the weights at the 1st and 99th
+percentiles. `trunc =` adds the truncated weights beside the originals,
+with the number of weights changed; the cut-offs are in `$stored$trunc`
+(taken over all person-periods, as is usual for MSMs; `trunc_by =
+"period"` takes them within each period):
+
+```{r msm-truncate}
+wt <- wttab(pp, "sw", trunc = c(0.01, 0.99), digits = 3)
+wt
+cut <- unlist(wt$stored$trunc[, c("lower", "upper")])
+pp$sw_trunc <- pmin(pmax(pp$sw, cut[1]), cut[2])
+```
+
+### The weighted pooled logistic model
+
+The MSM is a pooled logistic regression of the outcome on treatment and
+baseline covariates, with period as a factor for the baseline hazard,
+weighted by `sw`. Each person contributes several correlated rows, so the
+variance is clustered by person: `vce = "cluster"` with `cluster = ~id`, as
+Stata's `logit ... [pweight = sw], vce(cluster id)`.
+
+```{r msm-fit}
+pp$treated <- factor(pp$A, 0:1, c("Untreated", "Treated"))
+pp$period_f <- factor(pp$period)
+attr(pp$treated, "label") <- "Treatment"
+attr(pp$period_f, "label") <- "Period"
+
+crude_pl <- glm(Y ~ treated + period_f, family = binomial, data = pp)
+cond_pl <- glm(Y ~ treated + V + L + period_f, family = binomial, data = pp)
+msm <- suppressWarnings(glm(Y ~ treated + V + period_f, family = binomial,
+                            data = pp, weights = sw))
+msm_t <- suppressWarnings(glm(Y ~ treated + V + period_f, family = binomial,
+                              data = pp, weights = sw_trunc))
+
+t_msm <- regtab(crude_pl, cond_pl, msm, msm_t,
+                models = c("Crude", "Adjusted for L", "MSM",
+                           "MSM, truncated"),
+                vce = "cluster", cluster = ~id, keep = "treated",
+                stats = "n", vce_note = TRUE)
+t_msm
+```
+
+`keep = "treated"` shows only the treatment rows, as MSM tables usually
+do; `drop = "period_f"` would keep the covariates too. `Observations` counts
+person-periods. The footnote records the clustered variance:
+
+```{r msm-footnote}
+t_msm$footnote
+```
+
+Truncation at the 1st and 99th percentiles changes nothing at two
+decimals here; these weights have no extreme tail. The "Adjusted for L"
+column conditions on a variable on the causal pathway
+and is shown only for contrast; it is not an estimate of the marginal
+effect.
+
+The marginal effect of treatment on the per-period risk comes from the same
+weighted model with marginaleffects, averaged with the weights and with the
+clustered variance regtab used (Stata's `margins` after
+`logit ... [pweight = sw], vce(cluster id)`), as a risk difference and, by
+the log-ratio route, a risk ratio:
+
+```{r msm-effecttab, eval = has("marginaleffects")}
+V_msm <- tt_vcov(msm, "cluster", cluster = ~id)
+effecttab(
+  RD = marginaleffects::avg_comparisons(msm, variables = "treated",
+                                        vcov = V_msm, wts = pp$sw),
+  RR = marginaleffects::avg_comparisons(msm, variables = "treated",
+                                        comparison = "lnratioavg",
+                                        transform = exp,
+                                        vcov = V_msm, wts = pp$sw),
+  effect = "Per-period risk", digits = 3
+)
+```
+
+### Other ways to fit the same MSM
+
+The same weighted model can be fitted as a survey-weighted GLM with the
+person as the sampling unit, which is how the ipw package's documentation
+fits it, or as an independence GEE. regtab reads both: `svyglm()` with the
+design-based variance and t on the design degrees of freedom (Stata's
+`svy:`), and `geeglm()` with `gee_as = "glm"` (Stata's
+`glm ... [pweight], vce(cluster id)`; by default a GEE is Stata's `xtgee`,
+also shown as odds ratios, with xtgee's robust variance for a weighted fit).
+
+```{r msm-alternatives, eval = has("survey", "geepack")}
+design <- survey::svydesign(ids = ~id, weights = ~sw, data = pp)
+msm_svy <- survey::svyglm(Y ~ treated + V + period_f, design = design,
+                          family = quasibinomial)
+msm_gee <- suppressWarnings(
+  geepack::geeglm(Y ~ treated + V + period_f, family = binomial, data = pp,
+                  id = id, weights = sw, corstr = "independence")
+)
+regtab(msm, msm_svy, msm_gee,
+       models = c("glm, cluster", "svyglm", "geeglm"),
+       vce = c("cluster", "stata", "stata"), cluster = list(~id, NULL, NULL),
+       gee_as = "glm", keep = "treated")
+```
+
+`geeglm()` needs the data sorted by `id`, as they are here; regtab refuses
+a fit on unsorted data, where geepack would split a person into several
+clusters.
+
+### A weighted Cox MSM
+
+With counting-process data (`start`, `stop`) the MSM can be a weighted Cox
+model. Give survival the person identifier with `id =` (or `cluster =`):
+the robust variance then sums over each person's rows, and regtab applies
+the G/(G - 1) factor.
+
+```{r msm-cox}
+pp$start <- pp$period - 1
+pp$stop <- pp$period
+msm_cox <- coxph(Surv(start, stop, Y) ~ treated + V, data = pp,
+                 weights = sw, id = id, ties = "breslow")
+t_cox <- regtab(msm_cox, models = "Cox MSM", keep = "treated",
+                vce_note = TRUE)
+t_cox
+t_cox$footnote
+```
+
+### Bootstrap intervals
+
+Bootstrap confidence intervals, resampling people and re-estimating the
+weights in each sample, are often preferred for MSMs. regtab has no
+bootstrap variance, but it tables supplied intervals through a data frame
+(see [Regression tables](regression-tables.html#data-frame-input)). The
+`key` column (`2.treated`, the second level of `treated`) puts the row on
+the fitted model's treatment row. The loop below uses 100 replicates to keep
+this article fast; use at least 1,000.
+
+```{r msm-bootstrap}
+set.seed(1)
+rows_of <- split(seq_len(nrow(pp)), pp$id)
+boot_log_or <- replicate(100, {
+  pick <- sample(names(rows_of), replace = TRUE)
+  b <- pp[unlist(rows_of[pick]), ]
+  b$id <- rep(seq_along(pick), lengths(rows_of[pick]))
+  b$sw <- msm_weights(b)
+  fit <- suppressWarnings(glm(Y ~ treated + V + period_f, family = binomial,
+                              data = b, weights = sw))
+  coef(fit)[["treatedTreated"]]
+})
+boot_ci <- data.frame(
+  term = "treatedTreated", key = "2.treated",
+  estimate = exp(coef(msm)[["treatedTreated"]]),
+  conf.low = exp(quantile(boot_log_or, 0.025)),
+  conf.high = exp(quantile(boot_log_or, 0.975))
+)
+attr(boot_ci, "effect_scale") <- "OR"
+regtab(msm, boot_ci, models = c("MSM, cluster-robust", "MSM, bootstrap"),
+       vce = c("cluster", "stata"), cluster = list(~id, NULL),
+       keep = "treated")
+```
+
+A data frame without a `p.value` column and with supplied intervals gets no
+p-value: regtab derives one only from a standard error.
+
+## What tabtools covers, and what it does not
+
+| Output | tabtools |
+|---|---|
+| Baseline balance before and after weighting, SMDs, effective sample size | `table1_tc(wt =, wtcompare = TRUE, smd = TRUE)` |
+| Balance in each period of a time-varying MSM | one `table1_tc()` per period, stacked into one sheet with `stacktab()` |
+| Weight distribution and truncation table | `wttab()`: overall, by treatment (`by`), by period (`period`), truncation blocks (`trunc`), from a weight vector, a data frame, WeightIt or ipw |
+| Weighted effect estimates with robust, cluster-robust, survey or M-estimation variance | `regtab()` with `vce`, `svyglm()`, `glm_weightit()`, weighted `coxph()`, `geeglm(gee_as = "glm")` |
+| Crude, adjusted, IPTW and MSM estimates side by side | `regtab()` with one `vce` per model |
+| Bootstrap intervals | a data frame with `conf.low`/`conf.high` |
+| Treatment effects (ATE, ATET, potential-outcome means, risk ratios), predictive margins, marginal effects | `effecttab()` on marginaleffects results, a data frame or a matrix |
+| Standardized survival curves | not a tabtools table; marginaleffects or adjustedCurves, then a data frame for `effecttab()` |
+| Weighted models of classes without a robust variance (`polr`, `multinom`, `survreg`, mixed models) | refused for `vce = "robust"`/`"cluster"`; their weights act as frequency weights, and regtab warns when they are not integers |
+
+The last row matters for IPTW: an inverse-probability weight passed to
+`polr()`, `multinom()`, `zeroinfl()` or `survreg()` is treated by the fitting
+function as a frequency weight, which inflates the sample size and
+understates the standard errors. regtab warns about non-integer weights on
+those fits and refuses `vce = "robust"` for them rather than print a
+misleading interval; refit `survreg()` with `robust = TRUE` for a robust
+AFT model.
+
+The Stata equivalents of every call above (`[pweight]`, `vce(cluster id)`,
+`svy:`, `teffects ipw`) are listed in
+[Coming from Stata](coming-from-stata.html#weighted).
+
+## References
+
+Robins JM, Hernán MA, Brumback B (2000). Marginal structural models and
+causal inference in epidemiology. *Epidemiology* 11(5), 550-560.
+
+Cole SR, Hernán MA (2008). Constructing inverse probability weights for
+marginal structural models. *American Journal of Epidemiology* 168(6),
+656-664.
+
+Austin PC, Stuart EA (2015). Moving towards best practice when using inverse
+probability of treatment weighting (IPTW) using the propensity score to
+estimate causal treatment effects in observational studies. *Statistics in
+Medicine* 34(28), 3661-3679.

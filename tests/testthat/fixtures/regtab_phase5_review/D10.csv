@@ -1,0 +1,14 @@
+,Model,,
+,RRR,95% CI,p-value
+Primary: Age at cohort entry (years),1.00,"(1.00, 1.00)",0.88
+Primary: Smoking status,,,
+Primary:   Never,Reference,,
+Primary:   Former,1.12,"(1.01, 1.24)",0.038
+Primary:   Current,1.04,"(0.93, 1.17)",0.49
+Primary: Intercept,0.65,"(0.53, 0.79)",<0.001
+Tertiary: Age at cohort entry (years),1.00,"(1.00, 1.00)",0.43
+Tertiary: Smoking status,,,
+Tertiary:   Never,Reference,,
+Tertiary:   Former,1.11,"(1.01, 1.23)",0.028
+Tertiary:   Current,1.07,"(0.96, 1.19)",0.22
+Tertiary: Intercept,0.93,"(0.78, 1.11)",0.43

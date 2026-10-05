@@ -1,0 +1,38 @@
+(3 real changes made)
+  (1 observation in frame __000006 unmatched)
+(2 missing values generated)
+(3 missing values generated)
+(3 missing values generated)
+(5 missing values generated)
+(3 missing values generated)
+(4 missing values generated)
+(2 missing values generated)
+(3 missing values generated)
+(3 missing values generated)
+(5 missing values generated)
+(3 missing values generated)
+(4 missing values generated)
+(2 missing values generated)
+(3 missing values generated)
+(3 missing values generated)
+(5 missing values generated)
+(3 missing values generated)
+(4 missing values generated)
+(4 missing values generated)
+  (19 variables copied from linked frame)
+(1 real change made)
+(1 real change made, 1 to missing)
+  +------------------------------------------------------------------------------------------------------------------+
+  |                         Crude 0        Crude 1        Crude Total   Weighted 0     Weighted 1     Weighted Total |
+  |------------------------------------------------------------------------------------------------------------------|
+  | No. (Column %)          11 (47.8)      12 (52.2)      23 (100.0)    11 (47.8)      12 (52.2)      23 (100.0)     |
+  |------------------------------------------------------------------------------------------------------------------|
+  | Effective sample size                                               ESS=11         ESS=12         ESS=22         |
+  |------------------------------------------------------------------------------------------------------------------|
+  | category                                                                                                         |
+  |    0                    <5             6/Suppressed   ≥5            <5             7/Suppressed   ≥5             |
+  |    1                    8/Suppressed   <5             ≥5            9/Suppressed   <5             ≥5             |
+  |    Missing              <5             <5             <5            <5             <5             <5             |
+  +------------------------------------------------------------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to tests/testthat/fixtures/table1_phase3/S6.csv

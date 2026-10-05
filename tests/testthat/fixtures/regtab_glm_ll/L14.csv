@@ -1,0 +1,9 @@
+,Model,,
+,Coef.,95% CI,p-value
+Mileage (mpg),-0.01,"(-0.03, 0.01)",0.27
+Weight (lbs.),0.00,"(0.00, 0.00)",0.003
+Intercept,8.25,"(7.48, 9.03)",<0.001
+Observations,74,,
+AIC,81569.75,,
+BIC,81576.67,,
+Log-likelihood,-40781.88,,

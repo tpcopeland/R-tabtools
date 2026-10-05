@@ -1,0 +1,15 @@
+  +-------------------------------------------------------------------+
+  |                     sq int native                                 |
+  |                             Coef.                95% CI   p-value |
+  |        Car origin                                                 |
+  |          Domestic       Reference                                 |
+  |           Foreign          216.75   (-2684.26, 3117.76)      0.88 |
+  |           mpg#mpg           -6.64       (-10.21, -3.07)    <0.001 |
+  |   foreign#mpg#mpg                                                 |
+  | 0.foreign#mpg#mpg       Reference                                 |
+  | 1.foreign#mpg#mpg            2.58         (-2.22, 7.38)      0.29 |
+  |         Intercept         8829.74   (7177.01, 10482.47)    <0.001 |
+  +-------------------------------------------------------------------+
+
+Markdown exported to R42.md
+Exported 11 rows × 5 cols to regtab.xlsx, sheet R42

@@ -1,0 +1,6 @@
+,Model,,
+,Estimate,95% CI,p-value
+Treatment group,0.9850,"(0.9661, 1.0042)",0.13
+Age at cohort entry (years),0.9988,"(0.9981, 0.9995)",<0.001
+Female sex,0.9989,"(0.9797, 1.0185)",0.91
+Subjects,"15,000",,

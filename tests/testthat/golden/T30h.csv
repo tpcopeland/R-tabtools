@@ -1,0 +1,17 @@
+Table 1. Custom Symbol Formatting Demo,,,
+ ,SSRI,SNRI,p-value
+"No. (Row %), No. (Column %), Mean [SD], Geometric mean (×/GSD), or Median (Q1 to Q3)","N=8,934","N=6,066",
+Age at cohort entry (years),58.3 [13.4],58.5 [13.3],0.244
+C-reactive protein (mg/L),4.5 (×/2.2),4.4 (×/2.2),0.382
+Prior hospitalizations,2 (1 to 3),2 (1 to 3),0.974
+Female sex,"5,351/8,934 (60)","3,621/6,066 (60)",0.805
+Education level,,,0.106
+   Primary,"2,333/3,860 (60)","1,527/3,860 (40)",
+   Secondary,"3,530/5,884 (60)","2,354/5,884 (40)",
+   Tertiary,"3,071/5,256 (58)","2,185/5,256 (42)",
+Smoking status,,,0.973
+   Never,"4,857/8,156 (60)","3,299/8,156 (40)",
+   Former,"1,832/3,085 (59)","1,253/3,085 (41)",
+   Current,"1,383/2,325 (59)","942/2,325 (41)",
+   Missing,"862/1,434 (60)","572/1,434 (40)",
+SD shown as mean [SD]. IQR uses 'to' separator. Row % for categoricals.,,,

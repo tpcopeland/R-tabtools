@@ -1,0 +1,18 @@
+name,kind,row,col,value
+_golden_id,meta,,,B16
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+icc_1,scalar,,,.21161871277850031
+n_1,scalar,,,3200
+ll_1,scalar,,,-1897.48094888589
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,10
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable mixed-effects probit regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Dose_(mg),c1,.37915302834405729
+table,matrix,Female,c1,-.047162573864048998
+table,matrix,Intercept,c1,-.31394426326714769
+table,matrix,var(_cons[site]),c1,.2684217855097884

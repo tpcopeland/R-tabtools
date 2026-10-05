@@ -1,0 +1,5 @@
+,NB r2,,
+,IRR,95% CI,p-value
+Exposure score,1.43,"(1.29, 1.59)",<0.001
+Observations,400,,
+Pseudo R²,0.030,,

@@ -1,0 +1,10 @@
+name,kind,row,col,value
+_golden_id,meta,,,RV09
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,stage female
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as % (No.). P-values were calculated using Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,Data are presented as % (No.).
+table,matrix,Clinical_stage,p_value,.88101484251378515
+table,matrix,Female_sex,p_value,.81897084890175875

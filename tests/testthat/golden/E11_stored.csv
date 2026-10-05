@@ -1,0 +1,24 @@
+name,kind,row,col,value
+_golden_id,meta,,,E11
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,4
+ci_level,scalar,,,95
+N_cols,scalar,,,5
+N_rows,scalar,,,7
+sheet,macro,,,E11
+xlsx,macro,,,effecttab.xlsx
+markdown,macro,,,E11.md
+methods,macro,,,"Average treatment effects estimated using regression adjustment with 95% confidence intervals. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+type,macro,,,teffects
+effect_label,macro,,,Effect
+table,matrix,none_vs_A,c1,-1.9042927806788761
+table,matrix,none_vs_A,c2,1.54224203498000e-09
+table,matrix,O_vs_A,c1,-.64287855378100844
+table,matrix,O_vs_A,c2,.0088184133660144
+table,matrix,H_vs_A,c1,2.4486700515883069
+table,matrix,H_vs_A,c2,6.59583924337000e-19
+table,matrix,A_(PO_Mean),c1,8.2390554635307609
+table,matrix,A_(PO_Mean),c2,0

@@ -1,0 +1,7 @@
+name,kind,row,col,value
+_golden_id,meta,,,W2
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,age female stage
+Dapa,macro,,,"Weighted data are presented as mean±SD for continuous measures, and row % (No./total) for categorical measures and column % (No./total) for binary measures. P-values suppressed."

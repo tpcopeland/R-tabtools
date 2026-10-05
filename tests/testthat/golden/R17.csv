@@ -1,0 +1,15 @@
+,Multinomial,,
+,RRR,95% CI,p-value
+Secondary: Age at cohort entry (years),1.00,"(1.00, 1.00)",0.75
+Secondary: Female sex,1.08,"(1.00, 1.18)",0.063
+Secondary: Diabetes,1.01,"(0.93, 1.09)",0.86
+Secondary: Hypertension,0.99,"(0.91, 1.08)",0.85
+Tertiary: Age at cohort entry (years),1.00,"(1.00, 1.00)",0.76
+Tertiary: Female sex,1.02,"(0.93, 1.11)",0.71
+Tertiary: Diabetes,1.03,"(0.95, 1.12)",0.50
+Tertiary: Hypertension,1.00,"(0.92, 1.09)",0.98
+Observations,"15,000",,
+AIC,32530.06,,
+BIC,32606.21,,
+Log-likelihood,-16255.03,,
+Pseudo R²,0.000,,

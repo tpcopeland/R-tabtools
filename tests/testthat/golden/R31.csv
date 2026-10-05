@@ -1,0 +1,7 @@
+,Cloglog,,
+,Coef.,95% CI,p-value
+Mileage (mpg),-0.14,"(-0.29, 0.01)",0.062
+Weight (lbs.),0.00,"(-0.00, -0.00)",<0.001
+Intercept,10.10,"(3.53, 16.67)",0.003
+Observations,74,,
+Log-likelihood,-27.74,,

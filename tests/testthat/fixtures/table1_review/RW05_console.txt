@@ -1,0 +1,26 @@
+(1 real change made)
+(1 real change made, 1 to missing)
+(1 real change made)
+(1 real change made, 1 to missing)
+(1 real change made)
+(1 real change made, 1 to missing)
+  +-----------------------------------------------------+
+  |                             Control      Active     |
+  |-----------------------------------------------------|
+  | No. (Column %) or Mean±SD   6 (50.0 %)   6 (50.0 %) |
+  |-----------------------------------------------------|
+  | Effective sample size       ESS=5        ESS=5      |
+  |-----------------------------------------------------|
+  | Clinical stage                                      |
+  |    Stage I                  2 (41%)      1 (27%)    |
+  |    Stage II                 2 (41%)      1 (24%)    |
+  |    Stage III                1 (17%)      2 (48%)    |
+  |    Missing                  1 (17 %)     1 (17 %)   |
+  |-----------------------------------------------------|
+  | Female sex                  4 (72%)      4 (67%)    |
+  |    Missing                  1 (17 %)     0          |
+  |-----------------------------------------------------|
+  | Age at entry                52±4         66±5       |
+  |    Missing                  1 (17 %)     0          |
+  +-----------------------------------------------------+
+CSV exported to tests/testthat/fixtures/table1_review/RW05.csv

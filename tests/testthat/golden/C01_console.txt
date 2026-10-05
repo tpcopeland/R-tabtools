@@ -1,0 +1,17 @@
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+Table S1. Exposure Effects on Cardiovascular Events
+  +------------------------------------------------------+
+  |                      Cox PH                          |
+  |                          HR         95% CI   p-value |
+  | Treatment group        1.04   (0.98, 1.10)      0.18 |
+  | Education level                                      |
+  |         Primary   Reference                          |
+  |       Secondary        1.08   (1.00, 1.15)     0.038 |
+  |        Tertiary        1.05   (0.98, 1.13)      0.18 |
+  +------------------------------------------------------+
+
+Markdown exported to C01.md
+Exported 8 rows × 5 cols to comptab.xlsx, sheet C01

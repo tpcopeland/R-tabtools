@@ -1,0 +1,8 @@
+,Model,,
+,Coef.,95% CI,p-value
+Mileage (mpg),-31.91,"(-239.16, 175.34)",0.76
+Weight (lbs.),1.95,"(0.29, 3.61)",0.022
+Intercept,905.88,"(-8196.83, 10008.59)",0.84
+Observations,74,,
+R²,0.304,,
+F statistic,15.70,,

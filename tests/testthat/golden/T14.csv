@@ -1,0 +1,10 @@
+ ,SSRI,SNRI,p-value
+"No. (Column %), Mean±SD, Geometric mean (×/GSD), or Median (Q1, Q3)","N=8,934","N=6,066",
+"Age at cohort entry (years), mean±SD",58.3±13.4,58.5±13.3,0.24
+"C-reactive protein (mg/L), geometric mean (×/GSD)",4.5 (×/2.2),4.4 (×/2.2),0.38
+"Prior hospitalizations, median (Q1, Q3)","2 (1, 3)","2 (1, 3)",0.97
+"Female sex, No. (%)","5,351 (60)","3,621 (60)",0.80
+"Education level, No. (%)",,,0.11
+   Primary,"2,333 (26)","1,527 (25)",
+   Secondary,"3,530 (40)","2,354 (39)",
+   Tertiary,"3,071 (34)","2,185 (36)",

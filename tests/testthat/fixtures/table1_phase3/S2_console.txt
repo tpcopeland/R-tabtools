@@ -1,0 +1,11 @@
+  +-----------------------------------------------------------+
+  |                  0         1         Total     p-value    |
+  |-----------------------------------------------------------|
+  | No. (Column %)   <5        N=5       ≥5                   |
+  |-----------------------------------------------------------|
+  | category                                       Suppressed |
+  |    0             0         <5        <5                   |
+  |    1             <5        <5        5                    |
+  +-----------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to tests/testthat/fixtures/table1_phase3/S2.csv

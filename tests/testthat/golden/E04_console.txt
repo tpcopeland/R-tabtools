@@ -1,0 +1,13 @@
+
+Table 9. Average Marginal Effects on CV Event Risk
+  +--------------------------------------------------------------+
+  |                                AME          95% CI   p-value |
+  |             Treatment group   0.01   (-0.01, 0.02)      0.39 |
+  | Age at cohort entry (years)   0.00    (0.00, 0.00)     0.038 |
+  |                  Female sex   0.00   (-0.01, 0.02)      0.85 |
+  |                    Diabetes   0.02    (0.01, 0.04)     0.008 |
+  |                Hypertension   0.00   (-0.02, 0.01)      0.87 |
+  +--------------------------------------------------------------+
+
+Markdown exported to E04.md
+Exported 8 rows × 5 cols to effecttab.xlsx, sheet E04

@@ -1,0 +1,25 @@
+name,kind,row,col,value
+_golden_id,meta,,,MI04
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,11
+fmi_1,scalar,,,.25576831023810398
+mi_m_1,scalar,,,5
+events_1,scalar,,,133
+n_1,scalar,,,400
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,14
+sheet,macro,,,MI04
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,MI04.md
+methods,macro,,,"Hazard ratios with 95% confidence intervals from multivariable Cox proportional hazards regression with multiple imputation. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,HR
+table,matrix,Treatment_group,c1,.90405156676106091
+table,matrix,Age_at_cohort_entry_(years),c1,.99460895161894958
+table,matrix,Female_sex,c1,1.5670892566865879
+table,matrix,__Secondary,c1,.93441570422011022
+table,matrix,__Tertiary,c1,.94963317023489091

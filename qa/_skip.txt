@@ -1,0 +1,12 @@
+# Scripts in qa/ that qa/run_all.R does not run, one per line:
+#   <script>  <reason>
+# Every top-level qa/*.R must be either run by qa/run_all.R or listed
+# here; an unlisted script fails the runner, so a new QA script cannot be
+# forgotten silently.
+make_golden.R                      generator: needs stata-mp and the Stata-Tools checkouts; rewrites tests/testthat/golden/ only with --update
+make_regtab_fixtures.R             generator: rewrites the Phase 4 review fixtures (golden/fixtures/nbsim.dta, autolong.dta); every golden on them must then be regenerated
+make_regtab_phase5_review_data.R   generator: rewrites the Phase 5 review fixture data (tests/testthat/fixtures/regtab_phase5_review/)
+make_regtab_5w_review_data.R       generator: rewrites the 5w review fixture data (tests/testthat/fixtures/regtab_5w_review/)
+make_regtab_h_t2b_data.R           generator: rewrites the Milestone H group t2b fixture data (tests/testthat/fixtures/regtab_h_t2b/: offs.dta, lung.dta, gee.dta); qa/stata/make_regtab_h_t2b.do must then be rerun
+make_mi_fixture.R                  generator: needs mice (install it into a temporary library); rewrites tests/testthat/golden/fixtures/mi_cohort.dta, after which goldens MI01-MI07 and qa/stata/make_regtab_mi.do must be rerun
+make_demo_data.R                   generator: rewrites qa/demo/demo_tabtools.rds from the golden fixtures (qa/demo_parity.R --update checks it is current)

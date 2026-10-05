@@ -1,0 +1,18 @@
+  +------------------------------------------------------------------+
+  |                                  MI Cox                          |
+  |                                      HR         95% CI   p-value |
+  |             Treatment group        0.90   (0.63, 1.30)      0.58 |
+  | Age at cohort entry (years)        0.99   (0.98, 1.01)      0.47 |
+  |                  Female sex        1.57   (1.07, 2.30)     0.021 |
+  |             Education level                                      |
+  |                     Primary   Reference                          |
+  |                   Secondary        0.93   (0.60, 1.46)      0.77 |
+  |                    Tertiary        0.95   (0.58, 1.56)      0.84 |
+  |                    Subjects         400                          |
+  |                      Events         133                          |
+  |                 Imputations           5                          |
+  |                 Largest FMI      0.2558                          |
+  +------------------------------------------------------------------+
+
+Markdown exported to MI04.md
+Exported 14 rows × 5 cols to regtab.xlsx, sheet MI04

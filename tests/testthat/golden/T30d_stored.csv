@@ -1,0 +1,20 @@
+name,kind,row,col,value
+_golden_id,meta,,,T30d
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,6
+markdown_rows,scalar,,,17
+markdown,macro,,,T30d.md
+sheet,macro,,,T30d
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age female education income_quintile diabetes hypertension anxiety prior_cvd
+Dapa,macro,,,"Crude and weighted data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values suppressed. SMD reflects weighted comparison."
+table,matrix,Age_at_cohort_entry_(years),smd,.0000377679126828
+table,matrix,Female_sex,smd,8.43571173105000e-06
+table,matrix,Education_level,smd,.0001872940435811
+table,matrix,Disposable_income_quintile,smd,.024460135478733401
+table,matrix,Diabetes,smd,.0001127234125391
+table,matrix,Hypertension,smd,.0001301144651048
+table,matrix,Anxiety_disorder,smd,2.49617755274000e-06
+table,matrix,Prior_cardiovascular_disease,smd,.0000180412500447

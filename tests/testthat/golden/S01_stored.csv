@@ -1,0 +1,29 @@
+name,kind,row,col,value
+_golden_id,meta,,,S01
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_outcomes,scalar,,,2
+N_exposures,scalar,,,2
+N_rows,scalar,,,9
+markdown_cols,scalar,,,9
+markdown_rows,scalar,,,6
+sheet,macro,,,S01
+xlsx,macro,,,stratetab.xlsx
+methods,macro,,,Incidence rates and confidence intervals were formatted at the 95% level; rate-ratio intervals use an independent-rate log-normal approximation at the same level.
+outcome_ids,macro,,,CV Events \ Self-Harm
+markdown,macro,,,S01.md
+csv,macro,,,S01.csv
+ratios,matrix,SSRI,CV_Events,.86887835703001581
+ratios,matrix,SSRI,Self_Harm,.77837837837837831
+ratios,matrix,SNRI,CV_Events,.90858725761772852
+ratios,matrix,SNRI,Self_Harm,.70769230769230773
+rates,matrix,e1_SSRI,CV_Events,6.3300000000000001
+rates,matrix,e1_SSRI,Self_Harm,1.8500000000000001
+rates,matrix,e1_SNRI,CV_Events,7.2199999999999998
+rates,matrix,e1_SNRI,Self_Harm,2.6000000000000001
+rates,matrix,e2_SSRI,CV_Events,5.5
+rates,matrix,e2_SSRI,Self_Harm,1.4399999999999999
+rates,matrix,e2_SNRI,CV_Events,6.5599999999999996
+rates,matrix,e2_SNRI,Self_Harm,1.8400000000000001

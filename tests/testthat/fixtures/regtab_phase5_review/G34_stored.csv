@@ -1,0 +1,27 @@
+name,kind,row,col,value
+_golden_id,meta,,,G34
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_models,scalar,,,2
+N_cols,scalar,,,8
+N_rows,scalar,,,11
+methods,macro,,,"Collected regression estimates with 95% confidence intervals across 2 models. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,mixed
+table,matrix,Female_Treatment,c1,.94327022216390255
+table,matrix,Female_Treatment,c2,.
+table,matrix,Female_Age_z-score,c1,1.067395692253102
+table,matrix,Female_Age_z-score,c2,.
+table,matrix,Female_Intercept,c1,1.317555040035399
+table,matrix,Female_Intercept,c2,.
+table,matrix,Event_count_Treatment,c1,.
+table,matrix,Event_count_Treatment,c2,-.15548427875889739
+table,matrix,Event_count_Age_z-score,c1,.
+table,matrix,Event_count_Age_z-score,c2,.392441900577856
+table,matrix,Event_count_Intercept,c1,.
+table,matrix,Event_count_Intercept,c2,.63381655332824582
+table,matrix,Inflation_equation_Structural-ze,c1,.
+table,matrix,Inflation_equation_Structural-ze,c2,.81432599608039768
+table,matrix,Inflation_equation_Intercept,c1,.
+table,matrix,Inflation_equation_Intercept,c2,-.68108848314027848

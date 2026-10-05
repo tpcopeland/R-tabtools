@@ -1,0 +1,9 @@
+,Model,,
+,IRR,95% CI,p-value
+Exposure score,1.41,"(1.30, 1.52)",<0.001
+lnalpha,-0.51,"(-0.73, -0.29)",
+Intercept,1.31,"(1.11, 1.55)",0.002
+Variance: Clinic ID (Intercept),0.23,"(0.14, 0.40)",
+Observations,"1,000",,
+AIC,3263.90,,
+Log-likelihood,-1627.95,,

@@ -1,0 +1,20 @@
+name,kind,row,col,value
+_golden_id,meta,,,R10a
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,6
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,9
+sheet,macro,,,R10a
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R10a.md
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable linear regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Mileage_(mpg),c1,-280.26148523651563
+table,matrix,__4,c1,1693.840990157651
+table,matrix,__5,c1,3131.9821787778001
+table,matrix,Intercept,c1,10449.99118996686

@@ -1,0 +1,9 @@
+name,kind,row,col,value
+_golden_id,meta,,,RV03
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,x
+methods,macro,,,"Baseline characteristics were compared between groups defined by g. Data are presented as mean±SD. P-values were calculated using independent t-test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,Data are presented as mean±SD.
+table,matrix,x,p_value,.1055728090000841

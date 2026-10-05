@@ -1,0 +1,5 @@
+# Goldens are compared byte for byte: never convert their line endings.
+tests/testthat/golden/** -text
+*.dta binary
+*.xlsx binary
+*.rds binary

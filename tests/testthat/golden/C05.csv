@@ -1,0 +1,7 @@
+Cox models aligned by model label,,,,,,
+,Crude,,,Adjusted,,
+,HR,95% CI,p-value,HR,95% CI,p-value
+Treatment (crude and adjusted),1.05,"(0.99, 1.11)",0.095,1.05,"(1.00, 1.11)",0.066
+Diabetes,,,,1.62,"(1.53, 1.71)",<0.001
+Female sex,1.01,"(0.96, 1.07)",0.70,1.02,"(0.97, 1.08)",0.42
+Hypertension (frame B),1.59,"(1.50, 1.68)",<0.001,1.54,"(1.46, 1.63)",<0.001

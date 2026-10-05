@@ -1,0 +1,12 @@
+(1 real change made)
+(1 real change made, 1 to missing)
+  +-----------------------------------------------------------------+
+  |                  Total           0         1         p-value    |
+  |-----------------------------------------------------------------|
+  | No. (Column %)   N=30            N=14      N=16                 |
+  |-----------------------------------------------------------------|
+  | Flag             10/Suppressed   <5        ≥5        Suppressed |
+  |    Missing       <5              <5        <5                   |
+  +-----------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to tests/testthat/fixtures/table1_phase3/S15.csv

@@ -1,0 +1,25 @@
+,Constrained,,
+,Coef.,95% CI,p-value
+Mileage (mpg),-315.02,"(-448.87, -181.16)",<0.001
+Mileage (doubled),Dropped,,
+Car origin,,,
+  Domestic,Ref.,,
+  Foreign,303.06,"(-3820.84, 4426.96)",0.88
+Repair record 1978,,,
+  1,Ref.,,
+  2,812.46,"(-3294.56, 4919.49)",0.69
+  3,1412.53,"(-2396.82, 5221.89)",0.46
+  4,512.01,"(-3555.95, 4579.96)",0.80
+  5,3105.22,"(-2285.09, 8495.52)",0.25
+foreign#rep78,,,
+0.foreign#1.rep78,Ref.,,
+0.foreign#2.rep78,Ref.,,
+0.foreign#3.rep78,Ref.,,
+0.foreign#4.rep78,Ref.,,
+0.foreign#5.rep78,Ref.,,
+1.foreign#1.rep78,No obs,,
+1.foreign#2.rep78,No obs,,
+1.foreign#3.rep78,-716.38,"(-6024.98, 4592.22)",0.79
+1.foreign#4.rep78,2106.96,"(-2896.47, 7110.39)",0.40
+1.foreign#5.rep78,Dropped,,
+Intercept,11179.91,"(6559.83, 15800.00)",<0.001

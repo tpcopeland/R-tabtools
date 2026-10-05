@@ -1,0 +1,8 @@
+name,kind,row,col,value
+_golden_id,meta,,,RV07
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,s
+Dapa,macro,,,Data are presented as No. (%).
+table,matrix,s,p_value,.

@@ -1,0 +1,15 @@
+name,kind,row,col,value
+_golden_id,meta,,,P09
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,1
+markdown_rows,scalar,,,3
+n_datarows,scalar,,,3
+n_cols,scalar,,,1
+n_rows,scalar,,,5
+markdown,macro,,,P09.md
+csv,macro,,,P09.csv
+file,macro,,,P09.xlsx
+sheet,macro,,,P09
+source,macro,,,data

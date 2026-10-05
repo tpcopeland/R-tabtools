@@ -1,0 +1,8 @@
+,Model,,
+,IRR,95% CI,p-value
+Exposure score,1.40,"(1.33, 1.48)",<0.001
+var(_cons[clinic]),0.26,"(0.16, 0.43)",
+Observations,"1,000",,
+AIC,3498.41,,
+BIC,3513.13,,
+Log-likelihood,-1746.20,,

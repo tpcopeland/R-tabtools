@@ -1,0 +1,19 @@
+name,kind,row,col,value
+_golden_id,meta,,,E07
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+n_1,scalar,,,900
+ll_1,scalar,,,-526.81981703220572
+bic_1,scalar,,,1080.849213117709
+aic_1,scalar,,,1061.639634064411
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,11
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable probit regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,treat,c1,.41771917178411999
+table,matrix,x1,c1,.0289749475624341
+table,matrix,x2,c1,-.24332619542542619
+table,matrix,Intercept,c1,-2.013869883026624

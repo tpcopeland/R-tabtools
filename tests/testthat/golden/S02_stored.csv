@@ -1,0 +1,27 @@
+name,kind,row,col,value
+_golden_id,meta,,,S02
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_outcomes,scalar,,,2
+N_exposures,scalar,,,2
+N_rows,scalar,,,10
+markdown_cols,scalar,,,7
+markdown_rows,scalar,,,7
+sheet,macro,,,S02
+xlsx,macro,,,stratetab.xlsx
+methods,macro,,,Incidence rates and confidence intervals were formatted at the 95% level; rate-ratio intervals use an independent-rate log-normal approximation at the same level.
+outcome_ids,macro,,,cv_event \ rare_event
+markdown,macro,,,S02.md
+csv,macro,,,S02.csv
+rates,matrix,e1_SSRI,cv_event,35.966252662865386
+rates,matrix,e1_SSRI,rare_event,2.7264739921849581
+rates,matrix,e1_SNRI,cv_event,37.217688906304183
+rates,matrix,e1_SNRI,rare_event,2.8229331278397298
+rates,matrix,e2_Never,cv_event,37.211575962292507
+rates,matrix,e2_Never,rare_event,2.839797134282894
+rates,matrix,e2_Former,cv_event,36.235579316344598
+rates,matrix,e2_Former,rare_event,2.7092021918762321
+rates,matrix,e2_Current,cv_event,34.657164048726571
+rates,matrix,e2_Current,rare_event,1.9841887814156429

@@ -1,0 +1,12 @@
+  +----------------------------------------------------+
+  |                   Model                            |
+  |                      TR           95% CI   p-value |
+  | Treatment group    0.98     (0.96, 1.01)      0.25 |
+  |         lnsigma    1.00     (1.00, 1.00)     0.002 |
+  |      Female sex    1.00     (0.97, 1.02)      0.76 |
+  |         lnsigma   -0.46   (-0.48, -0.44)    <0.001 |
+  |           sigma    0.63     (0.62, 0.64)           |
+  +----------------------------------------------------+
+
+Markdown exported to R62.md
+Exported 8 rows × 5 cols to regtab.xlsx, sheet R62

@@ -1,0 +1,5 @@
+,RD,95% CI,p-value
+Treatment group,,,
+  SSRI,Reference,,
+  SNRI,0.01,"(-0.01, 0.02)",0.37
+Robust variance; margins averaged with the IPTW weights.,,,

@@ -1,0 +1,24 @@
+name,kind,row,col,value
+_golden_id,meta,,,MI03
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,10
+fmi_1,scalar,,,.21089956134543711
+mi_m_1,scalar,,,5
+n_1,scalar,,,400
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,13
+sheet,macro,,,MI03
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,MI03.md
+methods,macro,,,"Odds ratios with 95% confidence intervals from multivariable logistic regression with multiple imputation. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Treatment_group,c1,.8842387359764744
+table,matrix,Age_at_cohort_entry_(years),c1,.99859404832503906
+table,matrix,Female_sex,c1,1.743304103822519
+table,matrix,__Secondary,c1,1.035748801512302
+table,matrix,__Tertiary,c1,.97024361266576553

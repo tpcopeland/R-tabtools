@@ -1,0 +1,17 @@
+name,kind,row,col,value
+_golden_id,meta,,,B15b
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+icc_1,scalar,,,.21632628966183989
+n_1,scalar,,,3200
+ll_1,scalar,,,-1889.9857316000421
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,9
+methods,macro,,,"Hazard ratios with 95% confidence intervals from multivariable mixed-effects complementary log-log regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,HR
+table,matrix,Dose_(mg),c1,1.628324682646825
+table,matrix,Female,c1,.95942544056506585
+table,matrix,Median_Hazard_Ratio_(Site),c1,1.9017301912762259

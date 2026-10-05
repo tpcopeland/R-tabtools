@@ -1,0 +1,6 @@
+Table 7. Treatment Effect Estimates -- IPW vs AIPW,,,,,,
+,IPW,,,AIPW,,
+,ATE,95% CI,p-value,ATE,95% CI,p-value
+SNRI vs SSRI,0.01,"(-0.01, 0.02)",0.37,0.01,"(-0.01, 0.02)",0.37
+SSRI (PO Mean),0.35,"(0.34, 0.36)",<0.001,0.35,"(0.34, 0.36)",<0.001
+IPW = inverse probability weighting. AIPW = augmented IPW (doubly robust).,,,,,,

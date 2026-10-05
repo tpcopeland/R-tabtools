@@ -1,0 +1,23 @@
+name,kind,row,col,value
+_golden_id,meta,,,T03
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,15
+markdown,macro,,,T03.md
+sheet,macro,,,T03
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,price mpg rep78 headroom trunk weight length turn displacement gear_ratio
+methods,macro,,,"Baseline characteristics were compared between groups defined by Car origin. Data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures. P-values were calculated using independent t-test, Wilcoxon rank-sum test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures."
+table,matrix,Price,p_value,.29801024568333778
+table,matrix,Mileage_(mpg),p_value,.0019313757471673
+table,matrix,Repair_record_1978,p_value,.0000175796084266
+table,matrix,Headroom_(in_),p_value,.011048634495257
+table,matrix,Trunk_space_(cu__ft_),p_value,.0016599756527618001
+table,matrix,Weight_(lbs_),p_value,3.77932609079000e-07
+table,matrix,Length_(in_),p_value,1.13848517620000e-07
+table,matrix,Turn_circle_(ft_),p_value,1.66468710580000e-09
+table,matrix,Displacement_(cu__in_),p_value,1.07099225461000e-08
+table,matrix,Gear_ratio,p_value,3.84355368338000e-09

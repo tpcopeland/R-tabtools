@@ -1,0 +1,25 @@
+name,kind,row,col,value
+_golden_id,meta,,,S8
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+N_derived_suppressed,scalar,,,1
+N_secondary_suppressed,scalar,,,0
+N_primary_suppressed,scalar,,,2
+smallcells,scalar,,,3
+varlist,macro,,,allmissing
+methods,macro,,,"Baseline characteristics were compared between groups defined by group. Data are presented as mean±SD. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,Data are presented as mean±SD.
+suppression,matrix,r1,group_0,0
+suppression,matrix,r1,group_1,0
+suppression,matrix,r1,pvalue,0
+suppression,matrix,r2,group_0,1
+suppression,matrix,r2,group_1,0
+suppression,matrix,r2,pvalue,0
+suppression,matrix,r3,group_0,0
+suppression,matrix,r3,group_1,0
+suppression,matrix,r3,pvalue,3
+suppression,matrix,r4,group_0,1
+suppression,matrix,r4,group_1,0
+suppression,matrix,r4,pvalue,0
+table,matrix,allmissing,p_value,.d

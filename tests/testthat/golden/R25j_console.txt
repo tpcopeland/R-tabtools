@@ -1,0 +1,25 @@
+
+Table 5d. Logistic Regression with Advanced Formatting
+  +-------------------------------------------------------------------+
+  |                                 Advanced                          |
+  |                                       OR         95% CI   p-value |
+  |              Treatment group        1.03   (0.96, 1.10)      0.37 |
+  |  Age at cohort entry (years)        1.00   (1.00, 1.01)     0.034 |
+  |                   Female sex        1.01   (0.94, 1.08)      0.86 |
+  |              Education level                                      |
+  |                      Primary   Reference                          |
+  |                    Secondary        1.05   (0.96, 1.14)      0.26 |
+  |                     Tertiary        1.05   (0.96, 1.15)      0.28 |
+  |               Marital status                                      |
+  |                       Single   Reference                          |
+  |                      Married        0.91   (0.84, 0.99)     0.028 |
+  |                     Divorced        0.92   (0.83, 1.01)     0.085 |
+  |                      Widowed        0.96   (0.87, 1.07)      0.50 |
+  |                     Diabetes        1.10   (1.03, 1.18)     0.007 |
+  |                 Hypertension        0.99   (0.93, 1.07)      0.88 |
+  |             Anxiety disorder        1.14   (1.06, 1.23)    <0.001 |
+  | Prior cardiovascular disease        1.03   (0.96, 1.10)      0.39 |
+  +-------------------------------------------------------------------+
+
+Markdown exported to R25j.md
+Exported 19 rows × 5 cols to regtab.xlsx, sheet R25j

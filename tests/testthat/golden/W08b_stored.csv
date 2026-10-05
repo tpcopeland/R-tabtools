@@ -1,0 +1,19 @@
+name,kind,row,col,value
+_golden_id,meta,,,W08b
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,3
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,6
+sheet,macro,,,W08b
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,W08b.md
+methods,macro,,,"Odds ratios with 95% confidence intervals from multivariable survey-weighted logistic regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Treatment_group,c1,1.037975182961403
+table,matrix,Age_at_cohort_entry_(years),c1,1.0037315787116881
+table,matrix,Female_sex,c1,1.001574276682218

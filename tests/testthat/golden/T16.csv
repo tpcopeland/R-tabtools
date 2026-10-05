@@ -1,0 +1,9 @@
+ ,SSRI,SNRI,p-value
+"No. (Column %), Mean±SD, or Median (Q1, Q3)",N=8934,N=6066,
+Age at cohort entry (years),58.26±13.40,58.52±13.27,0.24
+C-reactive protein (mg/L),"4.42 (2.59, 7.57)","4.39 (2.60, 7.57)",0.41
+Female sex,5351 (59.9),3621 (59.7),0.80
+Education level,,,0.11
+   Primary,2333 (26.1),1527 (25.2),
+   Secondary,3530 (39.5),2354 (38.8),
+   Tertiary,3071 (34.4),2185 (36.0),

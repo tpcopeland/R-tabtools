@@ -1,0 +1,17 @@
+,SAS int,,
+,Coef.,95% CI,p-value
+Price class,,,
+  Budget,-6167.14,"(-7384.89, -4949.38)",<0.001
+  Mid-range,-5118.79,"(-6364.09, -3873.48)",<0.001
+  Premium,Reference,,
+Car origin,,,
+  Domestic,Reference,,
+  Foreign,-1721.09,"(-3168.00, -274.17)",0.020
+pclass#foreign,,,
+1.pclass#0.foreign,Reference,,
+1.pclass#1.foreign,1618.34,"(-650.29, 3886.96)",0.16
+2.pclass#0.foreign,Reference,,
+2.pclass#1.foreign,1734.87,"(-390.37, 3860.11)",0.11
+3.pclass#0.foreign,Reference,,
+3.pclass#1.foreign,Reference,,
+Intercept,10216.29,"(9282.31, 11150.26)",<0.001

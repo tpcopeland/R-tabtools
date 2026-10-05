@@ -1,0 +1,9 @@
+label,estimate,ll,ul,pvalue,model,model_label,rowtype,section,source_row,source_frame
+Any HRT,,,,,,,section,Any HRT,,_pe_rates
+   No HRT,,,,,,,reference,Any HRT,,_pe_rates
+hrt,.7381616360664092,.3678908708730452,1.481098456363356,.4733180752755499,1,Sustained EDSS 4,effect,Any HRT,1,_pe_bin
+Estrogen Dose,,,,,,,section,Estrogen Dose,,_pe_rates
+  No HRT,.5168584249831539,.1239686216446975,2.154921365841394,.4470461018043488,1,Sustained EDSS 4,effect,Estrogen Dose,2,_pe_dose
+  Low dose,1.643930304127894,.5847410237410342,4.621715828214056,.4289426862380099,1,Sustained EDSS 4,effect,Estrogen Dose,3,_pe_dose
+   Medium dose,,,,,,,reference,Estrogen Dose,,_pe_rates
+  High dose,.8950732091419716,.2795034576753387,2.86635470053577,.8755151836270445,1,Sustained EDSS 4,effect,Estrogen Dose,5,_pe_dose

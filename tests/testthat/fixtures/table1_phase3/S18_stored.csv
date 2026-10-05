@@ -1,0 +1,18 @@
+name,kind,row,col,value
+_golden_id,meta,,,S18
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,x y y b c
+methods,macro,,,"Baseline characteristics were compared between groups defined by Arm. Data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3) for continuous measures, and % (No.) for categorical measures. P-values were calculated using one-way ANOVA, Kruskal-Wallis test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3) for continuous measures, and % (No.) for categorical measures."
+table,matrix,Age_years,p_value,2.39024362285000e-06
+table,matrix,Age_years,smd,.15820449633578729
+table,matrix,Biomarker,p_value,.0004422842127088
+table,matrix,Biomarker,smd,.054716842745099699
+table,matrix,Biomarker_2,p_value,.0018397225046221
+table,matrix,Biomarker_2,smd,.1165603367872195
+table,matrix,Smoker,p_value,.0000158608777503
+table,matrix,Smoker,smd,.5296228919021565
+table,matrix,Region,p_value,.065917408452021403
+table,matrix,Region,smd,.24690831641564509

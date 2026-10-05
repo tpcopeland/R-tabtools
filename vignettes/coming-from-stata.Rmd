@@ -1,0 +1,622 @@
+---
+title: "Coming from Stata"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Coming from Stata}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+has_flextable <- requireNamespace("flextable", quietly = TRUE)
+```
+
+tabtools is the R implementation of the Stata `tabtools` commands
+`table1_tc`, `regtab`, `puttab`, `stacktab`, `stratetab`, `effecttab`,
+`comptab` and `hrcomptab` (Stata tabtools 2.1.14). What a reader sees
+targets cell-for-cell parity with the Stata output: row structure, labels
+and indents, descriptive statistics, number formats, headers, and the Excel
+styling, checked against tables written by Stata. Hypothesis tests use R's
+conventional tests (see [Deliberate differences](#deliberate-differences)).
+
+This vignette translates Stata calls into R, option by option, and ends
+with every place where R deliberately differs. For a whole analysis
+translated, see [The Stata demo in R](#the-stata-demo-in-r).
+
+## Three rules
+
+1. **Option names are argument names.** `nopvalue`, `pdp`, `borderstyle`,
+   `boldp`, `headershade`, and the rest keep their Stata names. A switch
+   becomes `TRUE`, `opt(x)` becomes `opt = x`, and `opt("A \ B")` becomes
+   either `opt = c("A", "B")` or the same Stata string.
+2. **Every call returns a table object**, a `tt_table` (Stata's `r()`
+   results are in `$stored`). `xlsx =`, `csv =` and `markdown =` also
+   write it, as the Stata options do, and the table is then returned
+   invisibly: assign it (`t2 <- regtab(fit, xlsx = "t2.xlsx")`) to print
+   it. The object can be written later with `tt_write_xlsx()`, `tt_write_csv()` and
+   `tt_write_markdown()`, or converted with `flextable::as_flextable()` and
+   `tt_as_gt()`.
+3. **`regtab()` takes fitted models.** Stata's `regtab` reads the active
+   `collect`; R passes the models: `regtab(fit1, fit2)`.
+
+## A first translation
+
+A small simulated cohort stands in for a Stata dataset. Variable labels are
+the `"label"` attribute (what `haven::read_dta()` sets); factors hold
+categorical variables. For a `.dta` file, convert its value-labelled
+predictors with `tt_as_factor(d, vars = c("drug", ...))`, which keeps the
+Stata codes; leave outcomes and event indicators numeric (a 0/1 `died`
+labelled No/Yes turned into a factor makes `coxph()` fit a multi-state
+model).
+
+```{r data}
+library(tabtools)
+set.seed(20260925)
+n <- 400
+cohort <- data.frame(
+  treated   = factor(sample(c("SSRI", "SNRI"), n, TRUE, c(0.6, 0.4)),
+                     levels = c("SSRI", "SNRI")),
+  index_age = round(rnorm(n, 58, 13), 1),
+  female    = rbinom(n, 1, 0.6),
+  education = factor(sample(c("Primary", "Secondary", "Tertiary"), n, TRUE),
+                     levels = c("Primary", "Secondary", "Tertiary")),
+  diabetes  = rbinom(n, 1, 0.3)
+)
+cohort$cv_event <- rbinom(n, 1, plogis(-2 + 0.03 * (cohort$index_age - 58) +
+                                         0.4 * cohort$diabetes))
+labs <- c(treated = "Treatment", index_age = "Age at cohort entry (years)",
+          female = "Female sex", education = "Education level",
+          diabetes = "Diabetes", cv_event = "Cardiovascular event")
+for (v in names(labs)) attr(cohort[[v]], "label") <- labs[[v]]
+```
+
+```stata
+table1_tc, by(treated) vars(index_age contn %5.1f \ female bin \ education cat \ diabetes bin) ///
+    smd xlsx("t1.xlsx") sheet("Table 1") title("Table 1") borderstyle(academic)
+```
+
+```{r table1}
+xlsx <- tempfile(fileext = ".xlsx")
+t1 <- table1_tc(cohort, by = "treated",
+                vars = c(index_age = "contn %5.1f", female = "bin",
+                         education = "cat", diabetes = "bin"),
+                smd = TRUE, xlsx = xlsx, sheet = "Table 1",
+                title = "Table 1", borderstyle = "academic")
+t1
+```
+
+The `vars` specification can also be written exactly as in Stata:
+`vars = "index_age contn %5.1f \\ female bin \\ education cat \\ diabetes bin"`.
+A plain character vector (`vars = c("index_age", "female")`) auto-types each
+variable, like a Stata varlist without `vars()`.
+
+```stata
+collect clear
+collect: logit cv_event i.treated index_age female i.education diabetes
+regtab, coef("OR") noint xlsx("t2.xlsx") sheet("Logistic")
+```
+
+```{r regtab}
+fit <- glm(cv_event ~ treated + index_age + female + education + diabetes,
+           family = binomial, data = cohort)
+t2 <- regtab(fit, coef = "OR", nointercept = TRUE, xlsx = xlsx, sheet = "Logistic")
+t2
+```
+
+The same object goes to Word through flextable, with the workbook's house
+style (the model label merged over its columns, italic Reference cells
+spanning the estimate, CI and p-value, the borders):
+
+```{r flextable, eval = has_flextable}
+flextable::as_flextable(t2)
+```
+
+## The Stata demo in R
+
+The package's source repository has an R twin of the Stata demo
+(`demo/demo_tabtools.do`): the same sections under the same `**#` headings,
+each R block headed by the Stata command it replaces. Every sheet of a
+ported command (61 of the Stata demo's 77) matches the Stata demo's output
+cell by cell; `corrtab`, `crosstab`, `survtab` and the `xtreg, re`, `qreg`
+and `churdle` models are not in the R port. The demo,
+`qa/demo/demo_tabtools.R` in the GitHub repository `tpcopeland/R-tabtools`,
+is not installed with the package, because its data include Stata's
+example datasets `auto` and `union`, which the package does not
+redistribute. From the root of a clone, with tabtools installed:
+
+```{r, eval = FALSE}
+demo <- new.env()                 # its objects stay out of your workspace
+demo$out_dir <- "tabtools_demo"   # optional; the default is a folder in tempdir()
+source("qa/demo/demo_tabtools.R", local = demo)
+```
+
+## `table1_tc` option by option
+
+`desctab()` is an alias of `table1_tc()`, as `desctab` is in Stata.
+
+| Stata | R | Notes |
+|---|---|---|
+| `varlist` | `vars = c("a", "b")` | auto-typed; `vars = NULL` (default) uses every column, as Stata does with no varlist |
+| `vars(a contn %5.1f \ b cat)` | `vars = c(a = "contn %5.1f", b = "cat")` or the Stata string | types `auto`, `contn`, `contln`, `conts`, `cat`, `cate`, `bin`, `bine` |
+| `if`/`in` | subset the data first | |
+| `[fweight=w]` | `fweight = "w"` | |
+| `wt(w)` | `wt = "w"` | |
+| `by(g)` | `by = "g"` | |
+| `total(before)`, `total(after)` | `total = "before"`, `total = "after"` | |
+| `missing` | `missing = TRUE` | |
+| `test`, `statistic` | `test = TRUE`, `statistic = TRUE` | R test names; see below |
+| `headerperc` | `headerperc = TRUE` | |
+| `smd` | `smd = TRUE` | |
+| `nopvalue` | `nopvalue = TRUE` | |
+| `format(%fmt)`, `percformat()`, `nformat()` | `format =`, `percformat =`, `nformat =` | Stata format strings, e.g. `"%5.1f"`, `"%12.0fc"` |
+| `varlabplus` | `varlabplus = TRUE` | |
+| `iqrmiddle()`, `sdleft()`, `sdright()`, `gsdleft()`, `gsdright()`, `percsign()` | same names | same defaults (`"±"`, `" (×/"`, ...) |
+| `spacelowpercent`, `extraspace`, `percent`, `percent_n`, `slashN`, `catrowperc` | same names, `TRUE` | |
+| `pdp(#)`, `highpdp(#)` | `pdp =`, `highpdp =` | |
+| `missingsummary` | `missingsummary = TRUE` | |
+| `smallcells(#)` | `smallcells = 5` | same suppression engine and markers |
+| `wtcompare`, `wtn` | `wtcompare = TRUE`, `wtn = TRUE` | |
+| `smdthreshold(#)` | `smdthreshold =` | `-1` disables |
+| `xlsx()`, `excel()` | `xlsx =`, `excel =` | `excel` wins when both are given, as in Stata |
+| `sheet()`, `title()`, `footnote()`, `open` | same names | `sheet` and `open` need `xlsx`, as in Stata; `title` and `footnote` need no file (see "Deliberate differences") |
+| `borderstyle()`, `font()`, `fontsize()` | same names | `borderstyle` needs no file (see "Deliberate differences") |
+| `boldp(#)`, `highlight(#)`, `zebra`, `headershade`, `headercolor()`, `zebracolor()` | same names | colours as Stata names, `"R G B"` or hex |
+| `csv()`, `markdown()`, `mdappend` | same names | |
+| `frame(name)`, `clear` | `as.data.frame(tab)` | the table is the return value |
+| `dots` | `dots = TRUE` | a progress message |
+| (none) | `labels = c(a = "Age")` | override variable labels |
+| (none) | `test_args = list(t.test = list(var.equal = TRUE))` | arguments for R's tests |
+
+## `regtab`
+
+### Which R model stands for which Stata command
+
+The effect label (OR, HR, IRR, ...) and exponentiation follow the model, as
+Stata's `regtab` decides them from the collected command.
+
+| Stata | R | Estimate |
+|---|---|---|
+| `regress` | `lm()` | Coef. |
+| `logit`, `logistic` | `glm(family = binomial)` | OR |
+| `probit`, `cloglog` | `glm(binomial(link = "probit"))`, `"cloglog"` | Coef. |
+| `poisson` | `glm(family = poisson)` | IRR |
+| `glm, family() link()` | `glm()` with that family and link | by family and link |
+| `nbreg` | `MASS::glm.nb()` | IRR |
+| `stcox` | `survival::coxph()` (`ties = "breslow"` for Stata's default) | HR |
+| `clogit` (with or without `or`) | `survival::clogit()` (`method = "exact"`, the default) | OR, as Stata since 2.1.14 |
+| `streg`, `time` metric | `survival::survreg()` (Weibull, lognormal, loglogistic, exponential) | TR: `exp()` of the log-time coefficient, as Stata |
+| `intreg` / `tobit` | `survreg(dist = "gaussian")` / `AER::tobit()` | Coef. |
+| `stcrreg` | `cmprsk::crr()` (exact), or `coxph()` on `survival::finegray()` data | SHR |
+| `ologit` | `MASS::polr()`, `ordinal::clm()` (logit link) | OR |
+| `oprobit` | `MASS::polr(method = "probit")`, `ordinal::clm(link = "probit")` | Coef. |
+| `mlogit` | `nnet::multinom()` | RRR |
+| `zip`, `zinb` | `pscl::zeroinfl()` | Coef. |
+| `churdle` layout | `pscl::hurdle()` | Coef. |
+| `mixed` | `lme4::lmer(REML = FALSE)`, `nlme::lme(method = "ML")`, `glmmTMB::glmmTMB()` | Coef. |
+| `melogit`, `mepoisson`, `meprobit`, `mecloglog`, `menbreg`, `meglm` | `lme4::glmer()`, `lme4::glmer.nb()`, `glmmTMB::glmmTMB()` | by family and link |
+| `xtgee` | `geepack::geeglm()` | by family and link, as `glm`: OR for binomial/logit, IRR for poisson/log, else Coef. |
+| `glm [pw], vce(cluster id)` read of a GEE | `geeglm(corstr = "independence")` with `gee_as = "glm"` | OR, IRR, ... by family and link |
+| `svy: <cmd>` | `survey::svyglm()` | as the plain command: OR for a (quasi)binomial logit, IRR for a (quasi)poisson log; t with the design degrees of freedom |
+| `teffects ipw` | `WeightIt::glm_weightit()` | Coef. (the ATE for `y ~ treat` with an identity link), M-estimation variance |
+| `mi estimate: <cmd>` | a `mice` `mira` (`with(imp, glm(...))`), or `tt_mi(list_of_fits)`, of `lm`, `glm`, `coxph` or `crr` fits | as the plain command: Rubin's rules with `mi estimate`'s degrees of freedom |
+| anything else | a `broom.helpers::tidy_plus_plus()`-shaped data frame | from its attributes |
+
+Not supported: mixed-effects Cox models (`coxme`), which have no Stata
+equivalent (Stata's `mestreg` is a parametric survival model, and
+`stcox, shared()` is a gamma frailty model), and subclasses of the classes
+above (`mgcv::gam`, frailty `coxph`) until they are verified against a
+Stata command; pass those as a data frame. An `lmerTest` fit is shown as
+`as(fit, "lmerMod")`, with a note (Stata `mixed`'s z statistics, not
+Satterthwaite t tests). A pooled `mice` result (`mipo`) is refused: pass
+the `mira`, which regtab pools itself, since `mice::pool()` applies the
+small-sample degrees of freedom to every model and `mi estimate` does not.
+Stata's `bootstrap:` and `jackknife:` prefixes have no R counterpart in
+regtab; pass bootstrap estimates and intervals as a data frame.
+
+**Multiple imputation.** `regtab(with(imp, glm(y ~ x, binomial)))` is
+`collect: mi estimate: logit y x` followed by `regtab`: the imputations
+are pooled by Rubin's rules, with Barnard and Rubin's small-sample degrees
+of freedom when the completed-data model has finite residual degrees of
+freedom (`regress`, `lm`) and Rubin's large-sample degrees of freedom
+otherwise (`logit`, `stcox`), as `mi estimate` does; `vce = "robust"` is
+`mi estimate: logit ..., vce(robust)`. `stats = c("mi_m", "fmi")` add the
+Imputations and Largest FMI rows; the log-likelihood, AIC and BIC are
+blank. Stata's `mi estimate` reports coefficients unless it is itself given
+`or` (`mi estimate, or: logit`), and Stata's regtab shows odds ratios either
+way; R has no such prefix and shows them too. See `?tt_mi`.
+
+### Options
+
+| Stata | R | Notes |
+|---|---|---|
+| `collect: <model>` | `regtab(fit1, fit2, ...)` or `regtab(list(...))` | a named list names the models |
+| `models("A \ B")` | `models = c("A", "B")` or `"A \\ B"` | |
+| `coef()` | `coef =` | header only; exponentiation follows the model (`coef = "AF"` over a `survreg()` fit relabels the TR column) |
+| `sep()` | `sep =` | |
+| `title()`, `footnote()` | same names | |
+| `nointercept`, `keepintercept` | `nointercept = TRUE`, `keepintercept = TRUE` | intercept dropped by default when every model is on a ratio scale |
+| `noreeffects`, `relabel` | same names | mixed models |
+| `stats(n aic bic)` | `stats = c("n", "aic", "bic")` | also `events`, `groups`, `mi_m`, `qic`, `ll`, `icc`, `r2`, `r2_a`, `rmse`, `F`, `fmi`, always in Stata's row order; R-only `vce` (a "Standard errors" row) and `stat_fun =` add rows of your own |
+| `digits(#)` | `digits =` | |
+| `level(#)` | `level = 0.95` or `95` | Stata checks the collection's level; R fits carry none, so `level` sets the intervals |
+| `keep()`, `drop()`, `labelmatch` | same names | Stata-style keys: `age`, `2.education`, `1.foreign#3.rep78` |
+| `dimnonsig`, `factorlabel` | same names | `factorlabel` is accepted; labels are always shown |
+| `refcat()`, `omitlabel()`, `emptylabel()` | same names | |
+| `cutlabels()` | `cutlabels =` | ordered-model cutpoints |
+| `compact`, `nopvalue`, `stars`, `starslevels()` | same names | |
+| `addrow("P trend" 0.03 \ ...)` | `addrow = list("P trend" = 0.03)` or the Stata string | |
+| `pdp()`, `highpdp()`, `cdisc`, `labelwidth()` | same names | |
+| `xlsx()`, `sheet()`, `open` | same names | regtab has no `excel()` synonym in Stata either; `excel =` is refused with a pointer to `xlsx =` |
+| `borderstyle()`, `font()`, `fontsize()`, `boldp()`, `highlight()`, `zebra`, `headershade`, `headercolor()`, `zebracolor()` | same names | |
+| `csv()`, `markdown()`, `mdappend` | same names | |
+| `frame(name)` | `as.data.frame(tab)` | frame characteristics become attributes |
+| `eplotframe(name)` | `as_forest_data(tab)` | for a `comptab()` table, `model`, `model_label` and `label` are the composite's as displayed (Stata copies the source table's); the source index is in `source_model` |
+| `fvgen` + `regtab` | `interactions = "fvgen"` (default), `xsymbol =`, `vsref =` | a native R interaction reproduces the fvgen-flattened table |
+| native factor interactions | `interactions = "native"` | raw `1.foreign#3.rep78` keys |
+| `vce(robust)`, `[pw = w]`, `vce(cluster id)` | `vce = c("stata", "model", "robust", "cluster")`, `cluster = ~id` | `"stata"`: the variance Stata reports by default; `"model"`: the fit's own `vcov()`; `"robust"`: Stata's `vce(robust)`/`[pweight]`; `"cluster"`: `vce(cluster id)`. One value, or one per model (a list or a vector as long as the models); `cluster` alone implies `"cluster"`. See [Weighted and robust variance](#weighted) |
+| `xtgee` vs `glm [pw], vce(cluster)` | `gee_as = c("xtgee", "glm")` | how a `geeglm` fit is read |
+| (none) | `vce_note = TRUE` | a footnote sentence naming each model's non-default variance |
+| (none) | `ci_method = "profile"` | profile intervals instead of Stata's Wald |
+
+## Output and stored results
+
+| Stata | R |
+|---|---|
+| `r(methods)`, `r(Dapa)`, `r(table)`, `r(N_rows)`, ... | `tab$stored$methods`, `tab$stored$Dapa`, `tab$stored$table`, ... |
+| `tabtools set font Calibri` | `tabtools_options(font = "Calibri")` |
+| `tabtools set ..., permanent` / `tabtools use` | `tabtools_options(..., persist = TRUE)` (reloaded when tabtools is loaded) |
+| (Excel only) | Word: `flextable::as_flextable(tab)`, then `flextable::save_as_docx()` or officer |
+| HTML, Quarto | `tt_as_gt(tab)` or `flextable::as_flextable(tab)` |
+
+```{r stored}
+t2$stored$methods
+head(as_forest_data(t2))
+```
+
+## Composite, rate and effect tables
+
+The development version adds the rest of Stata tabtools' table commands
+except `survtab`, `crosstab` and `corrtab`. Each keeps the Stata option
+names and is tested against the output of Stata tabtools 2.1.14; its help
+page lists the differences.
+
+| Stata | R | Notes |
+|---|---|---|
+| `puttab` (varlist, `frame()`, `matrix()`) | `puttab(x)`, `x` a data frame, matrix or `tt_table` | `subset =` for `if`/`in`; no file is required |
+| `stacktab using file.xlsx, blocks(...)` | `stacktab(blocks, xlsx = "file.xlsx")` | `tt_table` blocks need no workbook |
+| `strate` | `tt_rates()` | log-normal intervals, as `strate` |
+| `stratetab, using(...)` | `stratetab(x)`, blocks from `tt_rates()`, strate-shaped data frames or `.dta` files | the level comes from the blocks |
+| `effecttab` after `teffects` or `margins` | `effecttab()` on marginaleffects results, data frames or matrices | see [Weighted analyses](weighted-analyses.html) |
+| `comptab framelist, rows()` | `comptab(list(m1, m2), rows = list(1, 3:5))` | `regtab()`/`effecttab()` tables for frames; `rownames` patterns match case-insensitive parts of labels (`"treated"` also matches `Untreated`), and the R-only `rownames_exact = TRUE` matches whole labels; see [Regression tables](regression-tables.html#table-2) |
+| `hrcomptab rateframe, modelframes() rows()` (or `comptab ..., rateframe()`) | `hrcomptab(rates, list(m1, m2), rows = list(1, 3:5))` | a `coxph()` fit's outcome identity is its event variable, so `outcomemap` is often unnecessary |
+| `survtab`, `crosstab`, `corrtab` | not yet | |
+
+## Deliberate differences
+
+Everything above aims at identical output. These are the places where R
+does something else on purpose, and why.
+
+### Hypothesis tests (table1_tc)
+
+Displayed descriptive statistics match Stata; p-values come from R's
+conventional tests (only the numbers: the p-value format, `pdp`/`highpdp`,
+`<0.001`, is Stata's). The Test column and the methods paragraph name the R
+test, and the paragraph drops Stata's closing software sentence.
+
+| Variable type | Groups | Stata (Test column) | R (Test column) |
+|---|---|---|---|
+| `contn`, `contln` | 2 | pooled-variance t via `regress` (`Ind. t test`) | `t.test()`, Welch (`Welch t test`) |
+| `contn`, `contln` | >2 | `anova` (`ANOVA`) | `oneway.test()`, Welch (`Welch ANOVA`) |
+| `conts` | 2 | `ranksum` (`Wilcoxon rank-sum`) | `wilcox.test()` (`Wilcoxon rank-sum`); exact for n < 50 without ties, with continuity correction |
+| `conts` | >2 | `kwallis` (`Kruskal-Wallis`) | `kruskal.test()` (`Kruskal-Wallis`) |
+| `cat`, `bin` | any | `tab, chi2` (`Chi-square`) | `chisq.test(correct = FALSE)` (`Pearson's chi-squared`), the same test |
+| `cate`, `bine` | any | `tab, exact` (`Fisher's exact`) | `fisher.test()` (`Fisher's exact`); a table too large for the exact algorithm gets a Monte Carlo p-value under a fixed internal seed, labelled `Fisher's exact (simulated)` |
+
+`test_args = list(t.test = list(var.equal = TRUE), oneway.test =
+list(var.equal = TRUE))` gives Stata's pooled-variance tests. Stata's
+`kwallis` keeps ranks in float precision, so its p-values differ from
+`kruskal.test()` around the seventh significant digit.
+
+### Input that R refuses or treats differently
+
+- **Invalid display formats** are an error. Stata's `string()` silently
+  returns `""` for a format such as `%5.1x` or `%5.5g` (decimals not
+  fewer than the width), so the cell prints as `±`.
+  `%e` formats are refused too (Stata's `%e` is not C's).
+- **Dates** (`Date`, `POSIXt` columns) are refused: Stata counts days from
+  1960 and R from 1970, so no summary could match. Convert them first.
+- **Non-finite values**: `Inf`, `-Inf`, `NaN`, and values of 2^1023
+  (8.99e307) or more, in any analysed column (`by` included) or in a
+  weight, are refused by name. A Stata variable cannot hold them; a Stata
+  weight of 1e308 is a missing value that silently drops its record.
+- **Overflow** follows Stata. Values of 1e200 print `2.e+200±.` (the
+  squares overflow), and a sum of values beyond 8.99e307 leaves the cell
+  (and its p-value and SMD) blank. A weighted sum beyond the range is
+  formed again from the weights divided by a power of two, as Stata
+  tabtools does (since 2.1.12), so huge weights give the true means, SDs,
+  quartiles, percentages, effective counts and ESS (weights of 1e200 give
+  `ESS=10` and `6±3`); the SMD, which Stata computes from the unscaled
+  sums, stays blank where they overflow.
+- **Tiny weights and huge values** follow Stata tabtools (since 2.1.14):
+  a weight total below 1 is multiplied by a power of two before the
+  weighted quartiles (1..10 under weights of 1e-12 prints `6 (3, 8)`, as
+  for any equal weights), and automatic typing divides the
+  values by a power of two before the moments and the Shapiro-Wilk test,
+  so values near 1e100 are typed by their shape.
+- **Output files** are checked before anything is written: `csv` must name
+  a `.csv` file and two arguments naming the same file are refused, as in
+  Stata tabtools (since 2.1.12); R also refuses a missing or read-only directory
+  there. An existing Markdown file is replaced unless `mdappend`, as in
+  Stata.
+- **Paired tests and `mu`** (R-only `test_args`): `paired = TRUE` for
+  `t.test` or `wilcox.test` pairs the i-th record of each of two groups in
+  row order and is labelled `Paired t test` / `Wilcoxon signed-rank`;
+  unequal groups, more than two groups, and (under `fweight`) pair members
+  with different frequencies are errors. A nonzero `mu` is refused.
+- **Stricter checks on R objects**: `labels =` overrides must be named,
+  non-missing strings; duplicate column names in `data` are refused for
+  the analysed columns; `validate_tt_table()` refuses missing roles, row
+  types, `NA` text, and fractional or missing header spans.
+- **Level order**: numeric and labelled variables follow the value codes,
+  and R factors keep their own level order (Stata has no such type). In
+  `table1_tc`, character variables sort bytewise (Stata's `encode`). In
+  `regtab`, a character predictor takes the level order of the fit, which
+  R sets from the locale's collation: under `en_US.UTF-8`, `c("a", "A",
+  "b", "B")` sorts `a A b B` where Stata's `encode` gives `A B a b`, so the
+  **reference level itself** can differ from Stata's. Convert the column
+  before fitting with `factor(x, levels = sort(unique(x), method =
+  "radix"))` to get Stata's order.
+- `r(table)` row names cut at 32 bytes drop a partial UTF-8 character
+  instead of keeping a stray byte.
+- `regtab(models =)` with more labels than models warns (Stata errors).
+- **`title`, `footnote` and `borderstyle` without a file**: Stata's
+  `table1_tc` refuses `title()` without `excel()` or `markdown()` and
+  `borderstyle()` without `excel()`, because a Stata table has nowhere else
+  to go. In R the table goes on to `flextable::as_flextable()`, `tt_as_gt()` or
+  a later `tt_write_xlsx()`, so `table1_tc()` accepts them without a file,
+  as `regtab()` already did. `sheet`, `open` and `mdappend` still need their
+  file.
+
+### Rate tables (stratetab)
+
+- **Default exposure and outcome labels**: Stata's `stratetab` labels the
+  blocks `Exposure 1`, `Exposure 2`, ... and the outcomes `Outcome 1`, ...
+  unless `explabels()` and `outlabels()` are given, because a `strate` file
+  records no variable names. A `tt_rates()` result from time and event data
+  knows its grouping column and event variable, so when every block is
+  one, `stratetab()` names each exposure by the grouping column's `"label"`
+  attribute (else its name) and each outcome by the event column's label
+  (else its name); `tt_rates()` keeps the grouping column's label for this.
+  Strate-shaped data frames and `.dta` files, a mix of the two kinds of
+  block, a block without a grouping column, and names that would repeat
+  (the same `by` in every exposure, the same event in every outcome) keep
+  Stata's defaults. Given `explabels` and `outlabels` always win. On the
+  same route the default outcome identities are the event variables' names
+  (Stata: the outcome labels), which are a `coxph()` model's outcome
+  identities, so `hrcomptab()` pairs rates and models without `outcomemap`.
+- **Scale check**: blocks from `tt_rates(per = k)`, `k` not 1, give a
+  warning when a numeric `unitlabel` matches neither `k * ratescale` nor
+  `k * ratescale / pyscale` (`per = 1000` with `ratescale = 1000` shows
+  rates per million under "Per 1,000 PY"). Stata cannot check this: a
+  `strate` file does not record its `per()`.
+
+### Composite and effect tables (comptab, hrcomptab, effecttab)
+
+- **Hazard-ratio check**: `hrcomptab()` refuses an `effecttab()` model of
+  differences or predictions even when its `effect` header says HR (Stata
+  trusts the header), and an indicator row placed on a block whose
+  categories read Yes/No, 1/0 or TRUE/FALSE, where Stata's rule (an
+  indicator is the second category) would put the treated effect on "No".
+- **`effecttab(estimand =)`** (R only) names the effect a result estimates
+  (ATE, ATT, ATC) when the result cannot say, for example an
+  `avg_comparisons()` over the treated.
+- **Data-frame p-values**: a p-value derived from `std.error` tests the
+  frame's `null.value` column (default 0); a ratio header without one is
+  refused.
+
+### Output files
+
+- **CSV formula cells**: `tt_write_csv()` and the commands' `csv =` write a
+  leading `'` before a cell a spreadsheet would run as a formula
+  (`=HYPERLINK(...)`, `+cmd|...`, `@SUM(...)`); Stata's `export delimited`
+  writes it as it is. Numbers, intervals and labels such as
+  `+ Comorbidities` are written unchanged.
+
+### Models (regtab)
+
+- **Standard errors** are the ones Stata reports (`vce = "stata"`): the
+  observed information for non-canonical links and `glm.nb`, the normal
+  distribution for every `glm` family, Stata's `M/(M - 1)` factor on robust
+  `coxph` and `survreg` fits. `vce = "model"` uses the fit's own `vcov()` and R's
+  `summary()` distribution instead; `vce = "robust"` and `"cluster"` give
+  Stata's `vce(robust)`/`[pweight]` and `vce(cluster id)` variances (see
+  [Weighted and robust variance](#weighted)).
+- **Perfect prediction**: Stata's `logit` drops observations a covariate
+  predicts perfectly; R's `glm()` keeps them. regtab warns and prints the
+  coefficient with a blank interval.
+- **Convergence**: R's `glm()` stops earlier than Stata for non-canonical
+  links; refit with `glm.control(epsilon = 1e-12)` when a last digit
+  differs. `polr`, `multinom` and `zeroinfl` fits also stop slightly short
+  of the maximum.
+- **Weights in `glm()`** are analytic weights under the default
+  `vce = "stata"` (Stata's `[aweight]`): `Observations` counts rows with a
+  positive weight, not their sum. For inverse-probability weights
+  (Stata's `[pw]`) use `vce = "robust"`; regtab warns when non-integer,
+  non-constant weights meet the default, but never switches by itself.
+  The log-likelihood, AIC and BIC are those of Stata's `glm [aweight]`
+  (weights rescaled to mean 1), and a Gamma or inverse Gaussian `glm`
+  reports Stata's log-likelihood at scale 1, not R's `logLik()`.
+- **Weights in `polr()`, `clm()`, `multinom()`, `zeroinfl()`, `hurdle()`
+  and `survreg()`** are frequency weights, Stata's `[fweight]`:
+  `Observations` (and BIC) use the sum of the weights, and the standard
+  errors are those of an expanded data set. Inverse-probability weights
+  passed there give a wrong analysis: an inflated N and standard errors that
+  are too small. regtab warns about non-integer weights on these fits and
+  refuses `vce = "robust"`/`"cluster"` for them (it has no robust variance
+  there); refit `survreg()` with `robust = TRUE` for Stata's robust `streg`.
+- **Ordered factors** and non-treatment contrasts are refused: a Reference
+  row claims a contrast against that level. Use an unordered factor.
+- **`stcrreg`**: `cmprsk::crr()` reproduces Stata exactly; `coxph()` on
+  `finegray()` data approximates it (its variance omits the
+  censoring-distribution term). `crr` fits carry no labels, so their rows
+  show covariate names.
+- **lme4 and glmmTMB**: for probit and cloglog links and for `glmer.nb()`,
+  lme4's Laplace approximation is not Stata's, so the last digit can differ
+  (regtab says so once per session); `glmmTMB()` reproduces Stata's Laplace
+  fits exactly. `glmer(nAGQ = 7)` corresponds to Stata's default adaptive
+  quadrature; `nAGQ = 0` is refused. lme4's default optimizer can stop short
+  on random slopes: `lmerControl(optimizer = "bobyqa")` reaches Stata's
+  optimum.
+- **`nlme::lme()`**: regtab shows the fit's `varFix` standard errors with z
+  statistics, as `mixed` does. `summary.lme()` prints different ones for
+  an ML fit (times `sqrt(N / (N - p))`, with t tests), so its table and
+  regtab's disagree by design. nlme's default is REML (`mixed, reml`); fit
+  with `method = "ML"` for Stata's default. `correlation =` and `weights =`
+  structures are refused (Stata's `residuals()` option has no rows in
+  regtab's layout). On unscaled random slopes lme can stop short too:
+  `lmeControl(niterEM = 200)` reaches Stata's optimum.
+- **`streg, time` ancillary rows (`survreg()` with `keepintercept`)**: the
+  covariate rows are time ratios, `exp()` of the log-time coefficients,
+  and a kept intercept is `exp()` of the constant; the ancillary rows
+  (`ln_p`, `p`, `1/p`; `lnsigma`, `sigma`; `lngamma`, `gamma`) stay on
+  their own scale, as in Stata tabtools since 2.1.12.
+- **`xtgee`**: `geeglm()` is shown by glm's family/link rule, as Stata
+  tabtools (since 2.1.12) shows `xtgee`: odds ratios for binomial/logit and
+  incidence rate ratios for poisson/log, intercept dropped, coefficients
+  otherwise, with
+  xtgee's model-based variance; `vce = "model"` gives geepack's sandwich,
+  which is Stata's `vce(robust)` without its `G/(G - 1)` factor. QICu has
+  Stata's additive constant only for fixed-scale families. A weighted
+  `geeglm` is `xtgee [pw]`, robust by default. `gee_as = "glm"` reads an
+  independence-correlation fit as Stata's `glm [pw], vce(cluster id)`
+  instead: ratios by family and link, the sandwich times `G/(G - 1)`.
+- **Methods sentence** (`r(methods)`, `tab$stored$methods`): built from
+  the models, as in Stata tabtools since 2.1.12: the estimates by each model's effect
+  scale (a `coef` or `cdisc` relabel does not change them), the model by
+  its command, family and link, "univariable" or "multivariable" by the
+  number of predictor variables. The R-only models name themselves
+  (`pscl::hurdle()` count models are not Stata's `churdle`; `clm()` links
+  Stata has no ordered model for).
+- **Data-frame input**: the ratio scale comes from `effect_scale`,
+  `stata_cmd` or broom.helpers' `exponentiate` record (exponentiated
+  `broom::tidy()` output declared as coefficients is refused); on a ratio
+  scale `std.error` is used only when its scale is declared
+  (`attr(x, "se_scale")`: `"link"` for broom's `exponentiate = TRUE`,
+  `"estimate"` for `parameters`); supplied intervals fix the
+  confidence level (`attr(x, "conf.level")`, which `tidy_plus_plus()`
+  sets); a `df` column gives t statistics; factor levels are keyed
+  `2.treat`, so `regtab(fit, tidy_plus_plus(fit))` shares their rows.
+  Malformed columns (factors, reversed bounds, p outside \[0, 1\], ...) are
+  refused. See `?regtab`, "Data-frame input".
+- **Upstream Stata quirks not reproduced**: with a one-level mixed model
+  beside a two-level one, Stata loses the second model's outer variance and
+  labels its inner one `var(_cons)`; R shows both.
+- **Covariates named like intercepts or ancillary parameters** (`p`,
+  `alpha`, `constant`, `cut1`, ...) are ordinary covariates: kept by
+  `nointercept` and exponentiated with the others, as in Stata tabtools since 2.1.12,
+  which decides these rows from the coefficient's equation and name. A
+  covariate named like an ancillary parameter of its own or another model
+  (`alpha` in a Poisson model beside an `nbreg`) keeps its own row, apart
+  from the parameter's, as in Stata tabtools since 2.1.13, and `keep = "alpha"` selects
+  both.
+- **Pseudo R-squared with an offset** is blank for `ologit`, `oprobit`,
+  `logit` and `probit` models, as Stata reports none, and against the
+  offset-only model for `poisson`. `multinom()` offsets (Stata's `mlogit`
+  refuses `offset()`) enter the standard errors and the constant-only
+  model.
+- **Data changed after fitting**: `coxph()`, `survreg()`, `multinom()`
+  and `model = FALSE` fits keep no copy of their data, so regtab reads
+  the data again and refuses the fit when they no longer reproduce it;
+  fit with `model = TRUE` to tabulate after changing the data. A
+  `coxph()` with `tt()` terms (survival allows no `model = TRUE` there) is
+  checked on its observations and events, and gets the variances survival
+  stores (`vce = "stata"`/`"model"`, a fit with `cluster =` or
+  `robust = TRUE`).
+- **Fine-Gray `coxph()` fits** are recognised by their weights, their
+  `Surv(start, stop, status)` response and `finegray()`'s mark on the
+  data, not by the `fg*` column names (`finegray = TRUE` declares one);
+  keep the subject id in the `finegray()` formula and fit with
+  `cluster = id` (or `id = id`) for delayed entry, counting-process input,
+  or expanded data re-sorted with new row names; without it regtab reads
+  the subjects only from right-censored `finegray()` output.
+- **Pseudo R-squared of `cloglog`** (and of a `glm` whose link is not
+  logit/probit or, for Poisson, log): none, as Stata's `cloglog` and
+  `glm` report none.
+- **`xtgee, scale(#)`** is `geeglm(scale.fix = TRUE, scale.value =
+  rep(#, nrow(data)), data = data)` with an independence working
+  correlation. geepack stores only the `scale.value` expression, so it may
+  refer only to the data (a scale held in another variable is refused).
+  With a working correlation other than independence, geepack's
+  fixed-scale fit estimates the correlation differently from xtgee (a note
+  says so). A `geeglm()` fit on data not sorted by the id is refused
+  (geepack would split an id into several clusters).
+- `keep = "i.a##i.b"` matches nothing and errors (Stata keeps only the
+  parent row).
+
+## Weighted and robust variance (IPTW, MSM) {#weighted}
+
+R's `glm(weights = w)` does not record what kind of weight `w` is, while
+Stata's `[pw = w]` always reports a robust variance. So `vce` says it, per
+model. Under the default `vce = "stata"` a weighted `glm()` gets Stata's
+analytic-weight (`[aw]`) variance, which differs from Stata's `[pw]` robust
+standard error (for unstabilised weights it understates it).
+
+| Stata | R |
+|---|---|
+| `logit y i.treated [pw = w]` | `regtab(glm(y ~ treated, binomial, d, weights = w), vce = "robust")` |
+| `regress y x [pw = w]` | `regtab(lm(y ~ x, d, weights = w), vce = "robust")` (HC1, t) |
+| `logit y x [pw = w], vce(cluster id)` | `regtab(fit, vce = "cluster", cluster = ~id)` |
+| `stcox x [pw = w]` | `regtab(coxph(Surv(time, died) ~ x, d, weights = w, robust = TRUE))` |
+| `svy: logit y x` | `regtab(survey::svyglm(y ~ x, design, family = quasibinomial))` |
+| `teffects ipw` weights from WeightIt | `regtab(WeightIt::glm_weightit(...))` |
+
+```{r weighted}
+# Stabilised IPTW weights for treatment.
+ps <- glm(treated ~ index_age + female + education + diabetes,
+          family = binomial, data = cohort)$fitted.values
+p1 <- mean(cohort$treated == "SNRI")
+cohort$sw <- ifelse(cohort$treated == "SNRI", p1 / ps, (1 - p1) / (1 - ps))
+
+crude <- glm(cv_event ~ treated, family = binomial, data = cohort)
+adjusted <- glm(cv_event ~ treated + index_age + female + education + diabetes,
+                family = binomial, data = cohort)
+# (binomial with non-integer weights warns about non-integer successes;
+# the estimates are those of Stata's logit [pw = sw].)
+iptw <- suppressWarnings(glm(cv_event ~ treated, family = binomial,
+                             data = cohort, weights = sw))
+
+# One vce per model: model-based for the unweighted fits, robust
+# (Stata's [pw] HC0 x N/(N-1)) for the weighted one.
+tw <- regtab(crude, adjusted, iptw, models = c("Crude", "Adjusted", "IPTW"),
+             vce = list("stata", "stata", "robust"), coef = "OR",
+             nointercept = TRUE, vce_note = TRUE)
+tw
+# vce_note: the footnote (workbook, Word, HTML) names the robust column.
+tw$footnote
+```
+
+```{r msm}
+# Pooled-logistic marginal structural model on person-period data, with
+# the baseline weights carried forward and variance clustered on the person
+# (Stata: logit y i.treated i.period [pw = sw], vce(cluster id)).
+# A small person-period data set: one row per person and year.
+pp <- cohort[rep(seq_len(nrow(cohort)), each = 3), c("treated", "sw")]
+# Row indexing drops the variable label; restore it for the table.
+attr(pp$treated, "label") <- attr(cohort$treated, "label")
+pp$id <- rep(seq_len(nrow(cohort)), each = 3)
+pp$period <- rep(1:3, nrow(cohort))
+pp$event <- rbinom(nrow(pp), 1, 0.05)
+msm <- suppressWarnings(glm(event ~ treated + factor(period), family = binomial,
+                            data = pp, weights = sw))
+regtab(msm, models = "MSM", vce = "cluster", cluster = ~id, keep = "treated")
+
+# The same variance matrix, e.g. for marginaleffects (Stata's margins):
+V <- tt_vcov(msm, vce = "cluster", cluster = ~id)
+sqrt(diag(V))[2]
+```
+
+With `vce = "stata"`, a `glm()` or `lm()` whose weights are non-integer and
+not constant keeps the analytic reading but warns that the weights look
+like inverse-probability weights, rather than switching silently.
+`tt_vce_types(fit)` lists the `vce` values a fit accepts.

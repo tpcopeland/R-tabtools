@@ -1,0 +1,10 @@
+Table E24. Matrix input,,,
+,Matrix,,
+,Diff,90% CI,p-value
+Tie low,0.2,(0.1; 0.1),0.10
+Near zero,0.0,(0.0; 0.0),0.001
+No interval,0.8,,
+Large,1234.5,(1000.0; 1500.2),<0.001
+Hi p,0.1,(0.2; 0.3),>0.99
+Source,Stata,,
+From a matrix.,,,

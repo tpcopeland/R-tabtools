@@ -1,0 +1,9 @@
+  +-----------------------------------------------------+
+  |                       AME          95% CI   p-value |
+  | Age (years)          0.00    (0.00, 0.00)    <0.001 |
+  |      o.age2   (collinear)                           |
+  |         Sex          0.00   (-0.01, 0.01)      0.47 |
+  +-----------------------------------------------------+
+
+Markdown exported to E26.md
+Exported 6 rows × 5 cols to effecttab.xlsx, sheet E26

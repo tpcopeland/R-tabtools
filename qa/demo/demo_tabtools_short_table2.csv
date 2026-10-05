@@ -1,0 +1,7 @@
+Table 2. Deaths by treatment,,,,,
+Exposure,Death,,,,
+,Events,Person-Years (PY),"Per 1,000 PY (95% CI)",aHR (95% CI),p-value
+Treatment,,,,,
+   Control,131,"2,888","45.4 (38.2, 53.8)",Reference,
+   Treated,55,"1,660","33.1 (25.4, 43.2)","0.64 (0.46, 0.89)",0.009
+"aHR: hazard ratio adjusted for age, sex, diabetes and education.",,,,,

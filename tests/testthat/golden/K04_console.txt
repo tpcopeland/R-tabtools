@@ -1,0 +1,15 @@
+  +------------------------------------------------------------------------------+
+  | Source block: Estrogen dose-response model                                   |
+  |                                               Exposure    aHR         95% CI |
+  |                                               Low dose   0.91   (0.74, 1.12) |
+  |                                              High dose   0.73   (0.58, 0.92) |
+  |                                                                              |
+  |                                   Exposure         aHR                       |
+  |                                    Any HRT        0.82                       |
+  |                              Former smoker        1.14                       |
+  |                             Current smoker        1.46                       |
+  |                                               Exposure    aHR         95% CI |
+  |                                               Low dose   0.91   (0.74, 1.12) |
+  +------------------------------------------------------------------------------+
+
+stacktab: 3 blocks -> 11 rows written -> sheet K04

@@ -1,0 +1,15 @@
+name,kind,row,col,value
+_golden_id,meta,,,S1
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+n_1,scalar,,,227
+ll_1,scalar,,,-272.10624441957913
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,7
+methods,macro,,,"Time ratios with 95% confidence intervals from multivariable accelerated failure-time survival regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,TR
+table,matrix,age,c1,.9877847321701283
+table,matrix,sex,c1,1.466957971162407

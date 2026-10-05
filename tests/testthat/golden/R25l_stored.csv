@@ -1,0 +1,21 @@
+name,kind,row,col,value
+_golden_id,meta,,,R25l
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,7
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,10
+sheet,macro,,,R25l
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R25l.md
+methods,macro,,,"Odds ratios with 95% confidence intervals from multivariable logistic regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Treatment_group,c1,1.030605779951459
+table,matrix,Diabetes,c1,1.097581975715189
+table,matrix,Hypertension,c1,.99414070384653375
+table,matrix,Anxiety_disorder,c1,1.1388301449880629
+table,matrix,Prior_cardiovascular_disease,c1,1.02979302410214

@@ -1,0 +1,25 @@
+name,kind,row,col,value
+_golden_id,meta,,,R25n
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,10
+n_1,scalar,,,15000
+bic_1,scalar,,,96176.145964673226
+aic_1,scalar,,,96130.451131792724
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,13
+sheet,macro,,,R25n
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R25n.md
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable linear regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Treatment_group,c1,-.095151310761437805
+table,matrix,Age_at_cohort_entry_(years),c1,-.0033623579939278002
+table,matrix,Female_sex,c1,-.010908959614778399
+table,matrix,Diabetes,c1,.1321048385201713
+table,matrix,Hypertension,c1,.1188189263960317
+table,matrix,Intercept,c1,6.2450708800042412

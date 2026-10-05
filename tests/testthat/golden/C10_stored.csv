@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,C10
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_frames,scalar,,,1
+N_models,scalar,,,2
+N_cols,scalar,,,8
+N_rows,scalar,,,7
+markdown_cols,scalar,,,7
+markdown_rows,scalar,,,5
+methods,macro,,,Composite table assembled from 1 source frame(s) with 2 model column(s). The final table contains 7 rows and 8 columns.
+sheet,macro,,,C10
+xlsx,macro,,,comptab.xlsx
+markdown,macro,,,C10.md

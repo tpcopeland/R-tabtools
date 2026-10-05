@@ -1,0 +1,11 @@
+ ,Domestic,Foreign,Total
+"Column % (No.), Mean±SD, or Median (Q1, Q3)",N=52,N=22,N=74
+Effective sample size,ESS=52,ESS=22,ESS=74
+Price,6072±3097,6385±2622,6165±2949
+Mileage (mpg),"19 (16, 22)","24 (21, 28)","20 (18, 25)"
+Repair record 1978,,,
+   1,4 (2),0 (0),3 (2)
+   2,17 (8),0 (0),12 (8)
+   3,56 (27),14 (3),43 (30)
+   4,19 (9),43 (9),26 (18)
+   5,4 (2),43 (9),16 (11)

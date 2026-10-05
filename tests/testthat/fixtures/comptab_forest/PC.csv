@@ -1,0 +1,9 @@
+label,estimate,ll,ul,pvalue,model,model_label,rowtype,section,source_row,source_frame
+Frame A,,,,,,,section,Frame A,,_pc_a
+Treatment group,1.048016991292953,.9919014157653923,1.107307234954604,.0948490824747927,1,Crude,effect,Frame A,1,_pc_a
+Treatment group,1.053099720614388,.9966861637705998,1.112706348167343,.0655044070567459,2,Adjusted,effect,Frame A,1,_pc_a
+Female sex,1.006760983882383,.9526624822364941,1.063931557678589,.8110207457819849,1,Crude,effect,Frame A,2,_pc_a
+Female sex,1.016528835659679,.9618760480255971,1.074286937333244,.5609592050607057,2,Adjusted,effect,Frame A,2,_pc_a
+Frame B,,,,,,,section,Frame B,,_pc_b
+Hypertension,1.541624470823697,1.459390075691036,1.628492648147616,5.06829279846e-54,1,Adjusted,effect,Frame B,5,_pc_b
+Hypertension,1.588105752409848,1.503669402778434,1.677283501397999,7.75770671176e-62,2,Crude,effect,Frame B,5,_pc_b

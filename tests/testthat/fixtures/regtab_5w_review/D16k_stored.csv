@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,D16k
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,8
+methods,macro,,,"Incidence rate ratios with 95% confidence intervals from multivariable negative binomial regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,IRR
+table,matrix,treat,c1,1.361062134472774
+table,matrix,x1,c1,1.0118318903454031
+table,matrix,lnalpha,c1,-3.8257268237300019
+table,matrix,alpha,c1,.021802583135993599
+table,matrix,Intercept,c1,.33022323494646488

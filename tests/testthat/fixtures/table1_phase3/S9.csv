@@ -1,0 +1,6 @@
+ ,group = 0,group = 1,p-value
+No. (Column %),<10,<10,
+category,,,Suppressed
+   0,<10,<10,
+   1,<10,<10,
+Counts below 10 are shown as <10; complementary cells are shown as ≥10 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.,,,

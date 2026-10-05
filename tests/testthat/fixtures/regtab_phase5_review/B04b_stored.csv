@@ -1,0 +1,14 @@
+name,kind,row,col,value
+_golden_id,meta,,,B04b
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,6
+methods,macro,,,"Coefficients with 95% confidence intervals from univariable interval regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Exposure_score,c1,1.4818523199096481
+table,matrix,sigma,c1,4.6582937988387814
+table,matrix,Intercept,c1,-3.8995716496554489

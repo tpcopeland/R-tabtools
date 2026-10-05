@@ -1,0 +1,13 @@
+name,kind,row,col,value
+_golden_id,meta,,,G2
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,5
+methods,macro,,,"Coefficients with 95% confidence intervals from univariable generalized estimating equation (GEE) linear regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,x,c1,.49827696731239279
+table,matrix,Intercept,c1,.84243110673345856

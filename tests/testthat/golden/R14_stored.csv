@@ -1,0 +1,22 @@
+name,kind,row,col,value
+_golden_id,meta,,,R14
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,7
+markdown_rows,scalar,,,3
+ci_level,scalar,,,95
+N_models,scalar,,,2
+N_cols,scalar,,,8
+N_rows,scalar,,,6
+sheet,macro,,,R14
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R14.md
+methods,macro,,,"Collected regression estimates with 95% confidence intervals across 2 models. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,mixed
+table,matrix,Mileage_(mpg),c1,-49.512220666355319
+table,matrix,Mileage_(mpg),c2,.84485784275348941
+table,matrix,Weight_(lbs_),c1,1.7465591583457589
+table,matrix,Weight_(lbs_),c2,.99610092060053124
+table,matrix,Intercept,c1,1946.06866796486
+table,matrix,Intercept,c2,898396.71195646632

@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,D05b
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+n_1,scalar,,,1796.666007
+ll_1,scalar,,,-3000.906508205253
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,8
+methods,macro,,,"Hazard ratios with 95% confidence intervals from multivariable Cox proportional hazards regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,HR
+table,matrix,treat,c1,1.827162375985619
+table,matrix,x1,c1,1.018950568351241
+table,matrix,x2,c1,.96759408238184208

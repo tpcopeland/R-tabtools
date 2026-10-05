@@ -1,0 +1,24 @@
+name,kind,row,col,value
+_golden_id,meta,,,E23
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,5
+ci_level,scalar,,,95
+N_cols,scalar,,,5
+N_rows,scalar,,,8
+sheet,macro,,,E23
+xlsx,macro,,,effecttab.xlsx
+markdown,macro,,,E23.md
+methods,macro,,,"Marginal effects estimated using the margins command with 95% confidence intervals. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+type,macro,,,margins
+effect_label,macro,,,Pr(Diabetes)
+table,matrix,c.1_sex#c.0_highbp,c1,.039321949884379002
+table,matrix,c.1_sex#c.0_highbp,c2,7.58566301956000e-20
+table,matrix,c.1_sex#c.1_highbp,c1,.047483940281556697
+table,matrix,c.1_sex#c.1_highbp,c2,4.73030032069000e-34
+table,matrix,c.2_sex#c.0_highbp,c1,.0460212338393583
+table,matrix,c.2_sex#c.0_highbp,c2,1.22559103495000e-24
+table,matrix,c.2_sex#c.1_highbp,c1,.056040892306393197
+table,matrix,c.2_sex#c.1_highbp,c2,1.36080686857000e-42

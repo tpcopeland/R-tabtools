@@ -1,0 +1,23 @@
+name,kind,row,col,value
+_golden_id,meta,,,R83
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,9
+n_1,scalar,,,1055
+ll_1,scalar,,,-324.9934664632566
+aic_1,scalar,,,657.98693292651319
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,12
+sheet,macro,,,R83
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R83.md
+methods,macro,,,"Odds ratios with 95% confidence intervals from multivariable conditional logistic regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Exposure_score,c1,1.613525191094167
+table,matrix,Current_smoker,c1,2.674472787233062
+table,matrix,__Middle,c1,1.2252344857468529
+table,matrix,__High,c1,1.6242142210859949

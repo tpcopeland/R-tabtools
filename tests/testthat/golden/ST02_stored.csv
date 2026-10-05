@@ -1,0 +1,18 @@
+name,kind,row,col,value
+_golden_id,meta,,,ST02
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,2
+n_1,scalar,,,74
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,5
+sheet,macro,,,ST02
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,ST02.md
+methods,macro,,,"Odds ratios with 95% confidence intervals from univariable logistic regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Mileage_(mpg),c1,1.173231766324379

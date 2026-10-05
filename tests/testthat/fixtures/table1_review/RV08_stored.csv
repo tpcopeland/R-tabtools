@@ -1,0 +1,11 @@
+name,kind,row,col,value
+_golden_id,meta,,,RV08
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,stage female age
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values were calculated using independent t-test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures."
+table,matrix,Clinical_stage,p_value,.71653131057378927
+table,matrix,Female_sex,p_value,.81897084890175875
+table,matrix,Age_at_entry,p_value,.0009593102991237

@@ -1,0 +1,27 @@
+name,kind,row,col,value
+_golden_id,meta,,,T27
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,1
+N_derived_suppressed,scalar,,,1
+N_secondary_suppressed,scalar,,,0
+N_primary_suppressed,scalar,,,2
+smallcells,scalar,,,5
+markdown,macro,,,T27.md
+sheet,macro,,,T27
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,rare_ae
+methods,macro,,,"Baseline characteristics were compared between groups defined by Study group. Data are presented as No. (%). P-values were calculated using Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,Data are presented as No. (%).
+suppression,matrix,r1,group_0,0
+suppression,matrix,r1,group_1,0
+suppression,matrix,r1,pvalue,0
+suppression,matrix,r2,group_0,0
+suppression,matrix,r2,group_1,0
+suppression,matrix,r2,pvalue,0
+suppression,matrix,r3,group_0,1
+suppression,matrix,r3,group_1,1
+suppression,matrix,r3,pvalue,3
+table,matrix,Rare_adverse_event,p_value,.d

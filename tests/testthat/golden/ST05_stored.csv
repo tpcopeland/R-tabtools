@@ -1,0 +1,21 @@
+name,kind,row,col,value
+_golden_id,meta,,,ST05
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,6
+F_1,scalar,,,15.70447443454584
+n_1,scalar,,,74
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,9
+sheet,macro,,,ST05
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,ST05.md
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable survey-weighted linear regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Mileage_(mpg),c1,-31.913678270878989
+table,matrix,Weight_(lbs_),c1,1.9481539126644081
+table,matrix,Intercept,c1,905.87991810827498

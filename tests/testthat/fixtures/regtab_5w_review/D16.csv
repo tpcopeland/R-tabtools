@@ -1,0 +1,9 @@
+,Model,,
+,IRR,95% CI,p-value
+treat,1.36,"(1.20, 1.54)",<0.001
+x1,1.01,"(1.01, 1.02)",<0.001
+Observations,900,,
+AIC,4855.42,,
+BIC,4874.63,,
+Log-likelihood,-2423.71,,
+Pseudo R²,0.016,,

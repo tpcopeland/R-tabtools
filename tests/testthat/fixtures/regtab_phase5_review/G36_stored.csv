@@ -1,0 +1,19 @@
+name,kind,row,col,value
+_golden_id,meta,,,G36
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+icc_1,scalar,,,.0031571254332833001
+groups_1,scalar,,,62
+n_1,scalar,,,10351
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,11
+methods,macro,,,"Coefficients with 95% confidence intervals from univariable linear mixed-effects regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Age_(years),c1,.048558321297625599
+table,matrix,Intercept,c1,23.215078730973509
+table,matrix,Variance_zone_(Intercept),c1,.017797883524090001
+table,matrix,Variance_location_(Intercept),c1,.056224286297989902
+table,matrix,Residual_Variance,c1,23.37204336869528

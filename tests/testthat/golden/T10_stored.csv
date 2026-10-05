@@ -1,0 +1,18 @@
+name,kind,row,col,value
+_golden_id,meta,,,T10
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,11
+markdown,macro,,,T10.md
+sheet,macro,,,T10
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age female education smoking diabetes
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD for continuous measures, and No./total (%) for categorical measures. P-values were calculated using independent t-test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No./total (%) for categorical measures."
+table,matrix,Age_at_cohort_entry_(years),p_value,.24424100913188879
+table,matrix,Female_sex,p_value,.80496326113412198
+table,matrix,Education_level,p_value,.10568084613205581
+table,matrix,Smoking_status,p_value,.98692762506017062
+table,matrix,Diabetes,p_value,.5585408266876779

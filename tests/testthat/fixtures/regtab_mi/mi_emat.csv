@@ -1,0 +1,2278 @@
+fit,what,row,col,value
+A1,b,r1,treated,  -.09221343381629464
+A1,b,r1,index_age, .0020875631757529627
+A1,b,r1,female,  -.73302439906315175
+A1,b,r1,1b.education,                    0
+A1,b,r1,2.education,   .28900639908140069
+A1,b,r1,3.education,   .29286737884517444
+A1,b,r1,_cons,   26.343223711427747
+A1,V,treated,treated,   .15178961855238543
+A1,V,treated,index_age,-.0000772933990092676
+A1,V,treated,female,-.0057288242040136363
+A1,V,treated,1b.education,                    0
+A1,V,treated,2.education,-.0014036334278163783
+A1,V,treated,3.education, -.012506285983066289
+A1,V,treated,_cons, -.045443548405715163
+A1,V,index_age,treated,-.0000772933990092676
+A1,V,index_age,index_age, .0002355857242883044
+A1,V,index_age,female,  .000457440484388504
+A1,V,index_age,1b.education,                    0
+A1,V,index_age,2.education,-.0001073368120964331
+A1,V,index_age,3.education, .0002499867741267162
+A1,V,index_age,_cons, -.013973294135131098
+A1,V,female,treated,-.0057288242040136363
+A1,V,female,index_age,  .000457440484388504
+A1,V,female,female,   .15612019945042116
+A1,V,female,1b.education,                    0
+A1,V,female,2.education,  .003778878585164922
+A1,V,female,3.education, .0019958113681118905
+A1,V,female,_cons,  -.12642605939608634
+A1,V,1b.education,treated,                    0
+A1,V,1b.education,index_age,                    0
+A1,V,1b.education,female,                    0
+A1,V,1b.education,1b.education,                    0
+A1,V,1b.education,2.education,                    0
+A1,V,1b.education,3.education,                    0
+A1,V,1b.education,_cons,                    0
+A1,V,2.education,treated,-.0014036334278163783
+A1,V,2.education,index_age,-.0001073368120964331
+A1,V,2.education,female,  .003778878585164922
+A1,V,2.education,1b.education,                    0
+A1,V,2.education,2.education,   .23566336738904123
+A1,V,2.education,3.education,   .14027621733303061
+A1,V,2.education,_cons,  -.13669894877044669
+A1,V,3.education,treated, -.012506285983066289
+A1,V,3.education,index_age, .0002499867741267162
+A1,V,3.education,female, .0019958113681118905
+A1,V,3.education,1b.education,                    0
+A1,V,3.education,2.education,   .14027621733303061
+A1,V,3.education,3.education,   .26091799090931722
+A1,V,3.education,_cons,  -.15569530415117275
+A1,V,_cons,treated, -.045443548405715163
+A1,V,_cons,index_age, -.013973294135131098
+A1,V,_cons,female,  -.12642605939608634
+A1,V,_cons,1b.education,                    0
+A1,V,_cons,2.education,  -.13669894877044669
+A1,V,_cons,3.education,  -.15569530415117275
+A1,V,_cons,_cons,   1.0520149960692688
+A1,W,treated,treated,   .15167628370999534
+A1,W,treated,index_age,-.0000531147296228303
+A1,W,treated,female,-.0057010308061915616
+A1,W,treated,1b.education,                    0
+A1,W,treated,2.education,-.0014237833068637548
+A1,W,treated,3.education, -.011155152144646744
+A1,W,treated,_cons,  -.04728719230471852
+A1,W,index_age,treated,-.0000531147296228303
+A1,W,index_age,index_age, .0002097327126306874
+A1,W,index_age,female, .0004170886435563638
+A1,W,index_age,1b.education,                    0
+A1,W,index_age,2.education, .0000726389290442593
+A1,W,index_age,3.education, .0001776597643067575
+A1,W,index_age,_cons, -.012499464380993506
+A1,W,female,treated,-.0057010308061915616
+A1,W,female,index_age, .0004170886435563638
+A1,W,female,female,    .1560554731455619
+A1,W,female,1b.education,                    0
+A1,W,female,2.education, .0041474747944265037
+A1,W,female,3.education, .0020476187304220338
+A1,W,female,_cons,  -.12421362791201493
+A1,W,1b.education,treated,                    0
+A1,W,1b.education,index_age,                    0
+A1,W,1b.education,female,                    0
+A1,W,1b.education,1b.education,                    0
+A1,W,1b.education,2.education,                    0
+A1,W,1b.education,3.education,                    0
+A1,W,1b.education,_cons,                    0
+A1,W,2.education,treated,-.0014237833068637548
+A1,W,2.education,index_age, .0000726389290442593
+A1,W,2.education,female, .0041474747944265037
+A1,W,2.education,1b.education,                    0
+A1,W,2.education,2.education,   .22626835056815389
+A1,W,2.education,3.education,   .13580719532771232
+A1,W,2.education,_cons,  -.14204857344162999
+A1,W,3.education,treated, -.011155152144646744
+A1,W,3.education,index_age, .0001776597643067575
+A1,W,3.education,female, .0020476187304220338
+A1,W,3.education,1b.education,                    0
+A1,W,3.education,2.education,   .13580719532771232
+A1,W,3.education,3.education,   .24101194038676313
+A1,W,3.education,_cons,  -.14333252325049134
+A1,W,_cons,treated,  -.04728719230471852
+A1,W,_cons,index_age, -.012499464380993506
+A1,W,_cons,female,  -.12421362791201493
+A1,W,_cons,1b.education,                    0
+A1,W,_cons,2.education,  -.14204857344162999
+A1,W,_cons,3.education,  -.14333252325049134
+A1,W,_cons,_cons,   .96338530444525716
+A1,B,treated,treated, .0000944457019917444
+A1,B,treated,index_age,-.0000201488911553643
+A1,B,treated,female, -.000023161164851729
+A1,B,treated,1b.education,                    0
+A1,B,treated,2.education, .0000167915658728136
+A1,B,treated,3.education,-.0011259448653496212
+A1,B,treated,_cons, .0015363699158361301
+A1,B,index_age,treated,-.0000201488911553643
+A1,B,index_age,index_age, .0000215441763813475
+A1,B,index_age,female, .0000336265340267835
+A1,B,index_age,1b.education,                    0
+A1,B,index_age,2.education,-.0001499797842839103
+A1,B,index_age,3.education, .0000602725081832989
+A1,B,index_age,_cons,-.0012281914617813272
+A1,B,female,treated, -.000023161164851729
+A1,B,female,index_age, .0000336265340267835
+A1,B,female,female, .0000539385873827129
+A1,B,female,1b.education,                    0
+A1,B,female,2.education,-.0003071635077179847
+A1,B,female,3.education,-.0000431728019251196
+A1,B,female,_cons,-.0018436929033928298
+A1,B,1b.education,treated,                    0
+A1,B,1b.education,index_age,                    0
+A1,B,1b.education,female,                    0
+A1,B,1b.education,1b.education,                    0
+A1,B,1b.education,2.education,                    0
+A1,B,1b.education,3.education,                    0
+A1,B,1b.education,_cons,                    0
+A1,B,2.education,treated, .0000167915658728136
+A1,B,2.education,index_age,-.0001499797842839103
+A1,B,2.education,female,-.0003071635077179847
+A1,B,2.education,1b.education,                    0
+A1,B,2.education,2.education, .0078291806840727913
+A1,B,2.education,3.education, .0037241850044319076
+A1,B,2.education,_cons, .0044580205593194268
+A1,B,3.education,treated,-.0011259448653496212
+A1,B,3.education,index_age, .0000602725081832989
+A1,B,3.education,female,-.0000431728019251196
+A1,B,3.education,1b.education,                    0
+A1,B,3.education,2.education, .0037241850044319076
+A1,B,3.education,3.education,  .016588375435461763
+A1,B,3.education,_cons, -.010302317417234504
+A1,B,_cons,treated, .0015363699158361301
+A1,B,_cons,index_age,-.0012281914617813272
+A1,B,_cons,female,-.0018436929033928298
+A1,B,_cons,1b.education,                    0
+A1,B,_cons,2.education, .0044580205593194268
+A1,B,_cons,3.education, -.010302317417234504
+A1,B,_cons,_cons,   .07385807635334303
+A1,df,r1,treated,   391.70102703691396
+A1,df,r1,index_age,    170.1825379554717
+A1,df,r1,female,   391.84598858052055
+A1,df,r1,1b.education,                    0
+A1,df,r1,2.education,   327.42119857672287
+A1,df,r1,3.education,   237.14984619599772
+A1,df,r1,_cons,   219.29752983813108
+A1,rvi,r1,treated, .0007472153168440571
+A1,rvi,r1,index_age,   .12326647251800366
+A1,rvi,r1,female, .0004147647215095205
+A1,rvi,r1,1b.education,                    0
+A1,rvi,r1,2.education,  .041521568514981032
+A1,rvi,r1,3.education,  .082593627894991195
+A1,rvi,r1,_cons,   .09199817686138255
+A1,fmi,r1,treated, .0007761269945818494
+A1,fmi,r1,index_age,   .11556488727116843
+A1,fmi,r1,female, .0004422031872236554
+A1,fmi,r1,1b.education,                    0
+A1,fmi,r1,2.education,  .040845822657716413
+A1,fmi,r1,3.education,  .079347075296110958
+A1,fmi,r1,_cons,  .087891530419442199
+A1,table,b,treated,  -.09221343381629464
+A1,table,b,index_age, .0020875631757529627
+A1,table,b,female,  -.73302439906315175
+A1,table,b,1b.education,                    0
+A1,table,b,2.education,   .28900639908140069
+A1,table,b,3.education,   .29286737884517444
+A1,table,b,_cons,   26.343223711427747
+A1,table,se,treated,   .38960187185431416
+A1,table,se,index_age,  .015348802047335955
+A1,table,se,female,   .39512048725726834
+A1,table,se,1b.education,                    .
+A1,table,se,2.education,   .48545171478638455
+A1,table,se,3.education,   .51080132234491837
+A1,table,se,_cons,   1.0256778227441934
+A1,table,t,treated,  -.23668632128845749
+A1,table,t,index_age,   .13600821544996697
+A1,table,t,female,  -1.8551920811584481
+A1,table,t,1b.education,                    .
+A1,table,t,2.education,   .59533500506548509
+A1,table,t,3.education,   .57334890501206626
+A1,table,t,_cons,   25.683721659250317
+A1,table,pvalue,treated,   .81302387360002293
+A1,table,pvalue,index_age,   .89197553527215767
+A1,table,pvalue,female,  .064319627670123461
+A1,table,pvalue,1b.education,                    .
+A1,table,pvalue,2.education,   .55203080721543629
+A1,table,pvalue,3.education,   .56695176026474647
+A1,table,pvalue,_cons, 4.80802236888600e-68
+A1,table,ll,treated,  -.85818581273732475
+A1,table,ll,index_age, -.028210995532529103
+A1,table,ll,female,  -1.5098456990705995
+A1,table,ll,1b.education,                    .
+A1,table,ll,2.education,  -.66599154741603905
+A1,table,ll,3.education,  -.71342022744967404
+A1,table,ll,_cons,   24.321776308173096
+A1,table,ul,treated,   .67375894510473544
+A1,table,ul,index_age,   .03238612188403503
+A1,table,ul,female,  .043796900944296113
+A1,table,ul,1b.education,                    .
+A1,table,ul,2.education,   1.2440043455788405
+A1,table,ul,3.education,    1.299154985140023
+A1,table,ul,_cons,   28.364671114682398
+A1,table,df,treated,   391.70102703691396
+A1,table,df,index_age,    170.1825379554717
+A1,table,df,female,   391.84598858052055
+A1,table,df,1b.education,                    0
+A1,table,df,2.education,   327.42119857672287
+A1,table,df,3.education,   237.14984619599772
+A1,table,df,_cons,   219.29752983813108
+A1,table,crit,treated,   1.9660387545762463
+A1,table,crit,index_age,   1.9740015289037423
+A1,table,crit,female,   1.9660365004096811
+A1,table,crit,1b.education,                    .
+A1,table,crit,2.education,   1.9672357052393392
+A1,table,crit,3.education,   1.9700176218716858
+A1,table,crit,_cons,   1.9708405099822501
+A1,table,eform,treated,                    0
+A1,table,eform,index_age,                    0
+A1,table,eform,female,                    0
+A1,table,eform,1b.education,                    0
+A1,table,eform,2.education,                    0
+A1,table,eform,3.education,                    0
+A1,table,eform,_cons,                    0
+A1,scalar,M_mi,,                    5
+A1,scalar,N,,                  400
+A1,scalar,fmi_max_mi,,   .11556488727116843
+A1,scalar,N_fail,,                    .
+A1,scalar,N_sub,,                    .
+A2,b,r1,cv_event:treated,   -.1230281894832245
+A2,b,r1,cv_event:index_age,-.0014069409523765905
+A2,b,r1,cv_event:female,   .55578222281836587
+A2,b,r1,cv_event:1b.education,                    0
+A2,b,r1,cv_event:2.education,  .035124644854069999
+A2,b,r1,cv_event:3.education, -.030208091938747787
+A2,b,r1,cv_event:_cons,  -.94077188734256301
+A2,V,cv_event:treated,cv_event:treated,  .049160953772397396
+A2,V,cv_event:treated,cv_event:index_age,-.0000325283812769866
+A2,V,cv_event:treated,cv_event:female,-.0022040962251944876
+A2,V,cv_event:treated,cv_event:1b.education,                    0
+A2,V,cv_event:treated,cv_event:2.education,-.0014193633571507893
+A2,V,cv_event:treated,cv_event:3.education,-.0049272499499337721
+A2,V,cv_event:treated,cv_event:_cons, -.012903140547980165
+A2,V,cv_event:index_age,cv_event:treated,-.0000325283812769866
+A2,V,cv_event:index_age,cv_event:index_age, .0000821997861432566
+A2,V,cv_event:index_age,cv_event:female, .0001662652849100283
+A2,V,cv_event:index_age,cv_event:1b.education,                    0
+A2,V,cv_event:index_age,cv_event:2.education, .0002056060081666126
+A2,V,cv_event:index_age,cv_event:3.education, .0002449781773322268
+A2,V,cv_event:index_age,cv_event:_cons,-.0050218659004486752
+A2,V,cv_event:female,cv_event:treated,-.0022040962251944876
+A2,V,cv_event:female,cv_event:index_age, .0001662652849100283
+A2,V,cv_event:female,cv_event:female,  .053629858468398899
+A2,V,cv_event:female,cv_event:1b.education,                    0
+A2,V,cv_event:female,cv_event:2.education, .0021164219204155873
+A2,V,cv_event:female,cv_event:3.education, .0011457607110338373
+A2,V,cv_event:female,cv_event:_cons, -.046799353014642699
+A2,V,cv_event:1b.education,cv_event:treated,                    0
+A2,V,cv_event:1b.education,cv_event:index_age,                    0
+A2,V,cv_event:1b.education,cv_event:female,                    0
+A2,V,cv_event:1b.education,cv_event:1b.education,                    0
+A2,V,cv_event:1b.education,cv_event:2.education,                    0
+A2,V,cv_event:1b.education,cv_event:3.education,                    0
+A2,V,cv_event:1b.education,cv_event:_cons,                    0
+A2,V,cv_event:2.education,cv_event:treated,-.0014193633571507893
+A2,V,cv_event:2.education,cv_event:index_age, .0002056060081666126
+A2,V,cv_event:2.education,cv_event:female, .0021164219204155873
+A2,V,cv_event:2.education,cv_event:1b.education,                    0
+A2,V,cv_event:2.education,cv_event:2.education,  .078615040336779032
+A2,V,cv_event:2.education,cv_event:3.education,  .052094736091283879
+A2,V,cv_event:2.education,cv_event:_cons, -.061752279388522471
+A2,V,cv_event:3.education,cv_event:treated,-.0049272499499337721
+A2,V,cv_event:3.education,cv_event:index_age, .0002449781773322268
+A2,V,cv_event:3.education,cv_event:female, .0011457607110338373
+A2,V,cv_event:3.education,cv_event:1b.education,                    0
+A2,V,cv_event:3.education,cv_event:2.education,  .052094736091283879
+A2,V,cv_event:3.education,cv_event:3.education,  .095907727110927155
+A2,V,cv_event:3.education,cv_event:_cons, -.066308136484399621
+A2,V,cv_event:_cons,cv_event:treated, -.012903140547980165
+A2,V,cv_event:_cons,cv_event:index_age,-.0050218659004486752
+A2,V,cv_event:_cons,cv_event:female, -.046799353014642699
+A2,V,cv_event:_cons,cv_event:1b.education,                    0
+A2,V,cv_event:_cons,cv_event:2.education, -.061752279388522471
+A2,V,cv_event:_cons,cv_event:3.education, -.066308136484399621
+A2,V,cv_event:_cons,cv_event:_cons,   .38597060353121548
+A2,W,cv_event:treated,cv_event:treated,  .049091867675274813
+A2,W,cv_event:treated,cv_event:index_age,-.0000231197179943666
+A2,W,cv_event:treated,cv_event:female,-.0021784208647534446
+A2,W,cv_event:treated,cv_event:1b.education,                    0
+A2,W,cv_event:treated,cv_event:2.education,-.0009196284468784869
+A2,W,cv_event:treated,cv_event:3.education, -.003809546822668848
+A2,W,cv_event:treated,cv_event:_cons, -.014019103584494475
+A2,W,cv_event:index_age,cv_event:treated,-.0000231197179943666
+A2,W,cv_event:index_age,cv_event:index_age, .0000673609822274723
+A2,W,cv_event:index_age,cv_event:female, .0001305129392084291
+A2,W,cv_event:index_age,cv_event:1b.education,                    0
+A2,W,cv_event:index_age,cv_event:2.education, .0000138461438222231
+A2,W,cv_event:index_age,cv_event:3.education,  .000066766333530878
+A2,W,cv_event:index_age,cv_event:_cons, -.004004234758923475
+A2,W,cv_event:female,cv_event:treated,-.0021784208647534446
+A2,W,cv_event:female,cv_event:index_age, .0001305129392084291
+A2,W,cv_event:female,cv_event:female,  .053538299770093813
+A2,W,cv_event:female,cv_event:1b.education,                    0
+A2,W,cv_event:female,cv_event:2.education, .0015462866413309966
+A2,W,cv_event:female,cv_event:3.education, .0006556847770145643
+A2,W,cv_event:female,cv_event:_cons,  -.04428146766964166
+A2,W,cv_event:1b.education,cv_event:treated,                    0
+A2,W,cv_event:1b.education,cv_event:index_age,                    0
+A2,W,cv_event:1b.education,cv_event:female,                    0
+A2,W,cv_event:1b.education,cv_event:1b.education,                    0
+A2,W,cv_event:1b.education,cv_event:2.education,                    0
+A2,W,cv_event:1b.education,cv_event:3.education,                    0
+A2,W,cv_event:1b.education,cv_event:_cons,                    0
+A2,W,cv_event:2.education,cv_event:treated,-.0009196284468784869
+A2,W,cv_event:2.education,cv_event:index_age, .0000138461438222231
+A2,W,cv_event:2.education,cv_event:female, .0015462866413309966
+A2,W,cv_event:2.education,cv_event:1b.education,                    0
+A2,W,cv_event:2.education,cv_event:2.education,  .072291007415049985
+A2,W,cv_event:2.education,cv_event:3.education,  .043547030583689979
+A2,W,cv_event:2.education,cv_event:_cons, -.045019719818743184
+A2,W,cv_event:3.education,cv_event:treated, -.003809546822668848
+A2,W,cv_event:3.education,cv_event:index_age,  .000066766333530878
+A2,W,cv_event:3.education,cv_event:female, .0006556847770145643
+A2,W,cv_event:3.education,cv_event:1b.education,                    0
+A2,W,cv_event:3.education,cv_event:2.education,  .043547030583689979
+A2,W,cv_event:3.education,cv_event:3.education,  .077743021160494738
+A2,W,cv_event:3.education,cv_event:_cons, -.046485142240670178
+A2,W,cv_event:_cons,cv_event:treated, -.014019103584494475
+A2,W,cv_event:_cons,cv_event:index_age, -.004004234758923475
+A2,W,cv_event:_cons,cv_event:female,  -.04428146766964166
+A2,W,cv_event:_cons,cv_event:1b.education,                    0
+A2,W,cv_event:_cons,cv_event:2.education, -.045019719818743184
+A2,W,cv_event:_cons,cv_event:3.education, -.046485142240670178
+A2,W,cv_event:_cons,cv_event:_cons,   .31230455544158076
+A2,B,cv_event:treated,cv_event:treated, .0000575717476021559
+A2,B,cv_event:treated,cv_event:index_age,-7.84055273551666e-06
+A2,B,cv_event:treated,cv_event:female,-.0000213961337008691
+A2,B,cv_event:treated,cv_event:1b.education,                    0
+A2,B,cv_event:treated,cv_event:2.education,-.0004164457585602519
+A2,B,cv_event:treated,cv_event:3.education,-.0009314192727207701
+A2,B,cv_event:treated,cv_event:_cons, .0009299691970952579
+A2,B,cv_event:index_age,cv_event:treated,-7.84055273551666e-06
+A2,B,cv_event:index_age,cv_event:index_age, .0000123656699298202
+A2,B,cv_event:index_age,cv_event:female, .0000297936214179994
+A2,B,cv_event:index_age,cv_event:1b.education,                    0
+A2,B,cv_event:index_age,cv_event:2.education, .0001597998869536579
+A2,B,cv_event:index_age,cv_event:3.education, .0001485098698344574
+A2,B,cv_event:index_age,cv_event:_cons,-.0008480259512710004
+A2,B,cv_event:female,cv_event:treated,-.0000213961337008691
+A2,B,cv_event:female,cv_event:index_age, .0000297936214179994
+A2,B,cv_event:female,cv_event:female, .0000762989152542378
+A2,B,cv_event:female,cv_event:1b.education,                    0
+A2,B,cv_event:female,cv_event:2.education, .0004751127325704923
+A2,B,cv_event:female,cv_event:3.education, .0004083966116827274
+A2,B,cv_event:female,cv_event:_cons,-.0020982377875008659
+A2,B,cv_event:1b.education,cv_event:treated,                    0
+A2,B,cv_event:1b.education,cv_event:index_age,                    0
+A2,B,cv_event:1b.education,cv_event:female,                    0
+A2,B,cv_event:1b.education,cv_event:1b.education,                    0
+A2,B,cv_event:1b.education,cv_event:2.education,                    0
+A2,B,cv_event:1b.education,cv_event:3.education,                    0
+A2,B,cv_event:1b.education,cv_event:_cons,                    0
+A2,B,cv_event:2.education,cv_event:treated,-.0004164457585602519
+A2,B,cv_event:2.education,cv_event:index_age, .0001597998869536579
+A2,B,cv_event:2.education,cv_event:female, .0004751127325704923
+A2,B,cv_event:2.education,cv_event:1b.education,                    0
+A2,B,cv_event:2.education,cv_event:2.education, .0052700274347742071
+A2,B,cv_event:2.education,cv_event:3.education, .0071230879229949176
+A2,B,cv_event:2.education,cv_event:_cons,  -.01394379964148274
+A2,B,cv_event:3.education,cv_event:treated,-.0009314192727207701
+A2,B,cv_event:3.education,cv_event:index_age, .0001485098698344574
+A2,B,cv_event:3.education,cv_event:female, .0004083966116827274
+A2,B,cv_event:3.education,cv_event:1b.education,                    0
+A2,B,cv_event:3.education,cv_event:2.education, .0071230879229949176
+A2,B,cv_event:3.education,cv_event:3.education,  .015137254958693676
+A2,B,cv_event:3.education,cv_event:_cons, -.016519161869774542
+A2,B,cv_event:_cons,cv_event:treated, .0009299691970952579
+A2,B,cv_event:_cons,cv_event:index_age,-.0008480259512710004
+A2,B,cv_event:_cons,cv_event:female,-.0020982377875008659
+A2,B,cv_event:_cons,cv_event:1b.education,                    0
+A2,B,cv_event:_cons,cv_event:2.education,  -.01394379964148274
+A2,B,cv_event:_cons,cv_event:3.education, -.016519161869774542
+A2,B,cv_event:_cons,cv_event:_cons,  .061388373408028961
+A2,df,r1,cv_event:treated,   2025439.4930773282
+A2,df,r1,cv_event:index_age,     122.744933424913
+A2,df,r1,cv_event:female,   1372379.0309324414
+A2,df,r1,cv_event:1b.education,                    0
+A2,df,r1,cv_event:2.education,   618.13456643989264
+A2,df,r1,cv_event:3.education,   111.50913458388447
+A2,df,r1,cv_event:_cons,   109.80793006233743
+A2,rvi,r1,cv_event:treated, .0014072819062327579
+A2,rvi,r1,cv_event:index_age,   .22028781981941567
+A2,rvi,r1,cv_event:female, .0017101532678150068
+A2,rvi,r1,cv_event:1b.education,                    0
+A2,rvi,r1,cv_event:2.education,  .087480215698480815
+A2,rvi,r1,cv_event:3.education,   .23365063100561417
+A2,rvi,r1,cv_event:_cons,   .23587887786483031
+A2,fmi,r1,cv_event:treated, .0014062902978923774
+A2,fmi,r1,cv_event:index_age,   .19355518377101955
+A2,fmi,r1,cv_event:female, .0017086884688057452
+A2,fmi,r1,cv_event:1b.education,                    0
+A2,fmi,r1,cv_event:2.education,  .083403935604634674
+A2,fmi,r1,cv_event:3.education,   .20355559362682066
+A2,fmi,r1,cv_event:_cons,   .20520467859735042
+A2,table,b,cv_event:treated,   -.1230281894832245
+A2,table,b,cv_event:index_age,-.0014069409523765905
+A2,table,b,cv_event:female,   .55578222281836587
+A2,table,b,cv_event:1b.education,                    0
+A2,table,b,cv_event:2.education,  .035124644854069999
+A2,table,b,cv_event:3.education, -.030208091938747787
+A2,table,b,cv_event:_cons,  -.94077188734256301
+A2,table,se,cv_event:treated,   .22172269566374433
+A2,table,se,cv_event:index_age, .0090664097714176044
+A2,table,se,cv_event:female,   .23158121354807454
+A2,table,se,cv_event:1b.education,                    .
+A2,table,se,cv_event:2.education,   .28038373764678121
+A2,table,se,cv_event:3.education,   .30968972716402327
+A2,table,se,cv_event:_cons,    .6212653245846057
+A2,table,t,cv_event:treated,   -.5548741373314533
+A2,table,t,cv_event:index_age,  -.15518170784780272
+A2,table,t,cv_event:female,   2.3999452041173002
+A2,table,t,cv_event:1b.education,                    .
+A2,table,t,cv_event:2.education,   .12527347394990127
+A2,table,t,cv_event:3.education, -.097543086802967971
+A2,table,t,cv_event:_cons,  -1.5142835920733027
+A2,table,pvalue,cv_event:treated,   .57898081423082615
+A2,table,pvalue,cv_event:index_age,   .87693296744969873
+A2,table,pvalue,cv_event:female,  .016397658648014887
+A2,table,pvalue,cv_event:1b.education,                    .
+A2,table,pvalue,cv_event:2.education,   .90034778216881572
+A2,table,pvalue,cv_event:3.education,   .92247023145857454
+A2,table,pvalue,cv_event:_cons,   .13282708071609806
+A2,table,ll,cv_event:treated,  -.55759694722944586
+A2,table,ll,cv_event:index_age, -.019353713670403276
+A2,table,ll,cv_event:female,   .10189098446033634
+A2,table,ll,cv_event:1b.education,                    .
+A2,table,ll,cv_event:2.education,   -.5154955111784405
+A2,table,ll,cv_event:3.education,  -.64384808627296952
+A2,table,ll,cv_event:_cons,  -2.1719978878406101
+A2,table,ul,cv_event:treated,   .31154056826299692
+A2,table,ul,cv_event:index_age,  .016539831765650097
+A2,table,ul,cv_event:female,   1.0096734611763953
+A2,table,ul,cv_event:1b.education,                    .
+A2,table,ul,cv_event:2.education,   .58574480088658043
+A2,table,ul,cv_event:3.education,   .58343190239547404
+A2,table,ul,cv_event:_cons,   .29045411315548386
+A2,table,df,cv_event:treated,   2025439.4930773282
+A2,table,df,cv_event:index_age,     122.744933424913
+A2,table,df,cv_event:female,   1372379.0309324414
+A2,table,df,cv_event:1b.education,                    0
+A2,table,df,cv_event:2.education,   618.13456643989264
+A2,table,df,cv_event:3.education,   111.50913458388447
+A2,table,df,cv_event:_cons,   109.80793006233743
+A2,table,crit,cv_event:treated,   1.9599651557785081
+A2,table,crit,cv_event:index_age,   1.9794795481895111
+A2,table,crit,cv_event:female,   1.9599657131246748
+A2,table,crit,cv_event:1b.education,                    .
+A2,table,crit,cv_event:2.education,   1.9638091732915151
+A2,table,crit,cv_event:3.education,   1.9814670636756868
+A2,table,crit,cv_event:_cons,   1.9818038312717305
+A2,table,eform,cv_event:treated,                    0
+A2,table,eform,cv_event:index_age,                    0
+A2,table,eform,cv_event:female,                    0
+A2,table,eform,cv_event:1b.education,                    0
+A2,table,eform,cv_event:2.education,                    0
+A2,table,eform,cv_event:3.education,                    0
+A2,table,eform,cv_event:_cons,                    0
+A2,scalar,M_mi,,                    5
+A2,scalar,N,,                  400
+A2,scalar,fmi_max_mi,,   .20520467859735042
+A2,scalar,N_fail,,                    .
+A2,scalar,N_sub,,                    .
+A3,b,r1,cv_event:treated,  -.12302818948322462
+A3,b,r1,cv_event:index_age,-.0014069409523765973
+A3,b,r1,cv_event:female,   .55578222281836576
+A3,b,r1,cv_event:1b.education,                    0
+A3,b,r1,cv_event:2.education,  .035124644854069888
+A3,b,r1,cv_event:3.education, -.030208091938747839
+A3,b,r1,cv_event:_cons,  -.94077188734256256
+A3,V,cv_event:treated,cv_event:treated,  .049782025563531195
+A3,V,cv_event:treated,cv_event:index_age, -.000080562692989776
+A3,V,cv_event:treated,cv_event:female,-.0038701949316458091
+A3,V,cv_event:treated,cv_event:1b.education,                    0
+A3,V,cv_event:treated,cv_event:2.education,-.0022747246639788585
+A3,V,cv_event:treated,cv_event:3.education,-.0066373408806071448
+A3,V,cv_event:treated,cv_event:_cons,-.0080990659972784689
+A3,V,cv_event:index_age,cv_event:treated, -.000080562692989776
+A3,V,cv_event:index_age,cv_event:index_age,   .00008284069881803
+A3,V,cv_event:index_age,cv_event:female, .0000200498733287807
+A3,V,cv_event:index_age,cv_event:1b.education,                    0
+A3,V,cv_event:index_age,cv_event:2.education, .0002435994872968674
+A3,V,cv_event:index_age,cv_event:3.education,  .000279881575591135
+A3,V,cv_event:index_age,cv_event:_cons,-.0049503974136309243
+A3,V,cv_event:female,cv_event:treated,-.0038701949316458091
+A3,V,cv_event:female,cv_event:index_age, .0000200498733287807
+A3,V,cv_event:female,cv_event:female,  .053347979000167502
+A3,V,cv_event:female,cv_event:1b.education,                    0
+A3,V,cv_event:female,cv_event:2.education, .0026477775736639094
+A3,V,cv_event:female,cv_event:3.education, .0032630487518789863
+A3,V,cv_event:female,cv_event:_cons, -.038469719336148178
+A3,V,cv_event:1b.education,cv_event:treated,                    0
+A3,V,cv_event:1b.education,cv_event:index_age,                    0
+A3,V,cv_event:1b.education,cv_event:female,                    0
+A3,V,cv_event:1b.education,cv_event:1b.education,                    0
+A3,V,cv_event:1b.education,cv_event:2.education,                    0
+A3,V,cv_event:1b.education,cv_event:3.education,                    0
+A3,V,cv_event:1b.education,cv_event:_cons,                    0
+A3,V,cv_event:2.education,cv_event:treated,-.0022747246639788585
+A3,V,cv_event:2.education,cv_event:index_age, .0002435994872968674
+A3,V,cv_event:2.education,cv_event:female, .0026477775736639094
+A3,V,cv_event:2.education,cv_event:1b.education,                    0
+A3,V,cv_event:2.education,cv_event:2.education,  .079485252376546092
+A3,V,cv_event:2.education,cv_event:3.education,   .05309630146976374
+A3,V,cv_event:2.education,cv_event:_cons,  -.06490419582621515
+A3,V,cv_event:3.education,cv_event:treated,-.0066373408806071448
+A3,V,cv_event:3.education,cv_event:index_age,  .000279881575591135
+A3,V,cv_event:3.education,cv_event:female, .0032630487518789863
+A3,V,cv_event:3.education,cv_event:1b.education,                    0
+A3,V,cv_event:3.education,cv_event:2.education,   .05309630146976374
+A3,V,cv_event:3.education,cv_event:3.education,  .096786554926311469
+A3,V,cv_event:3.education,cv_event:_cons, -.070139460949421403
+A3,V,cv_event:_cons,cv_event:treated,-.0080990659972784689
+A3,V,cv_event:_cons,cv_event:index_age,-.0049503974136309243
+A3,V,cv_event:_cons,cv_event:female, -.038469719336148178
+A3,V,cv_event:_cons,cv_event:1b.education,                    0
+A3,V,cv_event:_cons,cv_event:2.education,  -.06490419582621515
+A3,V,cv_event:_cons,cv_event:3.education, -.070139460949421403
+A3,V,cv_event:_cons,cv_event:_cons,   .37603591830049471
+A3,W,cv_event:treated,cv_event:treated,  .049712939466408611
+A3,W,cv_event:treated,cv_event:index_age,-.0000711540297071555
+A3,W,cv_event:treated,cv_event:female,-.0038445195712047651
+A3,W,cv_event:treated,cv_event:1b.education,                    0
+A3,W,cv_event:treated,cv_event:2.education,-.0017749897537065571
+A3,W,cv_event:treated,cv_event:3.education,-.0055196377533422237
+A3,W,cv_event:treated,cv_event:_cons,-.0092150290337928101
+A3,W,cv_event:index_age,cv_event:treated,-.0000711540297071555
+A3,W,cv_event:index_age,cv_event:index_age, .0000680018949022458
+A3,W,cv_event:index_age,cv_event:female,-.0000157024723728181
+A3,W,cv_event:index_age,cv_event:1b.education,                    0
+A3,W,cv_event:index_age,cv_event:2.education, .0000518396229524771
+A3,W,cv_event:index_age,cv_event:3.education, .0001016697317897864
+A3,W,cv_event:index_age,cv_event:_cons,-.0039327662721057267
+A3,W,cv_event:female,cv_event:treated,-.0038445195712047651
+A3,W,cv_event:female,cv_event:index_age,-.0000157024723728181
+A3,W,cv_event:female,cv_event:female,  .053256420301862416
+A3,W,cv_event:female,cv_event:1b.education,                    0
+A3,W,cv_event:female,cv_event:2.education,  .002077642294579316
+A3,W,cv_event:female,cv_event:3.education, .0027729728178597151
+A3,W,cv_event:female,cv_event:_cons,  -.03595183399114716
+A3,W,cv_event:1b.education,cv_event:treated,                    0
+A3,W,cv_event:1b.education,cv_event:index_age,                    0
+A3,W,cv_event:1b.education,cv_event:female,                    0
+A3,W,cv_event:1b.education,cv_event:1b.education,                    0
+A3,W,cv_event:1b.education,cv_event:2.education,                    0
+A3,W,cv_event:1b.education,cv_event:3.education,                    0
+A3,W,cv_event:1b.education,cv_event:_cons,                    0
+A3,W,cv_event:2.education,cv_event:treated,-.0017749897537065571
+A3,W,cv_event:2.education,cv_event:index_age, .0000518396229524771
+A3,W,cv_event:2.education,cv_event:female,  .002077642294579316
+A3,W,cv_event:2.education,cv_event:1b.education,                    0
+A3,W,cv_event:2.education,cv_event:2.education,  .073161219454817017
+A3,W,cv_event:2.education,cv_event:3.education,  .044548595962169812
+A3,W,cv_event:2.education,cv_event:_cons, -.048171636256435786
+A3,W,cv_event:3.education,cv_event:treated,-.0055196377533422237
+A3,W,cv_event:3.education,cv_event:index_age, .0001016697317897864
+A3,W,cv_event:3.education,cv_event:female, .0027729728178597151
+A3,W,cv_event:3.education,cv_event:1b.education,                    0
+A3,W,cv_event:3.education,cv_event:2.education,  .044548595962169812
+A3,W,cv_event:3.education,cv_event:3.education,  .078621848975879025
+A3,W,cv_event:3.education,cv_event:_cons, -.050316466705691919
+A3,W,cv_event:_cons,cv_event:treated,-.0092150290337928101
+A3,W,cv_event:_cons,cv_event:index_age,-.0039327662721057267
+A3,W,cv_event:_cons,cv_event:female,  -.03595183399114716
+A3,W,cv_event:_cons,cv_event:1b.education,                    0
+A3,W,cv_event:_cons,cv_event:2.education, -.048171636256435786
+A3,W,cv_event:_cons,cv_event:3.education, -.050316466705691919
+A3,W,cv_event:_cons,cv_event:_cons,   .30236987021086009
+A3,B,cv_event:treated,cv_event:treated, .0000575717476021554
+A3,B,cv_event:treated,cv_event:index_age,-7.84055273551711e-06
+A3,B,cv_event:treated,cv_event:female,-.0000213961337008699
+A3,B,cv_event:treated,cv_event:1b.education,                    0
+A3,B,cv_event:treated,cv_event:2.education,-.0004164457585602513
+A3,B,cv_event:treated,cv_event:3.education,-.0009314192727207675
+A3,B,cv_event:treated,cv_event:_cons, .0009299691970952843
+A3,B,cv_event:index_age,cv_event:treated,-7.84055273551711e-06
+A3,B,cv_event:index_age,cv_event:index_age, .0000123656699298202
+A3,B,cv_event:index_age,cv_event:female,  .000029793621417999
+A3,B,cv_event:index_age,cv_event:1b.education,                    0
+A3,B,cv_event:index_age,cv_event:2.education, .0001597998869536585
+A3,B,cv_event:index_age,cv_event:3.education, .0001485098698344572
+A3,B,cv_event:index_age,cv_event:_cons, -.000848025951270998
+A3,B,cv_event:female,cv_event:treated,-.0000213961337008699
+A3,B,cv_event:female,cv_event:index_age,  .000029793621417999
+A3,B,cv_event:female,cv_event:female, .0000762989152542368
+A3,B,cv_event:female,cv_event:1b.education,                    0
+A3,B,cv_event:female,cv_event:2.education, .0004751127325704943
+A3,B,cv_event:female,cv_event:3.education,  .000408396611682726
+A3,B,cv_event:female,cv_event:_cons,-.0020982377875008473
+A3,B,cv_event:1b.education,cv_event:treated,                    0
+A3,B,cv_event:1b.education,cv_event:index_age,                    0
+A3,B,cv_event:1b.education,cv_event:female,                    0
+A3,B,cv_event:1b.education,cv_event:1b.education,                    0
+A3,B,cv_event:1b.education,cv_event:2.education,                    0
+A3,B,cv_event:1b.education,cv_event:3.education,                    0
+A3,B,cv_event:1b.education,cv_event:_cons,                    0
+A3,B,cv_event:2.education,cv_event:treated,-.0004164457585602513
+A3,B,cv_event:2.education,cv_event:index_age, .0001597998869536585
+A3,B,cv_event:2.education,cv_event:female, .0004751127325704943
+A3,B,cv_event:2.education,cv_event:1b.education,                    0
+A3,B,cv_event:2.education,cv_event:2.education, .0052700274347742262
+A3,B,cv_event:2.education,cv_event:3.education, .0071230879229949393
+A3,B,cv_event:2.education,cv_event:_cons, -.013943799641482801
+A3,B,cv_event:3.education,cv_event:treated,-.0009314192727207675
+A3,B,cv_event:3.education,cv_event:index_age, .0001485098698344572
+A3,B,cv_event:3.education,cv_event:female,  .000408396611682726
+A3,B,cv_event:3.education,cv_event:1b.education,                    0
+A3,B,cv_event:3.education,cv_event:2.education, .0071230879229949393
+A3,B,cv_event:3.education,cv_event:3.education,  .015137254958693711
+A3,B,cv_event:3.education,cv_event:_cons, -.016519161869774569
+A3,B,cv_event:_cons,cv_event:treated, .0009299691970952843
+A3,B,cv_event:_cons,cv_event:index_age, -.000848025951270998
+A3,B,cv_event:_cons,cv_event:female,-.0020982377875008473
+A3,B,cv_event:_cons,cv_event:1b.education,                    0
+A3,B,cv_event:_cons,cv_event:2.education, -.013943799641482801
+A3,B,cv_event:_cons,cv_event:3.education, -.016519161869774569
+A3,B,cv_event:_cons,cv_event:_cons,   .06138837340802885
+A3,df,r1,cv_event:treated,   2076939.2834726684
+A3,df,r1,cv_event:index_age,   124.66648281099931
+A3,df,r1,cv_event:female,   1357990.4478107165
+A3,df,r1,cv_event:1b.education,                    0
+A3,df,r1,cv_event:2.education,   631.89491733491684
+A3,df,r1,cv_event:3.education,   113.56207275273512
+A3,df,r1,cv_event:_cons,   104.22788062240335
+A3,rvi,r1,cv_event:treated, .0013897005058264244
+A3,rvi,r1,cv_event:index_age,   .21821162391305918
+A3,rvi,r1,cv_event:female, .0017192048918444173
+A3,rvi,r1,cv_event:1b.education,                    0
+A3,rvi,r1,cv_event:2.education,  .086439687157410947
+A3,rvi,r1,cv_event:3.education,   .23103890568645027
+A3,rvi,r1,cv_event:_cons,   .24362893048260065
+A3,fmi,r1,cv_event:treated, .0013887335361866787
+A3,fmi,r1,cv_event:index_age,   .19198424824347246
+A3,fmi,r1,cv_event:female, .0017177245325811347
+A3,fmi,r1,cv_event:1b.education,                    0
+A3,fmi,r1,cv_event:2.education,  .082461839173379736
+A3,fmi,r1,cv_event:3.education,   .20161600447828829
+A3,fmi,r1,cv_event:_cons,   .21089956134543711
+A3,table,b,cv_event:treated,  -.12302818948322462
+A3,table,b,cv_event:index_age,-.0014069409523765973
+A3,table,b,cv_event:female,   .55578222281836576
+A3,table,b,cv_event:1b.education,                    0
+A3,table,b,cv_event:2.education,  .035124644854069888
+A3,table,b,cv_event:3.education, -.030208091938747839
+A3,table,b,cv_event:_cons,  -.94077188734256256
+A3,table,se,cv_event:treated,   .22311885972174381
+A3,table,se,cv_event:index_age, .0091016865919471227
+A3,table,se,cv_event:female,   .23097181429812491
+A3,table,se,cv_event:1b.education,                    .
+A3,table,se,cv_event:2.education,   .28193129016933555
+A3,table,se,cv_event:3.education,   .31110537591997905
+A3,table,se,cv_event:_cons,   .61321767611550038
+A3,table,t,cv_event:treated,  -.55140201790496624
+A3,table,t,cv_event:index_age,  -.15458024599763884
+A3,table,t,cv_event:female,   2.4062772529508494
+A3,table,t,cv_event:1b.education,                    .
+A3,table,t,cv_event:2.education,   .12458583377876602
+A3,table,t,cv_event:3.education, -.097099228354439654
+A3,table,t,cv_event:_cons,  -1.5341565058952522
+A3,table,pvalue,cv_event:treated,   .58135817702506165
+A3,table,pvalue,cv_event:index_age,   .87740222333200102
+A3,table,pvalue,cv_event:female,  .016116161359409936
+A3,table,pvalue,cv_event:1b.education,                    .
+A3,table,pvalue,cv_event:2.education,   .90089106593994717
+A3,table,pvalue,cv_event:3.education,   .92281875436296401
+A3,table,pvalue,cv_event:_cons,   .12802113428974324
+A3,table,ll,cv_event:treated,  -.56033337365504698
+A3,table,ll,cv_event:index_age, -.019420779337474811
+A3,table,ll,cv_event:female,   .10308538186553962
+A3,table,ll,cv_event:1b.education,                    .
+A3,table,ll,cv_event:2.education,  -.51851095726501817
+A3,table,ll,cv_event:3.education,  -.64653093912468151
+A3,table,ll,cv_event:_cons,  -2.1567742605875697
+A3,table,ul,cv_event:treated,   .31427699468859777
+A3,table,ul,cv_event:index_age,  .016606897432721618
+A3,table,ul,cv_event:female,   1.0084790637711918
+A3,table,ul,cv_event:1b.education,                    .
+A3,table,ul,cv_event:2.education,   .58876024697315787
+A3,table,ul,cv_event:3.education,   .58611475524718581
+A3,table,ul,cv_event:_cons,   .27523048590244459
+A3,table,df,cv_event:treated,   2076939.2834726684
+A3,table,df,cv_event:index_age,   124.66648281099931
+A3,table,df,cv_event:female,   1357990.4478107165
+A3,table,df,cv_event:1b.education,                    0
+A3,table,df,cv_event:2.education,   631.89491733491684
+A3,table,df,cv_event:3.education,   113.56207275273512
+A3,table,df,cv_event:_cons,   104.22788062240335
+A3,table,crit,cv_event:treated,   1.9599651267364617
+A3,table,crit,cv_event:index_age,   1.9791758596737747
+A3,table,crit,cv_event:female,   1.9599657314399044
+A3,table,crit,cv_event:1b.education,                    .
+A3,table,crit,cv_event:2.education,   1.9637252813852606
+A3,table,crit,cv_event:3.education,   1.9810742432958186
+A3,table,crit,cv_event:_cons,   1.9829864999129143
+A3,table,eform,cv_event:treated,                    0
+A3,table,eform,cv_event:index_age,                    0
+A3,table,eform,cv_event:female,                    0
+A3,table,eform,cv_event:1b.education,                    0
+A3,table,eform,cv_event:2.education,                    0
+A3,table,eform,cv_event:3.education,                    0
+A3,table,eform,cv_event:_cons,                    0
+A3,scalar,M_mi,,                    5
+A3,scalar,N,,                  400
+A3,scalar,fmi_max_mi,,   .21089956134543711
+A3,scalar,N_fail,,                    .
+A3,scalar,N_sub,,                    .
+A5,b,r1,treated,  -.09221343381629464
+A5,b,r1,index_age, .0020875631757529627
+A5,b,r1,female,  -.73302439906315175
+A5,b,r1,1b.education,                    0
+A5,b,r1,2.education,   .28900639908140069
+A5,b,r1,3.education,   .29286737884517444
+A5,b,r1,_cons,   26.343223711427747
+A5,V,treated,treated,  .015920751823424836
+A5,V,treated,index_age,-.0001481427926161338
+A5,V,treated,female,  .017569452986510435
+A5,V,treated,1b.education,                    0
+A5,V,treated,2.education,  .022762885592499109
+A5,V,treated,3.education,-.0088306130258356021
+A5,V,treated,_cons, -.014779304109839814
+A5,V,index_age,treated,-.0001481427926161338
+A5,V,index_age,index_age, .0001278473305769886
+A5,V,index_age,female, .0014866127050353222
+A5,V,index_age,1b.education,                    0
+A5,V,index_age,2.education,-.0005711651766200375
+A5,V,index_age,3.education, .0017047791895242854
+A5,V,index_age,_cons, -.010018477682210395
+A5,V,female,treated,  .017569452986510435
+A5,V,female,index_age, .0014866127050353222
+A5,V,female,female,    .1077374933992421
+A5,V,female,1b.education,                    0
+A5,V,female,2.education,  .052114884116689381
+A5,V,female,3.education,  .041557189441585582
+A5,V,female,_cons,   -.2344387324403176
+A5,V,1b.education,treated,                    0
+A5,V,1b.education,index_age,                    0
+A5,V,1b.education,female,                    0
+A5,V,1b.education,1b.education,                    0
+A5,V,1b.education,2.education,                    0
+A5,V,1b.education,3.education,                    0
+A5,V,1b.education,_cons,                    0
+A5,V,2.education,treated,  .022762885592499109
+A5,V,2.education,index_age,-.0005711651766200375
+A5,V,2.education,female,  .052114884116689381
+A5,V,2.education,1b.education,                    0
+A5,V,2.education,2.education,   .20033675222298142
+A5,V,2.education,3.education,  .060061855958232359
+A5,V,2.education,_cons, -.099170937998446673
+A5,V,3.education,treated,-.0088306130258356021
+A5,V,3.education,index_age, .0017047791895242854
+A5,V,3.education,female,  .041557189441585582
+A5,V,3.education,1b.education,                    0
+A5,V,3.education,2.education,  .060061855958232359
+A5,V,3.education,3.education,   .10699661412912123
+A5,V,3.education,_cons,  -.21312690855721589
+A5,V,_cons,treated, -.014779304109839814
+A5,V,_cons,index_age, -.010018477682210395
+A5,V,_cons,female,   -.2344387324403176
+A5,V,_cons,1b.education,                    0
+A5,V,_cons,2.education, -.099170937998446673
+A5,V,_cons,3.education,  -.21312690855721589
+A5,V,_cons,_cons,   .98814467928878269
+A5,W,treated,treated,  .015807416981034741
+A5,W,treated,index_age,-.0001239641232296966
+A5,W,treated,female,  .017597246384332511
+A5,W,treated,1b.education,                    0
+A5,W,treated,2.education,  .022742735713451732
+A5,W,treated,3.education,-.0074794791874160564
+A5,W,treated,_cons, -.016622948008843171
+A5,W,index_age,treated,-.0001239641232296966
+A5,W,index_age,index_age, .0001019943189193716
+A5,W,index_age,female, .0014462608642031821
+A5,W,index_age,1b.education,                    0
+A5,W,index_age,2.education,-.0003911894354793451
+A5,W,index_age,3.education, .0016324521797043267
+A5,W,index_age,_cons,-.0085446479280728033
+A5,W,female,treated,  .017597246384332511
+A5,W,female,index_age, .0014462608642031821
+A5,W,female,female,   .10767276709438285
+A5,W,female,1b.education,                    0
+A5,W,female,2.education,   .05248348032595096
+A5,W,female,3.education,  .041608996803895723
+A5,W,female,_cons,  -.23222630095624619
+A5,W,1b.education,treated,                    0
+A5,W,1b.education,index_age,                    0
+A5,W,1b.education,female,                    0
+A5,W,1b.education,1b.education,                    0
+A5,W,1b.education,2.education,                    0
+A5,W,1b.education,3.education,                    0
+A5,W,1b.education,_cons,                    0
+A5,W,2.education,treated,  .022742735713451732
+A5,W,2.education,index_age,-.0003911894354793451
+A5,W,2.education,female,   .05248348032595096
+A5,W,2.education,1b.education,                    0
+A5,W,2.education,2.education,   .19094173540209408
+A5,W,2.education,3.education,  .055592833952914068
+A5,W,2.education,_cons,  -.10452056266962999
+A5,W,3.education,treated,-.0074794791874160564
+A5,W,3.education,index_age, .0016324521797043267
+A5,W,3.education,female,  .041608996803895723
+A5,W,3.education,1b.education,                    0
+A5,W,3.education,2.education,  .055592833952914068
+A5,W,3.education,3.education,  .087090563606567112
+A5,W,3.education,_cons,  -.20076412765653448
+A5,W,_cons,treated, -.016622948008843171
+A5,W,_cons,index_age,-.0085446479280728033
+A5,W,_cons,female,  -.23222630095624619
+A5,W,_cons,1b.education,                    0
+A5,W,_cons,2.education,  -.10452056266962999
+A5,W,_cons,3.education,  -.20076412765653448
+A5,W,_cons,_cons,     .899514987664771
+A5,B,treated,treated, .0000944457019917444
+A5,B,treated,index_age,-.0000201488911553643
+A5,B,treated,female, -.000023161164851729
+A5,B,treated,1b.education,                    0
+A5,B,treated,2.education, .0000167915658728136
+A5,B,treated,3.education,-.0011259448653496212
+A5,B,treated,_cons, .0015363699158361301
+A5,B,index_age,treated,-.0000201488911553643
+A5,B,index_age,index_age, .0000215441763813475
+A5,B,index_age,female, .0000336265340267835
+A5,B,index_age,1b.education,                    0
+A5,B,index_age,2.education,-.0001499797842839103
+A5,B,index_age,3.education, .0000602725081832989
+A5,B,index_age,_cons,-.0012281914617813272
+A5,B,female,treated, -.000023161164851729
+A5,B,female,index_age, .0000336265340267835
+A5,B,female,female, .0000539385873827129
+A5,B,female,1b.education,                    0
+A5,B,female,2.education,-.0003071635077179847
+A5,B,female,3.education,-.0000431728019251196
+A5,B,female,_cons,-.0018436929033928298
+A5,B,1b.education,treated,                    0
+A5,B,1b.education,index_age,                    0
+A5,B,1b.education,female,                    0
+A5,B,1b.education,1b.education,                    0
+A5,B,1b.education,2.education,                    0
+A5,B,1b.education,3.education,                    0
+A5,B,1b.education,_cons,                    0
+A5,B,2.education,treated, .0000167915658728136
+A5,B,2.education,index_age,-.0001499797842839103
+A5,B,2.education,female,-.0003071635077179847
+A5,B,2.education,1b.education,                    0
+A5,B,2.education,2.education, .0078291806840727913
+A5,B,2.education,3.education, .0037241850044319076
+A5,B,2.education,_cons, .0044580205593194268
+A5,B,3.education,treated,-.0011259448653496212
+A5,B,3.education,index_age, .0000602725081832989
+A5,B,3.education,female,-.0000431728019251196
+A5,B,3.education,1b.education,                    0
+A5,B,3.education,2.education, .0037241850044319076
+A5,B,3.education,3.education,  .016588375435461763
+A5,B,3.education,_cons, -.010302317417234504
+A5,B,_cons,treated, .0015363699158361301
+A5,B,_cons,index_age,-.0012281914617813272
+A5,B,_cons,female,-.0018436929033928298
+A5,B,_cons,1b.education,                    0
+A5,B,_cons,2.education, .0044580205593194268
+A5,B,_cons,3.education, -.010302317417234504
+A5,B,_cons,_cons,   .07385807635334303
+A5,df,r1,treated,   3.7231293043022462
+A5,df,r1,index_age,   2.9029007124547985
+A5,df,r1,female,   3.7477458154968892
+A5,df,r1,1b.education,                    0
+A5,df,r1,2.education,   3.5671297632348389
+A5,df,r1,3.education,    2.973791957668555
+A5,df,r1,_cons,   3.3903742835459689
+A5,rvi,r1,treated, .0071697256121015188
+A5,rvi,r1,index_age,   .25347501636884567
+A5,rvi,r1,female, .0006011390494173724
+A5,rvi,r1,1b.education,                    0
+A5,rvi,r1,2.education,  .049203579307074384
+A5,rvi,r1,3.education,   .22856724882939083
+A5,rvi,r1,_cons,   .09853053349794981
+A5,fmi,r1,treated,  .069975381038708595
+A5,fmi,r1,index_age,   .29669277452142639
+A5,fmi,r1,female,  .062423984842115976
+A5,fmi,r1,1b.education,                    0
+A5,fmi,r1,2.education,   .11621479610902763
+A5,fmi,r1,3.education,   .27807042203721732
+A5,fmi,r1,_cons,   .16612327055461151
+A5,table,b,treated,  -.09221343381629464
+A5,table,b,index_age, .0020875631757529627
+A5,table,b,female,  -.73302439906315175
+A5,table,b,1b.education,                    0
+A5,table,b,2.education,   .28900639908140069
+A5,table,b,3.education,   .29286737884517444
+A5,table,b,_cons,   26.343223711427747
+A5,table,se,treated,   .12617746163013754
+A5,table,se,index_age,  .011306959386899232
+A5,table,se,female,   .32823390044180706
+A5,table,se,1b.education,                    .
+A5,table,se,2.education,   .44758993758012638
+A5,table,se,3.education,    .3271033691803269
+A5,table,se,_cons,   .99405466614708005
+A5,table,t,treated,  -.73082333900961449
+A5,table,t,index_age,   .18462639727632793
+A5,table,t,female,  -2.2332379381791201
+A5,table,t,1b.education,                    .
+A5,table,t,2.education,   .64569458519085565
+A5,table,t,3.education,   .89533586761596851
+A5,table,t,_cons,   26.500779694071685
+A5,table,pvalue,treated,   .50820735699155961
+A5,table,pvalue,index_age,   .86566310726716511
+A5,table,pvalue,female,   .09381820231865251
+A5,table,pvalue,1b.education,                    .
+A5,table,pvalue,2.education,   .55764265153376991
+A5,table,pvalue,3.education,   .43710936249034821
+A5,table,pvalue,_cons,  .000047404364817829
+A5,table,ll,treated,  -.45305570162455228
+A5,table,ll,index_age, -.034586819897299621
+A5,table,ll,female,  -1.6690562051688544
+A5,table,ll,1b.education,                    .
+A5,table,ll,2.education,  -1.0154962371663028
+A5,table,ll,3.education,  -.75333088569243623
+A5,table,ll,_cons,   23.376106211029594
+A5,table,ul,treated,   .26862883399196297
+A5,table,ul,index_age,  .038761946248805544
+A5,table,ul,female,   .20300740704255094
+A5,table,ul,1b.education,                    .
+A5,table,ul,2.education,   1.5935090353291042
+A5,table,ul,3.education,    1.339065643382785
+A5,table,ul,_cons,     29.3103412118259
+A5,table,df,treated,   3.7231293043022462
+A5,table,df,index_age,   2.9029007124547985
+A5,table,df,female,   3.7477458154968892
+A5,table,df,1b.education,                    0
+A5,table,df,2.education,   3.5671297632348389
+A5,table,df,3.education,    2.973791957668555
+A5,table,df,_cons,   3.3903742835459689
+A5,table,crit,treated,    2.859799707066466
+A5,table,crit,index_age,   3.2435230213655166
+A5,table,crit,female,    2.851721911861608
+A5,table,crit,1b.education,                    .
+A5,table,crit,2.education,   2.9145039392539398
+A5,table,crit,3.education,   3.1983720227621935
+A5,table,crit,_cons,   2.9848635104733154
+A5,table,eform,treated,                    0
+A5,table,eform,index_age,                    0
+A5,table,eform,female,                    0
+A5,table,eform,1b.education,                    0
+A5,table,eform,2.education,                    0
+A5,table,eform,3.education,                    0
+A5,table,eform,_cons,                    0
+A5,scalar,M_mi,,                    5
+A5,scalar,N,,                  400
+A5,scalar,fmi_max_mi,,   .29669277452142639
+A5,scalar,N_fail,,                    .
+A5,scalar,N_sub,,                    .
+A6,b,r1,treated,  -.09221343381629464
+A6,b,r1,index_age, .0020875631757529627
+A6,b,r1,female,  -.73302439906315175
+A6,b,r1,1b.education,                    0
+A6,b,r1,2.education,   .28900639908140069
+A6,b,r1,3.education,   .29286737884517444
+A6,b,r1,_cons,   26.343223711427747
+A6,V,treated,treated,   .14735769418641428
+A6,V,treated,index_age,-.0003557293795878305
+A6,V,treated,female,-.0021273580879275188
+A6,V,treated,1b.education,                    0
+A6,V,treated,2.education,-.0050735150761919267
+A6,V,treated,3.education, -.020724032500705022
+A6,V,treated,_cons,  -.03055499368332646
+A6,V,index_age,treated,-.0003557293795878305
+A6,V,index_age,index_age, .0002084470582618205
+A6,V,index_age,female, .0013165743294598594
+A6,V,index_age,1b.education,                    0
+A6,V,index_age,2.education, .0001217676126489311
+A6,V,index_age,3.education, .0003319525283326428
+A6,V,index_age,_cons,  -.01252796486095074
+A6,V,female,treated,-.0021273580879275188
+A6,V,female,index_age, .0013165743294598594
+A6,V,female,female,   .15622475338069841
+A6,V,female,1b.education,                    0
+A6,V,female,2.education,  .017281148217498005
+A6,V,female,3.education, -.010311109399296975
+A6,V,female,_cons,  -.17448153127234234
+A6,V,1b.education,treated,                    0
+A6,V,1b.education,index_age,                    0
+A6,V,1b.education,female,                    0
+A6,V,1b.education,1b.education,                    0
+A6,V,1b.education,2.education,                    0
+A6,V,1b.education,3.education,                    0
+A6,V,1b.education,_cons,                    0
+A6,V,2.education,treated,-.0050735150761919267
+A6,V,2.education,index_age, .0001217676126489311
+A6,V,2.education,female,  .017281148217498005
+A6,V,2.education,1b.education,                    0
+A6,V,2.education,2.education,   .25095297320099025
+A6,V,2.education,3.education,   .14075322407295898
+A6,V,2.education,_cons,  -.15757899560224101
+A6,V,3.education,treated, -.020724032500705022
+A6,V,3.education,index_age, .0003319525283326428
+A6,V,3.education,female, -.010311109399296975
+A6,V,3.education,1b.education,                    0
+A6,V,3.education,2.education,   .14075322407295898
+A6,V,3.education,3.education,    .2430811220517593
+A6,V,3.education,_cons,  -.14940798446364847
+A6,V,_cons,treated,  -.03055499368332646
+A6,V,_cons,index_age,  -.01252796486095074
+A6,V,_cons,female,  -.17448153127234234
+A6,V,_cons,1b.education,                    0
+A6,V,_cons,2.education,  -.15757899560224101
+A6,V,_cons,3.education,  -.14940798446364847
+A6,V,_cons,_cons,   .97305960480554488
+A6,W,treated,treated,   .14724435934402419
+A6,W,treated,index_age,-.0003315507102013933
+A6,W,treated,female,-.0020995646901054441
+A6,W,treated,1b.education,                    0
+A6,W,treated,2.education,-.0050936649552393029
+A6,W,treated,3.education, -.019372898662285476
+A6,W,treated,_cons, -.032398637582329817
+A6,W,index_age,treated,-.0003315507102013933
+A6,W,index_age,index_age, .0001825940466042035
+A6,W,index_age,female, .0012762224886277193
+A6,W,index_age,1b.education,                    0
+A6,W,index_age,2.education, .0003017433537896235
+A6,W,index_age,3.education, .0002596255185126842
+A6,W,index_age,_cons, -.011054135106813148
+A6,W,female,treated,-.0020995646901054441
+A6,W,female,index_age, .0012762224886277193
+A6,W,female,female,   .15616002707583915
+A6,W,female,1b.education,                    0
+A6,W,female,2.education,  .017649744426759588
+A6,W,female,3.education, -.010259302036986832
+A6,W,female,_cons,  -.17226909978827093
+A6,W,1b.education,treated,                    0
+A6,W,1b.education,index_age,                    0
+A6,W,1b.education,female,                    0
+A6,W,1b.education,1b.education,                    0
+A6,W,1b.education,2.education,                    0
+A6,W,1b.education,3.education,                    0
+A6,W,1b.education,_cons,                    0
+A6,W,2.education,treated,-.0050936649552393029
+A6,W,2.education,index_age, .0003017433537896235
+A6,W,2.education,female,  .017649744426759588
+A6,W,2.education,1b.education,                    0
+A6,W,2.education,2.education,   .24155795638010291
+A6,W,2.education,3.education,   .13628420206764069
+A6,W,2.education,_cons,  -.16292862027342431
+A6,W,3.education,treated, -.019372898662285476
+A6,W,3.education,index_age, .0002596255185126842
+A6,W,3.education,female, -.010259302036986832
+A6,W,3.education,1b.education,                    0
+A6,W,3.education,2.education,   .13628420206764069
+A6,W,3.education,3.education,   .22317507152920518
+A6,W,3.education,_cons,  -.13704520356296707
+A6,W,_cons,treated, -.032398637582329817
+A6,W,_cons,index_age, -.011054135106813148
+A6,W,_cons,female,  -.17226909978827093
+A6,W,_cons,1b.education,                    0
+A6,W,_cons,2.education,  -.16292862027342431
+A6,W,_cons,3.education,  -.13704520356296707
+A6,W,_cons,_cons,    .8844299131815333
+A6,B,treated,treated, .0000944457019917444
+A6,B,treated,index_age,-.0000201488911553643
+A6,B,treated,female, -.000023161164851729
+A6,B,treated,1b.education,                    0
+A6,B,treated,2.education, .0000167915658728136
+A6,B,treated,3.education,-.0011259448653496212
+A6,B,treated,_cons, .0015363699158361301
+A6,B,index_age,treated,-.0000201488911553643
+A6,B,index_age,index_age, .0000215441763813475
+A6,B,index_age,female, .0000336265340267835
+A6,B,index_age,1b.education,                    0
+A6,B,index_age,2.education,-.0001499797842839103
+A6,B,index_age,3.education, .0000602725081832989
+A6,B,index_age,_cons,-.0012281914617813272
+A6,B,female,treated, -.000023161164851729
+A6,B,female,index_age, .0000336265340267835
+A6,B,female,female, .0000539385873827129
+A6,B,female,1b.education,                    0
+A6,B,female,2.education,-.0003071635077179847
+A6,B,female,3.education,-.0000431728019251196
+A6,B,female,_cons,-.0018436929033928298
+A6,B,1b.education,treated,                    0
+A6,B,1b.education,index_age,                    0
+A6,B,1b.education,female,                    0
+A6,B,1b.education,1b.education,                    0
+A6,B,1b.education,2.education,                    0
+A6,B,1b.education,3.education,                    0
+A6,B,1b.education,_cons,                    0
+A6,B,2.education,treated, .0000167915658728136
+A6,B,2.education,index_age,-.0001499797842839103
+A6,B,2.education,female,-.0003071635077179847
+A6,B,2.education,1b.education,                    0
+A6,B,2.education,2.education, .0078291806840727913
+A6,B,2.education,3.education, .0037241850044319076
+A6,B,2.education,_cons, .0044580205593194268
+A6,B,3.education,treated,-.0011259448653496212
+A6,B,3.education,index_age, .0000602725081832989
+A6,B,3.education,female,-.0000431728019251196
+A6,B,3.education,1b.education,                    0
+A6,B,3.education,2.education, .0037241850044319076
+A6,B,3.education,3.education,  .016588375435461763
+A6,B,3.education,_cons, -.010302317417234504
+A6,B,_cons,treated, .0015363699158361301
+A6,B,_cons,index_age,-.0012281914617813272
+A6,B,_cons,female,-.0018436929033928298
+A6,B,_cons,1b.education,                    0
+A6,B,_cons,2.education, .0044580205593194268
+A6,B,_cons,3.education, -.010302317417234504
+A6,B,_cons,_cons,   .07385807635334303
+A6,df,r1,treated,   391.69091915580702
+A6,df,r1,index_age,   147.97804496122455
+A6,df,r1,female,   391.84610617689452
+A6,df,r1,1b.education,                    0
+A6,df,r1,2.education,   333.27499433774568
+A6,df,r1,3.education,   224.46854601454987
+A6,df,r1,_cons,   204.89265003571867
+A6,rvi,r1,treated, .0007697058338601334
+A6,rvi,r1,index_age,   .14158737449779385
+A6,rvi,r1,female, .0004144870238004064
+A6,rvi,r1,1b.education,                    0
+A6,rvi,r1,2.education,  .038893427323519185
+A6,rvi,r1,3.education,  .089194776039084475
+A6,rvi,r1,_cons,   .10021109677892587
+A6,fmi,r1,treated, .0007987130956347288
+A6,fmi,r1,index_age,   .13125418089378538
+A6,fmi,r1,female, .0004419242117266187
+A6,fmi,r1,1b.education,                    0
+A6,fmi,r1,2.education,  .038317465896764547
+A6,fmi,r1,3.education,  .085355190802571479
+A6,fmi,r1,_cons,  .095269777145350121
+A6,table,b,treated,  -.09221343381629464
+A6,table,b,index_age, .0020875631757529627
+A6,table,b,female,  -.73302439906315175
+A6,table,b,1b.education,                    0
+A6,table,b,2.education,   .28900639908140069
+A6,table,b,3.education,   .29286737884517444
+A6,table,b,_cons,   26.343223711427747
+A6,table,se,treated,   .38387197629732533
+A6,table,se,index_age,  .014437695739342222
+A6,table,se,female,   .39525277150286803
+A6,table,se,1b.education,                    .
+A6,table,se,2.education,   .50095206676985593
+A6,table,se,3.education,   .49303257706946635
+A6,table,se,_cons,   .98643783626011872
+A6,table,t,treated,  -.24021923847046175
+A6,table,t,index_age,   .14459116007441722
+A6,table,t,female,  -1.8545711805535885
+A6,table,t,1b.education,                    .
+A6,table,t,2.education,    .5769142763396844
+A6,table,t,3.education,   .59401222650630359
+A6,table,t,_cons,   26.705406811343327
+A6,table,pvalue,treated,   .81028597064805397
+A6,table,pvalue,index_age,   .88523041831483884
+A6,table,pvalue,female,   .06440853403327472
+A6,table,pvalue,1b.education,                    .
+A6,table,pvalue,2.education,   .56438683477134566
+A6,table,pvalue,3.education,     .553102099278315
+A6,table,pvalue,_cons, 1.17886200182296e-68
+A6,table,ll,treated,  -.84692067637301605
+A6,table,ll,index_age, -.026443127022925311
+A6,table,ll,female,  -1.5101057740033732
+A6,table,ll,1b.education,                    .
+A6,table,ll,2.education,  -.69642018090901769
+A6,table,ll,3.education,  -.67869700629310714
+A6,table,ll,_cons,   24.398353370996364
+A6,table,ul,treated,   .66249380874042674
+A6,table,ul,index_age,  .030618253374431234
+A6,table,ul,female,  .044056975877069693
+A6,table,ul,1b.education,                    .
+A6,table,ul,2.education,   1.2744329790718192
+A6,table,ul,3.education,   1.2644317639834561
+A6,table,ul,_cons,    28.28809405185913
+A6,table,df,treated,   391.69091915580702
+A6,table,df,index_age,   147.97804496122455
+A6,table,df,female,   391.84610617689452
+A6,table,df,1b.education,                    0
+A6,table,df,2.education,   333.27499433774568
+A6,table,df,3.education,   224.46854601454987
+A6,table,df,_cons,   204.89265003571867
+A6,table,crit,treated,   1.9660389118172259
+A6,table,crit,index_age,   1.9761249103576222
+A6,table,crit,female,   1.9660364985817256
+A6,table,crit,1b.education,                    .
+A6,table,crit,2.education,    1.967107524567089
+A6,table,crit,3.education,   1.9705886189370241
+A6,table,crit,_cons,   1.9716096331067039
+A6,table,eform,treated,                    0
+A6,table,eform,index_age,                    0
+A6,table,eform,female,                    0
+A6,table,eform,1b.education,                    0
+A6,table,eform,2.education,                    0
+A6,table,eform,3.education,                    0
+A6,table,eform,_cons,                    0
+A6,scalar,M_mi,,                    5
+A6,scalar,N,,                  400
+A6,scalar,fmi_max_mi,,   .13125418089378538
+A6,scalar,N_fail,,                    .
+A6,scalar,N_sub,,                    .
+A7,b,r1,treated, -.082262982066484233
+A7,b,r1,female,  -.74000667688467092
+A7,b,r1,_cons,   26.679150521301789
+A7,V,treated,treated,    .1500354979839599
+A7,V,treated,female,-.0056002833448873888
+A7,V,treated,_cons, -.054179485383096637
+A7,V,female,treated,-.0056002833448873888
+A7,V,female,female,    .1541868708122921
+A7,V,female,_cons, -.096523488232085286
+A7,V,_cons,treated, -.054179485383096637
+A7,V,_cons,female, -.096523488232085286
+A7,V,_cons,_cons,   .11811062693941288
+A7,W,treated,treated,    .1500354979839599
+A7,W,treated,female,-.0056002833448873888
+A7,W,treated,_cons, -.054179485383096637
+A7,W,female,treated,-.0056002833448873888
+A7,W,female,female,    .1541868708122921
+A7,W,female,_cons, -.096523488232085286
+A7,W,_cons,treated, -.054179485383096637
+A7,W,_cons,female, -.096523488232085286
+A7,W,_cons,_cons,   .11811062693941288
+A7,B,treated,treated,                    0
+A7,B,treated,female,                    0
+A7,B,treated,_cons,                    0
+A7,B,female,treated,                    0
+A7,B,female,female,                    0
+A7,B,female,_cons,                    0
+A7,B,_cons,treated,                    0
+A7,B,_cons,female,                    0
+A7,B,_cons,_cons,                    0
+A7,df,r1,treated,   395.01499999999999
+A7,df,r1,female,   395.01499999999999
+A7,df,r1,_cons,   395.01499999999999
+A7,rvi,r1,treated,                    0
+A7,rvi,r1,female,                    0
+A7,rvi,r1,_cons,                    0
+A7,fmi,r1,treated,                    0
+A7,fmi,r1,female,                    0
+A7,fmi,r1,_cons,                    0
+A7,table,b,treated, -.082262982066484233
+A7,table,b,female,  -.74000667688467092
+A7,table,b,_cons,   26.679150521301789
+A7,table,se,treated,   .38734415960997776
+A7,table,se,female,   .39266636068333138
+A7,table,se,_cons,   .34367226675920898
+A7,table,t,treated,  -.21237697800662847
+A7,table,t,female,  -1.8845685573800772
+A7,table,t,_cons,   77.629628869629755
+A7,table,pvalue,treated,   .83192249107188443
+A7,table,pvalue,female,    .0602220739679643
+A7,table,pvalue,_cons, 2.7079914206834e-241
+A7,table,ll,treated,   -.8437768109808963
+A7,table,ll,female,  -1.5119838873089599
+A7,table,ll,_cons,   26.003495093800257
+A7,table,ul,treated,   .67925084684792791
+A7,table,ul,female,  .031970533539618207
+A7,table,ul,_cons,   27.354805948803321
+A7,table,df,treated,   395.01499999999999
+A7,table,df,female,   395.01499999999999
+A7,table,df,_cons,   395.01499999999999
+A7,table,crit,treated,   1.9659876366309252
+A7,table,crit,female,   1.9659876366309252
+A7,table,crit,_cons,   1.9659876366309252
+A7,table,eform,treated,                    0
+A7,table,eform,female,                    0
+A7,table,eform,_cons,                    0
+A7,scalar,M_mi,,                    5
+A7,scalar,N,,                  400
+A7,scalar,fmi_max_mi,,                    0
+A7,scalar,N_fail,,                    .
+A7,scalar,N_sub,,                    .
+A8,b,r1,cv_event:treated,  -.12666747541634696
+A8,b,r1,cv_event:female,   .55622867098000539
+A8,b,r1,cv_event:_cons,  -1.0170727054566311
+A8,V,cv_event:treated,cv_event:treated,  .048794306669724674
+A8,V,cv_event:treated,cv_event:female,-.0021398464543471284
+A8,V,cv_event:treated,cv_event:_cons, -.016923424455082381
+A8,V,cv_event:female,cv_event:treated,-.0021398464543471284
+A8,V,cv_event:female,cv_event:female,   .05317351352535029
+A8,V,cv_event:female,cv_event:_cons,  -.03565591173088551
+A8,V,cv_event:_cons,cv_event:treated, -.016923424455082381
+A8,V,cv_event:_cons,cv_event:female,  -.03565591173088551
+A8,V,cv_event:_cons,cv_event:_cons,  .042267663124059274
+A8,W,cv_event:treated,cv_event:treated,  .048794306669724674
+A8,W,cv_event:treated,cv_event:female,-.0021398464543471284
+A8,W,cv_event:treated,cv_event:_cons, -.016923424455082381
+A8,W,cv_event:female,cv_event:treated,-.0021398464543471284
+A8,W,cv_event:female,cv_event:female,   .05317351352535029
+A8,W,cv_event:female,cv_event:_cons,  -.03565591173088551
+A8,W,cv_event:_cons,cv_event:treated, -.016923424455082381
+A8,W,cv_event:_cons,cv_event:female,  -.03565591173088551
+A8,W,cv_event:_cons,cv_event:_cons,  .042267663124059274
+A8,B,cv_event:treated,cv_event:treated,                    0
+A8,B,cv_event:treated,cv_event:female,                    0
+A8,B,cv_event:treated,cv_event:_cons,                    0
+A8,B,cv_event:female,cv_event:treated,                    0
+A8,B,cv_event:female,cv_event:female,                    0
+A8,B,cv_event:female,cv_event:_cons,                    0
+A8,B,cv_event:_cons,cv_event:treated,                    0
+A8,B,cv_event:_cons,cv_event:female,                    0
+A8,B,cv_event:_cons,cv_event:_cons,                    0
+A8,df,r1,cv_event:treated,                    .
+A8,df,r1,cv_event:female,                    .
+A8,df,r1,cv_event:_cons,                    .
+A8,rvi,r1,cv_event:treated,                    0
+A8,rvi,r1,cv_event:female,                    0
+A8,rvi,r1,cv_event:_cons,                    0
+A8,fmi,r1,cv_event:treated,                    0
+A8,fmi,r1,cv_event:female,                    0
+A8,fmi,r1,cv_event:_cons,                    0
+A8,table,b,cv_event:treated,  -.12666747541634696
+A8,table,b,cv_event:female,   .55622867098000539
+A8,table,b,cv_event:_cons,  -1.0170727054566311
+A8,table,se,cv_event:treated,   .22089433372027603
+A8,table,se,cv_event:female,   .23059382802961204
+A8,table,se,cv_event:_cons,   .20559100934637017
+A8,table,t,cv_event:treated,   -.5734301703580551
+A8,table,t,cv_event:female,   2.4121576701895791
+A8,table,t,cv_event:_cons,  -4.9470680098812796
+A8,table,pvalue,cv_event:treated,   .56635346722417546
+A8,table,pvalue,cv_event:female,   .01585842190825142
+A8,table,pvalue,cv_event:_cons, 7.53396595266603e-07
+A8,table,ll,cv_event:treated,  -.55961241389705951
+A8,table,ll,cv_event:female,   .10427307298474303
+A8,table,ll,cv_event:_cons,  -1.4200236793207544
+A8,table,ul,cv_event:treated,   .30627746306436565
+A8,table,ul,cv_event:female,   1.0081842689752678
+A8,table,ul,cv_event:_cons,  -.61412173159250794
+A8,table,df,cv_event:treated,                    .
+A8,table,df,cv_event:female,                    .
+A8,table,df,cv_event:_cons,                    .
+A8,table,crit,cv_event:treated,   1.9599639845400538
+A8,table,crit,cv_event:female,   1.9599639845400538
+A8,table,crit,cv_event:_cons,   1.9599639845400538
+A8,table,eform,cv_event:treated,                    0
+A8,table,eform,cv_event:female,                    0
+A8,table,eform,cv_event:_cons,                    0
+A8,scalar,M_mi,,                    5
+A8,scalar,N,,                  400
+A8,scalar,fmi_max_mi,,                    0
+A8,scalar,N_fail,,                    .
+A8,scalar,N_sub,,                    .
+A9,b,r1,bmi:treated,  -.09221343381629464
+A9,b,r1,bmi:index_age, .0020875631757529627
+A9,b,r1,bmi:female,  -.73302439906315175
+A9,b,r1,bmi:1b.education,                    0
+A9,b,r1,bmi:2.education,   .28900639908140069
+A9,b,r1,bmi:3.education,   .29286737884517444
+A9,b,r1,bmi:_cons,   26.343223711427747
+A9,V,bmi:treated,bmi:treated,   .15178961855238546
+A9,V,bmi:treated,bmi:index_age,-.0000772933990092657
+A9,V,bmi:treated,bmi:female,-.0057288242040136033
+A9,V,bmi:treated,bmi:1b.education,                    0
+A9,V,bmi:treated,bmi:2.education,-.0014036334278163662
+A9,V,bmi:treated,bmi:3.education, -.012506285983066266
+A9,V,bmi:treated,bmi:_cons,  -.04544354840571533
+A9,V,bmi:index_age,bmi:treated,-.0000772933990092657
+A9,V,bmi:index_age,bmi:index_age, .0002355857242883043
+A9,V,bmi:index_age,bmi:female, .0004574404843885048
+A9,V,bmi:index_age,bmi:1b.education,                    0
+A9,V,bmi:index_age,bmi:2.education,-.0001073368120964297
+A9,V,bmi:index_age,bmi:3.education, .0002499867741267199
+A9,V,bmi:index_age,bmi:_cons, -.013973294135131095
+A9,V,bmi:female,bmi:treated,-.0057288242040136033
+A9,V,bmi:female,bmi:index_age, .0004574404843885048
+A9,V,bmi:female,bmi:female,   .15612019945042124
+A9,V,bmi:female,bmi:1b.education,                    0
+A9,V,bmi:female,bmi:2.education, .0037788785851649463
+A9,V,bmi:female,bmi:3.education, .0019958113681119273
+A9,V,bmi:female,bmi:_cons,  -.12642605939608648
+A9,V,bmi:1b.education,bmi:treated,                    0
+A9,V,bmi:1b.education,bmi:index_age,                    0
+A9,V,bmi:1b.education,bmi:female,                    0
+A9,V,bmi:1b.education,bmi:1b.education,                    0
+A9,V,bmi:1b.education,bmi:2.education,                    0
+A9,V,bmi:1b.education,bmi:3.education,                    0
+A9,V,bmi:1b.education,bmi:_cons,                    0
+A9,V,bmi:2.education,bmi:treated,-.0014036334278163662
+A9,V,bmi:2.education,bmi:index_age,-.0001073368120964297
+A9,V,bmi:2.education,bmi:female, .0037788785851649463
+A9,V,bmi:2.education,bmi:1b.education,                    0
+A9,V,bmi:2.education,bmi:2.education,   .23566336738904137
+A9,V,bmi:2.education,bmi:3.education,   .14027621733303067
+A9,V,bmi:2.education,bmi:_cons,  -.13669894877044697
+A9,V,bmi:3.education,bmi:treated, -.012506285983066266
+A9,V,bmi:3.education,bmi:index_age, .0002499867741267199
+A9,V,bmi:3.education,bmi:female, .0019958113681119273
+A9,V,bmi:3.education,bmi:1b.education,                    0
+A9,V,bmi:3.education,bmi:2.education,   .14027621733303067
+A9,V,bmi:3.education,bmi:3.education,   .26091799090931733
+A9,V,bmi:3.education,bmi:_cons,  -.15569530415117308
+A9,V,bmi:_cons,bmi:treated,  -.04544354840571533
+A9,V,bmi:_cons,bmi:index_age, -.013973294135131095
+A9,V,bmi:_cons,bmi:female,  -.12642605939608648
+A9,V,bmi:_cons,bmi:1b.education,                    0
+A9,V,bmi:_cons,bmi:2.education,  -.13669894877044697
+A9,V,bmi:_cons,bmi:3.education,  -.15569530415117308
+A9,V,bmi:_cons,bmi:_cons,   1.0520149960692691
+A9,W,bmi:treated,bmi:treated,   .15167628370999536
+A9,W,bmi:treated,bmi:index_age,-.0000531147296228285
+A9,W,bmi:treated,bmi:female,-.0057010308061915286
+A9,W,bmi:treated,bmi:1b.education,                    0
+A9,W,bmi:treated,bmi:2.education,-.0014237833068637426
+A9,W,bmi:treated,bmi:3.education, -.011155152144646721
+A9,W,bmi:treated,bmi:_cons, -.047287192304718687
+A9,W,bmi:index_age,bmi:treated,-.0000531147296228285
+A9,W,bmi:index_age,bmi:index_age, .0002097327126306873
+A9,W,bmi:index_age,bmi:female, .0004170886435563646
+A9,W,bmi:index_age,bmi:1b.education,                    0
+A9,W,bmi:index_age,bmi:2.education, .0000726389290442627
+A9,W,bmi:index_age,bmi:3.education, .0001776597643067612
+A9,W,bmi:index_age,bmi:_cons, -.012499464380993502
+A9,W,bmi:female,bmi:treated,-.0057010308061915286
+A9,W,bmi:female,bmi:index_age, .0004170886435563646
+A9,W,bmi:female,bmi:female,   .15605547314556198
+A9,W,bmi:female,bmi:1b.education,                    0
+A9,W,bmi:female,bmi:2.education,  .004147474794426528
+A9,W,bmi:female,bmi:3.education, .0020476187304220707
+A9,W,bmi:female,bmi:_cons,  -.12421362791201507
+A9,W,bmi:1b.education,bmi:treated,                    0
+A9,W,bmi:1b.education,bmi:index_age,                    0
+A9,W,bmi:1b.education,bmi:female,                    0
+A9,W,bmi:1b.education,bmi:1b.education,                    0
+A9,W,bmi:1b.education,bmi:2.education,                    0
+A9,W,bmi:1b.education,bmi:3.education,                    0
+A9,W,bmi:1b.education,bmi:_cons,                    0
+A9,W,bmi:2.education,bmi:treated,-.0014237833068637426
+A9,W,bmi:2.education,bmi:index_age, .0000726389290442627
+A9,W,bmi:2.education,bmi:female,  .004147474794426528
+A9,W,bmi:2.education,bmi:1b.education,                    0
+A9,W,bmi:2.education,bmi:2.education,   .22626835056815403
+A9,W,bmi:2.education,bmi:3.education,   .13580719532771238
+A9,W,bmi:2.education,bmi:_cons,  -.14204857344163027
+A9,W,bmi:3.education,bmi:treated, -.011155152144646721
+A9,W,bmi:3.education,bmi:index_age, .0001776597643067612
+A9,W,bmi:3.education,bmi:female, .0020476187304220707
+A9,W,bmi:3.education,bmi:1b.education,                    0
+A9,W,bmi:3.education,bmi:2.education,   .13580719532771238
+A9,W,bmi:3.education,bmi:3.education,   .24101194038676321
+A9,W,bmi:3.education,bmi:_cons,  -.14333252325049167
+A9,W,bmi:_cons,bmi:treated, -.047287192304718687
+A9,W,bmi:_cons,bmi:index_age, -.012499464380993502
+A9,W,bmi:_cons,bmi:female,  -.12421362791201507
+A9,W,bmi:_cons,bmi:1b.education,                    0
+A9,W,bmi:_cons,bmi:2.education,  -.14204857344163027
+A9,W,bmi:_cons,bmi:3.education,  -.14333252325049167
+A9,W,bmi:_cons,bmi:_cons,   .96338530444525738
+A9,B,bmi:treated,bmi:treated, .0000944457019917444
+A9,B,bmi:treated,bmi:index_age,-.0000201488911553643
+A9,B,bmi:treated,bmi:female, -.000023161164851729
+A9,B,bmi:treated,bmi:1b.education,                    0
+A9,B,bmi:treated,bmi:2.education, .0000167915658728136
+A9,B,bmi:treated,bmi:3.education,-.0011259448653496212
+A9,B,bmi:treated,bmi:_cons, .0015363699158361301
+A9,B,bmi:index_age,bmi:treated,-.0000201488911553643
+A9,B,bmi:index_age,bmi:index_age, .0000215441763813475
+A9,B,bmi:index_age,bmi:female, .0000336265340267835
+A9,B,bmi:index_age,bmi:1b.education,                    0
+A9,B,bmi:index_age,bmi:2.education,-.0001499797842839103
+A9,B,bmi:index_age,bmi:3.education, .0000602725081832989
+A9,B,bmi:index_age,bmi:_cons,-.0012281914617813272
+A9,B,bmi:female,bmi:treated, -.000023161164851729
+A9,B,bmi:female,bmi:index_age, .0000336265340267835
+A9,B,bmi:female,bmi:female, .0000539385873827129
+A9,B,bmi:female,bmi:1b.education,                    0
+A9,B,bmi:female,bmi:2.education,-.0003071635077179847
+A9,B,bmi:female,bmi:3.education,-.0000431728019251196
+A9,B,bmi:female,bmi:_cons,-.0018436929033928298
+A9,B,bmi:1b.education,bmi:treated,                    0
+A9,B,bmi:1b.education,bmi:index_age,                    0
+A9,B,bmi:1b.education,bmi:female,                    0
+A9,B,bmi:1b.education,bmi:1b.education,                    0
+A9,B,bmi:1b.education,bmi:2.education,                    0
+A9,B,bmi:1b.education,bmi:3.education,                    0
+A9,B,bmi:1b.education,bmi:_cons,                    0
+A9,B,bmi:2.education,bmi:treated, .0000167915658728136
+A9,B,bmi:2.education,bmi:index_age,-.0001499797842839103
+A9,B,bmi:2.education,bmi:female,-.0003071635077179847
+A9,B,bmi:2.education,bmi:1b.education,                    0
+A9,B,bmi:2.education,bmi:2.education, .0078291806840727913
+A9,B,bmi:2.education,bmi:3.education, .0037241850044319076
+A9,B,bmi:2.education,bmi:_cons, .0044580205593194268
+A9,B,bmi:3.education,bmi:treated,-.0011259448653496212
+A9,B,bmi:3.education,bmi:index_age, .0000602725081832989
+A9,B,bmi:3.education,bmi:female,-.0000431728019251196
+A9,B,bmi:3.education,bmi:1b.education,                    0
+A9,B,bmi:3.education,bmi:2.education, .0037241850044319076
+A9,B,bmi:3.education,bmi:3.education,  .016588375435461763
+A9,B,bmi:3.education,bmi:_cons, -.010302317417234504
+A9,B,bmi:_cons,bmi:treated, .0015363699158361301
+A9,B,bmi:_cons,bmi:index_age,-.0012281914617813272
+A9,B,bmi:_cons,bmi:female,-.0018436929033928298
+A9,B,bmi:_cons,bmi:1b.education,                    0
+A9,B,bmi:_cons,bmi:2.education, .0044580205593194268
+A9,B,bmi:_cons,bmi:3.education, -.010302317417234504
+A9,B,bmi:_cons,bmi:_cons,   .07385807635334303
+A9,df,r1,bmi:treated,   7174922.9311110759
+A9,df,r1,bmi:index_age,   332.15106364141405
+A9,df,r1,bmi:female,    23271080.97596259
+A9,df,r1,bmi:1b.education,                    0
+A9,df,r1,bmi:2.education,   2516.8018548949544
+A9,df,r1,bmi:3.education,   687.22324179985424
+A9,df,r1,bmi:_cons,   563.56676794699354
+A9,rvi,r1,bmi:treated, .0007472153168440568
+A9,rvi,r1,bmi:index_age,   .12326647251800373
+A9,rvi,r1,bmi:female, .0004147647215095203
+A9,rvi,r1,bmi:1b.education,                    0
+A9,rvi,r1,bmi:2.education,  .041521568514981004
+A9,rvi,r1,bmi:3.education,  .082593627894991167
+A9,rvi,r1,bmi:_cons,  .091998176861382536
+A9,fmi,r1,bmi:treated, .0007469359433886288
+A9,fmi,r1,bmi:index_age,   .11505189017064049
+A9,fmi,r1,bmi:female, .0004146786709945397
+A9,fmi,r1,bmi:1b.education,                    0
+A9,fmi,r1,bmi:2.education,  .040628329740543853
+A9,fmi,r1,bmi:3.education,  .078968912181234127
+A9,fmi,r1,bmi:_cons,  .087480192702265397
+A9,table,b,bmi:treated,  -.09221343381629464
+A9,table,b,bmi:index_age, .0020875631757529627
+A9,table,b,bmi:female,  -.73302439906315175
+A9,table,b,bmi:1b.education,                    0
+A9,table,b,bmi:2.education,   .28900639908140069
+A9,table,b,bmi:3.education,   .29286737884517444
+A9,table,b,bmi:_cons,   26.343223711427747
+A9,table,se,bmi:treated,   .38960187185431422
+A9,table,se,bmi:index_age,  .015348802047335951
+A9,table,se,bmi:female,   .39512048725726845
+A9,table,se,bmi:1b.education,                    .
+A9,table,se,bmi:2.education,   .48545171478638466
+A9,table,se,bmi:3.education,   .51080132234491848
+A9,table,se,bmi:_cons,   1.0256778227441934
+A9,table,t,bmi:treated,  -.23668632128845743
+A9,table,t,bmi:index_age,     .136008215449967
+A9,table,t,bmi:female,  -1.8551920811584477
+A9,table,t,bmi:1b.education,                    .
+A9,table,t,bmi:2.education,   .59533500506548498
+A9,table,t,bmi:3.education,   .57334890501206615
+A9,table,t,bmi:_cons,   25.683721659250317
+A9,table,pvalue,bmi:treated,   .81290015427032847
+A9,table,pvalue,bmi:index_age,    .8918971786656138
+A9,table,pvalue,bmi:female,  .063568814736084112
+A9,table,pvalue,bmi:1b.education,                    .
+A9,table,pvalue,bmi:2.education,   .55167308631314371
+A9,table,pvalue,bmi:3.education,    .5665960428568747
+A9,table,pvalue,bmi:_cons, 6.65109812779022e-97
+A9,table,ll,bmi:treated,  -.85581919977566467
+A9,table,ll,bmi:index_age, -.028105553171470756
+A9,table,ll,bmi:female,  -1.5074463639201925
+A9,table,ll,bmi:1b.education,                    .
+A9,table,ll,bmi:2.education,  -.66291926854130023
+A9,table,ll,bmi:3.education,  -.71005114174583894
+A9,table,ll,bmi:_cons,   24.328605513511011
+A9,table,ul,bmi:treated,   .67139233214307537
+A9,table,ul,bmi:index_age,  .032280679522976682
+A9,table,ul,bmi:female,   .04139756579388898
+A9,table,ul,bmi:1b.education,                    .
+A9,table,ul,bmi:2.education,   1.2409320667041017
+A9,table,ul,bmi:3.education,   1.2957858994361877
+A9,table,ul,bmi:_cons,   28.357841909344483
+A9,table,df,bmi:treated,   7174922.9311110759
+A9,table,df,bmi:index_age,   332.15106364141405
+A9,table,df,bmi:female,    23271080.97596259
+A9,table,df,bmi:1b.education,                    0
+A9,table,df,bmi:2.education,   2516.8018548949544
+A9,table,df,bmi:3.education,   687.22324179985424
+A9,table,df,bmi:_cons,   563.56676794699354
+A9,table,crit,bmi:treated,    1.959964315173796
+A9,table,crit,bmi:index_age,   1.9671317835820452
+A9,table,crit,bmi:female,   1.9599640864808001
+A9,table,crit,bmi:1b.education,                    .
+A9,table,crit,bmi:2.education,   1.9609070039881942
+A9,table,crit,bmi:3.education,   1.9634219347494031
+A9,table,crit,bmi:_cons,   1.9641822736564971
+A9,table,eform,bmi:treated,                    0
+A9,table,eform,bmi:index_age,                    0
+A9,table,eform,bmi:female,                    0
+A9,table,eform,bmi:1b.education,                    0
+A9,table,eform,bmi:2.education,                    0
+A9,table,eform,bmi:3.education,                    0
+A9,table,eform,bmi:_cons,                    0
+A9,scalar,M_mi,,                    5
+A9,scalar,N,,                  400
+A9,scalar,fmi_max_mi,,   .11505189017064049
+A9,scalar,N_fail,,                    .
+A9,scalar,N_sub,,                    .
+A10,b,r1,cv_event:treated, -.081105233941031793
+A10,b,r1,cv_event:index_age,-.0009198004545155054
+A10,b,r1,cv_event:female,   .38049955143708075
+A10,b,r1,cv_event:1b.education,                    0
+A10,b,r1,cv_event:2.education,  .023996466132803262
+A10,b,r1,cv_event:3.education, -.019741084326237647
+A10,b,r1,cv_event:_cons,  -1.2803770239007588
+A10,V,cv_event:treated,cv_event:treated,  .032549429003576325
+A10,V,cv_event:treated,cv_event:index_age,-.0000238843486235832
+A10,V,cv_event:treated,cv_event:female,-.0012349593688074881
+A10,V,cv_event:treated,cv_event:1b.education,                    0
+A10,V,cv_event:treated,cv_event:2.education,-.0010325707721153432
+A10,V,cv_event:treated,cv_event:3.education,-.0031211421611859942
+A10,V,cv_event:treated,cv_event:_cons,-.0082658038338644605
+A10,V,cv_event:index_age,cv_event:treated,-.0000238843486235832
+A10,V,cv_event:index_age,cv_event:index_age, .0000504717995829382
+A10,V,cv_event:index_age,cv_event:female, .0001040351291591181
+A10,V,cv_event:index_age,cv_event:1b.education,                    0
+A10,V,cv_event:index_age,cv_event:2.education, .0000846718630561182
+A10,V,cv_event:index_age,cv_event:3.education,  .000127429930613894
+A10,V,cv_event:index_age,cv_event:_cons,-.0030546475514253778
+A10,V,cv_event:female,cv_event:treated,-.0012349593688074881
+A10,V,cv_event:female,cv_event:index_age, .0001040351291591181
+A10,V,cv_event:female,cv_event:female,  .037736768370808423
+A10,V,cv_event:female,cv_event:1b.education,                    0
+A10,V,cv_event:female,cv_event:2.education, .0012432120300215712
+A10,V,cv_event:female,cv_event:3.education, .0007342712595328656
+A10,V,cv_event:female,cv_event:_cons, -.033535016444488606
+A10,V,cv_event:1b.education,cv_event:treated,                    0
+A10,V,cv_event:1b.education,cv_event:index_age,                    0
+A10,V,cv_event:1b.education,cv_event:female,                    0
+A10,V,cv_event:1b.education,cv_event:1b.education,                    0
+A10,V,cv_event:1b.education,cv_event:2.education,                    0
+A10,V,cv_event:1b.education,cv_event:3.education,                    0
+A10,V,cv_event:1b.education,cv_event:_cons,                    0
+A10,V,cv_event:2.education,cv_event:treated,-.0010325707721153432
+A10,V,cv_event:2.education,cv_event:index_age, .0000846718630561182
+A10,V,cv_event:2.education,cv_event:female, .0012432120300215712
+A10,V,cv_event:2.education,cv_event:1b.education,                    0
+A10,V,cv_event:2.education,cv_event:2.education,  .049966619956108523
+A10,V,cv_event:2.education,cv_event:3.education,  .032259742117888644
+A10,V,cv_event:2.education,cv_event:_cons, -.036257066726427943
+A10,V,cv_event:3.education,cv_event:treated,-.0031211421611859942
+A10,V,cv_event:3.education,cv_event:index_age,  .000127429930613894
+A10,V,cv_event:3.education,cv_event:female, .0007342712595328656
+A10,V,cv_event:3.education,cv_event:1b.education,                    0
+A10,V,cv_event:3.education,cv_event:2.education,  .032259742117888644
+A10,V,cv_event:3.education,cv_event:3.education,  .059243762600217256
+A10,V,cv_event:3.education,cv_event:_cons, -.039507302068709602
+A10,V,cv_event:_cons,cv_event:treated,-.0082658038338644605
+A10,V,cv_event:_cons,cv_event:index_age,-.0030546475514253778
+A10,V,cv_event:_cons,cv_event:female, -.033535016444488606
+A10,V,cv_event:_cons,cv_event:1b.education,                    0
+A10,V,cv_event:_cons,cv_event:2.education, -.036257066726427943
+A10,V,cv_event:_cons,cv_event:3.education, -.039507302068709602
+A10,V,cv_event:_cons,cv_event:_cons,   .23878541070193554
+A10,W,cv_event:treated,cv_event:treated,  .032517717821839834
+A10,W,cv_event:treated,cv_event:index_age,-.0000187659463181962
+A10,W,cv_event:treated,cv_event:female,-.0012208273844404223
+A10,W,cv_event:treated,cv_event:1b.education,                    0
+A10,W,cv_event:treated,cv_event:2.education,-.0007994683296945425
+A10,W,cv_event:treated,cv_event:3.education,-.0026193693670257716
+A10,W,cv_event:treated,cv_event:_cons,-.0088233637419529443
+A10,W,cv_event:index_age,cv_event:treated,-.0000187659463181962
+A10,W,cv_event:index_age,cv_event:index_age, .0000441293988625144
+A10,W,cv_event:index_age,cv_event:female, .0000881652445978858
+A10,W,cv_event:index_age,cv_event:1b.education,                    0
+A10,W,cv_event:index_age,cv_event:2.education, 2.06178283164670e-06
+A10,W,cv_event:index_age,cv_event:3.education, .0000481431217974649
+A10,W,cv_event:index_age,cv_event:_cons,-.0026188809657467131
+A10,W,cv_event:female,cv_event:treated,-.0012208273844404223
+A10,W,cv_event:female,cv_event:index_age, .0000881652445978858
+A10,W,cv_event:female,cv_event:female,  .037694879557830199
+A10,W,cv_event:female,cv_event:1b.education,                    0
+A10,W,cv_event:female,cv_event:2.education, .0009923610227023732
+A10,W,cv_event:female,cv_event:3.education, .0005129164068226782
+A10,W,cv_event:female,cv_event:_cons, -.032418237824788698
+A10,W,cv_event:1b.education,cv_event:treated,                    0
+A10,W,cv_event:1b.education,cv_event:index_age,                    0
+A10,W,cv_event:1b.education,cv_event:female,                    0
+A10,W,cv_event:1b.education,cv_event:1b.education,                    0
+A10,W,cv_event:1b.education,cv_event:2.education,                    0
+A10,W,cv_event:1b.education,cv_event:3.education,                    0
+A10,W,cv_event:1b.education,cv_event:_cons,                    0
+A10,W,cv_event:2.education,cv_event:treated,-.0007994683296945425
+A10,W,cv_event:2.education,cv_event:index_age, 2.06178283164670e-06
+A10,W,cv_event:2.education,cv_event:female, .0009923610227023732
+A10,W,cv_event:2.education,cv_event:1b.education,                    0
+A10,W,cv_event:2.education,cv_event:2.education,  .047266792934203751
+A10,W,cv_event:2.education,cv_event:3.education,  .028552311683416747
+A10,W,cv_event:2.education,cv_event:_cons,  -.02905634616290307
+A10,W,cv_event:3.education,cv_event:treated,-.0026193693670257716
+A10,W,cv_event:3.education,cv_event:index_age, .0000481431217974649
+A10,W,cv_event:3.education,cv_event:female, .0005129164068226782
+A10,W,cv_event:3.education,cv_event:1b.education,                    0
+A10,W,cv_event:3.education,cv_event:2.education,  .028552311683416747
+A10,W,cv_event:3.education,cv_event:3.education,  .051301786236336563
+A10,W,cv_event:3.education,cv_event:_cons, -.030776545517553495
+A10,W,cv_event:_cons,cv_event:treated,-.0088233637419529443
+A10,W,cv_event:_cons,cv_event:index_age,-.0026188809657467131
+A10,W,cv_event:_cons,cv_event:female, -.032418237824788698
+A10,W,cv_event:_cons,cv_event:1b.education,                    0
+A10,W,cv_event:_cons,cv_event:2.education,  -.02905634616290307
+A10,W,cv_event:_cons,cv_event:3.education, -.030776545517553495
+A10,W,cv_event:_cons,cv_event:_cons,   .20717927947390719
+A10,B,cv_event:treated,cv_event:treated,   .00002642598478041
+A10,B,cv_event:treated,cv_event:index_age,-4.26533525448921e-06
+A10,B,cv_event:treated,cv_event:female,-.0000117766536392215
+A10,B,cv_event:treated,cv_event:1b.education,                    0
+A10,B,cv_event:treated,cv_event:2.education,-.0001942520353506674
+A10,B,cv_event:treated,cv_event:3.education,-.0004181439951335188
+A10,B,cv_event:treated,cv_event:_cons, .0004646332567404036
+A10,B,cv_event:index_age,cv_event:treated,-4.26533525448921e-06
+A10,B,cv_event:index_age,cv_event:index_age, 5.28533393368645e-06
+A10,B,cv_event:index_age,cv_event:female, .0000132249038010269
+A10,B,cv_event:index_age,cv_event:1b.education,                    0
+A10,B,cv_event:index_age,cv_event:2.education, .0000688417335203929
+A10,B,cv_event:index_age,cv_event:3.education, .0000660723406803576
+A10,B,cv_event:index_age,cv_event:_cons,-.0003631388213988872
+A10,B,cv_event:female,cv_event:treated,-.0000117766536392215
+A10,B,cv_event:female,cv_event:index_age, .0000132249038010269
+A10,B,cv_event:female,cv_event:female, .0000349073441485203
+A10,B,cv_event:female,cv_event:1b.education,                    0
+A10,B,cv_event:female,cv_event:2.education, .0002090425060993316
+A10,B,cv_event:female,cv_event:3.education, .0001844623772584895
+A10,B,cv_event:female,cv_event:_cons,-.0009306488497499231
+A10,B,cv_event:1b.education,cv_event:treated,                    0
+A10,B,cv_event:1b.education,cv_event:index_age,                    0
+A10,B,cv_event:1b.education,cv_event:female,                    0
+A10,B,cv_event:1b.education,cv_event:1b.education,                    0
+A10,B,cv_event:1b.education,cv_event:2.education,                    0
+A10,B,cv_event:1b.education,cv_event:3.education,                    0
+A10,B,cv_event:1b.education,cv_event:_cons,                    0
+A10,B,cv_event:2.education,cv_event:treated,-.0001942520353506674
+A10,B,cv_event:2.education,cv_event:index_age, .0000688417335203929
+A10,B,cv_event:2.education,cv_event:female, .0002090425060993316
+A10,B,cv_event:2.education,cv_event:1b.education,                    0
+A10,B,cv_event:2.education,cv_event:2.education,  .002249855851587307
+A10,B,cv_event:2.education,cv_event:3.education,  .003089525362059916
+A10,B,cv_event:2.education,cv_event:_cons,-.0060006004696040597
+A10,B,cv_event:3.education,cv_event:treated,-.0004181439951335188
+A10,B,cv_event:3.education,cv_event:index_age, .0000660723406803576
+A10,B,cv_event:3.education,cv_event:female, .0001844623772584895
+A10,B,cv_event:3.education,cv_event:1b.education,                    0
+A10,B,cv_event:3.education,cv_event:2.education,  .003089525362059916
+A10,B,cv_event:3.education,cv_event:3.education, .0066183136365672432
+A10,B,cv_event:3.education,cv_event:_cons,-.0072756304592967542
+A10,B,cv_event:_cons,cv_event:treated, .0004646332567404036
+A10,B,cv_event:_cons,cv_event:index_age,-.0003631388213988872
+A10,B,cv_event:_cons,cv_event:female,-.0009306488497499231
+A10,B,cv_event:_cons,cv_event:1b.education,                    0
+A10,B,cv_event:_cons,cv_event:2.education,-.0060006004696040597
+A10,B,cv_event:_cons,cv_event:3.education,-.0072756304592967542
+A10,B,cv_event:_cons,cv_event:_cons,  .026338442690023643
+A10,df,r1,cv_event:treated,   4214265.4430234255
+A10,df,r1,cv_event:index_age,   253.30876380394227
+A10,df,r1,cv_event:female,   3246334.7163033751
+A10,df,r1,cv_event:1b.education,                    0
+A10,df,r1,cv_event:2.education,   1370.0867176004986
+A10,df,r1,cv_event:3.education,   222.58099363395974
+A10,df,r1,cv_event:_cons,   228.31418300981863
+A10,rvi,r1,cv_event:treated, .0009751970267481019
+A10,rvi,r1,cv_event:index_age,   .14372279894823747
+A10,rvi,r1,cv_event:female,  .001111260029733215
+A10,rvi,r1,cv_event:1b.education,                    0
+A10,rvi,r1,cv_event:2.education,  .057118895831646067
+A10,rvi,r1,cv_event:3.education,   .15480896371314776
+A10,rvi,r1,cv_event:_cons,    .1525544992157816
+A10,fmi,r1,cv_event:treated, .0009747210598847275
+A10,fmi,r1,cv_event:index_age,   .13248480113818514
+A10,fmi,r1,cv_event:female, .0011106418966339911
+A10,fmi,r1,cv_event:1b.education,                    0
+A10,fmi,r1,cv_event:2.education,  .055410482496861854
+A10,fmi,r1,cv_event:3.education,   .14173336372178807
+A10,fmi,r1,cv_event:_cons,   .13986388342045691
+A10,table,b,cv_event:treated, -.081105233941031793
+A10,table,b,cv_event:index_age,-.0009198004545155054
+A10,table,b,cv_event:female,   .38049955143708075
+A10,table,b,cv_event:1b.education,                    0
+A10,table,b,cv_event:2.education,  .023996466132803262
+A10,table,b,cv_event:3.education, -.019741084326237647
+A10,table,b,cv_event:_cons,  -1.2803770239007588
+A10,table,se,cv_event:treated,   .18041460307740148
+A10,table,se,cv_event:index_age, .0071043507502753676
+A10,table,se,cv_event:female,   .19425953868680021
+A10,table,se,cv_event:1b.education,                    .
+A10,table,se,cv_event:2.education,    .2235321452411454
+A10,table,se,cv_event:3.education,   .24340041618743641
+A10,table,se,cv_event:_cons,    .4886567411813077
+A10,table,t,cv_event:treated,  -.44954916374610776
+A10,table,t,cv_event:index_age,  -.12947002292642346
+A10,table,t,cv_event:female,   1.9587174663816671
+A10,table,t,cv_event:1b.education,                    .
+A10,table,t,cv_event:2.education,   .10735129887880775
+A10,table,t,cv_event:3.education, -.081105384433835748
+A10,table,t,cv_event:_cons,  -2.6201971977415059
+A10,table,pvalue,cv_event:treated,    .6530355739127599
+A10,table,pvalue,cv_event:index_age,   .89708848853973977
+A10,table,pvalue,cv_event:female,  .050145969263806059
+A10,table,pvalue,cv_event:1b.education,                    .
+A10,table,pvalue,cv_event:2.education,   .91452600614617685
+A10,table,pvalue,cv_event:3.education,   .93543102463894523
+A10,table,pvalue,cv_event:_cons, .0093775312458478591
+A10,table,ll,cv_event:treated,  -.43471145981585713
+A10,table,ll,cv_event:index_age, -.014910918900794589
+A10,table,ll,cv_event:female,-.0002422899983492433
+A10,table,ll,cv_event:1b.education,                    .
+A10,table,ll,cv_event:2.education,  -.41450586463127848
+A10,table,ll,cv_event:3.education,  -.49940522224941147
+A10,table,ll,cv_event:_cons,  -2.2432305310137686
+A10,table,ul,cv_event:treated,   .27250099193379351
+A10,table,ul,cv_event:index_age,  .013071317991763578
+A10,table,ul,cv_event:female,    .7612413928725108
+A10,table,ul,cv_event:1b.education,                    .
+A10,table,ul,cv_event:2.education,     .462498796896885
+A10,table,ul,cv_event:3.education,   .45992305359693614
+A10,table,ul,cv_event:_cons,  -.31752351678774915
+A10,table,df,cv_event:treated,   4214265.4430234255
+A10,table,df,cv_event:index_age,   253.30876380394227
+A10,table,df,cv_event:female,   3246334.7163033751
+A10,table,df,cv_event:1b.education,                    0
+A10,table,df,cv_event:2.education,   1370.0867176004986
+A10,table,df,cv_event:3.education,   222.58099363395974
+A10,table,df,cv_event:_cons,   228.31418300981863
+A10,table,crit,cv_event:treated,   1.9599645474547376
+A10,table,crit,cv_event:index_age,   1.9693732669008188
+A10,table,crit,cv_event:female,   1.9599647152940609
+A10,table,crit,cv_event:1b.education,                    .
+A10,table,crit,cv_event:2.education,   1.9616969643942153
+A10,table,crit,cv_event:3.education,   1.9706792019361083
+A10,table,crit,cv_event:_cons,   1.9704087265538395
+A10,table,eform,cv_event:treated,                    0
+A10,table,eform,cv_event:index_age,                    0
+A10,table,eform,cv_event:female,                    0
+A10,table,eform,cv_event:1b.education,                    0
+A10,table,eform,cv_event:2.education,                    0
+A10,table,eform,cv_event:3.education,                    0
+A10,table,eform,cv_event:_cons,                    0
+A10,scalar,M_mi,,                    5
+A10,scalar,N,,                  400
+A10,scalar,fmi_max_mi,,   .14173336372178807
+A10,scalar,N_fail,,                    .
+A10,scalar,N_sub,,                    .
+A11,b,r1,treated,  -.09221343381629464
+A11,b,r1,index_age, .0020875631757529627
+A11,b,r1,female,  -.73302439906315175
+A11,b,r1,1b.education,                    0
+A11,b,r1,2.education,   .28900639908140069
+A11,b,r1,3.education,   .29286737884517444
+A11,b,r1,_cons,   26.343223711427747
+A11,V,treated,treated,   .15178961855238543
+A11,V,treated,index_age,-.0000772933990092676
+A11,V,treated,female,-.0057288242040136363
+A11,V,treated,1b.education,                    0
+A11,V,treated,2.education,-.0014036334278163783
+A11,V,treated,3.education, -.012506285983066289
+A11,V,treated,_cons, -.045443548405715163
+A11,V,index_age,treated,-.0000772933990092676
+A11,V,index_age,index_age, .0002355857242883044
+A11,V,index_age,female,  .000457440484388504
+A11,V,index_age,1b.education,                    0
+A11,V,index_age,2.education,-.0001073368120964331
+A11,V,index_age,3.education, .0002499867741267162
+A11,V,index_age,_cons, -.013973294135131098
+A11,V,female,treated,-.0057288242040136363
+A11,V,female,index_age,  .000457440484388504
+A11,V,female,female,   .15612019945042116
+A11,V,female,1b.education,                    0
+A11,V,female,2.education,  .003778878585164922
+A11,V,female,3.education, .0019958113681118905
+A11,V,female,_cons,  -.12642605939608634
+A11,V,1b.education,treated,                    0
+A11,V,1b.education,index_age,                    0
+A11,V,1b.education,female,                    0
+A11,V,1b.education,1b.education,                    0
+A11,V,1b.education,2.education,                    0
+A11,V,1b.education,3.education,                    0
+A11,V,1b.education,_cons,                    0
+A11,V,2.education,treated,-.0014036334278163783
+A11,V,2.education,index_age,-.0001073368120964331
+A11,V,2.education,female,  .003778878585164922
+A11,V,2.education,1b.education,                    0
+A11,V,2.education,2.education,   .23566336738904123
+A11,V,2.education,3.education,   .14027621733303061
+A11,V,2.education,_cons,  -.13669894877044669
+A11,V,3.education,treated, -.012506285983066289
+A11,V,3.education,index_age, .0002499867741267162
+A11,V,3.education,female, .0019958113681118905
+A11,V,3.education,1b.education,                    0
+A11,V,3.education,2.education,   .14027621733303061
+A11,V,3.education,3.education,   .26091799090931722
+A11,V,3.education,_cons,  -.15569530415117275
+A11,V,_cons,treated, -.045443548405715163
+A11,V,_cons,index_age, -.013973294135131098
+A11,V,_cons,female,  -.12642605939608634
+A11,V,_cons,1b.education,                    0
+A11,V,_cons,2.education,  -.13669894877044669
+A11,V,_cons,3.education,  -.15569530415117275
+A11,V,_cons,_cons,   1.0520149960692688
+A11,W,treated,treated,   .15167628370999534
+A11,W,treated,index_age,-.0000531147296228303
+A11,W,treated,female,-.0057010308061915616
+A11,W,treated,1b.education,                    0
+A11,W,treated,2.education,-.0014237833068637548
+A11,W,treated,3.education, -.011155152144646744
+A11,W,treated,_cons,  -.04728719230471852
+A11,W,index_age,treated,-.0000531147296228303
+A11,W,index_age,index_age, .0002097327126306874
+A11,W,index_age,female, .0004170886435563638
+A11,W,index_age,1b.education,                    0
+A11,W,index_age,2.education, .0000726389290442593
+A11,W,index_age,3.education, .0001776597643067575
+A11,W,index_age,_cons, -.012499464380993506
+A11,W,female,treated,-.0057010308061915616
+A11,W,female,index_age, .0004170886435563638
+A11,W,female,female,    .1560554731455619
+A11,W,female,1b.education,                    0
+A11,W,female,2.education, .0041474747944265037
+A11,W,female,3.education, .0020476187304220338
+A11,W,female,_cons,  -.12421362791201493
+A11,W,1b.education,treated,                    0
+A11,W,1b.education,index_age,                    0
+A11,W,1b.education,female,                    0
+A11,W,1b.education,1b.education,                    0
+A11,W,1b.education,2.education,                    0
+A11,W,1b.education,3.education,                    0
+A11,W,1b.education,_cons,                    0
+A11,W,2.education,treated,-.0014237833068637548
+A11,W,2.education,index_age, .0000726389290442593
+A11,W,2.education,female, .0041474747944265037
+A11,W,2.education,1b.education,                    0
+A11,W,2.education,2.education,   .22626835056815389
+A11,W,2.education,3.education,   .13580719532771232
+A11,W,2.education,_cons,  -.14204857344162999
+A11,W,3.education,treated, -.011155152144646744
+A11,W,3.education,index_age, .0001776597643067575
+A11,W,3.education,female, .0020476187304220338
+A11,W,3.education,1b.education,                    0
+A11,W,3.education,2.education,   .13580719532771232
+A11,W,3.education,3.education,   .24101194038676313
+A11,W,3.education,_cons,  -.14333252325049134
+A11,W,_cons,treated,  -.04728719230471852
+A11,W,_cons,index_age, -.012499464380993506
+A11,W,_cons,female,  -.12421362791201493
+A11,W,_cons,1b.education,                    0
+A11,W,_cons,2.education,  -.14204857344162999
+A11,W,_cons,3.education,  -.14333252325049134
+A11,W,_cons,_cons,   .96338530444525716
+A11,B,treated,treated, .0000944457019917444
+A11,B,treated,index_age,-.0000201488911553643
+A11,B,treated,female, -.000023161164851729
+A11,B,treated,1b.education,                    0
+A11,B,treated,2.education, .0000167915658728136
+A11,B,treated,3.education,-.0011259448653496212
+A11,B,treated,_cons, .0015363699158361301
+A11,B,index_age,treated,-.0000201488911553643
+A11,B,index_age,index_age, .0000215441763813475
+A11,B,index_age,female, .0000336265340267835
+A11,B,index_age,1b.education,                    0
+A11,B,index_age,2.education,-.0001499797842839103
+A11,B,index_age,3.education, .0000602725081832989
+A11,B,index_age,_cons,-.0012281914617813272
+A11,B,female,treated, -.000023161164851729
+A11,B,female,index_age, .0000336265340267835
+A11,B,female,female, .0000539385873827129
+A11,B,female,1b.education,                    0
+A11,B,female,2.education,-.0003071635077179847
+A11,B,female,3.education,-.0000431728019251196
+A11,B,female,_cons,-.0018436929033928298
+A11,B,1b.education,treated,                    0
+A11,B,1b.education,index_age,                    0
+A11,B,1b.education,female,                    0
+A11,B,1b.education,1b.education,                    0
+A11,B,1b.education,2.education,                    0
+A11,B,1b.education,3.education,                    0
+A11,B,1b.education,_cons,                    0
+A11,B,2.education,treated, .0000167915658728136
+A11,B,2.education,index_age,-.0001499797842839103
+A11,B,2.education,female,-.0003071635077179847
+A11,B,2.education,1b.education,                    0
+A11,B,2.education,2.education, .0078291806840727913
+A11,B,2.education,3.education, .0037241850044319076
+A11,B,2.education,_cons, .0044580205593194268
+A11,B,3.education,treated,-.0011259448653496212
+A11,B,3.education,index_age, .0000602725081832989
+A11,B,3.education,female,-.0000431728019251196
+A11,B,3.education,1b.education,                    0
+A11,B,3.education,2.education, .0037241850044319076
+A11,B,3.education,3.education,  .016588375435461763
+A11,B,3.education,_cons, -.010302317417234504
+A11,B,_cons,treated, .0015363699158361301
+A11,B,_cons,index_age,-.0012281914617813272
+A11,B,_cons,female,-.0018436929033928298
+A11,B,_cons,1b.education,                    0
+A11,B,_cons,2.education, .0044580205593194268
+A11,B,_cons,3.education, -.010302317417234504
+A11,B,_cons,_cons,   .07385807635334303
+A11,df,r1,treated,   391.70102703691396
+A11,df,r1,index_age,    170.1825379554717
+A11,df,r1,female,   391.84598858052055
+A11,df,r1,1b.education,                    0
+A11,df,r1,2.education,   327.42119857672287
+A11,df,r1,3.education,   237.14984619599772
+A11,df,r1,_cons,   219.29752983813108
+A11,rvi,r1,treated, .0007472153168440571
+A11,rvi,r1,index_age,   .12326647251800366
+A11,rvi,r1,female, .0004147647215095205
+A11,rvi,r1,1b.education,                    0
+A11,rvi,r1,2.education,  .041521568514981032
+A11,rvi,r1,3.education,  .082593627894991195
+A11,rvi,r1,_cons,   .09199817686138255
+A11,fmi,r1,treated, .0007761269945818494
+A11,fmi,r1,index_age,   .11556488727116843
+A11,fmi,r1,female, .0004422031872236554
+A11,fmi,r1,1b.education,                    0
+A11,fmi,r1,2.education,  .040845822657716413
+A11,fmi,r1,3.education,  .079347075296110958
+A11,fmi,r1,_cons,  .087891530419442199
+A11,table,b,treated,  -.09221343381629464
+A11,table,b,index_age, .0020875631757529627
+A11,table,b,female,  -.73302439906315175
+A11,table,b,1b.education,                    0
+A11,table,b,2.education,   .28900639908140069
+A11,table,b,3.education,   .29286737884517444
+A11,table,b,_cons,   26.343223711427747
+A11,table,se,treated,   .38960187185431416
+A11,table,se,index_age,  .015348802047335955
+A11,table,se,female,   .39512048725726834
+A11,table,se,1b.education,                    .
+A11,table,se,2.education,   .48545171478638455
+A11,table,se,3.education,   .51080132234491837
+A11,table,se,_cons,   1.0256778227441934
+A11,table,t,treated,  -.23668632128845749
+A11,table,t,index_age,   .13600821544996697
+A11,table,t,female,  -1.8551920811584481
+A11,table,t,1b.education,                    .
+A11,table,t,2.education,   .59533500506548509
+A11,table,t,3.education,   .57334890501206626
+A11,table,t,_cons,   25.683721659250317
+A11,table,pvalue,treated,   .81302387360002293
+A11,table,pvalue,index_age,   .89197553527215767
+A11,table,pvalue,female,  .064319627670123461
+A11,table,pvalue,1b.education,                    .
+A11,table,pvalue,2.education,   .55203080721543629
+A11,table,pvalue,3.education,   .56695176026474647
+A11,table,pvalue,_cons, 4.80802236888600e-68
+A11,table,ll,treated,  -.73457070163859617
+A11,table,ll,index_age, -.023297154351632869
+A11,table,ll,female,  -1.3844799294232866
+A11,table,ll,1b.education,                    .
+A11,table,ll,2.education,  -.51175627883944597
+A11,table,ll,3.education,   -.5506210393983032
+A11,table,ll,_cons,   24.648976609151227
+A11,table,ul,treated,   .55014383400600686
+A11,table,ul,index_age,  .027472280703138792
+A11,table,ul,female, -.081568868703016939
+A11,table,ul,1b.education,                    .
+A11,table,ul,2.education,   1.0897690770022472
+A11,table,ul,3.education,    1.136355797088652
+A11,table,ul,_cons,   28.037470813704267
+A11,table,df,treated,   391.70102703691396
+A11,table,df,index_age,    170.1825379554717
+A11,table,df,female,   391.84598858052055
+A11,table,df,1b.education,                    0
+A11,table,df,2.education,   327.42119857672287
+A11,table,df,3.education,   237.14984619599772
+A11,table,df,_cons,   219.29752983813108
+A11,table,crit,treated,   1.6487530328460573
+A11,table,crit,index_age,   1.6538565973487018
+A11,table,crit,female,   1.6487515868443521
+A11,table,crit,1b.education,                    .
+A11,table,crit,2.education,   1.6495207525906255
+A11,table,crit,3.education,   1.6513042964949736
+A11,table,crit,_cons,   1.6518316616650397
+A11,table,eform,treated,                    0
+A11,table,eform,index_age,                    0
+A11,table,eform,female,                    0
+A11,table,eform,1b.education,                    0
+A11,table,eform,2.education,                    0
+A11,table,eform,3.education,                    0
+A11,table,eform,_cons,                    0
+A11,scalar,M_mi,,                    5
+A11,scalar,N,,                  400
+A11,scalar,fmi_max_mi,,   .11556488727116843
+A11,scalar,N_fail,,                    .
+A11,scalar,N_sub,,                    .
+A4,b,r1,treated,  -.10086887733956382
+A4,b,r1,index_age,-.0054056325218622813
+A4,b,r1,female,   .44921992198565375
+A4,b,r1,1b.education,                    0
+A4,b,r1,2.education, -.067833860306993649
+A4,b,r1,3.education,  -.05167950555233386
+A4,V,treated,treated,  .034049887747798616
+A4,V,treated,index_age, .0000643348103663752
+A4,V,treated,female, -.000216045041763957
+A4,V,treated,1b.education,                    0
+A4,V,treated,2.education, .0016485128716218446
+A4,V,treated,3.education,-.0056539680774229115
+A4,V,index_age,treated, .0000643348103663752
+A4,V,index_age,index_age, .0000543315870789438
+A4,V,index_age,female, .0000890796484331273
+A4,V,index_age,1b.education,                    0
+A4,V,index_age,2.education,   .00023931715706337
+A4,V,index_age,3.education, .0003372441845819984
+A4,V,female,treated, -.000216045041763957
+A4,V,female,index_age, .0000890796484331273
+A4,V,female,female,   .03813930494756803
+A4,V,female,1b.education,                    0
+A4,V,female,2.education, .0011415260995006173
+A4,V,female,3.education,-.0006626963949686497
+A4,V,1b.education,treated,                    0
+A4,V,1b.education,index_age,                    0
+A4,V,1b.education,female,                    0
+A4,V,1b.education,1b.education,                    0
+A4,V,1b.education,2.education,                    0
+A4,V,1b.education,3.education,                    0
+A4,V,2.education,treated, .0016485128716218446
+A4,V,2.education,index_age,   .00023931715706337
+A4,V,2.education,female, .0011415260995006173
+A4,V,2.education,1b.education,                    0
+A4,V,2.education,2.education,  .051837530149942725
+A4,V,2.education,3.education,  .033581958473763482
+A4,V,3.education,treated,-.0056539680774229115
+A4,V,3.education,index_age, .0003372441845819984
+A4,V,3.education,female,-.0006626963949686497
+A4,V,3.education,1b.education,                    0
+A4,V,3.education,2.education,  .033581958473763482
+A4,V,3.education,3.education,  .063117845451961044
+A4,W,treated,treated,   .03367390309372794
+A4,W,treated,index_age, .0000265082083156475
+A4,W,treated,female,-.0003842767157291341
+A4,W,treated,1b.education,                    0
+A4,W,treated,2.education, .0013900011786863429
+A4,W,treated,3.education, -.004858913972534692
+A4,W,index_age,treated, .0000265082083156475
+A4,W,index_age,index_age,  .000041540541279289
+A4,W,index_age,female, .0000607419994526259
+A4,W,index_age,1b.education,                    0
+A4,W,index_age,2.education, .0000432720263091358
+A4,W,index_age,3.education, .0001515791376035516
+A4,W,female,treated,-.0003842767157291341
+A4,W,female,index_age, .0000607419994526259
+A4,W,female,female,  .038046715843211058
+A4,W,female,1b.education,                    0
+A4,W,female,2.education, .0008209964671857884
+A4,W,female,3.education,-.0006104306019598637
+A4,W,1b.education,treated,                    0
+A4,W,1b.education,index_age,                    0
+A4,W,1b.education,female,                    0
+A4,W,1b.education,1b.education,                    0
+A4,W,1b.education,2.education,                    0
+A4,W,1b.education,3.education,                    0
+A4,W,2.education,treated, .0013900011786863429
+A4,W,2.education,index_age, .0000432720263091358
+A4,W,2.education,female, .0008209964671857884
+A4,W,2.education,1b.education,                    0
+A4,W,2.education,2.education,  .048073468039661657
+A4,W,2.education,3.education,  .028837119360015973
+A4,W,3.education,treated, -.004858913972534692
+A4,W,3.education,index_age, .0001515791376035516
+A4,W,3.education,female,-.0006104306019598637
+A4,W,3.education,1b.education,                    0
+A4,W,3.education,2.education,  .028837119360015973
+A4,W,3.education,3.education,  .053121777094950765
+A4,B,treated,treated, .0003133205450588966
+A4,B,treated,index_age, .0000315221683756064
+A4,B,treated,female, .0001401930616376476
+A4,B,treated,1b.education,                    0
+A4,B,treated,2.education, .0002154264107795848
+A4,B,treated,3.education,-.0006625450874068496
+A4,B,index_age,treated, .0000315221683756064
+A4,B,index_age,index_age, .0000106592048330457
+A4,B,index_age,female, .0000236147074837512
+A4,B,index_age,1b.education,                    0
+A4,B,index_age,2.education, .0001633709422951952
+A4,B,index_age,3.education,  .000154720872482039
+A4,B,female,treated, .0001401930616376476
+A4,B,female,index_age, .0000236147074837512
+A4,B,female,female, .0000771575869641417
+A4,B,female,1b.education,                    0
+A4,B,female,2.education,  .000267108026929024
+A4,B,female,3.education,-.0000435548275073217
+A4,B,1b.education,treated,                    0
+A4,B,1b.education,index_age,                    0
+A4,B,1b.education,female,                    0
+A4,B,1b.education,1b.education,                    0
+A4,B,1b.education,2.education,                    0
+A4,B,1b.education,3.education,                    0
+A4,B,2.education,treated, .0002154264107795848
+A4,B,2.education,index_age, .0001633709422951952
+A4,B,2.education,female,  .000267108026929024
+A4,B,2.education,1b.education,                    0
+A4,B,2.education,2.education, .0031367184252342217
+A4,B,2.education,3.education, .0039540325947895879
+A4,B,3.education,treated,-.0006625450874068496
+A4,B,3.education,index_age,  .000154720872482039
+A4,B,3.education,female,-.0000435548275073217
+A4,B,3.education,1b.education,                    0
+A4,B,3.education,2.education, .0039540325947895879
+A4,B,3.education,3.education, .0083300569641752368
+A4,df,r1,treated,   32805.836908231373
+A4,df,r1,index_age,   72.169328787794115
+A4,df,r1,female,   678712.38406859955
+A4,df,r1,1b.education,                    0
+A4,df,r1,2.education,   758.63876606446161
+A4,df,r1,3.education,   159.47987551471255
+A4,rvi,r1,treated,  .011165461070080301
+A4,rvi,r1,index_age,   .30791716731991842
+A4,rvi,r1,female, .0024335636415643842
+A4,rvi,r1,1b.education,                    0
+A4,rvi,r1,2.education,  .078298118770537481
+A4,rvi,r1,3.education,   .18817270248966148
+A4,fmi,r1,treated,  .011102456213702025
+A4,fmi,r1,index_age,   .25576831023810404
+A4,fmi,r1,female,  .002430595376313599
+A4,fmi,r1,1b.education,                    0
+A4,fmi,r1,2.education,  .075047924243490341
+A4,fmi,r1,3.education,   .16873129536424156
+A4,table,b,treated,  -.10086887733956382
+A4,table,b,index_age,-.0054056325218622813
+A4,table,b,female,   .44921992198565375
+A4,table,b,1b.education,                    0
+A4,table,b,2.education, -.067833860306993649
+A4,table,b,3.education,  -.05167950555233386
+A4,table,se,treated,   .18452611670925775
+A4,table,se,index_age, .0073709963423504539
+A4,table,se,female,   .19529286967927945
+A4,table,se,1b.education,                    .
+A4,table,se,2.education,   .22767856761219912
+A4,table,se,3.education,   .25123265204180972
+A4,table,t,treated,  -.54663740362831348
+A4,table,t,index_age,    -.733365242742549
+A4,table,t,female,   2.3002371910627719
+A4,table,t,1b.education,                    .
+A4,table,t,2.education,  -.29793696006790532
+A4,table,t,3.education,  -.20570377748404073
+A4,table,pvalue,treated,   .58463158459384279
+A4,table,pvalue,index_age,   .46571130967196506
+A4,table,pvalue,female,  .021435087687849016
+A4,table,pvalue,1b.education,                    .
+A4,table,pvalue,2.education,   .76583285221414277
+A4,table,pvalue,3.education,   .83728465277956032
+A4,table,ll,treated,  -.46254676432072184
+A4,table,ll,index_age,  -.02009885619357641
+A4,table,ll,female,  .066452248377682988
+A4,table,ll,1b.education,                    .
+A4,table,ll,2.education,  -.51478872400655629
+A4,table,ll,3.education,  -.54785159298813069
+A4,table,ul,treated,   .26080900964159426
+A4,table,ul,index_age, .0092875911498518458
+A4,table,ul,female,   .83198759559362445
+A4,table,ul,1b.education,                    .
+A4,table,ul,2.education,   .37912100339256904
+A4,table,ul,3.education,   .44449258188346291
+A4,table,df,treated,   32805.836908231373
+A4,table,df,index_age,   72.169328787794115
+A4,table,df,female,   678712.38406859955
+A4,table,df,1b.education,                    0
+A4,table,df,2.education,   758.63876606446161
+A4,table,df,3.education,   159.47987551471255
+A4,table,crit,treated,   1.9600362996367795
+A4,table,crit,index_age,   1.9933836606719535
+A4,table,crit,female,   1.9599674797987894
+A4,table,crit,1b.education,                    .
+A4,table,crit,2.education,   1.9630959048409553
+A4,table,crit,3.education,   1.9749506419779568
+A4,table,eform,treated,                    0
+A4,table,eform,index_age,                    0
+A4,table,eform,female,                    0
+A4,table,eform,1b.education,                    0
+A4,table,eform,2.education,                    0
+A4,table,eform,3.education,                    0
+A4,scalar,M_mi,,                    5
+A4,scalar,N,,                  400
+A4,scalar,fmi_max_mi,,   .25576831023810404
+A4,scalar,N_fail,,                  133
+A4,scalar,N_sub,,                  400

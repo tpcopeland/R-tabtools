@@ -1,0 +1,10 @@
+  +---------------------------------------------------------------+
+  |                                 OLS                           |
+  |                               Coef.          95% CI   p-value |
+  |             Treatment group   -0.09   (-0.29, 0.10)      0.35 |
+  | Age at cohort entry (years)    0.00   (-0.01, 0.00)      0.40 |
+  |                  Female sex   -0.01   (-0.21, 0.18)      0.90 |
+  +---------------------------------------------------------------+
+
+Markdown exported to R27b.md
+Exported 6 rows × 5 cols to regtab.xlsx, sheet R27b

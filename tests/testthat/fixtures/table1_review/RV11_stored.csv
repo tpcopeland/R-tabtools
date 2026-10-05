@@ -1,0 +1,14 @@
+name,kind,row,col,value
+_golden_id,meta,,,RV11
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,yN x1 x2 c1 b1 c2 c3
+methods,macro,,,"Baseline characteristics were compared between groups defined by g. Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values were calculated using independent t-test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures."
+table,matrix,Marker,p_value,.716231383316418
+table,matrix,Marker_2,p_value,.93635951869259837
+table,matrix,Group,p_value,.86687789975018159
+table,matrix,Group_2,p_value,1
+table,matrix,Stage,p_value,1
+table,matrix,Stage_2,p_value,.0001697424355528

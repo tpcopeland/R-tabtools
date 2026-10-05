@@ -1,0 +1,25 @@
+name,kind,row,col,value
+_golden_id,meta,,,MI01
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,11
+fmi_1,scalar,,,.1155648872711684
+mi_m_1,scalar,,,5
+n_1,scalar,,,400
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,14
+sheet,macro,,,MI01
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,MI01.md
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable linear regression with multiple imputation. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Treatment_group,c1,-.092213433816294599
+table,matrix,Age_at_cohort_entry_(years),c1,.002087563175753
+table,matrix,Female_sex,c1,-.73302439906315175
+table,matrix,__Secondary,c1,.28900639908140069
+table,matrix,__Tertiary,c1,.29286737884517439
+table,matrix,Intercept,c1,26.343223711427751

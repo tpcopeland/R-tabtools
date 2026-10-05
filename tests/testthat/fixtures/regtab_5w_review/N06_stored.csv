@@ -1,0 +1,18 @@
+name,kind,row,col,value
+_golden_id,meta,,,N06
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+n_1,scalar,,,900
+ll_1,scalar,,,-4814.6708438710994
+bic_1,scalar,,,9649.7488720321708
+aic_1,scalar,,,9635.3416877421987
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,10
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable gamma regression with a log link. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,treat,c1,.1953091373340641
+table,matrix,x1,c1,.0096957886673399007
+table,matrix,Intercept,c1,1.099305232664924

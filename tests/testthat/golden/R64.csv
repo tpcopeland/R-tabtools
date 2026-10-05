@@ -1,0 +1,15 @@
+,Multinomial,,
+,RRR,95% CI,p-value
+Secondary: Smoking status,,,
+Secondary:   Never,Reference,,
+Secondary:   Former,0.89,"(0.81, 0.99)",0.038
+Secondary:   Current,0.96,"(0.85, 1.08)",0.48
+Secondary: Age at cohort entry (years),1.00,"(1.00, 1.00)",0.87
+Secondary: Female sex,1.08,"(0.99, 1.18)",0.084
+Tertiary: Smoking status,,,
+Tertiary:   Never,Reference,,
+Tertiary:   Former,1.00,"(0.90, 1.11)",0.96
+Tertiary:   Current,1.03,"(0.91, 1.16)",0.67
+Tertiary: Age at cohort entry (years),1.00,"(1.00, 1.00)",0.57
+Tertiary: Female sex,1.01,"(0.92, 1.10)",0.81
+Observations,"13,566",,

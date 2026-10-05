@@ -1,0 +1,24 @@
+name,kind,row,col,value
+_golden_id,meta,,,E17
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,7
+markdown_rows,scalar,,,2
+ci_level,scalar,,,95
+N_cols,scalar,,,8
+N_rows,scalar,,,5
+sheet,macro,,,E17
+xlsx,macro,,,effecttab.xlsx
+markdown,macro,,,E17.md
+methods,macro,,,"Effect estimates from multiple collected models were formatted with 95% confidence intervals. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+type,macro,,,margins
+effect_label,macro,,,AME
+table,matrix,Age_(years),c1,.0024320500152956999
+table,matrix,Age_(years),c2,1.18057153773000e-37
+table,matrix,Age_(years),c3,.0024698635264433998
+table,matrix,Age_(years),c4,8.91524126954000e-39
+table,matrix,Body_mass_index_(BMI),c1,.0030291093448200999
+table,matrix,Body_mass_index_(BMI),c2,3.59800198942000e-15
+table,matrix,Body_mass_index_(BMI),c3,.0028925020718689998
+table,matrix,Body_mass_index_(BMI),c4,4.90010080337000e-14

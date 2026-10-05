@@ -1,0 +1,20 @@
+name,kind,row,col,value
+_golden_id,meta,,,T30g
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,14
+markdown,macro,,,T30g.md
+sheet,macro,,,T30g
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age crp prior_hosp female smoking education rare_event
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures. P-values were calculated using independent t-test, Wilcoxon rank-sum test, Pearson's chi-squared test, Fisher's exact test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures."
+table,matrix,Age_at_cohort_entry_(years),p_value,.24424100913188879
+table,matrix,C-reactive_protein_(mg/L),p_value,.3820998126804821
+table,matrix,Prior_hospitalizations,p_value,.97386067765338269
+table,matrix,Female_sex,p_value,.80496326113412198
+table,matrix,Smoking_status,p_value,.98673348136219641
+table,matrix,Education_level,p_value,.10568084613205581
+table,matrix,Rare_adverse_event,p_value,.8361214768347246

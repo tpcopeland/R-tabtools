@@ -1,0 +1,18 @@
+name,kind,row,col,value
+_golden_id,meta,,,R67
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,2
+ci_level,scalar,,,99.900000000000006
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,5
+sheet,macro,,,R67
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R67.md
+methods,macro,,,"Coefficients with 99.9% confidence intervals from univariable linear regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Weight_(lbs_),c1,-.0060086868119993003
+table,matrix,Intercept,c1,39.440283530717977

@@ -1,0 +1,12 @@
+  +--------------------------------------------------------+
+  |               Total     0         1         p-value    |
+  |--------------------------------------------------------|
+  | No. (Row %)   N=30      N=15      N=15                 |
+  |--------------------------------------------------------|
+  | category                                    Suppressed |
+  |    0          8         <3        ≥3                   |
+  |    1          12        8         4                    |
+  |    Missing    10        ≥3        ≥3                   |
+  +--------------------------------------------------------+
+Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to tests/testthat/fixtures/table1_phase3/S7.csv

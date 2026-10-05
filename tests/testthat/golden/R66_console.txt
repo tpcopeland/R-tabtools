@@ -1,0 +1,14 @@
+  +-----------------------------------------------------+
+  |                      Model                          |
+  |                         OR         95% CI   p-value |
+  |     Mileage (mpg)     0.84   (0.66, 1.06)      0.14 |
+  |     Weight (lbs.)     1.00   (1.00, 1.00)     0.064 |
+  | Turn circle (ft.)     0.67   (0.58, 0.77)    <0.001 |
+  |      Observations       74                          |
+  |               AIC    55.07                          |
+  |               BIC    64.29                          |
+  |    Log-likelihood   -23.54                          |
+  +-----------------------------------------------------+
+
+Markdown exported to R66.md
+Exported 10 rows × 5 cols to regtab.xlsx, sheet R66

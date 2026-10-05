@@ -1,0 +1,3 @@
+model,kind,subcmd,level,equation,term,estimate,conf_low,conf_high,p_value
+1,margins,,95,,0b.treated,0,.,.,.
+1,margins,,95,,1.treated,.0071123306386191021,-.008465360847294932,.022690022124533138,.3708599103410562

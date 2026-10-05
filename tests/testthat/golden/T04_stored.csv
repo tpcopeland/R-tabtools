@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,T04
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,2
+markdown_rows,scalar,,,7
+markdown,macro,,,T04.md
+sheet,macro,,,T04
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age female education diabetes
+Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures."
+table,matrix,Age_at_cohort_entry_(years),p_value,.
+table,matrix,Female_sex,p_value,.
+table,matrix,Education_level,p_value,.
+table,matrix,Diabetes,p_value,.

@@ -1,0 +1,26 @@
+name,kind,row,col,value
+_golden_id,meta,,,R70
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,7
+markdown_rows,scalar,,,5
+ci_level,scalar,,,95
+N_models,scalar,,,2
+N_cols,scalar,,,8
+N_rows,scalar,,,8
+sheet,macro,,,R70
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R70.md
+methods,macro,,,"Collected regression estimates with 95% confidence intervals across 2 models. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,mixed
+table,matrix,cut1,c1,-.094353093946516906
+table,matrix,cut1,c2,.
+table,matrix,Female_sex,c1,-.16458765369227871
+table,matrix,Female_sex,c2,1.0026590301019229
+table,matrix,cut1_2,c1,.
+table,matrix,cut1_2,c2,-1.0582794969875171
+table,matrix,cut2,c1,.
+table,matrix,cut2,c2,.61887764716945326
+table,matrix,Intercept,c1,58.744201060665922
+table,matrix,Intercept,c2,.

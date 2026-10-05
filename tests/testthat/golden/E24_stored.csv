@@ -1,0 +1,26 @@
+name,kind,row,col,value
+_golden_id,meta,,,E24
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,6
+ci_level,scalar,,,90
+N_cols,scalar,,,5
+N_rows,scalar,,,9
+sheet,macro,,,E24
+xlsx,macro,,,effecttab.xlsx
+markdown,macro,,,E24.md
+methods,macro,,,"Effect estimates were formatted from the supplied matrix with 90% confidence intervals and p-values. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+type,macro,,,margins
+effect_label,macro,,,Diff
+table,matrix,Tie_low,c1,.25
+table,matrix,Tie_low,c2,.10000000000000001
+table,matrix,Near_zero,c1,-.001
+table,matrix,Near_zero,c2,.001
+table,matrix,No_interval,c1,.75
+table,matrix,No_interval,c2,.
+table,matrix,Large,c1,1234.55
+table,matrix,Large,c2,.00001
+table,matrix,Hi_p,c1,.050000000000000003
+table,matrix,Hi_p,c2,.995

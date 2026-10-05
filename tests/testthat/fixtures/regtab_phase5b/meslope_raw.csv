@@ -1,0 +1,9 @@
+,Model,,
+,OR,95% CI,p-value
+Exposure score,2.00,"(1.65, 2.42)",<0.001
+z,1.26,"(1.15, 1.39)",<0.001
+var(x[clinic]),0.27,"(0.14, 0.51)",
+Median Odds Ratio (Clinic ID),2.09,"(1.77, 2.61)",
+"cov(x[clinic],_cons[clinic])",0.00,"(-0.16, 0.16)",0.98
+Groups,40,,
+ICC,0.154,,

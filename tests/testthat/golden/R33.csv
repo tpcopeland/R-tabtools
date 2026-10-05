@@ -1,0 +1,5 @@
+,GLM gamma,,
+,Coef.,95% CI,p-value
+Mileage (mpg),-0.01,"(-0.03, 0.01)",0.29
+Weight (lbs.),0.00,"(0.00, 0.00)",0.008
+Intercept,8.28,"(7.36, 9.19)",<0.001

@@ -1,0 +1,18 @@
+name,kind,row,col,value
+_golden_id,meta,,,T24
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,8
+markdown,macro,,,T24.md
+sheet,macro,,,T24
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age female education diabetes hypertension
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values were calculated using independent t-test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures."
+table,matrix,Age_at_cohort_entry_(years),p_value,.0096450455655283998
+table,matrix,Female_sex,p_value,.56770775099784387
+table,matrix,Education_level,p_value,.3040419531550107
+table,matrix,Diabetes,p_value,.053129215943992503
+table,matrix,Hypertension,p_value,.0016328246970650001

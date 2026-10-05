@@ -1,0 +1,702 @@
+. 
+. **# Console: tabtools set/get/list/detail
+. tabtools set font Calibri
+tabtools: default font set to Calibri
+. tabtools set fontsize 11
+tabtools: default font size set to 11
+. tabtools set borderstyle thin
+tabtools: default border style set to thin
+. tabtools get
+
+--------------------------------------------------
+tabtools - Persistent Formatting Defaults
+--------------------------------------------------
+
+  Font:        Calibri
+  Font size:   11
+  Border:      thin
+
+  Set with: tabtools set font Calibri
+            tabtools set fontsize 11
+            tabtools set borderstyle thin
+            tabtools set digits 3
+            tabtools set boldp 0.05
+  Clear:    tabtools set clear
+
+. tabtools set clear
+tabtools: all persistent defaults cleared
+. 
+. noisily tabtools
+
+----------------------------------------------------------------------
+tabtools - Publication-Ready Table Export Suite
+----------------------------------------------------------------------
+
+Descriptive Statistics
+  table1_tc    - Table 1 with automatic statistical tests
+  desctab      - Consolidated descriptive Table 1 engine
+  crosstab     - Cross-tabulation with association measures
+  corrtab      - Correlation matrix with significance
+
+Model Results
+  regtab       - Regression results from any estimation command
+  effecttab    - Treatment-effect style tables from supported results
+
+Incidence Rates
+  stratetab    - Incidence rates from strate output
+
+Survival Analysis
+  survtab      - Kaplan-Meier estimates, medians, and RMST
+
+Composite
+  comptab      - Combine regtab/effecttab frames into one table
+  hrcomptab    - Attach regtab frames to a stratetab scaffold
+
+Styled Export
+  puttab       - Style an in-memory dataset, frame, or matrix as one sheet
+  stacktab     - Assemble multi-sheet composite Excel tables from blocks
+
+General Purpose
+  tabtools     - Suite controller and persistent defaults
+  tabtools_tips - Quick reference and worked recipes
+
+----------------------------------------------------------------------
+Total commands: 14
+
+Help:     help tabtools for overview
+          tabtools_tips for quick reference and recipes
+          help <command> for individual command help
+Settings: tabtools set font Calibri (persistent defaults)
+          tabtools get (view current defaults)
+. noisily tabtools, detail
+
+----------------------------------------------------------------------
+tabtools - Publication-Ready Table Export Suite
+----------------------------------------------------------------------
+
+Descriptive Statistics
+  ------------------------------------------------------------
+  table1_tc    Create publication-ready Table 1 with descriptive
+               statistics. Automatically selects appropriate
+               tests (t-test, Wilcoxon, chi-square, Fisher's
+               exact) based on variable type and distribution.
+               Supports continuous, categorical, and binary
+               variables with customizable formatting.
+
+  desctab      Direct access to the consolidated Table 1 engine
+               number formats and optional composite cells such
+               as events / N (%).
+
+  crosstab     Cross-tabulation with row/column percentages
+               and association measures. Supports chi-square,
+               Fisher's exact, odds ratios, and risk ratios.
+
+  corrtab      Correlation matrix with significance stars or
+               p-values. Supports Pearson and Spearman. Exports
+               lower, upper, or full triangle to Excel.
+
+Model Results
+  ------------------------------------------------------------
+  regtab       Export regression results from any estimation
+               command to Excel. Supports logistic, Cox, Poisson,
+               linear, and other models. Configurable columns
+               for coefficients, confidence intervals, p-values,
+               and model statistics.
+
+  effecttab    Export treatment-effect style tables from
+               supported estimation results and matrix inputs.
+               Formats effect estimates, confidence intervals,
+               and p-values for publication output.
+
+Incidence Rates
+  ------------------------------------------------------------
+  stratetab    Export stratified incidence rates from strate
+               command output. Formats person-time, events,
+               rates, and confidence intervals. Supports
+               rate ratios and stratified analyses.
+
+Survival Analysis
+  ------------------------------------------------------------
+  survtab      Export Kaplan-Meier estimates, median survival,
+               and restricted mean survival time (RMST) to
+               Excel. Supports multiple groups and time points.
+
+Composite
+  ------------------------------------------------------------
+  comptab      Combine multiple regtab or effecttab frames
+               into a single publication-ready table. Supports
+               side-by-side and stacked layouts.
+
+  hrcomptab    Build a final Table 2-style sheet by using
+               a stratetab frame as the scaffold and injecting
+               selected rows from one or more regtab frames.
+
+Styled Export
+  ------------------------------------------------------------
+  puttab       Style a table already in memory -- the current
+               dataset, a named frame, or a Stata matrix
+               (e(b), r(table), collapse output) -- as one
+               house-styled Excel sheet. Feeds stacktab.
+
+  stacktab     Assemble multi-sheet composite Excel tables from
+               source blocks (vstack or hstack), with column
+               merges, titles, and notes.
+
+General Purpose
+  ------------------------------------------------------------
+  tabtools     Suite controller for listing commands and
+               managing persistent formatting defaults with
+               set and get.
+
+  tabtools_tips Quick reference and worked recipes.
+
+. 
+. log off demo
+. 
+. noisily table1_tc, by(treated) ///
+>     vars(index_age contn %5.1f \ female bin \ ///
+>          education cat \ income_quintile cat \ ///
+>          born_abroad bin \ civil_status cat \ ///
+>          diabetes bin \ hypertension bin \ anxiety bin \ prior_cvd bin)
+  +------------------------------------------------------------------+
+  |                                SSRI         SNRI         p-value |
+  |------------------------------------------------------------------|
+  | No. (Column %) or Mean±SD      N=8,934      N=6,066              |
+  |------------------------------------------------------------------|
+  | Age at cohort entry (years)    58.3±13.4    58.5±13.3    0.24    |
+  |------------------------------------------------------------------|
+  | Female sex                     5,351 (60)   3,621 (60)   0.80    |
+  |------------------------------------------------------------------|
+  | Education level                                          0.11    |
+  |    Primary                     2,333 (26)   1,527 (25)           |
+  |    Secondary                   3,530 (40)   2,354 (39)           |
+  |    Tertiary                    3,071 (34)   2,185 (36)           |
+  |------------------------------------------------------------------|
+  | Disposable income quintile                               0.73    |
+  |    1                           1,778 (20)   1,175 (19)           |
+  |    2                           1,783 (20)   1,249 (21)           |
+  |    3                           1,769 (20)   1,228 (20)           |
+  |    4                           1,786 (20)   1,209 (20)           |
+  |    5                           1,818 (20)   1,205 (20)           |
+  |------------------------------------------------------------------|
+  | Born outside Sweden            1,362 (15)   897 (15)     0.44    |
+  |------------------------------------------------------------------|
+  | Marital status                                           0.34    |
+  |    Single                      2,764 (31)   1,804 (30)           |
+  |    Married                     3,074 (34)   2,162 (36)           |
+  |    Divorced                    1,763 (20)   1,188 (20)           |
+  |    Widowed                     1,333 (15)   912 (15)             |
+  |------------------------------------------------------------------|
+  | Diabetes                       4,107 (46)   2,818 (46)   0.56    |
+  |------------------------------------------------------------------|
+  | Hypertension                   4,112 (46)   2,935 (48)   0.005   |
+  |------------------------------------------------------------------|
+  | Anxiety disorder               6,079 (68)   4,148 (68)   0.66    |
+  |------------------------------------------------------------------|
+  | Prior cardiovascular disease   5,002 (56)   3,390 (56)   0.90    |
+  +------------------------------------------------------------------+
+. 
+. log off demo
+. 
+. noisily table1_tc, by(treated) ///
+>     vars(index_age contn %5.1f \ female bin \ ///
+>          education cat \ income_quintile cat \ ///
+>          born_abroad bin \ diabetes bin \ hypertension bin) ///
+>     nopvalue smd
+  +-----------------------------------------------------------------+
+  |                               SSRI         SNRI         SMD     |
+  |-----------------------------------------------------------------|
+  | No. (Column %) or Mean±SD     N=8,934      N=6,066              |
+  |-----------------------------------------------------------------|
+  | Age at cohort entry (years)   58.3±13.4    58.5±13.3    0.019   |
+  |-----------------------------------------------------------------|
+  | Female sex                    5,351 (60)   3,621 (60)   0.004   |
+  |-----------------------------------------------------------------|
+  | Education level                                         0.035   |
+  |    Primary                    2,333 (26)   1,527 (25)           |
+  |    Secondary                  3,530 (40)   2,354 (39)           |
+  |    Tertiary                   3,071 (34)   2,185 (36)           |
+  |-----------------------------------------------------------------|
+  | Disposable income quintile                              0.024   |
+  |    1                          1,778 (20)   1,175 (19)           |
+  |    2                          1,783 (20)   1,249 (21)           |
+  |    3                          1,769 (20)   1,228 (20)           |
+  |    4                          1,786 (20)   1,209 (20)           |
+  |    5                          1,818 (20)   1,205 (20)           |
+  |-----------------------------------------------------------------|
+  | Born outside Sweden           1,362 (15)   897 (15)     0.013   |
+  |-----------------------------------------------------------------|
+  | Diabetes                      4,107 (46)   2,818 (46)   0.010   |
+  |-----------------------------------------------------------------|
+  | Hypertension                  4,112 (46)   2,935 (48)   0.047   |
+  +-----------------------------------------------------------------+
+. 
+. log off demo
+. 
+. noisily desctab education cv_event, ///
+>     vars(education cat \ cv_event bin)
+  +-----------------------------------+
+  |                        Total      |
+  |-----------------------------------|
+  | No. (Column %)         N=15,000   |
+  |-----------------------------------|
+  | Education level                   |
+  |    Primary             3,860 (26) |
+  |    Secondary           5,884 (39) |
+  |    Tertiary            5,256 (35) |
+  |-----------------------------------|
+  | Cardiovascular event   5,249 (35) |
+  +-----------------------------------+
+. 
+. log off demo
+. 
+. noisily survtab, times(365 730 1095 1460) by(treated) ///
+>     rmst(1460) difference median timeunit(days)
+  +---------------------------------------------------------------------------------------------------------------------
+> ------------------+
+  |                                                         SSRI (N=8934)                SNRI (N=6066)   Difference (SSR
+> I - SNRI)       p |
+  |                       Median survival, d                       5699.0                       5660.0                  
+>      39.0   0.094 |
+  |                                 (95% CI)             (5617.0, 5760.0)             (5574.0, 5729.0)                  
+>                   |
+  |                     Survival probability                                                                            
+>                   |
+  |                                 365 days                        99.9%                        99.8%            0.1 (-
+> 0.1, 0.2)         |
+  |                                 730 days                        99.5%                        99.5%           -0.1 (-
+> 0.3, 0.2)         |
+  |                                1095 days                        99.0%                        99.1%           -0.1 (-
+> 0.4, 0.2)         |
+  |                                1460 days                        97.3%                        97.5%           -0.2 (-
+> 0.8, 0.3)         |
+  |                RMST (1460-d), d (95% CI)   1448.87 (1447.02, 1450.72)   1449.75 (1447.55, 1451.96)        -0.88 (-3.
+> 76, 1.99)         |
+  | Log-rank test: chi2(1) = 2.80, p = 0.094                                                                            
+>                   |
+  +---------------------------------------------------------------------------------------------------------------------
+> ------------------+
+
+. 
+. log off demo
+. 
+. noisily regtab, coef("OR") noint
+  +-------------------------------------------------------------------+
+  |                                    Model                          |
+  |                                       OR         95% CI   p-value |
+  |  Age at cohort entry (years)        1.00   (1.00, 1.00)      0.27 |
+  |                   Female sex        0.99   (0.93, 1.06)      0.84 |
+  |              Education level                                      |
+  |                      Primary   Reference                          |
+  |                    Secondary        1.02   (0.94, 1.11)      0.66 |
+  |                     Tertiary        1.09   (1.00, 1.18)     0.053 |
+  |                     Diabetes        1.01   (0.94, 1.08)      0.78 |
+  |                 Hypertension        1.10   (1.03, 1.17)     0.005 |
+  |             Anxiety disorder        1.00   (0.93, 1.08)      0.96 |
+  | Prior cardiovascular disease        0.98   (0.92, 1.05)      0.63 |
+  +-------------------------------------------------------------------+
+
+. 
+. log off demo
+. 
+. noisily regtab, coef("OR") noint compact
+  +------------------------------------------------------------+
+  |                                            Model           |
+  |                                        OR 95% CI   p-value |
+  |  Age at cohort entry (years)   1.00 (1.00, 1.00)      0.27 |
+  |                   Female sex   0.99 (0.93, 1.06)      0.84 |
+  |              Education level                               |
+  |                      Primary           Reference           |
+  |                    Secondary   1.02 (0.94, 1.11)      0.66 |
+  |                     Tertiary   1.09 (1.00, 1.18)     0.053 |
+  |                     Diabetes   1.01 (0.94, 1.08)      0.78 |
+  |                 Hypertension   1.10 (1.03, 1.17)     0.005 |
+  |             Anxiety disorder   1.00 (0.93, 1.08)      0.96 |
+  | Prior cardiovascular disease   0.98 (0.92, 1.05)      0.63 |
+  +------------------------------------------------------------+
+
+. 
+. log off demo
+. 
+. noisily regtab, coef("OR") noint nopvalue
+  +---------------------------------------------------------+
+  |                                    Model                |
+  |                                       OR         95% CI |
+  |  Age at cohort entry (years)        1.00   (1.00, 1.00) |
+  |                   Female sex        0.99   (0.93, 1.06) |
+  |              Education level                            |
+  |                      Primary   Reference                |
+  |                    Secondary        1.02   (0.94, 1.11) |
+  |                     Tertiary        1.09   (1.00, 1.18) |
+  |                     Diabetes        1.01   (0.94, 1.08) |
+  |                 Hypertension        1.10   (1.03, 1.17) |
+  |             Anxiety disorder        1.00   (0.93, 1.08) |
+  | Prior cardiovascular disease        0.98   (0.92, 1.05) |
+  +---------------------------------------------------------+
+
+. 
+. log off demo
+. 
+. noisily regtab, stats(n ll aic bic r2)
+  +-----------------------------------------------------------------------------+
+  |                                              Model                          |
+  |                                                RRR         95% CI   p-value |
+  | Secondary: Age at cohort entry (years)        1.00   (1.00, 1.00)      0.75 |
+  |                  Secondary: Female sex        1.08   (1.00, 1.18)     0.063 |
+  |                    Secondary: Diabetes        1.01   (0.93, 1.09)      0.86 |
+  |                Secondary: Hypertension        0.99   (0.91, 1.08)      0.85 |
+  |  Tertiary: Age at cohort entry (years)        1.00   (1.00, 1.00)      0.76 |
+  |                   Tertiary: Female sex        1.02   (0.93, 1.11)      0.71 |
+  |                     Tertiary: Diabetes        1.03   (0.95, 1.12)      0.50 |
+  |                 Tertiary: Hypertension        1.00   (0.92, 1.09)      0.98 |
+  |                           Observations      15,000                          |
+  |                                    AIC    32530.06                          |
+  |                                    BIC    32606.21                          |
+  |                         Log-likelihood   -16255.03                          |
+  |                              Pseudo R²       0.000                          |
+  +-----------------------------------------------------------------------------+
+
+. 
+. log off demo
+. 
+. noisily regtab, stats(n aic bic ll) models("ZIP" \ "ZINB")
+  +---------------------------------------------------------------------------------------------------------------------
+> -+
+  |                                                 ZIP                                  ZINB                           
+>  |
+  |                                               Coef.           95% CI   p-value      Coef.           95% CI   p-value
+>  |
+  |                   Event count: Treatment      -0.15   (-0.26, -0.05)     0.003      -0.14   (-0.26, -0.03)     0.016
+>  |
+  |                 Event count: Age z-score       0.39     (0.34, 0.44)    <0.001       0.39     (0.33, 0.45)    <0.001
+>  |
+  |                      Event count: Female       0.30     (0.19, 0.41)    <0.001       0.32     (0.19, 0.45)    <0.001
+>  |
+  |               Inflation equation: Female       0.50     (0.15, 0.84)     0.005       0.72     (0.26, 1.19)     0.002
+>  |
+  | Inflation equation: Structural-zero risk       0.85     (0.66, 1.04)    <0.001       1.07     (0.79, 1.35)    <0.001
+>  |
+  |                             Observations      1,500                                 1,500                           
+>  |
+  |                                      AIC    4338.98                               4307.53                           
+>  |
+  |                                      BIC    4376.17                               4350.04                           
+>  |
+  |                           Log-likelihood   -2162.49                              -2145.76                           
+>  |
+  +---------------------------------------------------------------------------------------------------------------------
+> -+
+
+. 
+. log off demo
+. 
+. noisily regtab, stats(n ll aic bic r2)
+  +-----------------------------------------------------------------------------+
+  |                                              Model                          |
+  |                                              Coef.         95% CI   p-value |
+  |             Annual cost: Dose intensity       1.75   (1.49, 2.02)    <0.001 |
+  | Selection equation: Participation score       0.51   (0.43, 0.60)    <0.001 |
+  |                            Observations      1,200                          |
+  |                                     AIC    3425.86                          |
+  |                                     BIC    3451.31                          |
+  |                          Log-likelihood   -1707.93                          |
+  |                               Pseudo R²      0.100                          |
+  +-----------------------------------------------------------------------------+
+
+. 
+. log off demo
+. 
+. noisily corrtab index_age crp prior_hosp, ///
+>     star(0.05 0.01 0.001)
+  +----------------------------------------------------------------------------------------------------------------+
+  |                               Age at cohort entry (years)   C-reactive protein (mg/L)   Prior hospitalizations |
+  | Age at cohort entry (years)                          1.00                                                      |
+  |   C-reactive protein (mg/L)                         -0.01                        1.00                          |
+  |      Prior hospitalizations                          0.00                        0.01                     1.00 |
+  +----------------------------------------------------------------------------------------------------------------+
+
+* p<0.05, ** p<0.01, *** p<0.001
+
+. 
+. log off demo
+. 
+. noisily crosstab treated female, or label
+  +---------------------------------------------------------------------------------------------+
+  |                                    Treatment group            Male          Female    Total |
+  |                                               SSRI   3,583 (59.4%)   5,351 (59.6%)    8,934 |
+  |                                               SNRI   2,445 (40.6%)   3,621 (40.4%)    6,066 |
+  |                                              Total           6,028           8,972   15,000 |
+  | Pearson's chi-squared test: chi2 = 0.06, p = 0.805                                          |
+  |                        OR = 1.0 (95% CI: 0.9, 1.1)                                          |
+  +---------------------------------------------------------------------------------------------+
+
+. 
+. log off demo
+. 
+. * # smallcells(): primary and complementary suppression
+. 
+. * ## Primary suppression only: table1_tc
+. noisily table1_tc category, by(group) vars(category cat) ///
+>     total(after) smallcells(5)
+  +-------------------------------------------------------------+
+  |                  Control   Treatment   Total     p-value    |
+  |-------------------------------------------------------------|
+  | No. (Column %)   N=5       N=5         N=10                 |
+  |-------------------------------------------------------------|
+  | Characteristic                                   Suppressed |
+  |    Absent        <5        <5          5                    |
+  |    Present       <5        <5          5                    |
+  +-------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are wit
+> hheld for any variable carrying a suppressed count.
+. 
+. * ## Primary suppression only: desctab
+. noisily desctab category, by(group) vars(category cat) ///
+>     total(after) smallcells(5)
+  +-------------------------------------------------------------+
+  |                  Control   Treatment   Total     p-value    |
+  |-------------------------------------------------------------|
+  | No. (Column %)   N=5       N=5         N=10                 |
+  |-------------------------------------------------------------|
+  | Characteristic                                   Suppressed |
+  |    Absent        <5        <5          5                    |
+  |    Present       <5        <5          5                    |
+  +-------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are wit
+> hheld for any variable carrying a suppressed count.
+. 
+. * ## Primary suppression only: crosstab
+. noisily crosstab group category, label smallcells(5)
+  +------------------------------------------------------------+
+  |                     Study group   Absent   Present   Total |
+  |                         Control       <5        <5       5 |
+  |                       Treatment       <5        <5       5 |
+  |                           Total        5         5      10 |
+  | Fisher's exact test: Suppressed                            |
+  +------------------------------------------------------------+
+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction.
+. 
+. log off demo
+. 
+. * ## Complementary suppression: table1_tc
+. noisily table1_tc category, by(group) vars(category cat) ///
+>     total(after) smallcells(5)
+  +-------------------------------------------------------------+
+  |                  Control   Treatment   Total     p-value    |
+  |-------------------------------------------------------------|
+  | No. (Column %)   N=10      N=10        N=20                 |
+  |-------------------------------------------------------------|
+  | Characteristic                                   Suppressed |
+  |    Absent        <5        ≥5          8                    |
+  |    Present       ≥5        <5          12                   |
+  +-------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are wit
+> hheld for any variable carrying a suppressed count.
+. 
+. * ## Complementary suppression: desctab
+. noisily desctab category, by(group) vars(category cat) ///
+>     total(after) smallcells(5)
+  +-------------------------------------------------------------+
+  |                  Control   Treatment   Total     p-value    |
+  |-------------------------------------------------------------|
+  | No. (Column %)   N=10      N=10        N=20                 |
+  |-------------------------------------------------------------|
+  | Characteristic                                   Suppressed |
+  |    Absent        <5        ≥5          8                    |
+  |    Present       ≥5        <5          12                   |
+  +-------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are wit
+> hheld for any variable carrying a suppressed count.
+. 
+. * ## Complementary suppression: crosstab
+. noisily crosstab group category, label smallcells(5)
+  +------------------------------------------------------------+
+  |                     Study group   Absent   Present   Total |
+  |                         Control       <5        ≥5      10 |
+  |                       Treatment       ≥5        <5      10 |
+  |                           Total        8        12      20 |
+  | Fisher's exact test: Suppressed                            |
+  +------------------------------------------------------------+
+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction.
+. 
+. log off demo
+. 
+. * ## Binary variable suppression: table1_tc
+. noisily table1_tc rare_ae, by(group) vars(rare_ae bin) ///
+>     total(after) smallcells(5)
+  +-----------------------------------------------------------------+
+  |                      Control   Treatment   Total     p-value    |
+  |-----------------------------------------------------------------|
+  | No. (Column %)       N=50      N=50        N=100                |
+  |-----------------------------------------------------------------|
+  | Rare adverse event   <5        <5          5         Suppressed |
+  +-----------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are wit
+> hheld for any variable carrying a suppressed count.
+. 
+. * ## Binary variable suppression: desctab
+. noisily desctab rare_ae, by(group) vars(rare_ae bin) ///
+>     total(after) smallcells(5)
+  +-----------------------------------------------------------------+
+  |                      Control   Treatment   Total     p-value    |
+  |-----------------------------------------------------------------|
+  | No. (Column %)       N=50      N=50        N=100                |
+  |-----------------------------------------------------------------|
+  | Rare adverse event   <5        <5          5         Suppressed |
+  +-----------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are wit
+> hheld for any variable carrying a suppressed count.
+. 
+. log off demo
+. 
+. noisily puttab term ahr ci using "`_pipe_xlsx'", sheet("Block Primary") ///
+>     title("Source block: Primary HRT exposure model") varlabels
+puttab: wrote 3 data rows x 3 cols (data source) to sheet Block Primary in /tmp/RtmpMDyewy/tabtools-demo-stata/export/ta
+> btools/demo/_pipeline_parts.xlsx
+. 
+. log off demo
+. 
+. noisily puttab term ahr ci using "`_pipe_xlsx'", sheet("Block Dose") ///
+>     title("Source block: Estrogen dose-response model") varlabels
+puttab: wrote 2 data rows x 3 cols (data source) to sheet Block Dose in /tmp/RtmpMDyewy/tabtools-demo-stata/export/tabto
+> ols/demo/_pipeline_parts.xlsx
+. 
+. noisily stacktab using "`_pipe_xlsx'", sheet("Composite") ///
+>     blocks(sheet(Block Primary) rows(2/5) cols(B-D) label(Any HRT use) \ ///
+>            sheet(Block Dose) rows(2/4) cols(B-D) label(By estrogen dose)) ///
+>     columnmerge(B+C as "aHR (95% CI)") ///
+>     display ///
+>     title("Hormone therapy and recurrent events") ///
+>     note("aHR = adjusted hazard ratio; CI = confidence interval.")
+
+Hormone therapy and recurrent events
+  +--------------------------------------+
+  |      Any HRT use        aHR (95% CI) |
+  |          Any HRT   0.82 (0.69, 0.98) |
+  |    Former smoker   1.14 (0.97, 1.34) |
+  |   Current smoker   1.46 (1.21, 1.77) |
+  | By estrogen dose        aHR (95% CI) |
+  |         Low dose   0.91 (0.74, 1.12) |
+  |        High dose   0.73 (0.58, 0.92) |
+  +--------------------------------------+
+
+aHR = adjusted hazard ratio; CI = confidence interval.
+stacktab: 2 blocks -> 7 rows written -> sheet Composite
+. 
+. log off demo
+. 
+. * # Markdown report export
+. noisily table1_tc, by(treated) ///
+>     vars(index_age contn %5.1f \ female bin \ diabetes bin \ hypertension bin) ///
+>     title("Table 1. Baseline Characteristics") ///
+>     markdown("`markdown_report_export'")
+  +-----------------------------------------------------------------+
+  |                               SSRI         SNRI         p-value |
+  |-----------------------------------------------------------------|
+  | No. (Column %) or Mean±SD     N=8,934      N=6,066              |
+  |-----------------------------------------------------------------|
+  | Age at cohort entry (years)   58.3±13.4    58.5±13.3    0.24    |
+  |-----------------------------------------------------------------|
+  | Female sex                    5,351 (60)   3,621 (60)   0.80    |
+  |-----------------------------------------------------------------|
+  | Diabetes                      4,107 (46)   2,818 (46)   0.56    |
+  |-----------------------------------------------------------------|
+  | Hypertension                  4,112 (46)   2,935 (48)   0.005   |
+  +-----------------------------------------------------------------+
+Markdown exported to tabtools/demo/demo_markdown_report.md
+. 
+. noisily crosstab treated female, or label ///
+>     title("Table 2. Treatment by Sex") ///
+>     markdown("`markdown_report_export'") mdappend
+
+Table 2. Treatment by Sex
+  +---------------------------------------------------------------------------------------------+
+  |                                    Treatment group            Male          Female    Total |
+  |                                               SSRI   3,583 (59.4%)   5,351 (59.6%)    8,934 |
+  |                                               SNRI   2,445 (40.6%)   3,621 (40.4%)    6,066 |
+  |                                              Total           6,028           8,972   15,000 |
+  | Pearson's chi-squared test: chi2 = 0.06, p = 0.805                                          |
+  |                        OR = 1.0 (95% CI: 0.9, 1.1)                                          |
+  +---------------------------------------------------------------------------------------------+
+
+Markdown exported to tabtools/demo/demo_markdown_report.md
+. 
+. noisily corrtab index_age crp prior_hosp, star(0.05 0.01 0.001) ///
+>     title("Table 3. Correlation Matrix") ///
+>     markdown("`markdown_report_export'") mdappend
+
+Table 3. Correlation Matrix
+  +----------------------------------------------------------------------------------------------------------------+
+  |                               Age at cohort entry (years)   C-reactive protein (mg/L)   Prior hospitalizations |
+  | Age at cohort entry (years)                          1.00                                                      |
+  |   C-reactive protein (mg/L)                         -0.01                        1.00                          |
+  |      Prior hospitalizations                          0.00                        0.01                     1.00 |
+  +----------------------------------------------------------------------------------------------------------------+
+
+* p<0.05, ** p<0.01, *** p<0.001
+
+Markdown exported to tabtools/demo/demo_markdown_report.md
+. 
+. preserve
+. keep id index_age treated female cv_event
+. keep in 1/6
+(14,994 observations deleted)
+. noisily puttab id index_age treated female cv_event, ///
+>     varlabels ///
+>     title("Table 4. First Six Analysis Records") ///
+>     markdown("`markdown_report_export'") mdappend
+Markdown exported to tabtools/demo/demo_markdown_report.md
+. restore
+. 
+. 
+. noisily display as text "Markdown report written to tabtools/demo/demo_markdown_report.md"
+Markdown report written to tabtools/demo/demo_markdown_report.md
+. noisily display as text "The file contains multiple GitHub-Flavored Markdown tables appended in one report."
+The file contains multiple GitHub-Flavored Markdown tables appended in one report.
+. noisily type "`markdown_report'"
+### Table 1. Baseline Characteristics
+
+| No. (Column %) or Mean±SD | SSRI (N=8,934) | SNRI (N=6,066) | p-value |
+| --- | --- | --- | --- |
+| Age at cohort entry (years) | 58.3±13.4 | 58.5±13.3 | 0.24 |
+| Female sex | 5,351 (60) | 3,621 (60) | 0.80 |
+| Diabetes | 4,107 (46) | 2,818 (46) | 0.56 |
+| Hypertension | 4,112 (46) | 2,935 (48) | 0.005 |
+
+### Table 2. Treatment by Sex
+
+| Treatment group | Male | Female | Total |
+| --- | --- | --- | --- |
+| SSRI | 3,583 (59.4%) | 5,351 (59.6%) | 8,934 |
+| SNRI | 2,445 (40.6%) | 3,621 (40.4%) | 6,066 |
+| Total | 6,028 | 8,972 | 15,000 |
+| Pearson's chi-squared test: chi2 = 0.06, p = 0.805 |  |  |  |
+| OR = 1.0 (95% CI: 0.9, 1.1) |  |  |  |
+
+### Table 3. Correlation Matrix
+
+|  | Age at cohort entry (years) | C-reactive protein (mg/L) | Prior hospitalizations |
+| --- | --- | --- | --- |
+| Age at cohort entry (years) | 1.00 |  |  |
+| C-reactive protein (mg/L) | -0.01 | 1.00 |  |
+| Prior hospitalizations | 0.00 | 0.01 | 1.00 |
+
+*\* p\<0.05, \*\* p\<0.01, \*\*\* p\<0.001*
+
+### Table 4. First Six Analysis Records
+
+| Person identifier | Age at cohort entry (years) | Treatment group | Female sex | Cardiovascular event |
+| --- | --- | --- | --- | --- |
+| 1 | 73.75 | SSRI | Male | Yes |
+| 2 | 61.80 | SSRI | Female | No |
+| 3 | 46.22 | SSRI | Female | No |
+| 4 | 51.62 | SNRI | Female | Yes |
+| 5 | 54.89 | SSRI | Female | Yes |
+| 6 | 75.15 | SSRI | Male | No |
+. 
+. log off demo
+. display "RESULT: demo_tabtools tests=1 pass=1 fail=0"
+RESULT: demo_tabtools tests=1 pass=1 fail=0
+. log close demo

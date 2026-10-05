@@ -1,0 +1,10 @@
+  +------------------------------------------------------------------+
+  |                               Fine-Gray                          |
+  |                                     SHR         95% CI   p-value |
+  |             Treatment group        1.02   (0.91, 1.14)      0.70 |
+  | Age at cohort entry (years)        1.00   (0.99, 1.00)      0.64 |
+  |                  Female sex        1.09   (0.98, 1.22)      0.12 |
+  +------------------------------------------------------------------+
+
+Markdown exported to R20.md
+Exported 6 rows × 5 cols to regtab.xlsx, sheet R20

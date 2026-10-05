@@ -1,0 +1,22 @@
+name,kind,row,col,value
+_golden_id,meta,,,R25t
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,7
+n_1,scalar,,,1200
+ll_1,scalar,,,-1707.9319111466971
+bic_1,scalar,,,3451.3142064722751
+aic_1,scalar,,,3425.8638222933942
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,10
+sheet,macro,,,R25t
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R25t.md
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable Cragg hurdle regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Annual_cost_Dose_intensity,c1,1.754439439459164
+table,matrix,Selection_equation_Participation,c1,.51485243237492628

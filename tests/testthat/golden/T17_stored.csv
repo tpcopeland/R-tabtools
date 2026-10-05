@@ -1,0 +1,23 @@
+name,kind,row,col,value
+_golden_id,meta,,,T17
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,22
+markdown,macro,,,T17.md
+sheet,macro,,,T17
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age female education income_quintile born_abroad civil_status diabetes hypertension anxiety prior_cvd
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values were calculated using independent t-test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures."
+table,matrix,Age_at_cohort_entry_(years),p_value,.24424100913188879
+table,matrix,Female_sex,p_value,.80496326113412198
+table,matrix,Education_level,p_value,.10568084613205581
+table,matrix,Disposable_income_quintile,p_value,.73283180139639204
+table,matrix,Born_outside_Sweden,p_value,.44168148066201779
+table,matrix,Marital_status,p_value,.34064110178229362
+table,matrix,Diabetes,p_value,.5585408266876779
+table,matrix,Hypertension,p_value,.0045130482630992
+table,matrix,Anxiety_disorder,p_value,.66297588305119837
+table,matrix,Prior_cardiovascular_disease,p_value,.90066292771262202

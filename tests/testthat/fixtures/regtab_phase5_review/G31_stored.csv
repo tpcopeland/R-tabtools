@@ -1,0 +1,21 @@
+name,kind,row,col,value
+_golden_id,meta,,,G31
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_models,scalar,,,2
+N_cols,scalar,,,8
+N_rows,scalar,,,10
+methods,macro,,,"Collected regression estimates with 95% confidence intervals across 2 models. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,mixed
+table,matrix,Event_count_Treatment,c1,.90242881246651563
+table,matrix,Event_count_Treatment,c2,-.1439986263266404
+table,matrix,Event_count___1,c1,1.182850370536251
+table,matrix,Event_count___1,c2,.2373482010953791
+table,matrix,Event_count_Intercept,c1,1.1648780478020151
+table,matrix,Event_count_Intercept,c2,.63315495423118229
+table,matrix,Inflation_equation_Structural-ze,c1,.
+table,matrix,Inflation_equation_Structural-ze,c2,.72330457592051767
+table,matrix,Inflation_equation_Intercept,c1,.
+table,matrix,Inflation_equation_Intercept,c2,-.47740546864731093

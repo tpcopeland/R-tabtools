@@ -1,0 +1,16 @@
+,Model,,
+,RRR,95% CI,p-value
+Secondary: Female sex,,,
+Secondary:   Male,Reference,,
+Secondary:   Female,1.13,"(0.78, 1.63)",0.53
+Secondary: female#index_age,,,
+Secondary: 0.female#index_age,Reference,,
+Secondary: 1.female#index_age,1.00,"(0.99, 1.01)",0.83
+Secondary: Age at cohort entry (years),1.00,"(1.00, 1.01)",0.71
+Tertiary: Female sex,,,
+Tertiary:   Male,Reference,,
+Tertiary:   Female,0.95,"(0.65, 1.38)",0.77
+Tertiary: female#index_age,,,
+Tertiary: 0.female#index_age,Reference,,
+Tertiary: 1.female#index_age,1.00,"(0.99, 1.01)",0.70
+Tertiary: Age at cohort entry (years),1.00,"(0.99, 1.00)",0.63

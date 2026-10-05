@@ -1,0 +1,17 @@
+label,estimate,ll,ul,pvalue,model,model_label,rowtype,section,source_row,source_frame
+Any HRT,,,,,,,section,Any HRT,,_pb_rates
+   No HRT,,,,,,,reference,Any HRT,,_pb_rates
+hrt,.8045309728559482,.3478384815514464,1.860835188210207,.6111897686762915,1,Sustained EDSS 4,effect,Any HRT,1,_pb_bin
+hrt,.5012585389805071,.1385153923562433,1.813950916405483,.2925868295517209,2,Sustained EDSS 6,effect,Any HRT,1,_pb_bin
+hrt,.6019872604013666,.3499027349846675,1.035683992871397,.0667565769275474,3,Recurring Relapse,effect,Any HRT,1,_pb_bin
+Estrogen Dose,,,,,,,section,Estrogen Dose,,_pb_rates
+   No HRT,,,,,,,reference,Estrogen Dose,,_pb_rates
+  Low dose,3.248991620934271,.6720966487642819,15.70599492247027,.1427278100449993,1,Sustained EDSS 4,effect,Estrogen Dose,3,_pb_dose
+  Low dose,.3135257796827609,.0322458748427255,3.048402780359321,.3175618119608721,2,Sustained EDSS 6,effect,Estrogen Dose,3,_pb_dose
+  Low dose,1.289513072418444,.6133818868477153,2.710944029475215,.5024134644641007,3,Recurring Relapse,effect,Estrogen Dose,3,_pb_dose
+  Medium dose,2.119728897300864,.3863799930818816,11.62909746494075,.387014396235123,1,Sustained EDSS 4,effect,Estrogen Dose,4,_pb_dose
+  Medium dose,1.179367480706711,.2577013968190684,5.397361720646964,.8316383011251209,2,Sustained EDSS 6,effect,Estrogen Dose,4,_pb_dose
+  Medium dose,1.368750949656539,.6511201308041628,2.877317216213,.4076252908992505,3,Recurring Relapse,effect,Estrogen Dose,4,_pb_dose
+  High dose,1.881542965996599,.3401943053718328,10.40641738262442,.4688508948488068,1,Sustained EDSS 4,effect,Estrogen Dose,5,_pb_dose
+  High dose,.1698268513095088,.0155443790446974,1.855407626304665,.1461390988212135,2,Sustained EDSS 6,effect,Estrogen Dose,5,_pb_dose
+  High dose,1.193722350380573,.5642859776569135,2.525267517217141,.6432197296621145,3,Recurring Relapse,effect,Estrogen Dose,5,_pb_dose

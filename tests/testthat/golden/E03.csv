@@ -1,0 +1,5 @@
+Table 8. Predicted Probability of CV Event by Treatment,,,
+,Pr(CV Event),95% CI,p-value
+Treatment group,,,
+  SSRI,0.35,"(0.34, 0.36)",<0.001
+  SNRI,0.35,"(0.34, 0.37)",<0.001

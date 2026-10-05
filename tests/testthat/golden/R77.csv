@@ -1,0 +1,9 @@
+,Age,,,Female,,,Education,,
+,OR,95% CI,p-value,OR,95% CI,p-value,OR,95% CI,p-value
+Age at cohort entry (years),1.00,"(1.00, 1.01)",0.024,,,,,,
+Female sex,,,,1.01,"(0.94, 1.08)",0.85,,,
+Education level,,,,,,,,,
+  Primary,,,,,,,Reference,,
+  Secondary,,,,,,,1.05,"(0.97, 1.15)",0.23
+  Tertiary,,,,,,,1.05,"(0.97, 1.15)",0.25
+Observations,"15,000",,,"15,000",,,"15,000",,

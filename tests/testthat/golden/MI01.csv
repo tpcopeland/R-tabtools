@@ -1,0 +1,13 @@
+,MI regress,,
+,Coef.,95% CI,p-value
+Treatment group,-0.09,"(-0.86, 0.67)",0.81
+Age at cohort entry (years),0.00,"(-0.03, 0.03)",0.89
+Female sex,-0.73,"(-1.51, 0.04)",0.064
+Education level,,,
+  Primary,Reference,,
+  Secondary,0.29,"(-0.67, 1.24)",0.55
+  Tertiary,0.29,"(-0.71, 1.30)",0.57
+Intercept,26.34,"(24.32, 28.36)",<0.001
+Observations,400,,
+Imputations,5,,
+Largest FMI,0.1156,,

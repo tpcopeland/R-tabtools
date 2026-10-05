@@ -1,0 +1,16 @@
+(1 real change made)
+(1 real change made, 1 to missing)
+  +-------------------------------------------------------------------------------------------------------+
+  |                             group = 0   group = 1   Test         Statistic    p-value      SMD        |
+  |-------------------------------------------------------------------------------------------------------|
+  | No. (Column %) or Mean±SD   <5          N=6                                                           |
+  |-------------------------------------------------------------------------------------------------------|
+  | value                       <5          22±2        Suppressed   Suppressed   Suppressed   Suppressed |
+  |    Missing                  <5          0                                                             |
+  |-------------------------------------------------------------------------------------------------------|
+  | category                                            Suppressed   Suppressed   Suppressed   Suppressed |
+  |    0                        <5          <5                                                            |
+  |    1                        <5          <5                                                            |
+  +-------------------------------------------------------------------------------------------------------+
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.
+CSV exported to tests/testthat/fixtures/table1_phase3/S3.csv

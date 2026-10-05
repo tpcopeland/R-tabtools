@@ -1,0 +1,13 @@
+Table 2b. Propensity Score Model without P-values,,
+,No p-value,
+,OR,95% CI
+Age at cohort entry (years),1.00,"(1.00, 1.00)"
+Female sex,0.99,"(0.93, 1.06)"
+Education level,,
+  Primary,Reference,
+  Secondary,1.02,"(0.94, 1.11)"
+  Tertiary,1.09,"(1.00, 1.18)"
+Diabetes,1.01,"(0.94, 1.08)"
+Hypertension,1.10,"(1.03, 1.17)"
+Anxiety disorder,1.00,"(0.93, 1.08)"
+Prior cardiovascular disease,0.98,"(0.92, 1.05)"

@@ -1,0 +1,19 @@
+name,kind,row,col,value
+_golden_id,meta,,,T07
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,6
+markdown,macro,,,T07.md
+sheet,macro,,,T07
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,crp prior_hosp index_age lab_value cost_sek follow_up
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3). P-values were calculated using independent t-test, Wilcoxon rank-sum test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3)."
+table,matrix,C-reactive_protein_(mg/L),p_value,.3820998126804821
+table,matrix,Prior_hospitalizations,p_value,.97386067765338269
+table,matrix,Age_at_cohort_entry_(years),p_value,.24424100913188879
+table,matrix,Lab_value_(non-positive_allowed),p_value,.9970527551690902
+table,matrix,Lifetime_healthcare_cost_(SEK),p_value,.10642623243686911
+table,matrix,Follow-up_(days),p_value,.107038553329709

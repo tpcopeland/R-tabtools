@@ -1,0 +1,24 @@
+name,kind,row,col,value
+_golden_id,meta,,,S12
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+N_derived_suppressed,scalar,,,0
+N_secondary_suppressed,scalar,,,0
+N_primary_suppressed,scalar,,,1
+smallcells,scalar,,,5
+varlist,macro,,,rep78 foreign mpg
+Dapa,macro,,,"Data are presented as median (Q1, Q3) for continuous measures, and No. (%) for categorical measures."
+suppression,matrix,r1,Total,0
+suppression,matrix,r2,Total,0
+suppression,matrix,r3,Total,0
+suppression,matrix,r4,Total,1
+suppression,matrix,r5,Total,0
+suppression,matrix,r6,Total,0
+suppression,matrix,r7,Total,0
+suppression,matrix,r8,Total,0
+suppression,matrix,r9,Total,0
+suppression,matrix,r10,Total,0
+table,matrix,Repair_record_1978,p_value,.d
+table,matrix,Car_origin,p_value,.
+table,matrix,Mileage_(mpg),p_value,.

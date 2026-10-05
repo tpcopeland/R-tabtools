@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,D19b
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+n_1,scalar,,,411
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,10
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable linear regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,treat,c1,7.5393563980711287
+table,matrix,x1,c1,.77932369308051408
+table,matrix,__2,c1,-2.9208688991759382
+table,matrix,Intercept,c1,101.2477096442328

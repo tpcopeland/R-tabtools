@@ -1,0 +1,6 @@
+,Model,,
+,IRR,95% CI,p-value
+x,1.36,"(1.24, 1.48)",<0.001
+Observations,400,,
+Log-likelihood,-581.14,,
+Pseudo R²,0.039,,

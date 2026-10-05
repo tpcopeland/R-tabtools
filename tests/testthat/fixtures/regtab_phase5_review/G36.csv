@@ -1,0 +1,10 @@
+,Model,,
+,Coef.,95% CI,p-value
+Age (years),0.05,"(0.04, 0.05)",<0.001
+Intercept,23.22,"(22.92, 23.51)",<0.001
+Variance: zone (Intercept),0.02,"(0.00, 0.17)",
+Variance: location (Intercept),0.06,"(0.01, 0.22)",
+Residual Variance,23.37,"(22.74, 24.02)",
+Observations,"10,351",,
+Groups,62,,
+ICC,0.003,,

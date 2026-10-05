@@ -1,0 +1,94 @@
+# Binary packages for users without a compiler: Windows .zip (R release and
+# oldrel-1) and macOS arm64 .tgz (R release). Started by hand only and kept
+# disabled between runs (Windows bills 2x Linux minutes, macOS 10x):
+#   gh workflow enable build-binaries
+#   gh workflow run build-binaries --ref main                # Windows
+#   gh workflow run build-binaries --ref main -f os=macos    # macOS only
+#   gh workflow run build-binaries --ref main -f os=all      # both
+#   gh run download <run id>              # one artifact per platform and R version
+#   gh workflow disable build-binaries
+# A binary package works only with the R minor version that built it, hence
+# one per R version. A macOS binary can also be built on a Mac (qa/README.md).
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: 'Binaries to build (macOS bills 10x Linux minutes, Windows 2x)'
+        type: choice
+        options: [windows, macos, all]
+        default: windows
+
+name: build-binaries
+
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }} (R ${{ matrix.config.r }})
+    # Observed 2026-10-02: Windows 3 minutes.
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        config: ${{ fromJSON(inputs.os == 'macos' && '[{"os":"macos-latest","r":"release"}]' || inputs.os == 'all' && '[{"os":"windows-latest","r":"release"},{"os":"windows-latest","r":"oldrel-1"},{"os":"macos-latest","r":"release"}]' || '[{"os":"windows-latest","r":"release"},{"os":"windows-latest","r":"oldrel-1"}]') }}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # Without it the shared library requires the runner's macOS version.
+      MACOSX_DEPLOYMENT_TARGET: '11.0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+
+      # All of Suggests: the vignettes run their code only when the packages
+      # they use are installed, and the binary ships the built vignettes.
+      - uses: r-lib/actions/setup-r-dependencies@v2
+
+      - name: Build the source and binary packages
+        id: build
+        shell: bash
+        run: |
+          R CMD build .
+          mkdir lib
+          R CMD INSTALL --build -l lib tabtools_*.tar.gz
+          rm tabtools_*.tar.gz
+          ls -la tabtools_*
+          echo "rv=$(Rscript -e 'cat(format(getRversion()[, 1:2]))')" >> "$GITHUB_OUTPUT"
+
+      - name: Check the macOS deployment target
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          otool -l lib/tabtools/libs/tabtools.so | grep -A4 LC_BUILD_VERSION
+          otool -l lib/tabtools/libs/tabtools.so | grep -A4 LC_BUILD_VERSION | grep -q 'minos 11.0'
+
+      - name: Install the binary into an empty library and use it
+        shell: Rscript {0}
+        run: |
+          lib <- file.path(tempdir(), "fresh")
+          dir.create(lib)
+          bin <- Sys.glob(c("tabtools_*.zip", "tabtools_*.tgz"))
+          stopifnot(length(bin) == 1L)
+          install.packages(bin, repos = NULL, type = if (.Platform$OS.type == "windows") "win.binary" else "binary", lib = lib)
+          library(tabtools, lib.loc = lib)
+          print(packageVersion("tabtools", lib.loc = lib))
+          stopifnot(length(vignette(package = "tabtools", lib.loc = lib)$results[, "Item"]) == 5L,
+                    nzchar(system.file("llm", "tabtools-syntax.md", package = "tabtools", lib.loc = lib)))
+          d <- mtcars
+          d$am <- factor(d$am, 0:1, c("Automatic", "Manual"))
+          print(table1_tc(d, by = "am", vars = c(mpg = "contn %5.1f", cyl = "cat", vs = "bin")))
+          print(regtab(glm(breaks ~ wool + tension, family = poisson, data = warpbreaks)))
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tabtools-${{ runner.os }}-R${{ steps.build.outputs.rv }}
+          path: |
+            tabtools_*.zip
+            tabtools_*.tgz
+          if-no-files-found: error

@@ -1,0 +1,107 @@
+# R CMD check, started by hand only. Run it with
+#   gh workflow run R-CMD-check --ref main               # Linux + Windows
+#   gh workflow run R-CMD-check --ref main -f os=macos   # macOS only
+#   gh workflow run R-CMD-check --ref main -f os=all     # all five jobs
+# or locally on a Mac with qa/tools/check_local.sh. The Stata goldens are
+# committed under tests/testthat/golden/, so CI never needs Stata.
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: 'Jobs to run (macOS bills 10x Linux minutes, Windows 2x)'
+        type: choice
+        options: [linux-windows, macos, all]
+        default: linux-windows
+
+name: R-CMD-check
+
+permissions: read-all
+
+jobs:
+  R-CMD-check:
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})${{ matrix.config.nosuggests && ' no Suggests' || '' }}
+    # A hung job would otherwise run (and bill) GitHub's default 360 minutes,
+    # 3,600 on macOS. Observed 2026-10-01: Linux 21-26, macOS 19, Windows 47.
+    timeout-minutes: ${{ matrix.config.os == 'windows-latest' && 75 || 45 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # The last entry checks hard dependencies only (plus the test and
+        # vignette tooling): every use of a suggested package must be
+        # conditional. Vignettes load survival, a suggested package, so that
+        # job neither builds nor checks them; the other jobs do.
+        config: ${{ fromJSON(inputs.os == 'macos' && '[{"os":"macos-latest","r":"release"}]' || inputs.os == 'all' && '[{"os":"ubuntu-latest","r":"release"},{"os":"ubuntu-latest","r":"oldrel-1"},{"os":"windows-latest","r":"release"},{"os":"macos-latest","r":"release"},{"os":"ubuntu-latest","r":"release","nosuggests":true}]' || '[{"os":"ubuntu-latest","r":"release"},{"os":"ubuntu-latest","r":"oldrel-1"},{"os":"windows-latest","r":"release"},{"os":"ubuntu-latest","r":"release","nosuggests":true}]') }}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      # Neither R CMD check nor rcmdcheck sets NOT_CRAN, so without this the
+      # table1/regtab golden sweeps (skip_on_cran) would not run in CI.
+      NOT_CRAN: true
+      _R_CHECK_FORCE_SUGGESTS_: ${{ matrix.config.nosuggests && 'false' || 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        if: ${{ !matrix.config.nosuggests }}
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        if: ${{ matrix.config.nosuggests }}
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::rcmdcheck, any::testthat, any::knitr, any::rmarkdown
+          needs: check
+
+      # Suggests that install but do not load are skipped by the tests
+      # without the reason (flextable on macos-latest, 2026-10-01: 282
+      # skips). Print each load error; this step never fails the job.
+      - name: Suggests that do not load
+        if: ${{ !matrix.config.nosuggests }}
+        continue-on-error: true
+        run: |
+          s <- trimws(strsplit(read.dcf("DESCRIPTION", "Suggests")[1, 1], ",")[[1]])
+          s <- sub("[ (].*$", "", s)
+          for (p in s) tryCatch(loadNamespace(p), error = function(e) cat(p, ":", conditionMessage(e), "\n"))
+        shell: Rscript {0}
+
+      - uses: r-lib/actions/check-r-package@v2
+        if: ${{ !matrix.config.nosuggests }}
+        with:
+          upload-snapshots: true
+          build_args: 'c("--no-manual")'
+          error-on: '"warning"'
+
+      # The StataCorp example datasets (and the goldens that list their rows)
+      # are .Rbuildignored, so R CMD check on the tarball skips the tests that
+      # read them. Run the suite once from the source tree, where they exist.
+      - name: Source-tree tests (source-only fixtures)
+        if: ${{ matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release' && !matrix.config.nosuggests }}
+        run: Rscript -e 'testthat::test_local(stop_on_failure = TRUE, stop_on_warning = TRUE)'
+
+      # qa/ is excluded from the tarball. Exercise these public-API cases
+      # against a fresh installation on every operating system.
+      - name: Installed adversarial and sample QA
+        if: ${{ matrix.config.r == 'release' && !matrix.config.nosuggests }}
+        run: Rscript qa/run_all.R quick
+
+      - name: Installed seeded interaction matrix
+        if: ${{ matrix.config.r == 'release' && !matrix.config.nosuggests }}
+        run: Rscript qa/run_all.R interaction
+
+      - uses: r-lib/actions/check-r-package@v2
+        if: ${{ matrix.config.nosuggests }}
+        with:
+          upload-snapshots: true
+          build_args: 'c("--no-manual", "--no-build-vignettes")'
+          args: 'c("--no-manual", "--as-cran", "--ignore-vignettes")'
+          error-on: '"warning"'

@@ -1,0 +1,24 @@
+  +----------------------------------------------------------------+
+  |                           Keep                                 |
+  |                          Coef.                95% CI   p-value |
+  | Repair record 1978                                             |
+  |                  1   Reference                                 |
+  |                  2      812.46   (-3294.56, 4919.49)      0.69 |
+  |                  3     1412.53   (-2396.82, 5221.89)      0.46 |
+  |                  4      512.01   (-3555.95, 4579.96)      0.80 |
+  |                  5     3105.22   (-2285.09, 8495.52)      0.25 |
+  |      foreign#rep78                                             |
+  |  0.foreign#1.rep78   Reference                                 |
+  |  0.foreign#2.rep78   Reference                                 |
+  |  0.foreign#3.rep78   Reference                                 |
+  |  0.foreign#4.rep78   Reference                                 |
+  |  0.foreign#5.rep78   Reference                                 |
+  |  1.foreign#1.rep78       Empty                                 |
+  |  1.foreign#2.rep78       Empty                                 |
+  |  1.foreign#3.rep78     -716.38   (-6024.98, 4592.22)      0.79 |
+  |  1.foreign#4.rep78     2106.96   (-2896.47, 7110.39)      0.40 |
+  |  1.foreign#5.rep78     Omitted                                 |
+  +----------------------------------------------------------------+
+
+Markdown exported to R09b.md
+Exported 20 rows × 5 cols to regtab.xlsx, sheet R09b

@@ -1,0 +1,25 @@
+name,kind,row,col,value
+_golden_id,meta,,,R81
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,11
+icc_1,scalar,,,.0010534143105534999
+groups_1,scalar,,,62
+n_1,scalar,,,10351
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,14
+sheet,macro,,,R81
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R81.md
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable linear mixed-effects regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,Age_(years),c1,.048577485324972698
+table,matrix,__Female,c1,.041204961022709097
+table,matrix,Intercept,c1,23.194071363657791
+table,matrix,Variance_Location_(stand_office_,c1,.0000281085132725
+table,matrix,Variance_Location_(stand_offic_2,c1,.024627118634942401
+table,matrix,Residual_Variance,c1,23.353751538479241

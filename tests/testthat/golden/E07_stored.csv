@@ -1,0 +1,20 @@
+name,kind,row,col,value
+_golden_id,meta,,,E07
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,2
+ci_level,scalar,,,95
+N_cols,scalar,,,5
+N_rows,scalar,,,5
+sheet,macro,,,E07
+xlsx,macro,,,effecttab.xlsx
+markdown,macro,,,E07.md
+methods,macro,,,"Average treatment effects estimated using inverse probability weighting with 95% confidence intervals. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+type,macro,,,teffects
+effect_label,macro,,,Birth weight
+table,matrix,Non-smoker_(PO_Mean),c1,3406.3801979082482
+table,matrix,Non-smoker_(PO_Mean),c2,0
+table,matrix,Smoker_(PO_Mean),c1,3143.4010537525141
+table,matrix,Smoker_(PO_Mean),c2,0

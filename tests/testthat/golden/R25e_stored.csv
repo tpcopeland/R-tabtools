@@ -1,0 +1,26 @@
+name,kind,row,col,value
+_golden_id,meta,,,R25e
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,12
+n_1,scalar,,,15000
+ll_1,scalar,,,-43574.74461321249
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,15
+sheet,macro,,,R25e
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R25e.md
+methods,macro,,,"Hazard ratios with 95% confidence intervals from multivariable Cox proportional hazards regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,HR
+table,matrix,Treatment_group,c1,1.039611018967292
+table,matrix,Age_at_cohort_entry_(years),c1,1.0020167620476179
+table,matrix,Female_sex,c1,1.012761360162292
+table,matrix,__Secondary,c1,1.0643953263659121
+table,matrix,__Tertiary,c1,1.0453795246280191
+table,matrix,Diabetes,c1,1.5297661080239371
+table,matrix,Hypertension,c1,1.50209698849994
+table,matrix,Anxiety_disorder,c1,1.691533313850903

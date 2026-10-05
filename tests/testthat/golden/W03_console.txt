@@ -1,0 +1,13 @@
+  +------------------------------------------------------------------+
+  |                                Model                             |
+  |                                Coef.            95% CI   p-value |
+  |             Treatment group    0.007   (-0.008, 0.023)      0.37 |
+  | Age at cohort entry (years)    0.001    (0.000, 0.001)     0.025 |
+  |                  Female sex    0.003   (-0.013, 0.019)      0.70 |
+  |                   Intercept    0.307    (0.270, 0.343)    <0.001 |
+  |                Observations   15,000                             |
+  |                          R²    0.000                             |
+  +------------------------------------------------------------------+
+
+Markdown exported to W03.md
+Exported 9 rows × 5 cols to regtab.xlsx, sheet W03

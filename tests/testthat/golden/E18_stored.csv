@@ -1,0 +1,22 @@
+name,kind,row,col,value
+_golden_id,meta,,,E18
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,3
+ci_level,scalar,,,95
+N_cols,scalar,,,5
+N_rows,scalar,,,6
+sheet,macro,,,E18
+xlsx,macro,,,effecttab.xlsx
+markdown,macro,,,E18.md
+methods,macro,,,"Effect estimates were formatted from the supplied matrix with 95% confidence intervals and p-values. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+type,macro,,,margins
+effect_label,macro,,,RD
+table,matrix,Treated_vs_control,c1,.12
+table,matrix,Treated_vs_control,c2,.0004
+table,matrix,Dose_high,c1,-.029999999999999999
+table,matrix,Dose_high,c2,.25
+table,matrix,Zero_row,c1,0
+table,matrix,Zero_row,c2,1

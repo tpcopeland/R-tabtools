@@ -1,0 +1,11 @@
+name,kind,row,col,value
+_golden_id,meta,,,RV10
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,age marker marker
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as meanSD, geometric meanGSD, or median (Q1Q3). P-values were calculated using independent t-test, Wilcoxon rank-sum test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as meanSD, geometric meanGSD, or median (Q1Q3)."
+table,matrix,Age_at_entry_mean±SD,p_value,.0009593102991237
+table,matrix,Inflammation_marker_median_(Q1_Q,p_value,.035344328407527902
+table,matrix,Inflammation_marker_geometric_me,p_value,.019582610383451701

@@ -1,0 +1,13 @@
+name,kind,row,col,value
+_golden_id,meta,,,W3
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+sheet,macro,,,W3
+xlsx,macro,,,tests/testthat/fixtures/table1_phase3/phase3.xlsx
+varlist,macro,,,age marker female stage
+Dapa,macro,,,"Crude and weighted data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures. P-values suppressed. SMD reflects weighted comparison."
+table,matrix,Age_at_entry,smd,3.084393341060979
+table,matrix,Inflammation_marker,smd,1.811986055821688
+table,matrix,Female_sex,smd,.12511735255283721
+table,matrix,Clinical_stage,smd,.70716857455244486

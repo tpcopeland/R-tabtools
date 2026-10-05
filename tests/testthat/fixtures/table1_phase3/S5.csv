@@ -1,0 +1,6 @@
+ ,0,1,Total,p-value
+No. (Column %),N=10,N=10,N=20,
+category,,,,Suppressed
+   0,<5,≥5,8,
+   1,≥5,<5,12,
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.,,,,

@@ -1,0 +1,5 @@
+,Weibull AFT,,
+,TR,95% CI,p-value
+Treatment group,0.98,"(0.97, 1.00)",0.13
+Age at cohort entry (years),1.00,"(1.00, 1.00)",<0.001
+Female sex,1.00,"(0.98, 1.02)",0.91

@@ -1,0 +1,67 @@
+url: https://tpcopeland.github.io/R-tabtools/
+template:
+  bootstrap: 5
+
+reference:
+- title: Tables
+  desc: Baseline-characteristics (Table 1) and regression tables, and ways to combine them.
+  contents:
+  - table1_tc
+  - desctab
+  - regtab
+  - tt_mi
+  - regtab_uv
+  - tt_from_modelsummary
+  - tt_merge
+  - tt_stack
+- title: Composite and export tables
+  desc: Style a table already in memory, assemble sheets into one composite, tabulate incidence rates, compose rates and hazard ratios into a Table 2, format treatment effects and margins, and describe inverse probability weights.
+  contents:
+  - puttab
+  - stacktab
+  - stratetab
+  - tt_rates
+  - comptab
+  - effecttab
+  - tt_effect_rows
+  - wttab
+- title: Output
+  desc: Write or convert a table.
+  contents:
+  - tt_write_xlsx
+  - tt_write_csv
+  - tt_write_markdown
+  - as_flextable.tt_table
+  - tt_as_gt
+  - tt_as_gtsummary
+  - tt_as_tinytable
+  - as_forest_data
+  - as.data.frame.tt_table
+  - print.tt_table
+- title: Variance
+  desc: The variances and interval methods behind regtab's standard errors (`vce`), for use with other tools.
+  contents:
+  - tt_vcov
+  - tt_vce_types
+  - tt_ci_methods
+- title: Settings and data
+  contents:
+  - tabtools_options
+  - tt_as_factor
+- title: Building blocks
+  desc: The table object every renderer reads.
+  contents:
+  - tt_table
+  - validate_tt_table
+- title: Package
+  contents:
+  - tabtools-package
+
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - regression-tables
+  - weighted-analyses
+  - compared-with-gtsummary
+  - coming-from-stata

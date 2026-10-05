@@ -1,0 +1,22 @@
+name,kind,row,col,value
+_golden_id,meta,,,T02
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,22
+markdown,macro,,,T02.md
+sheet,macro,,,T02
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,index_age female education income_quintile born_abroad civil_status diabetes hypertension anxiety prior_cvd
+Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values suppressed."
+table,matrix,Age_at_cohort_entry_(years),smd,.019391478652278402
+table,matrix,Female_sex,smd,.0041078082303385001
+table,matrix,Education_level,smd,.035247818683190303
+table,matrix,Disposable_income_quintile,smd,.023619766429219601
+table,matrix,Born_outside_Sweden,smd,.012815286191433999
+table,matrix,Marital_status,smd,.030462595884754199
+table,matrix,Diabetes,smd,.0097321587841439992
+table,matrix,Hypertension,smd,.047247450875322901
+table,matrix,Anxiety_disorder,smd,.0072524935766846996
+table,matrix,Prior_cardiovascular_disease,smd,.0020766307613508

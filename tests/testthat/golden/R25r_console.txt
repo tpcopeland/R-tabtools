@@ -1,0 +1,17 @@
+
+Table 5m. GLM Poisson -- Prior Hospitalizations
+  +--------------------------------------------------------------------+
+  |                               GLM Poisson                          |
+  |                                       IRR         95% CI   p-value |
+  |             Treatment group          1.00   (0.98, 1.02)      0.97 |
+  | Age at cohort entry (years)          1.00   (1.00, 1.00)      0.81 |
+  |                  Female sex          1.00   (0.98, 1.02)     >0.99 |
+  |                    Diabetes          1.00   (0.98, 1.03)      0.82 |
+  |                Hypertension          1.00   (0.98, 1.03)      0.89 |
+  |                Observations        15,000                          |
+  |                         AIC      49369.13                          |
+  |                         BIC      49414.83                          |
+  +--------------------------------------------------------------------+
+
+Markdown exported to R25r.md
+Exported 11 rows × 5 cols to regtab.xlsx, sheet R25r

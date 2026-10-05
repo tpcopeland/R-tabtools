@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,O5
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+n_1,scalar,,,400
+ll_1,scalar,,,-403.57507679472877
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,8
+methods,macro,,,"Coefficients with 95% confidence intervals from univariable ordered probit regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,x,c1,.35626258052212229
+table,matrix,cut1,c1,-.27331836738616933
+table,matrix,cut2,c1,.74161965834264898

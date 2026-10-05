@@ -1,0 +1,19 @@
+name,kind,row,col,value
+_golden_id,meta,,,D10
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,15
+methods,macro,,,"Relative risk ratios with 95% confidence intervals from multivariable multinomial logistic regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,RRR
+table,matrix,Primary_Age_at_cohort_entry_(yea,c1,.99975294945809778
+table,matrix,Primary___Former,c1,1.1175414572723961
+table,matrix,Primary___Current,c1,1.041759245304551
+table,matrix,Primary_Intercept,c1,.64891324129836203
+table,matrix,Tertiary_Age_at_cohort_entry_(ye,c1,.99880884451627039
+table,matrix,Tertiary___Former,c1,1.1145393640627479
+table,matrix,Tertiary___Current,c1,1.0694675365257551
+table,matrix,Tertiary_Intercept,c1,.93096715232140959

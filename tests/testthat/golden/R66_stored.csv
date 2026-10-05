@@ -1,0 +1,23 @@
+name,kind,row,col,value
+_golden_id,meta,,,R66
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,7
+n_1,scalar,,,74
+ll_1,scalar,,,-23.535653135217551
+bic_1,scalar,,,64.287566643251779
+aic_1,scalar,,,55.071306270435102
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,10
+sheet,macro,,,R66
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R66.md
+methods,macro,,,"Odds ratios with 95% confidence intervals from multivariable logistic regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Mileage_(mpg),c1,.83584504636113333
+table,matrix,Weight_(lbs_),c1,.99761494956482821
+table,matrix,Turn_circle_(ft_),c1,.670793519523468

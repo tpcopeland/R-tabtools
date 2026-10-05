@@ -1,0 +1,53 @@
+Age at cohort entry (years)
+Female sex
+Treatment group
+  Male
+   Female
+Intercept
+foreign#rep78
+1.foreign#3.rep78
+1.foreign#c.mpg#c.mpg
+mpg#mpg
+Foreign # Repair
+cov(x,_cons)
+cov(age,_cons)
+cov(x[clinic],_cons[clinic])
+var(x[clinic])
+var(_cons[clinic])
+sd(x)
+var(e)
+/cut1
+/lnalpha
+lnalpha
+Ancillary: ln_p
+Event count: Treatment
+C-reactive protein (mg/L)
+Lifetime healthcare cost (SEK)
+Body mass index, kg/m2
+It's
+Cost $
+Back\slash
+Ratio 1:2
+N=5
+p<0.05
+50% or more
+Ålder (år)
+Geometric × mean
+ÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅ twenty
+A very long variable label that goes well past thirty-two characters
+A very long variable label that goes well past thirty-two characters too
+Duplicate
+Duplicate
+Duplicate
+1st quartile
+2
+x#
+#x
+(open
+close)
+a[b]
+Variance: Clinic ID (Exposure score)
+Covariance: Clinic ID (Exposure score, Intercept)
+Median Odds Ratio (Clinic ID)
+Residual Variance
+Median Hazard Ratio (Site)

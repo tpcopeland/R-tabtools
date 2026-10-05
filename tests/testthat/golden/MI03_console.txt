@@ -1,0 +1,17 @@
+  +-------------------------------------------------------------------------+
+  |                               MI logit, robust                          |
+  |                                             OR         95% CI   p-value |
+  |             Treatment group               0.88   (0.57, 1.37)      0.58 |
+  | Age at cohort entry (years)               1.00   (0.98, 1.02)      0.88 |
+  |                  Female sex               1.74   (1.11, 2.74)     0.016 |
+  |             Education level                                             |
+  |                     Primary          Reference                          |
+  |                   Secondary               1.04   (0.60, 1.80)      0.90 |
+  |                    Tertiary               0.97   (0.52, 1.80)      0.92 |
+  |                Observations                400                          |
+  |                 Imputations                  5                          |
+  |                 Largest FMI             0.2109                          |
+  +-------------------------------------------------------------------------+
+
+Markdown exported to MI03.md
+Exported 13 rows × 5 cols to regtab.xlsx, sheet MI03

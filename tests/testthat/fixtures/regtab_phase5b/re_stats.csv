@@ -1,0 +1,110 @@
+call,kind,name,value
+slope_raw,scalar,n_1, 6.0000000000000000e+02
+slope_raw,scalar,groups_1, 6.0000000000000000e+00
+slope_raw,scalar,icc_1, 1.5053788178267091e-01
+slope_raw,scalar,N_rows, 1.4000000000000000e+01
+slope_raw,rowname,1,"Age_(years)"
+slope_raw,rowname,2,"Female_sex"
+slope_raw,rowname,3,"BMI"
+slope_raw,rowname,4,"Intercept"
+slope_raw,rowname,5,"var(age)"
+slope_raw,rowname,6,"var(_cons)"
+slope_raw,rowname,7,"cov_age_cons_"
+slope_raw,rowname,8,"var(e)"
+slope_relabel,scalar,n_1, 6.0000000000000000e+02
+slope_relabel,scalar,groups_1, 6.0000000000000000e+00
+slope_relabel,scalar,icc_1, 1.5053788178267091e-01
+slope_relabel,scalar,N_rows, 1.4000000000000000e+01
+slope_relabel,rowname,1,"Age_(years)"
+slope_relabel,rowname,2,"Female_sex"
+slope_relabel,rowname,3,"BMI"
+slope_relabel,rowname,4,"Intercept"
+slope_relabel,rowname,5,"Variance_Healthcare_Region_(Age_"
+slope_relabel,rowname,6,"Variance_Healthcare_Region_(Inte"
+slope_relabel,rowname,7,"Covariance_Healthcare_Region_(Ag"
+slope_relabel,rowname,8,"Residual_Variance"
+slope_nore,scalar,icc_1, 1.5053788178267091e-01
+slope_nore,scalar,N_rows, 8.0000000000000000e+00
+slope_nore,rowname,1,"Age_(years)"
+slope_nore,rowname,2,"Female_sex"
+slope_nore,rowname,3,"BMI"
+slope_nore,rowname,4,"Intercept"
+reml_relabel,scalar,n_1, 6.0000000000000000e+02
+reml_relabel,scalar,groups_1, 6.0000000000000000e+00
+reml_relabel,scalar,icc_1, 8.7801584360321008e-03
+reml_relabel,scalar,aic_1, 1.7150012173728830e+03
+reml_relabel,scalar,N_rows, 1.3000000000000000e+01
+reml_relabel,rowname,1,"Age_(years)"
+reml_relabel,rowname,2,"Female_sex"
+reml_relabel,rowname,3,"BMI"
+reml_relabel,rowname,4,"Intercept"
+reml_relabel,rowname,5,"Variance_Healthcare_Region_(Inte"
+reml_relabel,rowname,6,"Residual_Variance"
+lvl3_raw,scalar,n_1, 1.0351000000000000e+04
+lvl3_raw,scalar,groups_1, 6.2000000000000000e+01
+lvl3_raw,scalar,icc_1, 3.1620530582878001e-03
+lvl3_raw,scalar,N_rows, 1.4000000000000000e+01
+lvl3_raw,rowname,1,"Age_(years)"
+lvl3_raw,rowname,2,"__Female"
+lvl3_raw,rowname,3,"Intercept"
+lvl3_raw,rowname,4,"var(_cons[zone])"
+lvl3_raw,rowname,5,"var(_cons[location])"
+lvl3_raw,rowname,6,"var(e)"
+melogit_nore,scalar,n_1, 1.0351000000000000e+04
+melogit_nore,scalar,groups_1, 6.2000000000000000e+01
+melogit_nore,scalar,icc_1, 6.2883496275414605e-02
+melogit_nore,scalar,N_rows, 1.0000000000000000e+01
+melogit_nore,rowname,1,"Age_(years)"
+melogit_nore,rowname,2,"__Female"
+mepois_raw,scalar,n_1, 1.0351000000000000e+04
+mepois_raw,scalar,groups_1, 6.2000000000000000e+01
+mepois_raw,scalar,N_rows, 1.0000000000000000e+01
+mepois_raw,rowname,1,"Age_(years)"
+mepois_raw,rowname,2,"__Female"
+mepois_raw,rowname,3,"var(_cons[location])"
+mepois_relabel,scalar,n_1, 1.0351000000000000e+04
+mepois_relabel,scalar,groups_1, 6.2000000000000000e+01
+mepois_relabel,scalar,N_rows, 1.0000000000000000e+01
+mepois_relabel,rowname,1,"Age_(years)"
+mepois_relabel,rowname,2,"__Female"
+mepois_relabel,rowname,3,"Variance_Location_(stand_office_"
+meslope_raw,scalar,groups_1, 4.0000000000000000e+01
+meslope_raw,scalar,icc_1, 1.5425938273813589e-01
+meslope_raw,scalar,N_rows, 1.0000000000000000e+01
+meslope_raw,rowname,1,"Exposure_score"
+meslope_raw,rowname,2,"z"
+meslope_raw,rowname,3,"var(x[clinic])"
+meslope_raw,rowname,4,"Median_Odds_Ratio_(Clinic_ID)"
+meslope_raw,rowname,5,"cov_x_clinic__cons_clinic__"
+meslope_relabel,scalar,groups_1, 4.0000000000000000e+01
+meslope_relabel,scalar,icc_1, 1.5425938273813589e-01
+meslope_relabel,scalar,N_rows, 1.0000000000000000e+01
+meslope_relabel,rowname,1,"Exposure_score"
+meslope_relabel,rowname,2,"z"
+meslope_relabel,rowname,3,"Variance_Clinic_ID_(Exposure_sco"
+meslope_relabel,rowname,4,"Median_Odds_Ratio_(Clinic_ID)"
+meslope_relabel,rowname,5,"Covariance_Clinic_ID_(Exposure_s"
+slope2_relabel,scalar,icc_1, 3.4447045183653879e-01
+slope2_relabel,scalar,N_rows, 1.1000000000000000e+01
+slope2_relabel,rowname,1,"Exposure_score"
+slope2_relabel,rowname,2,"z"
+slope2_relabel,rowname,3,"Intercept"
+slope2_relabel,rowname,4,"Variance_Clinic_ID_(Exposure_sco"
+slope2_relabel,rowname,5,"Variance_Clinic_ID_(Intercept)"
+slope2_relabel,rowname,6,"Covariance_Clinic_ID_(Exposure_s"
+slope2_relabel,rowname,7,"Residual_Variance"
+gee_gauss,scalar,n_1, 2.6200000000000000e+04
+gee_gauss,scalar,groups_1, 4.4340000000000000e+03
+gee_gauss,scalar,N_rows, 9.0000000000000000e+00
+gee_gauss,rowname,1,"Age_in_current_year"
+gee_gauss,rowname,2,"1_if_not_SMSA"
+gee_gauss,rowname,3,"1_if_south"
+gee_gauss,rowname,4,"Intercept"
+gee_pois,scalar,n_1, 2.6200000000000000e+04
+gee_pois,scalar,groups_1, 4.4340000000000000e+03
+gee_pois,scalar,qic_1, 1.7044757738455519e+04
+gee_pois,scalar,N_rows, 1.0000000000000000e+01
+gee_pois,rowname,1,"Age_in_current_year"
+gee_pois,rowname,2,"Current_grade_completed"
+gee_pois,rowname,3,"1_if_not_SMSA"
+gee_pois,rowname,4,"1_if_south"

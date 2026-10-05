@@ -1,0 +1,12 @@
+,OL,,,ML,,
+,OR,95% CI,p-value,RRR,95% CI,p-value
+Education level: Age at cohort entry (years),1.00,"(1.00, 1.00)",0.72,,,
+Education level: Female sex,1.00,"(0.94, 1.06)",0.93,,,
+A,-1.08,"(-1.22, -0.94)",,,,
+B,0.60,"(0.46, 0.73)",,,,
+Secondary: Age at cohort entry (years),,,,1.00,"(1.00, 1.00)",0.75
+Secondary: Female sex,,,,1.08,"(1.00, 1.18)",0.062
+Secondary: Intercept,,,,1.41,"(1.17, 1.71)",<0.001
+Tertiary: Age at cohort entry (years),,,,1.00,"(1.00, 1.00)",0.78
+Tertiary: Female sex,,,,1.02,"(0.93, 1.11)",0.71
+Tertiary: Intercept,,,,1.38,"(1.14, 1.68)",<0.001

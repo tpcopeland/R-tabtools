@@ -1,0 +1,8 @@
+  +-----------------------------------------------------+
+  |                        ATE         95% CI   p-value |
+  | Smoker vs Nonsmoker   -262   (-308, -215)    <0.001 |
+  | Nonsmoker (PO Mean)   3408   (3389, 3426)    <0.001 |
+  +-----------------------------------------------------+
+
+Markdown exported to E12.md
+Exported 5 rows × 5 cols to effecttab.xlsx, sheet E12

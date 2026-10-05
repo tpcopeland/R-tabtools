@@ -1,0 +1,10 @@
+  +-------------------------------------------------+
+  |                  NB r2                          |
+  |                    IRR         95% CI   p-value |
+  | Exposure score    1.43   (1.29, 1.59)    <0.001 |
+  |   Observations     400                          |
+  |      Pseudo R²   0.030                          |
+  +-------------------------------------------------+
+
+Markdown exported to R35.md
+Exported 6 rows × 5 cols to regtab.xlsx, sheet R35

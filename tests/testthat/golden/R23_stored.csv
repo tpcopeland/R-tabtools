@@ -1,0 +1,23 @@
+name,kind,row,col,value
+_golden_id,meta,,,R23
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,7
+groups_1,scalar,,,4434
+n_1,scalar,,,26200
+qic_1,scalar,,,27142.203153874711
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,10
+sheet,macro,,,R23
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R23.md
+methods,macro,,,"Odds ratios with 95% confidence intervals from multivariable generalized estimating equation (GEE) logistic regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Age_in_current_year,c1,1.009929070701842
+table,matrix,Current_grade_completed,c1,1.0624893533517401
+table,matrix,1_if_not_SMSA,c1,.88184861783299184
+table,matrix,1_if_south,c1,.56286912631185426

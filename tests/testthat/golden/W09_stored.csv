@@ -1,0 +1,20 @@
+name,kind,row,col,value
+_golden_id,meta,,,W09
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,13
+markdown_rows,scalar,,,1
+ci_level,scalar,,,95
+N_models,scalar,,,4
+N_cols,scalar,,,14
+N_rows,scalar,,,4
+sheet,macro,,,W09
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,W09.md
+methods,macro,,,"Odds ratios with 95% confidence intervals from multivariable logistic regression across 4 models. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Treatment_group,c1,1.0507923574238129
+table,matrix,Treatment_group,c2,1.048883624406332
+table,matrix,Treatment_group,c3,1.038804286589778
+table,matrix,Treatment_group,c4,1.037975182961403

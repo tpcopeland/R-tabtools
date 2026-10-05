@@ -1,0 +1,4 @@
+ ,group = 0,group = 1,p-value
+Column % (No.),N=14,N=16,
+Flag,<5,≥5,Suppressed
+Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.,,,

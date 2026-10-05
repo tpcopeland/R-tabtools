@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,F2
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,index_age bmi lab_value education
+methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures. P-values were calculated using independent t-test, Wilcoxon rank-sum test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,"Data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures."
+table,matrix,Age_at_cohort_entry_(years),p_value,.0096450455655283998
+table,matrix,Age_at_cohort_entry_(years),smd,.0394446800857986
+table,matrix,Body_mass_index,p_value,.15760078821455209
+table,matrix,Body_mass_index,smd,.021518306796766799
+table,matrix,Lab_value_(non-positive_allowed),p_value,.17830253800237589
+table,matrix,Lab_value_(non-positive_allowed),smd,.0036109765569344002
+table,matrix,Education_level,p_value,.3040419531550107
+table,matrix,Education_level,smd,.023468667980197699

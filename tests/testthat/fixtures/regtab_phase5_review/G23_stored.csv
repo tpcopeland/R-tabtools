@@ -1,0 +1,23 @@
+name,kind,row,col,value
+_golden_id,meta,,,G23
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_models,scalar,,,2
+N_cols,scalar,,,8
+N_rows,scalar,,,9
+methods,macro,,,"Collected regression estimates with 95% confidence intervals across 2 models. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,mixed
+table,matrix,Analysis_time_when_record_ends_A,c1,1.003296522182711
+table,matrix,Analysis_time_when_record_ends_A,c2,.
+table,matrix,Analysis_time_when_record_ends_F,c1,1.0078589007246841
+table,matrix,Analysis_time_when_record_ends_F,c2,.
+table,matrix,Secondary_Age_at_cohort_entry_(y,c1,.
+table,matrix,Secondary_Age_at_cohort_entry_(y,c2,1.0005000512768689
+table,matrix,Secondary_Female_sex,c1,.
+table,matrix,Secondary_Female_sex,c2,1.0818685898038469
+table,matrix,Tertiary_Age_at_cohort_entry_(ye,c1,.
+table,matrix,Tertiary_Age_at_cohort_entry_(ye,c2,.99955618910072885
+table,matrix,Tertiary_Female_sex,c1,.
+table,matrix,Tertiary_Female_sex,c2,1.0159785004658659

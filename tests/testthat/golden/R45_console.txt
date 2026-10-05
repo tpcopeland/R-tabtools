@@ -1,0 +1,13 @@
+  +------------------------------------------------------+
+  |                   Cox split                          |
+  |                          HR         95% CI   p-value |
+  | Treatment group        1.05   (0.99, 1.11)     0.095 |
+  |      Female sex        1.01   (0.95, 1.06)      0.81 |
+  |        Subjects      15,000                          |
+  |             AIC    88014.08                          |
+  |             BIC    88031.15                          |
+  |  Log-likelihood   -44005.04                          |
+  +------------------------------------------------------+
+
+Markdown exported to R45.md
+Exported 9 rows × 5 cols to regtab.xlsx, sheet R45

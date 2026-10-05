@@ -1,0 +1,9 @@
+name,kind,row,col,value
+_golden_id,meta,,,RV05
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,s
+methods,macro,,,"Baseline characteristics were compared between groups defined by g. Data are presented as No. (%). P-values were calculated using Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+Dapa,macro,,,Data are presented as No. (%).
+table,matrix,s,p_value,.36787944117144228

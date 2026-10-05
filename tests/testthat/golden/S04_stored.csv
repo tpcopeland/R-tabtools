@@ -1,0 +1,22 @@
+name,kind,row,col,value
+_golden_id,meta,,,S04
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,99
+N_outcomes,scalar,,,1
+N_exposures,scalar,,,3
+N_rows,scalar,,,9
+markdown_cols,scalar,,,5
+markdown_rows,scalar,,,6
+sheet,macro,,,S04
+xlsx,macro,,,stratetab.xlsx
+methods,macro,,,Incidence rates and confidence intervals were formatted at the 99% level; rate-ratio intervals use an independent-rate log-normal approximation at the same level.
+outcome_ids,macro,,,Hip fracture
+markdown,macro,,,S04.md
+csv,macro,,,S04.csv
+ratios,matrix,e2_Overall,Hip_fracture,1.048389088729796
+ratios,matrix,e3_Overall,Hip_fracture,.
+rates,matrix,e1_Overall,Hip_fracture,.076922299999999999
+rates,matrix,e2_Overall,Hip_fracture,.080644499999999994
+rates,matrix,e3_Overall,Hip_fracture,0

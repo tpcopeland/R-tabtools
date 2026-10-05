@@ -1,0 +1,7 @@
+ ,SSRI,SNRI,Total,SMD
+"Mean±SD, Geometric mean (×/GSD), or Median (Q1, Q3)","N=8,934","N=6,066","N=15,000",
+Effective sample size,"ESS=8,928","ESS=6,058","ESS=14,436",
+Age at cohort entry (years),"59 (49, 69)","59 (49, 69)","59 (49, 69)",0.000
+Lab value (non-positive allowed),1.63 (×/2.02),1.63 (×/2.02),1.63 (×/2.02),0.001
+Body mass index,25.9±4.0,25.9±4.0,25.9±4.0,0.006
+Lifetime healthcare cost (SEK),"98115416 (77085939, 1.2e+08)","98797263 (77724768, 1.3e+08)","98395772 (77332466, 1.3e+08)",0.027

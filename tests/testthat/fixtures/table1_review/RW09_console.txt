@@ -1,0 +1,28 @@
+(7 real changes made)
+  (1 observation in frame __000006 unmatched)
+(2 missing values generated)
+(4 missing values generated)
+(3 missing values generated)
+(3 missing values generated)
+(2 missing values generated)
+(4 missing values generated)
+(3 missing values generated)
+(3 missing values generated)
+  (8 variables copied from linked frame)
+  +---------------------------------------------------------------------------------------------------+
+  |                             Crude g = 0   Crude g = 1   Weighted g = 0   Weighted g = 1   SMD     |
+  |---------------------------------------------------------------------------------------------------|
+  | No. (Column %) or Mean±SD   N=10          N=10          N=10             N=10                     |
+  |---------------------------------------------------------------------------------------------------|
+  | Effective sample size                                   ESS=9            ESS=9                    |
+  |---------------------------------------------------------------------------------------------------|
+  | Marker                      11±6          10±6          11±6             10±6             0.114   |
+  | Marker                      22±12         22±12         22±13            21±12            0.031   |
+  |---------------------------------------------------------------------------------------------------|
+  | Group                                                                                     0.256   |
+  |    1                        3 (30)        3 (30)        19               20                       |
+  |    2                        3 (30)        4 (40)        29               40                       |
+  |    3                        4 (40)        3 (30)        52               40                       |
+  | Group                       5 (50)        5 (50)        52               53               0.034   |
+  +---------------------------------------------------------------------------------------------------+
+CSV exported to tests/testthat/fixtures/table1_review/RW09.csv

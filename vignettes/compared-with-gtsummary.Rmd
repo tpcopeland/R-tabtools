@@ -1,0 +1,156 @@
+---
+title: "Compared with gtsummary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Compared with gtsummary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+ok <- requireNamespace("gtsummary", quietly = TRUE) &&
+  requireNamespace("gt", quietly = TRUE) &&
+  requireNamespace("flextable", quietly = TRUE)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = ok)
+# Inline values below are read from the tables built here.
+iv <- function(x) if (ok) x else "..."
+```
+
+gtsummary is the most widely used R package for the same two tables. This
+vignette builds one Table 1 and one Table 2 with each package, from the
+same data and the same models, and lists where the rows differ. Each table
+is shown in its package's usual HTML form: gtsummary through gt, tabtools
+through flextable (the workbook's house style).
+
+```{r data}
+library(tabtools)
+set.seed(20260925)
+n <- 600
+d <- data.frame(
+  treated   = factor(sample(c("SSRI", "SNRI"), n, TRUE, c(0.6, 0.4)),
+                     levels = c("SSRI", "SNRI")),
+  age       = round(rnorm(n, 58, 13), 1),
+  female    = rbinom(n, 1, 0.6),
+  education = factor(sample(c("Primary", "Secondary", "Tertiary"), n, TRUE),
+                     levels = c("Primary", "Secondary", "Tertiary")),
+  diabetes  = rbinom(n, 1, 0.3)
+)
+d$event <- rbinom(n, 1, plogis(-2 + 0.03 * (d$age - 58) + 0.4 * d$diabetes))
+labs <- c(treated = "Treatment", age = "Age at cohort entry (years)",
+          female = "Female sex", education = "Education level",
+          diabetes = "Diabetes", event = "Cardiovascular event")
+for (v in names(labs)) attr(d[[v]], "label") <- labs[[v]]
+```
+
+## Table 1
+
+```{r t1-gtsummary}
+g1 <- gtsummary::tbl_summary(
+  d[, c("treated", "age", "female", "education", "diabetes")],
+  by = treated,
+  statistic = list(age ~ "{mean} ({sd})"),
+  digits = list(age ~ 1)
+)
+g1 <- gtsummary::add_p(g1)
+gtsummary::as_gt(g1)
+```
+
+```{r t1-tabtools}
+t1 <- table1_tc(d, by = "treated",
+                vars = c(age = "contn %5.1f", female = "bin",
+                         education = "cat", diabetes = "bin"))
+flextable::as_flextable(t1)
+```
+
+```{r t1-values, include = FALSE}
+tb1 <- gtsummary::as_tibble(g1, col_labels = FALSE)
+g_cell <- function(lab, col = "stat_1") tb1[[col]][tb1$label == lab]
+t_cell <- function(tab, lab, j = 2L) tab$body[[j]][trimws(tab$body[[1]]) == lab]
+g_p <- paste0("`", stats::na.omit(tb1$p.value), "`", collapse = ", ")
+tp <- t1$body[[ncol(t1$body)]]
+t_p <- paste0("`", tp[nzchar(tp)], "`", collapse = ", ")
+n1 <- sum(d$treated == "SSRI")
+```
+
+Row by row:
+
+| | gtsummary | tabtools |
+|---|---|---|
+| Label column header | `Characteristic` | the descriptor, `No. (Column %) or Mean±SD`, merged over both header rows |
+| Group sizes | in the group's header cell: `SSRI`, then `N = `r iv(n1)`` on a second line | a second header row: `N=`r iv(n1)`` under each group label |
+| What the cells hold | a footnote on each column: `Mean (SD); n (%)` | the descriptor; no footnote |
+| Continuous cell | `` `r iv(g_cell(labs[["age"]]))` `` | `` `r iv(t_cell(t1, labs[["age"]]))` `` (Stata's `sdleft`) |
+| Categorical cell | `` `r iv(g_cell("Primary"))` `` | `` `r iv(t_cell(t1, "Primary"))` `` (Stata's default `percsign("")`) |
+| Label row of a categorical variable | the variable label, p-value on it | the same |
+| Level rows | indented when the table is rendered (four no-break spaces in gt output, cell padding in flextable, none in `as_tibble()`) | three literal spaces in the label text itself, kept in every output: console, CSV, Markdown (`&nbsp;`), Excel, Word, HTML |
+| Binary variable | one row (the level 1 count) | one row (`bin`) |
+| p-value, continuous | Wilcoxon rank-sum (default for continuous variables, whatever statistic is shown) | Welch t test for `contn`, Wilcoxon for `conts` |
+| p-value, categorical | Pearson's chi-squared without continuity correction, or Fisher's exact test when an expected count is below 5 | Pearson's chi-squared without continuity correction for `cat`/`bin` whatever the expected counts (as Stata's `tab, chi2`); Fisher's exact only for `cate`/`bine` |
+| p-values shown | `r iv(g_p)` (one decimal from 0.1 up) | `r iv(t_p)` (`pdp`/`highpdp`: two decimals from 0.10 up, up to three below, as in Stata) |
+
+tabtools reads its variable types from `vars` (or auto-types them as Stata
+does), while gtsummary picks a type and a test per variable and is
+configured with `type`, `statistic` and `test`. The tests can be aligned:
+`add_p(test = list(age ~ "t.test"))` in gtsummary, or `conts` in tabtools.
+
+## Table 2
+
+Two logistic models, crude and adjusted.
+
+```{r models}
+crude <- glm(event ~ treated, family = binomial, data = d)
+adjusted <- glm(event ~ treated + age + female + education + diabetes,
+                family = binomial, data = d)
+```
+
+```{r t2-gtsummary}
+g2 <- gtsummary::tbl_merge(
+  list(gtsummary::tbl_regression(crude, exponentiate = TRUE),
+       gtsummary::tbl_regression(adjusted, exponentiate = TRUE)),
+  tab_spanner = c("Crude", "Adjusted"),
+  quiet = TRUE
+)
+gtsummary::as_gt(g2)
+```
+
+```{r t2-tabtools}
+t2 <- regtab(crude, adjusted, models = c("Crude", "Adjusted"), coef = "OR")
+flextable::as_flextable(t2)
+```
+
+```{r t2-values, include = FALSE}
+tb2 <- gtsummary::as_tibble(g2, col_labels = FALSE)
+lab_d <- labs[["diabetes"]]
+g_ci <- tb2$conf.low_2[tb2$label == lab_d]
+t_ci <- t_cell(t2, lab_d, 6L)
+```
+
+Row by row:
+
+| | gtsummary | tabtools |
+|---|---|---|
+| Model headers | a spanner per merged table (`tab_spanner`) | each model's label merged over its OR, CI and p-value columns |
+| Reference level | an em dash in the OR and CI cells | the word `Reference`, italic, in one cell merged across that model's OR, CI and p-value columns |
+| Level rows | indented by the renderer | two literal spaces in the label text |
+| A term absent from a model | blank cells | blank cells |
+| Confidence interval | profile likelihood (`confint()` of the `glm`); Diabetes, adjusted: `` `r iv(g_ci)` `` | Wald, as Stata reports and consistent with the p-value: `` `r iv(t_ci)` ``; `ci_method = "profile"` gives profile intervals |
+| Row order | each model's terms, merged | the union of all models' rows in order of first appearance, intercept last |
+| Model statistics | `add_glance_table()` or `add_glance_source_note()` | `stats = c("n", "aic", "bic")` rows below the coefficients, merged across each model's columns |
+| Footnote | abbreviations (`CI = Confidence Interval, OR = Odds Ratio`) | only what `footnote`/`stars` add |
+
+## Where the difference matters
+
+Both packages produce publication tables. The differences above are the
+reason tabtools exists: it reproduces the Stata `tabtools` layout, so a
+table built in R matches one built in Stata cell for cell, and the same row
+structure is kept in every output (console, CSV, Markdown, Excel, Word,
+HTML). gtsummary covers more summary types, more model types, and many ways
+to extend and restyle a table that tabtools does not attempt.
+
+A tabtools table can also be shown with gt (`tt_as_gt(t2)`; gtsummary's
+own `as_gt()` converts gtsummary tables only, and tabtools does not mask
+it), with one limitation: gt cannot merge body cells, so the Reference
+text sits in the OR column instead of spanning the model's columns.
+`tt_as_gtsummary(t2)` turns a tabtools table into a gtsummary table, with
+tabtools' cells unchanged, for gtsummary's own tools such as `tbl_stack()`
+and the `modify_*()` functions.

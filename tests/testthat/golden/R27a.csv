@@ -1,0 +1,9 @@
+,Logit,,
+,OR,95% CI,p-value
+Age at cohort entry (years),1.00,"(1.00, 1.00)",0.24
+Female sex,0.99,"(0.93, 1.06)",0.82
+Education level,,,
+  Primary,Reference,,
+  Secondary,1.02,"(0.94, 1.11)",0.66
+  Tertiary,1.09,"(1.00, 1.18)",0.053
+Intercept,0.60,"(0.51, 0.71)",<0.001

@@ -1,0 +1,9 @@
+,Model,,
+,OR,95% CI,p-value
+Exposure score,1.77,"(1.42, 2.20)",<0.001
+Current smoker,2.08,"(1.31, 3.31)",0.002
+Group,,,
+  Low,Reference,,
+  Middle,1.39,"(0.86, 2.26)",0.18
+  High,1.36,"(0.83, 2.22)",0.22
+Observations,470,,

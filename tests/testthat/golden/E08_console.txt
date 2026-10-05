@@ -1,0 +1,8 @@
+  +--------------------------------------------------------------+
+  |                        Effect               95% CI   p-value |
+  | Smoker vs Nonsmoker   -241.09   (-285.98, -196.21)    <0.001 |
+  | Nonsmoker (PO Mean)   3378.75   (3353.99, 3403.51)    <0.001 |
+  +--------------------------------------------------------------+
+
+Markdown exported to E08.md
+Exported 5 rows × 5 cols to effecttab.xlsx, sheet E08

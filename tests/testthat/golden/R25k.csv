@@ -1,0 +1,8 @@
+Table 5e. Selected Covariates (keep/drop demo),,,
+,Selected,,
+,OR,95% CI,p-value
+Treatment group,1.03,"(0.96, 1.10)",0.39
+Age at cohort entry (years),1.00*,"(1.00, 1.01)",0.038
+Female sex,1.01,"(0.94, 1.08)",0.85
+Diabetes,1.10**,"(1.03, 1.18)",0.008
+Selected covariates from full model.,,,

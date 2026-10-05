@@ -1,0 +1,7 @@
+,Model,,
+,Coef.,95% CI,p-value
+Event count: Treatment,-0.15,"(-0.26, -0.05)",0.003
+Event count: Age z-score,0.39,"(0.34, 0.44)",<0.001
+Event count: Female,0.24,"(0.14, 0.34)",<0.001
+Event count: Intercept,0.50,"(0.40, 0.60)",<0.001
+Inflation equation: Intercept,-0.60,"(-0.74, -0.45)",<0.001

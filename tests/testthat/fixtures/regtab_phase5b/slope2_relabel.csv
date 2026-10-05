@@ -1,0 +1,10 @@
+,Model,,
+,Coef.,95% CI,p-value
+Exposure score,0.69,"(0.55, 0.84)",<0.001
+z,0.21,"(0.17, 0.26)",<0.001
+Intercept,1.28,"(1.05, 1.52)",<0.001
+Variance: Clinic ID (Exposure score),0.21,"(0.13, 0.34)",
+Variance: Clinic ID (Intercept),0.55,"(0.35, 0.86)",
+"Covariance: Clinic ID (Exposure score, Intercept)",0.00,"(-0.12, 0.11)",0.94
+Residual Variance,1.05,"(0.99, 1.11)",
+ICC,0.344,,

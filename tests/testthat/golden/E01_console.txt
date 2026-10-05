@@ -1,0 +1,10 @@
+
+Table 6. Average Treatment Effect on CV Events (IPW)
+  +-------------------------------------------------+
+  |                   ATE          95% CI   p-value |
+  |   SNRI vs SSRI   0.01   (-0.01, 0.02)      0.37 |
+  | SSRI (PO Mean)   0.35    (0.34, 0.36)    <0.001 |
+  +-------------------------------------------------+
+
+Markdown exported to E01.md
+Exported 5 rows × 5 cols to effecttab.xlsx, sheet E01

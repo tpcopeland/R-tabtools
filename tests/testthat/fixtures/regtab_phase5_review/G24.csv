@@ -1,0 +1,14 @@
+,AFT,,,ML,,
+,TR,95% CI,p-value,RRR,95% CI,p-value
+Analysis time when record ends: Age at cohort entry (years),1.00,"(1.00, 1.00)",<0.001,,,
+Analysis time when record ends: Female sex,1.00,"(0.98, 1.02)",0.91,,,
+Analysis time when record ends: Intercept,6522.52,"(6235.68, 6822.56)",<0.001,,,
+Ancillary: ln_p,1.05,"(1.02, 1.07)",<0.001,,,
+Ancillary: p,2.85,"(2.79, 2.91)",,,,
+Ancillary: 1/p,0.35,"(0.34, 0.36)",,,,
+Secondary: Age at cohort entry (years),,,,1.00,"(1.00, 1.00)",0.75
+Secondary: Female sex,,,,1.08,"(1.00, 1.18)",0.062
+Secondary: Intercept,,,,1.41,"(1.17, 1.71)",<0.001
+Tertiary: Age at cohort entry (years),,,,1.00,"(1.00, 1.00)",0.78
+Tertiary: Female sex,,,,1.02,"(0.93, 1.11)",0.71
+Tertiary: Intercept,,,,1.38,"(1.14, 1.68)",<0.001

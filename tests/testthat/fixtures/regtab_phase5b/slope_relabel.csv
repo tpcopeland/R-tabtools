@@ -1,0 +1,13 @@
+,Model,,
+,Coef.,95% CI,p-value
+Age (years),0.01,"(-0.00, 0.02)",0.056
+Female sex,-0.19,"(-0.34, -0.03)",0.020
+BMI,0.07,"(0.06, 0.09)",<0.001
+Intercept,2.77,"(2.12, 3.41)",<0.001
+Variance: Healthcare Region (Age (years)),0.00,"(0.00, 0.00)",
+Variance: Healthcare Region (Intercept),0.17,"(0.01, 1.92)",
+"Covariance: Healthcare Region (Age (years), Intercept)",0.00,"(-0.01, 0.00)",0.44
+Residual Variance,0.95,"(0.85, 1.06)",
+Observations,600,,
+Groups,6,,
+ICC,0.151,,

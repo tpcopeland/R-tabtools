@@ -1,0 +1,11 @@
+,Model,,
+,Coef.,95% CI,p-value
+Event count: Female,,,
+Event count:   0,Reference,,
+Event count:   1,0.19,"(0.06, 0.33)",0.005
+Event count: Treatment,-0.22,"(-0.38, -0.06)",0.008
+Event count: female#treatment,,,
+Event count: 0.female#treatment,Reference,,
+Event count: 1.female#treatment,0.11,"(-0.10, 0.31)",0.32
+Event count: Age z-score,0.39,"(0.34, 0.44)",<0.001
+Inflation equation: Structural-zero risk,0.82,"(0.64, 1.00)",<0.001

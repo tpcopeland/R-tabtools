@@ -1,0 +1,22 @@
+name,kind,row,col,value
+_golden_id,meta,,,R22
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,8
+icc_1,scalar,,,.062883496275414605
+groups_1,scalar,,,62
+n_1,scalar,,,10351
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,11
+sheet,macro,,,R22
+xlsx,macro,,,regtab.xlsx
+markdown,macro,,,R22.md
+methods,macro,,,"Odds ratios with 95% confidence intervals from multivariable mixed-effects logistic regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,OR
+table,matrix,Age_(years),c1,1.0512655691671271
+table,matrix,__Female,c1,.63516556354697196
+table,matrix,Median_Odds_Ratio_(Location_(sta,c1,1.5654583079935021

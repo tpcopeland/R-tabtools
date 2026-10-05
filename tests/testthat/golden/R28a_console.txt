@@ -1,0 +1,17 @@
+  +-------------------------------------------------------------------+
+  |                                    Model                          |
+  |                                       OR         95% CI   p-value |
+  |  Age at cohort entry (years)        1.00   (1.00, 1.00)      0.27 |
+  |                   Female sex        0.99   (0.93, 1.06)      0.84 |
+  |              Education level                                      |
+  |                      Primary   Reference                          |
+  |                    Secondary        1.02   (0.94, 1.11)      0.66 |
+  |                     Tertiary        1.09   (1.00, 1.18)     0.053 |
+  |                     Diabetes        1.01   (0.94, 1.08)      0.78 |
+  |                 Hypertension        1.10   (1.03, 1.17)     0.005 |
+  |             Anxiety disorder        1.00   (0.93, 1.08)      0.96 |
+  | Prior cardiovascular disease        0.98   (0.92, 1.05)      0.63 |
+  +-------------------------------------------------------------------+
+
+Markdown exported to R28a.md
+Exported 13 rows × 5 cols to regtab.xlsx, sheet R28a

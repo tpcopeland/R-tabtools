@@ -1,0 +1,24 @@
+name,kind,row,col,value
+_golden_id,meta,,,E10
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,4
+ci_level,scalar,,,95
+N_cols,scalar,,,5
+N_rows,scalar,,,7
+sheet,macro,,,E10
+xlsx,macro,,,effecttab.xlsx
+markdown,macro,,,E10.md
+methods,macro,,,"Average treatment effects estimated using inverse probability weighting with 95% confidence intervals. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+type,macro,,,teffects
+effect_label,macro,,,Effect
+table,matrix,O_vs_none,c1,1.3799719351188191
+table,matrix,O_vs_none,c2,3.51003732215000e-08
+table,matrix,A_vs_none,c1,2.0641249634563028
+table,matrix,A_vs_none,c2,3.69736086736000e-19
+table,matrix,H_vs_none,c1,4.4732462098171624
+table,matrix,H_vs_none,c2,7.37381503247000e-56
+table,matrix,none_(PO_Mean),c1,6.1572451255789176
+table,matrix,none_(PO_Mean),c2,4.0615441175000e-278

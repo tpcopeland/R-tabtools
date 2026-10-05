@@ -1,0 +1,87 @@
+**# Setup
+**# Build analysis dataset
+**# Console: consolidated display log
+**# Console: tabtools set/get/list/detail
+**# Console: table1_tc display
+**# Console: table1_tc nopvalue + smd
+**# Console: desctab display
+**# Console: survtab RMST + difference
+**# Console: regtab display
+**# Console: regtab compact display
+**# Console: regtab nopvalue display
+**# Console: regtab multinomial logit display
+**# Console: regtab zero-inflated display
+**# Console: regtab hurdle display
+**# Console: corrtab display
+**# Console: crosstab display
+**# Console: smallcells() disclosure control
+**# Console: puttab + stacktab export pipeline
+**# Console: Markdown export report
+**# Verify Markdown report content
+**# Sheet 1: Table 1 -- Baseline Characteristics
+**# Sheet 2: Table 1 with Total -- Adds a total column
+**# Sheet 3: Table 1 Weighted -- IPTW-weighted descriptives
+**# Sheet 4: Table 1 WtCompare -- Crude vs weighted side-by-side
+**# Sheet 5: Table 1 Stats -- SMD + test + statistic + boldp + zebra
+**# Sheet 6: Table 1 Formats -- Alternative formatting options
+**# Sheet 7: Table 1 Missing -- Missing data summary per variable
+**# Sheet 8: Table 1 Custom -- Custom symbols and display options
+**# Sheet 9: Table 1 explicit compact styling
+**# Sheet 10: Logistic -- Single propensity score model
+**# Sheet 11: Regtab Compact -- Estimate and CI in one column
+**# Sheet 12: Regtab NoPvalue -- P-value columns suppressed
+**# Sheet 13: Multi-Model -- Nested logistic models
+**# Sheet 14: Cox Model -- Survival analysis
+**# Sheet 15: Mixed Model -- Random effects with relabel + ICC
+**# Sheet 16: CDISC -- Regulatory-format regression output
+**# Sheet 17: Poisson -- Incidence rate ratios from Poisson regression
+**# Sheet 18: GEE with QICu -- Population-averaged model with QICu statistic
+**# Sheet 19: Regtab Advanced -- Conditional formatting and label features
+**# Sheet 20: Regtab Select -- Covariate filtering with keep/drop
+**# Sheet 21: Regtab Drop -- Exclude specific covariates with drop()
+**# Sheet 22: Regtab AddRow -- Append custom summary rows
+**# Sheet 23: MLogit -- Multinomial logit with outcome-specific rows
+**# Sheet 24: OLS -- Linear regression
+**# Sheet 25: Probit -- Binary probit regression
+**# Sheet 26: Ordered Logit -- Ordinal outcome model
+**# Sheet 27: Negative Binomial -- Count model
+**# Sheet 28: GLM Poisson -- Generalized linear model
+**# Sheet 29: Panel RE -- Random-effects panel model
+**# Sheet 30: Quantile -- Median regression
+**# Sheet 31: ZIP ZINB -- Zero-inflated count models
+**# Sheet 32: Hurdle -- Cragg hurdle model
+**# Verify new regtab workbook content
+**# Sheet 22: Composite -- Cherry-pick exposure rows from two Cox models
+**# Sheet 23: Composite Compact -- Full composite with sections + footnote
+**# Sheet 24: Composite Names -- Pattern-based row selection with rownames()
+**# Sheet 25: ATE -- Treatment effects (IPW)
+**# Sheet 26: ATE Comparison -- Multiple estimators side by side
+**# Sheet 27: Margins -- Predicted probabilities
+**# Sheet 28: Margins AME -- Average marginal effects
+**# Sheet 29: Rates -- Incidence rates with rate ratios + multiple exposure strata
+**# Sheet 30: Correlation -- Pearson with stars (lower triangle)
+**# Sheet 31: Correlation Spearman -- Spearman with p-values
+**# Sheet 32: Correlation Full -- Pearson full matrix (all cells)
+**# Sheet 33: Cross-Tabulation -- 2x2 with Fisher's exact + OR
+**# Sheet 34: Cross-Tab Measures -- Risk ratio and risk difference
+**# Sheet 35: Cross-Tab Styled -- boldp() + zebra
+**# Sheet 36: Cross-Tab Trend -- Cochran-Armitage trend test
+**# Sheet 37: Cross-Tab Row Pct -- Row percentages instead of column
+**# Sheet 41: Survival -- Kaplan-Meier table with median
+**# Sheet 42: Survival RMST -- RMST + risk set + between-group difference
+**# Sheet 43: Cumulative Incidence -- Reverse survival function
+**# Sheet 44: Explicit Arial formatting
+**# Sheet 45: Explicit serif formatting
+**# Sheet 46: HR Composite -- hrcomptab final Table 2-style survival composite
+**# Sheets 53-55: puttab -- style an in-memory table (matrix/frame/data)
+**# Sheets 56-59: stacktab -- assemble a composite from puttab-styled blocks
+**# Verify puttab + stacktab workbook content
+**# Sheets 47-52: Desctab -- direct descriptive table examples
+**# Verify desctab workbook content
+**# Sheets 60-65: Small-cell disclosure control
+**## Primary suppression only
+**## Complementary suppression prevents reconstruction
+**## Binary variable suppression
+**## Verify primary and complementary markers in every workbook
+**# Convert console output to markdown
+**# Cleanup

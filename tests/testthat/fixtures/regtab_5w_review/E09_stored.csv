@@ -1,0 +1,27 @@
+name,kind,row,col,value
+_golden_id,meta,,,E09
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+n_2,scalar,,,900
+ll_2,scalar,,,-3489.7736088299221
+bic_2,scalar,,,7006.7567967131417
+aic_2,scalar,,,6987.5472176598441
+n_1,scalar,,,900
+ll_1,scalar,,,-1064.8874467319879
+bic_1,scalar,,,2156.9844725172729
+aic_1,scalar,,,2137.7748934639758
+ci_level,scalar,,,95
+N_models,scalar,,,2
+N_cols,scalar,,,8
+N_rows,scalar,,,12
+methods,macro,,,"Collected regression estimates with 95% confidence intervals across 2 models. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,mixed
+table,matrix,treat,c1,2.024958042972171
+table,matrix,treat,c2,5.8600743380503193
+table,matrix,x1,c1,1.049086133568238
+table,matrix,x1,c2,.8433522672120578
+table,matrix,x2,c1,.66529575757247139
+table,matrix,x2,c2,.94138212206103689
+table,matrix,Intercept,c1,.035636308544042698
+table,matrix,Intercept,c2,97.081231990019248

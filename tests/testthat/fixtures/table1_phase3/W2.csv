@@ -1,0 +1,9 @@
+ ,Control,Active,Total
+"Row % (No.), Column % (No.), or Mean±SD",N=6,N=6,N=12
+Effective sample size,ESS=5,ESS=5,ESS=11
+"Age at entry, mean±SD",52±4,66±5,60±8
+"Female sex, row % (No./total)",72 (4/5),67 (4/6),69 (8/11)
+"Clinical stage, column % (No./total)",,,
+   Stage I,57 (2/5),43 (1/5),100 (3/5)
+   Stage II,60 (2/5),40 (1/5),100 (3/5)
+   Stage III,24 (1/5),76 (2/5),100 (3/5)

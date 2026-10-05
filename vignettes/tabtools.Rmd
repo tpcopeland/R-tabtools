@@ -1,0 +1,226 @@
+---
+title: "Get started with tabtools"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Get started with tabtools}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+# The examples use survival (Suggests): without it the code is shown, not
+# run.
+has_survival <- requireNamespace("survival", quietly = TRUE)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = has_survival)
+has_word <- has_survival && requireNamespace("flextable", quietly = TRUE) &&
+  requireNamespace("officer", quietly = TRUE)
+```
+
+tabtools makes the two tables almost every clinical or epidemiological paper
+needs: a table of baseline characteristics ("Table 1") and a table of
+regression estimates. `table1_tc()` (alias `desctab()`) builds the first,
+`regtab()` the second. Both return a `tt_table` object that prints in the
+console and can be written to Excel, CSV and Markdown, or converted for Word
+and HTML, with the same rows in every output.
+
+The same package also makes incidence-rate tables, a cohort study's "Table
+2" of rates beside hazard ratios, treatment-effect tables and
+weight diagnostics; [Where next](#where-next) points to them. tabtools is the
+R implementation of the Stata `tabtools` commands, but you do not need to
+know Stata to use it; if you do, see [Coming from Stata](coming-from-stata.html).
+
+## Installation
+
+```{r install, eval = FALSE}
+# install.packages("remotes")
+remotes::install_github("tpcopeland/R-tabtools")
+```
+
+## Data
+
+The examples use `survival::lung`, the NCCTG advanced lung cancer cohort.
+Two habits make the tables read well:
+
+- **Variable labels** are taken from the `"label"` attribute of each column,
+  the attribute `haven::read_dta()` and the labelled packages set. Without
+  one, the column name is shown.
+- **Categorical variables** should be factors; the level order is the row
+  order, and in regression tables the first level is the reference.
+
+```{r data}
+library(tabtools)
+library(survival)
+
+d <- lung[!is.na(lung$ph.ecog), ]
+d$sex <- factor(d$sex, 1:2, c("Male", "Female"))
+d$ecog <- factor(pmin(d$ph.ecog, 2), 0:2,
+                 c("Asymptomatic", "Symptomatic, ambulatory",
+                   "In bed part of the day"))
+d$dead <- as.integer(d$status == 2)
+d$karno_low <- as.integer(d$ph.karno < 80)
+
+labs <- c(age = "Age (years)", sex = "Sex", ecog = "ECOG performance status",
+          karno_low = "Karnofsky score below 80",
+          meal.cal = "Calories consumed at meals",
+          wt.loss = "Weight loss, last 6 months (lb)")
+for (v in names(labs)) attr(d[[v]], "label") <- labs[[v]]
+```
+
+## Table 1
+
+`vars` names the rows and, optionally, how each is summarised: `contn` mean
+and SD (with an optional display format), `conts` median and quartiles, `cat`
+counts and column percentages for each level, `bin` one row for the count of
+1s. `by` splits the columns, `total` adds an overall column, and `smd`
+adds standardized mean differences between the first two groups.
+
+```{r table1}
+t1 <- table1_tc(d, by = "sex",
+                vars = c(age = "contn %5.1f", ecog = "cat", karno_low = "bin",
+                         meal.cal = "conts", wt.loss = "conts"),
+                total = "before", smd = TRUE)
+t1
+```
+
+P-values come from R's conventional tests: Welch's t test for `contn`,
+Wilcoxon rank-sum for `conts`, and Pearson's chi-squared test without
+continuity correction for `cat` and `bin` (`cate` and `bine` give Fisher's
+exact test). `test = TRUE` adds a column naming the test, `nopvalue = TRUE`
+removes the p-values, and `test_args` passes arguments to the test
+functions. A methods sentence describing the table is stored with it:
+
+```{r table1-methods}
+t1$stored$methods
+```
+
+Give `vars` as a plain character vector and each variable is typed
+automatically: factors and few-valued numbers become `cat`, 0/1 variables
+`bin`, and other numbers `contn` or `conts` depending on a normality test. Naming the types, as above, keeps the table
+stable when the data change. `?table1_tc` lists every option: missing-value
+rows, weights, small-cell suppression, number formats and cell delimiters.
+
+## A regression table
+
+`regtab()` takes one or more fitted models and puts them side by side. The
+effect measure is chosen from the model: hazard ratios for a Cox model, odds
+ratios for a logistic model, incidence rate ratios for a Poisson model, and
+so on, exponentiated where the model is on a ratio scale.
+
+```{r regtab}
+# ties = "breslow" reproduces Stata's numbers. R's default (Efron) is valid,
+# and a better approximation with tied times; regtab then notes once that
+# Stata's stcox (Breslow) gives slightly different estimates.
+crude <- coxph(Surv(time, dead) ~ sex, data = d, ties = "breslow")
+adjusted <- coxph(Surv(time, dead) ~ sex + age + ecog, data = d,
+                  ties = "breslow")
+
+t2 <- regtab(crude, adjusted, models = c("Crude", "Adjusted"),
+             stats = c("n", "aic"))
+t2
+```
+
+Factor variables get a label row, indented level rows, and a Reference row
+for the base level. Rows are matched across models by variable and level, so
+a covariate that appears in only one model has blank cells in the other.
+Model statistics (`stats`) go below the estimates. As for Table 1, a methods
+sentence is stored:
+
+```{r regtab-methods}
+t2$stored$methods
+```
+
+[Regression tables with regtab()](regression-tables.html) covers the
+supported model classes, the row options, and robust and clustered standard
+errors.
+
+## Writing the tables
+
+The `xlsx`, `csv` and `markdown` arguments write a table as it is built; the
+`tt_write_*()` functions write one later. Several tables can go to one
+workbook as separate sheets. A command that writes a file returns its table
+invisibly, so nothing prints: assign it (`t2 <- regtab(..., xlsx = xlsx)`)
+and print it to see it.
+
+```{r write}
+out <- tempfile("tables")
+dir.create(out)
+xlsx <- file.path(out, "tables.xlsx")
+
+tt_write_xlsx(t1, xlsx, sheet = "Table 1")
+tt_write_xlsx(t2, xlsx, sheet = "Table 2")
+tt_write_csv(t2, file.path(out, "table2.csv"))
+tt_write_markdown(t2, file.path(out, "table2.md"))
+
+# The same at build time (nothing prints):
+regtab(crude, adjusted, models = c("Crude", "Adjusted"),
+       xlsx = xlsx, sheet = "Table 2b")
+
+list.files(out)
+openxlsx2::wb_get_sheet_names(openxlsx2::wb_load(xlsx))
+```
+
+The workbook carries the house style: bold headers, merged model headers,
+italic Reference cells spanning the estimate, interval and p-value columns,
+and borders set by `borderstyle`. The CSV keeps the label indents as leading
+spaces; the Markdown file writes them as `&nbsp;` so they survive rendering:
+
+```{r markdown-file}
+cat(readLines(file.path(out, "table2.md")), sep = "\n")
+```
+
+`as.data.frame()` returns the table as a data frame of text cells, and
+`as_forest_data()` the numbers behind a regression table (see
+[Regression tables with regtab()](regression-tables.html#forest-plots)).
+
+## Word and HTML
+
+`flextable::as_flextable()` converts a table to a flextable with the same
+house style as the workbook. In an R Markdown or Quarto document it renders
+directly:
+
+```{r flextable, eval = has_word}
+flextable::as_flextable(t2)
+```
+
+For a Word file, add the flextables to an officer document:
+
+```{r docx, eval = has_word}
+doc <- officer::read_docx()
+doc <- flextable::body_add_flextable(doc, flextable::as_flextable(t1))
+doc <- officer::body_add_break(doc)
+doc <- flextable::body_add_flextable(doc, flextable::as_flextable(t2))
+docx <- file.path(out, "tables.docx")
+print(doc, target = docx)
+file.exists(docx)
+```
+
+`flextable::save_as_docx(flextable::as_flextable(t2), path = ...)` writes a
+single table. `title` and `footnote` (arguments of both commands) become the
+caption and footer line. For gt output, used in HTML and Quarto, see
+`tt_as_gt()`.
+
+## Settings
+
+`tabtools_options()` sets defaults for the font, font size, border style,
+digits and colours, for the session or, with `persist = TRUE`, for future
+sessions:
+
+```{r options, eval = FALSE}
+tabtools_options(font = "Calibri", fontsize = 11, borderstyle = "academic")
+```
+
+## Where next {#where-next}
+
+- [Regression tables with regtab()](regression-tables.html): model classes
+  and their effect measures, multi-model tables, `keep`/`drop`, standard
+  errors, tables from models regtab does not support, and
+  [a Table 2 of incidence rates beside hazard ratios](regression-tables.html#table-2)
+  (`tt_rates()`, `stratetab()`, `hrcomptab()`).
+- [Weighted analyses: IPTW and marginal structural models](weighted-analyses.html):
+  balance tables before and after weighting, weight diagnostics
+  (`wttab()`), robust and cluster-robust standard errors, marginal
+  structural models, and treatment effects and margins (`effecttab()`).
+- [Compared with gtsummary](compared-with-gtsummary.html): the same two
+  tables made with gtsummary and with tabtools.
+- [Coming from Stata](coming-from-stata.html): the Stata to R translation,
+  option by option, and the deliberate differences.

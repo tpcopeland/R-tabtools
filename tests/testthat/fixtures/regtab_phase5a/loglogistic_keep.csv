@@ -1,0 +1,12 @@
+,Model,,
+,TR,95% CI,p-value
+Treatment group,0.98,"(0.96, 1.01)",0.20
+Age at cohort entry (years),1.00,"(1.00, 1.00)",0.002
+Smoking status,,,
+  Never,Reference,,
+  Former,1.01,"(0.98, 1.04)",0.37
+  Current,1.03,"(0.99, 1.06)",0.12
+Female sex,1.00,"(0.98, 1.02)",0.94
+lngamma,-1.16,"(-1.18, -1.14)",<0.001
+gamma,0.31,"(0.31, 0.32)",
+Intercept,5912.71,"(5584.16, 6260.59)",<0.001

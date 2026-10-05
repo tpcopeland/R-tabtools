@@ -1,0 +1,12 @@
+  +----------------------------------------------------+
+  |                  Probit                            |
+  |                   Coef.           95% CI   p-value |
+  |  Mileage (mpg)    -0.10   (-0.21, -0.00)     0.044 |
+  |  Weight (lbs.)     0.00   (-0.00, -0.00)    <0.001 |
+  |      Intercept     8.28    (3.27, 13.28)     0.001 |
+  |   Observations       74                            |
+  | Log-likelihood   -26.84                            |
+  +----------------------------------------------------+
+
+Markdown exported to R30.md
+Exported 8 rows × 5 cols to regtab.xlsx, sheet R30

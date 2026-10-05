@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,T36
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,1.2.5
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,10
+markdown,macro,,,T36.md
+sheet,macro,,,T36
+xlsx,macro,,,table1_tc.xlsx
+varlist,macro,,,price mpg rep78 headroom
+Dapa,macro,,,"Weighted data are presented as mean±SD, geometric mean (×/GSD), or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures. P-values suppressed. SMD reflects weighted comparison."
+table,matrix,Price,smd,.
+table,matrix,Mileage_(mpg),smd,.
+table,matrix,Repair_record_1978,smd,1.756081052448329
+table,matrix,Headroom_(in_),smd,1.113627686373089

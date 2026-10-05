@@ -1,0 +1,18 @@
+.DS_Store
+.Rhistory
+.RData
+.Rproj.user/
+*.Rcheck/
+tabtools_*.tar.gz
+qa/.stata-work/
+*.log
+/doc/
+/Meta/
+/demo/
+# Local development material, not distributed
+CLAUDE.md
+AGENTS.md
+IMPLEMENTATION_PLAN.md
+SESSION_NOTES*.md
+/trailer/
+*.zip

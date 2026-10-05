@@ -1,0 +1,14 @@
+ ,Crude Control,Crude Active,Crude Total,Weighted Control,Weighted Active,Weighted Total,SMD
+"No. (Column %), Mean±SD, or Median (Q1, Q3)",6 (50.0),6 (50.0),12 (100.0),6 (50.0),6 (50.0),12 (100.0),
+Effective sample size,,,,ESS=5,ESS=5,ESS=11,
+Age at entry,53±4,66±5,60±8,52±4,66±5,60±8,3.084
+   Missing,1 (17),0,1 (8),1 (17),0,1 (8),
+Inflammation marker,"6 (5, 8)","11 (8, 13)","8 (6, 12)","6 (5, 8)","12 (8, 13)","8 (6, 12)",1.812
+   Missing,1 (17),0,1 (8),1 (17),0,1 (8),
+Female sex,3 (60),4 (67),7 (64),72,67,69,0.125
+   Missing,1 (17),0,1 (8),1 (17),0,1 (8),
+Clinical stage,,,,,,,0.707
+   Stage I,2 (40),1 (20),3 (30),41,27,34,
+   Stage II,2 (40),2 (40),4 (40),41,24,32,
+   Stage III,1 (20),2 (40),3 (30),17,48,34,
+   Missing,1 (17),1 (17),2 (17),1 (17),1 (17),2 (17),

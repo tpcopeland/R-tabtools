@@ -1,0 +1,11 @@
+name,kind,row,col,value
+_golden_id,meta,,,RW09
+_golden_tabtools_version,meta,,,2.1.14
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+varlist,macro,,,x1 x2 c1 b1
+Dapa,macro,,,"Crude and weighted data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values suppressed. SMD reflects weighted comparison."
+table,matrix,Marker,smd,.1141841632954993
+table,matrix,Marker_2,smd,.0309566913196292
+table,matrix,Group,smd,.2560482042328775
+table,matrix,Group_2,smd,.034455882452372598
