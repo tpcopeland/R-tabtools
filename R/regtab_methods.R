@@ -84,6 +84,7 @@
 
 .rt_methods_noun <- function(info) {
   cmd <- tolower(info$stata_cmd %||% "unknown")
+  if (is.na(cmd)) cmd <- "unknown"
   one <- function(x) {
     # pscl::hurdle keeps one distribution per part (count, zero).
     if (is.list(x)) x <- x$count %||% x[[1]]
@@ -98,6 +99,10 @@
     base <- info
     base$stata_cmd <- substring(cmd, 3L)
     return(paste0("mixed-effects ", .rt_methods_noun(base)))
+  }
+  # polr/clm links without a Stata ordered command (stata_cmd NA).
+  if (identical(cmd, "unknown") && info$class %in% c("polr", "clm") && !is.na(link)) {
+    return(paste0("ordinal regression (", link, " link)"))
   }
   switch(cmd,
     regress = "linear regression",

@@ -490,7 +490,8 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
 # Blank-separated tokens of a Stata string, as `foreach ... of local`
 # splits them: double quotes (and compound quotes) group, and are removed.
 .ct_tokens <- function(x) {
-  m <- gregexpr('`"[^"]*"\'|"[^"]*"|[^ ]+', x)[[1]]
+  # A compound quote `"..."' may hold double quotes: it ends at the first "'.
+  m <- gregexpr('`".*?"\'|"[^"]*"|[^ ]+', x, perl = TRUE)[[1]]
   if (m[1] < 0) return(character())
   tok <- regmatches(x, list(m))[[1]]
   gsub('^`?"|"\'?$', "", tok)

@@ -63,6 +63,11 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
                      "i" = "{.fn tt_merge} joins rows on keys, never on labels; describe the groups in one {.fn table1_tc} call with {.arg by}."),
                    call = NULL)
   }
+  # tt_stack(groups =) heading rows have synthetic "group:<i>:<label>" keys and
+  # repeat the stacked tables' keys under each heading: scope the body keys
+  # by their heading, so headings merge with headings and never cross-join
+  # with data rows (CAT P1-12). The scope is removed from the result.
+  tabs <- lapply(tabs, .tt_scope_group_keys)
   for (k in seq_along(tabs)) {
     key <- tabs[[k]]$rows$key
     if (is.null(key) || anyNA(key)) {
@@ -97,6 +102,7 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   }))
   rownames(rows) <- NULL
   rows$block <- seq_len(nb)
+  rows$key <- .tt_unscope_key(rows$key)
   # A row is dimmed only when every table that has it dims it, and its p is
   # the smallest of the tables' (stack review item 4).
   for (i in seq_len(nb)) {
@@ -270,13 +276,15 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
     if (!is.null(groups)) {
       g <- as.data.frame(as.list(c(groups[k], rep("", nc - 1L))), stringsAsFactors = FALSE, col.names = names(b))
       b <- rbind(g, b)
-      r <- rbind(blank_row(t)[names(r)], r)
+      g_row <- blank_row(t)[names(r)]
+      if ("key" %in% names(g_row)) g_row$key <- .tt_group_key(k, groups[k])
+      r <- rbind(g_row, r)
     }
     body <- rbind(body, b)
     rows <- rbind(rows, r[names(first$rows)])
     if (any_pv) {
       pk <- t$meta$pvals
-      pk <- if (is.null(pk)) matrix(NA_real_, nrow(t$body), nm) else matrix(pk, nrow = nrow(t$body))
+      pk <- if (is.null(pk)) matrix(NA_real_, nrow(t$body), nm) else matrix(pk, nrow = nrow(t$body), ncol = nm)
       if (!is.null(groups)) pk <- rbind(rep(NA_real_, ncol(pk)), pk)
       pv <- rbind(pv, pk)
     }
@@ -301,6 +309,26 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
                   command = first$command, layout = first$layout, meta = meta)
   validate_tt_table(out)
 }
+
+# Synthetic key of a tt_stack(groups =) heading row.
+.tt_group_key <- function(i, label) paste0("group:", i, ":", label)
+
+.tt_scope_sep <- "\u001f"
+
+# Body keys prefixed by the heading key above them (stacked tables with
+# headings only; a table whose keys are NULL/NA is returned as it is).
+.tt_scope_group_keys <- function(t) {
+  key <- t$rows$key
+  if (is.null(key) || anyNA(key)) return(t)
+  is_g <- grepl("^group:[0-9]+:", key) & t$rows$type == "var" & is.na(t$rows$var %||% NA_character_)
+  if (!any(is_g)) return(t)
+  head_key <- key[is_g][cumsum(is_g)]
+  if (any(cumsum(is_g) == 0L)) return(t)
+  t$rows$key <- ifelse(is_g, key, paste0(head_key, .tt_scope_sep, key))
+  t
+}
+
+.tt_unscope_key <- function(key) sub(paste0("^group:[0-9]+:[^", .tt_scope_sep, "]*", .tt_scope_sep), "", key)
 
 .tt_compose_args <- function(tabs, fn) {
   if (length(tabs) == 1L && is.list(tabs[[1]]) && !inherits(tabs[[1]], "tt_table")) tabs <- tabs[[1]]

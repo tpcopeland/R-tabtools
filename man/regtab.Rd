@@ -77,7 +77,8 @@ Extra labels are ignored with a warning.}
 \item{coef}{Estimate-column header for every model; overrides scale
 detection (not the exponentiation, which follows the model).}
 
-\item{sep}{Confidence-interval delimiter. Default \code{", "}.}
+\item{sep}{Confidence-interval delimiter, used verbatim (a single space is
+allowed; an empty string means the default). Default \code{", "}.}
 
 \item{title, footnote}{Table title (cell A1) and footnote.}
 

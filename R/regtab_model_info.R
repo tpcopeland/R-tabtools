@@ -274,14 +274,19 @@ tt_model_info.multinom <- function(fit, ...) {
   .mi_ratio(fit, "mlogit", "RRR", intercept_terms = .mi_intercept(nm), equations = eq)
 }
 
-# ologit: OR with cutpoints; oprobit (and other links) is unclassified.
+# Stata command of a non-logit ordinal fit: oprobit for the probit link only;
+# cloglog, loglog, cauchit, ... have no Stata ordered command (NA; the link
+# is recorded in info$link and footnoted).
+.mi_ordinal_cmd <- function(link) if (identical(as.character(link), "probit")) "oprobit" else NA_character_
+
+# ologit: OR with cutpoints; oprobit (probit link only) has Coef.; other links are unclassified.
 #' @export
 tt_model_info.polr <- function(fit, ...) {
   cut <- names(fit$zeta)
   if (identical(fit$method, "logistic")) {
     return(.mi_ratio(fit, "ologit", "OR", cutpoint_terms = cut, link = "logit"))
   }
-  .mi(fit, "oprobit", cutpoint_terms = cut, link = fit$method)
+  .mi(fit, .mi_ordinal_cmd(fit$method), cutpoint_terms = cut, link = fit$method)
 }
 
 #' @export
@@ -290,7 +295,7 @@ tt_model_info.clm <- function(fit, ...) {
   if (identical(fit$link, "logit")) {
     return(.mi_ratio(fit, "ologit", "OR", cutpoint_terms = cut, link = "logit"))
   }
-  .mi(fit, "oprobit", cutpoint_terms = cut, link = fit$link)
+  .mi(fit, .mi_ordinal_cmd(fit$link), cutpoint_terms = cut, link = fit$link)
 }
 
 # zip/zinb/churdle: "Coef." on the native scale, auto-noint, multi-equation
