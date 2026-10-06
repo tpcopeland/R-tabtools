@@ -37,10 +37,10 @@ test_that("P0-1: sums are sequential IEEE double, not long double", {
   y <- rep(2.675, 15000)
   expect_identical(tabtools:::.stata_sum(y), seq_sum(y))
   expect_identical(tabtools:::.stata_sum(numeric()), 0)
-  # A constant 2.675 in 15,000 rows: Stata's ss is below -1e-8, so the SD is
-  # missing ("2.68±."), while an exact sum would give 0.
+  # A constant 2.675 in 15,000 rows: Stata < 2.1.15 gave a missing SD
+  # ("2.68±."); the centered SD (2.1.15 F05; 2.5.1 prints 2.68±0.00) is 0.
   ms <- tabtools:::.t1_mean_sd(y)
-  expect_true(is.na(ms[["sd"]]))
+  expect_identical(ms[["sd"]], 0)
   expect_identical(stata_fmt(ms[["mean"]], "%5.2f"), "2.68")
 })
 
@@ -52,7 +52,7 @@ test_that("P0-1: display ties match Stata (p11: constants, 2.68±.)", {
   tt <- table1_tc(d, vars = "a contn %5.1f \\ b contn %5.1f \\ c contn %5.1f \\ d contn %5.1f %5.3f \\ e contn %5.2f",
                   by = "g", total = "after", nopvalue = TRUE)
   rv_expect(tt, "RV01")
-  expect_identical(unname(unlist(tt$body[5, 2:4])), rep("2.68±.", 3))
+  expect_identical(unname(unlist(tt$body[5, 2:4])), rep("2.68±0.00", 3))
 })
 
 test_that("P0-1: display ties match Stata (p13: 40 constants, three group sizes)", {

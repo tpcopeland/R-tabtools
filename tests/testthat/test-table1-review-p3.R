@@ -35,8 +35,8 @@ test_that("weighted sums are Mata sums (double, data order): wt() display ties",
   tt <- table1_tc(rw_ties(), vars = "a contn %5.1f \\ c contn %5.1f \\ d contn %5.1f %5.3f \\ e contn %5.2f",
                   by = "g", total = "after", wt = "w")
   rw_expect(tt, "RW01")
-  # The Total column's aweighted SD of a constant 2.675 is Stata's ".".
-  expect_identical(tt$body[[4]][5], "2.68±.")
+  # The Total column's aweighted SD of a constant 2.675 is 0 (centered, 2.1.15).
+  expect_identical(tt$body[[4]][5], "2.68±0.00")
 })
 
 test_that("weighted sums are Mata sums (double, data order): fweight display ties", {
