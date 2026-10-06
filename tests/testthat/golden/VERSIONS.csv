@@ -14,3 +14,4 @@ fvgen,1.2.5,git-archive:Stata-Tools@1255176d/fvgen/fvgen.ado
 stata,17,MP
 rng,mt64,
 linesize,255,
+"smallcells_crosscheck",2.5.1,"git-archive:Stata-Tools@712044f8: T25 T26 T27 T28 T29 T30l T30m T30n reproduce the stored 2.1.14 cells, console, md and xlsx exactly (only the _stored.csv meta rows and smallcells_mode differ); goldens kept at 2.1.14 (B1, plan D12). Derivable-count refusals (S11, RW11, RW12 and S17/RW07 cells) are pinned from 2.5.1 in fixtures/table1_phase3 and fixtures/table1_review."

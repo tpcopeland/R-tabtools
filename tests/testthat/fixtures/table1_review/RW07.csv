@@ -5,6 +5,6 @@ Clinical stage,,,Suppressed
    Stage II,≥3,3,
    Stage III,3,4,
    Missing,<3,<3,
-Female sex,6,8,Suppressed
+Female sex,≥3,≥3,Suppressed
    Missing,<3,0,
 Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.,,,

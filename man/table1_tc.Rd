@@ -382,15 +382,19 @@ disclosure (a port of Stata's certified engine): counts below \code{k} show as
 percentages are withheld for a variable carrying a suppressed count, its
 p-value, test, statistic, and SMD read \code{Suppressed}, and a standard note
 joins the footnote. As in Stata, the engine protects the counts the table
-shows, not the ones that can be worked out from them: a categorical
-variable's hidden missing count is N minus its shown level counts, and a
-binary variable's hidden negative count follows from its n (\%) cell, so a
-small count of either kind can be read off the table. \code{missingsummary}
-and \code{slashN} show these counts, which are then protected. With
-\code{wtcompare} and neither \code{wtn} nor \code{percent_n}, a protected variable's
-weighted column shows effective counts rather than percentages, as Stata
-does, so give \code{wtn} or \code{percent_n} when using \code{smallcells} with
-\code{wtcompare}.
+shows, and also the ones that follow from them (Stata 2.1.17): a
+categorical variable's hidden missing count is N minus its shown level
+counts, and a binary variable's hidden negative and missing counts follow
+from the denominator its n (\%) cell releases. A hidden count below \code{k} is
+protected as a primary cell, as if \code{missingsummary} or \code{slashN} printed it:
+shown cells get a greater-than-or-equal marker where needed, percentages
+are withheld, and the p-value is suppressed. The group and total Ns are
+shared by every variable, so in a table of two or more variables they are
+never withheld as complementary cells; a count that could only be
+protected by withholding them is refused with an error of class
+\code{tabtools_error_smallcells}. \code{smallcells} cannot be combined with
+percent-only display, which includes \code{wtcompare} without \code{wtn} or
+\code{percent_n}.
 Count totals, artificial flow bounds, and required flows must be below
 2^53 for small-cell certification to preserve single-count changes;
 larger frequency-weighted blocks are refused with \code{smallcells}.

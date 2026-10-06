@@ -297,7 +297,13 @@ capture program drop _p3_call
 program define _p3_call
     table1_tc, by(rep78) vars(price contn \ foreign bin) headerperc total(after) smallcells(5) csv(`"`1'"')
 end
-p3_run S11 "`auto'" "`out'"
+* tabtools 2.1.17+ refuses S11 (r(498): the shared group N cannot be
+* withheld). Run it under capture so regeneration continues; the R side
+* asserts the refusal (test-table1-phase3-qa.R) and reads no S11 files.
+capture noisily p3_run S11 "`auto'" "`out'"
+local _s11_rc = _rc
+capture log close p3
+display as text "S11 rc = `_s11_rc' (498 expected under tabtools >= 2.1.17)"
 
 capture program drop _p3_call
 program define _p3_call

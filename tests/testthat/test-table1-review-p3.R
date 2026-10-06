@@ -62,6 +62,9 @@ test_that("percsign and empty delimiters under wt(), wtn, wtcompare, and smallce
                   wtcompare = TRUE, smd = TRUE, percsign = " %", iqrmiddle = "", sdleft = "", gsdleft = "",
                   gsdright = "", varlabplus = TRUE)
   rw_expect(tt, "RW06")
+  # RW07's cells and suppression map come from tabtools 2.5.1 (Stata-Tools
+  # 712044f8, derivable-count protection); the rest stays 2.1.14 (_stored.csv
+  # meta row `_cells_from`).
   rw_expect(table1_tc(rw_agg(), by = "trt", vars = "stage cat \\ female bin", percsign = " %", headerperc = TRUE,
                       missingsummary = TRUE, smallcells = 3, fweight = "fw"), "RW07")
 })
@@ -84,8 +87,12 @@ test_that("string by() codes count levels on records the weights drop", {
   tt <- table1_tc(s, vars = "x contn \\ c bin", by = "g", wt = "w", wtn = TRUE, smallcells = 3)
   rw_expect(tt, "RW10")
   expect_identical(colnames(tt$stored$suppression), c("g_2", "g_3"))
-  rw_expect(table1_tc(s, vars = "x contn \\ c bin", by = "g", smallcells = 3, nopvalue = TRUE, fweight = "fw"), "RW11")
-  rw_expect(table1_tc(s, vars = "x contn \\ c bin", by = "g", wt = "w", wtcompare = TRUE, smallcells = 3), "RW12")
+  # Stata 2.1.17+: RW11 stops with r(498) (shared group N cannot be withheld) and
+  # RW12 with the percent-only refusal (wtcompare without wtn/percent_n).
+  expect_error(table1_tc(s, vars = "x contn \\ c bin", by = "g", smallcells = 3, nopvalue = TRUE, fweight = "fw"),
+               class = "tabtools_error_smallcells_shared_margin")
+  expect_error(table1_tc(s, vars = "x contn \\ c bin", by = "g", wt = "w", wtcompare = TRUE, smallcells = 3),
+               class = "tabtools_error_smallcells_percent_only")
   # A factor by() keeps R's own numbering of its levels (no Stata analogue).
   f <- s
   f$g <- factor(f$g)

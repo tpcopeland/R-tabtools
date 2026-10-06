@@ -154,8 +154,12 @@ test_that("a coded N row: headerperc reads missing and prints '(.)', with and wi
   a <- golden_fixture("auto")
   p3_expect(table1_tc(a, by = "rep78", vars = "price contn \\ foreign bin", headerperc = TRUE,
                       smallcells = 5), "S10")
-  p3_expect(table1_tc(a, by = "rep78", vars = "price contn \\ foreign bin", headerperc = TRUE,
-                      total = "after", smallcells = 5), "S11")
+  # Stata 2.1.17+ refuses this table (S11 stopped with r(498)): a count below 5
+  # can only be protected by withholding the group or total N, which the other
+  # variable releases (qa/stata/make_table1_phase3.do, tabtools 2.5.1).
+  expect_error(table1_tc(a, by = "rep78", vars = "price contn \\ foreign bin", headerperc = TRUE,
+                         total = "after", smallcells = 5),
+               class = "tabtools_error_smallcells_shared_margin")
 })
 
 test_that("smallcells without by(), with conts", {
@@ -196,6 +200,9 @@ test_that("wtcompare + smallcells with a coded group N: crude and weighted codes
   # (desctab.ado:994-1007 interleaves Cr_/Wt_ per group).
   tt <- table1_tc(p3_review_data("sg3"), by = "arm", vars = "x contn \\ k cat \\ b bin", wt = "w",
                   wtcompare = TRUE, wtn = TRUE, smallcells = 4, catrowperc = TRUE, slashN = TRUE, smd = TRUE)
+  # S17's cells, console cells and suppression map come from tabtools 2.5.1
+  # (Stata-Tools 712044f8: derivable-count protection); its SMD header and
+  # note stay in 2.1.14's form (_stored.csv meta row `_cells_from`).
   p3_expect(tt, "S17")
   m <- tt$stored$suppression
   expect_identical(unname(m["r3", c("Cr_3", "Wt_3")]), c(0, 3))
