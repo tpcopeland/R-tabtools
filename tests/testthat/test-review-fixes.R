@@ -12,10 +12,17 @@ test_that("named colours are the ones Stata's xl() writes (finding 1)", {
   got <- vapply(names(xl), tt_parse_color, "")
   expect_identical(got, xl)
   expect_identical(tt_parse_color("NAVY"), "FF000080")
-  # Accepted by Stata's validator but rejected by xl() with r(16136).
-  for (nm in c("bluishgray", "dknavy", "ltblue", "gs8", "orange_red")) {
-    expect_error(tt_parse_color(nm), "does not support the colour name")
-  }
+  # Stata 2.5.1 resolves the remaining validator names through Stata's
+  # color-<name>.style `set rgb` definitions (W03).
+  expect_identical(tt_parse_color("bluishgray"), "FFD9E6EB")
+  expect_identical(tt_parse_color("dknavy"), "FF1E2D53")
+  expect_identical(tt_parse_color("ltblue"), "FFADD8E6")
+  expect_identical(tt_parse_color("emerald"), "FF2D6D66")
+  expect_identical(tt_parse_color("orange_red"), "FFFF4500")
+  expect_identical(tt_parse_color("gs0"), "FF000000")
+  expect_identical(tt_parse_color("gs8"), "FF808080")
+  expect_identical(tt_parse_color("GS16"), "FFFFFFFF")
+  expect_identical(tt_parse_color("gs5"), "FF505050")
   expect_error(tt_parse_color("chartreuse"), "not a supported Stata colour name")
   expect_identical(tt_parse_color("200 220 240"), "FFC8DCF0")
   expect_identical(tt_parse_color("#c8dcf0"), "FFC8DCF0")

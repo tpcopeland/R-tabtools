@@ -26,7 +26,11 @@ Puts the body rows of two or more tables one under another, each block
 optionally under a group label row; the result keeps the first table's
 header, which every table must share (the same header text and column
 roles), and its command's layout. Row keys are kept as they are, so a
-key may repeat across groups. Model columns retain unsafe effect-scale
+key may repeat across groups. With \code{groups}, a heading row has the key
+\verb{group:<label>} (\verb{group:<label>#1}, ... for a repeated label) and is flagged
+in \code{meta$stack_group_rows}; \code{\link[=tt_merge]{tt_merge()}} matches headings by that label and
+keeps each table's body rows under their heading. The prefix \verb{group:} is
+reserved for these keys. Model columns retain unsafe effect-scale
 provenance from any group: for example, stacking an exponentiated ratio
 with a raw log ratio still prevents \code{\link[=hrcomptab]{hrcomptab()}} from treating the
 entire column as hazard ratios.

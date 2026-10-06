@@ -666,7 +666,8 @@
 #'   Extra labels are ignored with a warning.
 #' @param coef Estimate-column header for every model; overrides scale
 #'   detection (not the exponentiation, which follows the model).
-#' @param sep Confidence-interval delimiter. Default `", "`.
+#' @param sep Confidence-interval delimiter, used verbatim (a single space is
+#'   allowed; an empty string means the default). Default `", "`.
 #' @param title,footnote Table title (cell A1) and footnote.
 #' @param nointercept,keepintercept Drop or keep the intercept row.
 #'   `nointercept` has three states: `NULL` (default), the intercept is
@@ -1023,7 +1024,12 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
     cli::cli_abort("{.arg starslevels} requires exactly 3 values (e.g. {.code c(0.05, 0.01, 0.001)}).",
                    call = NULL)
   }
-  .check_string(sep, "sep")
+  # sep is data (Stata _tt_sep_parse: only empty means the default), so " " is
+  # a valid separator and is not trimmed.
+  if (!is.character(sep) || length(sep) != 1L || is.na(sep)) {
+    cli::cli_abort("{.arg sep} must be a single string.", class = "tabtools_error_sep", call = NULL)
+  }
+  if (!nzchar(sep)) sep <- ", "
   if (!is.numeric(labelwidth) || length(labelwidth) != 1L || is.na(labelwidth)) {
     cli::cli_abort("{.arg labelwidth} must be a number.", call = NULL)
   }

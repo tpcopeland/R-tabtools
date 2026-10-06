@@ -20,6 +20,8 @@
 #' [regtab()], [stratetab()], ...) is left `NULL`. Called with no arguments,
 #' returns the current defaults. The analogue of Stata's `tabtools set`.
 #'
+#' @param ... Not used; any unnamed or unknown argument is an error. Query a
+#'   default with `tabtools_options()$digits`.
 #' @param font Font family (Stata default Arial).
 #' @param fontsize Default font size, a whole number from 6 to 72 (Stata's
 #'   `tabtools set fontsize` range); the `fontsize` argument of
@@ -48,9 +50,25 @@
 #' tabtools_options()$font
 #' options(op)
 #' @export
-tabtools_options <- function(font = NULL, fontsize = NULL, borderstyle = NULL,
+tabtools_options <- function(..., font = NULL, fontsize = NULL, borderstyle = NULL,
                              digits = NULL, boldp = NULL, headercolor = NULL,
                              zebracolor = NULL, persist = FALSE, clear = FALSE) {
+  dots <- list(...)
+  if (length(dots)) {
+    nms <- names(dots)
+    bad <- if (is.null(nms)) rep(TRUE, length(dots)) else !nzchar(nms)
+    if (any(bad)) {
+      cli::cli_abort(c("{.fn tabtools_options} takes only named arguments.",
+                       "x" = "Unnamed argument{?s} at position{?s} {which(bad)}.",
+                       "i" = "To query a default, use {.code tabtools_options()$digits}.",
+                       "i" = "To set one, use {.code tabtools_options(digits = 3)}."),
+                     class = "tabtools_error_options_unnamed", call = NULL)
+    }
+    valid <- .tt_option_keys
+    cli::cli_abort(c("{.fn tabtools_options} has no default named {.val {nms}}.",
+                     "i" = "Valid names: {.val {valid}}, {.arg persist}, {.arg clear}."),
+                   class = "tabtools_error_options_unknown", call = NULL)
+  }
   new <- list(font = font, fontsize = fontsize, borderstyle = borderstyle,
               digits = digits, boldp = boldp, headercolor = headercolor,
               zebracolor = zebracolor)
@@ -176,11 +194,15 @@ tabtools_options <- function(font = NULL, fontsize = NULL, borderstyle = NULL,
 # ---------------------------------------------------------------------------
 # Colours
 
-# Named colours as Stata's Excel writer renders them. _tabtools_validate_color
-# (_tabtools_common.ado:135-153) accepts 49 names, but the fill is set by Mata
-# xl() (op 7 in _tabtools_xlsx_apply_styles.ado), which knows only these 23
-# web colour names; the values below were read back from Stata-written
-# workbooks (2026-09-25 probe). They are not Stata's graph-scheme colours.
+# Named colours. The 23 web names are the ones Stata's Excel writer xl()
+# knows; the fill values were read back from Stata-written workbooks
+# (2026-09-25 probe; _tabtools_xlsx_deferred_styles.ado:_tt_xlsx_pend_named,
+# lines 565-587 of the 2.5.1 export). The other 26 names accepted by
+# _tabtools_validate_color (_tabtools_common.ado:137-145) are rejected by xl()
+# with r(16136); Stata 2.5.1 resolves them through its own
+# color-<name>.style `set rgb` definitions (_tabtools_xlsx_deferred_styles.ado:
+# 596-613). The RGB triplets below are those definitions, read from Stata 17
+# ado/base/style/color-<name>.style.
 .stata_colors <- c(
   black = "0 0 0", blue = "0 0 255", brown = "165 42 42", cyan = "0 255 255",
   dimgray = "105 105 105", gold = "255 215 0", gray = "128 128 128",
@@ -189,15 +211,20 @@ tabtools_options <- function(font = NULL, fontsize = NULL, borderstyle = NULL,
   navy = "0 0 128", olive = "128 128 0", orange = "255 165 0",
   pink = "255 192 203", purple = "128 0 128", red = "255 0 0",
   sienna = "160 82 45", teal = "0 128 128", white = "255 255 255",
-  yellow = "255 255 0"
-)
-
-# Names the Stata validator accepts but xl() rejects with r(16136).
-.stata_colors_rejected <- c(
-  "bluishgray", "cranberry", "dkgreen", "dknavy", "dkorange", "ebblue",
-  "eggshell", "eltblue", "emerald", "forest_green", "ltblue", "ltbluishgray",
-  "ltkhaki", "midblue", "midgreen", "mint", "orange_red", "sand", "stone",
-  paste0("gs", 0:16)
+  yellow = "255 255 0",
+  # Stata graph-scheme colours (color-<name>.style)
+  bluishgray = "217 230 235", cranberry = "193 5 52", dkgreen = "0 96 0",
+  dknavy = "30 45 83", dkorange = "227 126 0", ebblue = "0 139 188",
+  eggshell = "255 251 240", eltblue = "130 192 233", emerald = "45 109 102",
+  forest_green = "85 117 47", ltblue = "173 216 230",
+  ltbluishgray = "234 242 243", ltkhaki = "229 218 165", midblue = "0 128 255",
+  midgreen = "0 176 0", mint = "0 255 128", orange_red = "255 69 0",
+  sand = "217 194 99", stone = "215 210 158",
+  gs0 = "0 0 0", gs1 = "16 16 16", gs2 = "32 32 32", gs3 = "48 48 48",
+  gs4 = "64 64 64", gs5 = "80 80 80", gs6 = "96 96 96", gs7 = "112 112 112",
+  gs8 = "128 128 128", gs9 = "144 144 144", gs10 = "160 160 160",
+  gs11 = "176 176 176", gs12 = "192 192 192", gs13 = "208 208 208",
+  gs14 = "224 224 224", gs15 = "240 240 240", gs16 = "255 255 255"
 )
 
 #' Parse a colour into an Excel ARGB string
@@ -218,11 +245,6 @@ tt_parse_color <- function(x, arg = "color") {
   if (grepl("^#?[0-9A-Fa-f]{6}$", s)) return(paste0("FF", toupper(sub("^#", "", s))))
   if (grepl("^[A-Za-z][A-Za-z0-9_]*$", s)) {
     rgb <- .stata_colors[tolower(s)]
-    if (is.na(rgb) && tolower(s) %in% .stata_colors_rejected) {
-      cli::cli_abort(c("{.arg {arg}}: Stata's Excel writer does not support the colour name {.val {s}}.",
-                       "i" = "Stata fails with r(16136) for it; use an RGB triplet or a hex code instead."),
-                     call = NULL)
-    }
     if (is.na(rgb)) {
       cli::cli_abort(c("{.arg {arg}} is not a supported Stata colour name.",
                        "i" = "Use a name such as {.val navy}, an RGB triplet like {.val 200 220 240}, or a hex code."),

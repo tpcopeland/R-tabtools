@@ -1,5 +1,6 @@
 # tabtools (development version)
 
+
 These follow Stata tabtools 2.4.0. Until the Stata goldens are regenerated
 from 2.4.0, the golden tests translate the new pair header, note and
 footnote back to 2.1.14's form.
@@ -62,6 +63,28 @@ footnote back to 2.1.14's form.
   The sample-accounting ledger (`$meta$sample_accounting` and the
   `as.data.frame()` attribute) withholds the same counts, as `NA` with
   status `unavailable` and reason `suppressed_by_smallcells`.
+* Changed: `tabtools_options()` takes only named arguments (`...` is its first
+  formal), so `tabtools_options("digits")`, which used to set the session font
+  to "digits", now aborts with a hint to use `tabtools_options()$digits`.
+  Partial matching of option names (for example `fontsiz =`) no longer works.
+  `tabtools_options()` and `tabtools_options(clear = TRUE)` are unchanged.
+* `regtab(sep = " ")` is accepted, as in Stata, and renders `(a b)` intervals;
+  the separator is no longer trimmed. An empty `sep` means the default `", "`,
+  as in `effecttab()`.
+* `tt_stack()` accepts a 0-row table. `tt_stack(groups =)` heading rows have
+  the keys `group:<label>` (`group:<label>#2` for a repeated label) instead of
+  `NA`, and are flagged as headings. `tt_merge()` matches headings by label
+  and scopes the body rows under their heading, so stacks in a different order
+  align, and headings never join data rows. The prefix `group:` is reserved
+  for these keys.
+* `hrcomptab()`/`comptab()` `rownames` no longer split a compound quote that
+  holds inner double quotes.
+* `headercolor`/`zebracolor` accept all Stata colour names (`gs0`-`gs16`,
+  `ltblue`, `emerald`, ...), with the RGB values of Stata's `color-<name>.style`
+  definitions that tabtools 2.5.1 uses.
+* `polr`/`clm` fits with a non-logit, non-probit link (cloglog, loglog,
+  cauchit, ...) are no longer labelled `oprobit`; the table footnote names the
+  link scale and the methods text says "ordinal regression (<link> link)".
 
 # tabtools 0.1.0
 

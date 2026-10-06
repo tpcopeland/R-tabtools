@@ -1135,6 +1135,17 @@ tt_regtab_build <- function(fits, infos, o) {
       o$footnote <- if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, ". ", note)
     }
   }
+  # polr/clm links with no Stata ordered command (cloglog, loglog, cauchit,
+  # ...): the coefficients are on that link's scale; say so (CAT P1-9).
+  ord_links <- unique(unlist(lapply(infos, function(i) {
+    if (!is.null(i) && i$class %in% c("polr", "clm") && is.na(i$stata_cmd)) as.character(i$link)[1]
+  })))
+  ord_links <- ord_links[!is.na(ord_links)]
+  if (length(ord_links)) {
+    note <- sprintf("Ordinal model coefficients are on the %s link scale.", paste(ord_links, collapse = "/"))
+    fn <- trimws(o$footnote %||% "")
+    o$footnote <- if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, ". ", note)
+  }
   # xlsx footnote with the stars note (`regtab.ado:2985-2998`).
   xfoot <- o$footnote %||% ""
   if (o$stars) {

@@ -5,6 +5,7 @@
 \title{Persistent formatting defaults}
 \usage{
 tabtools_options(
+  ...,
   font = NULL,
   fontsize = NULL,
   borderstyle = NULL,
@@ -17,6 +18,9 @@ tabtools_options(
 )
 }
 \arguments{
+\item{...}{Not used; any unnamed or unknown argument is an error. Query a
+default with \code{tabtools_options()$digits}.}
+
 \item{font}{Font family (Stata default Arial).}
 
 \item{fontsize}{Default font size, a whole number from 6 to 72 (Stata's
