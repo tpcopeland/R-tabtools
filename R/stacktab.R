@@ -75,14 +75,31 @@
 #' column is dropped, and the header text replaces the merged cell of every
 #' section row (the first row under `hstack`).
 #'
+#' @param frames Explicit in-memory panel mode: a named list of data frames
+#'   or `tt_table` sources. Each entry may instead be
+#'   `list(data = source, label = "Panel heading")`. Names identify sources
+#'   and must be unique; an unnamed list gets `frame1`, `frame2`, etc.
+#'   Labels are literal; omitted or blank labels add no heading. Columns
+#'   stack by position and must have equal counts. The first source supplies
+#'   the only ordinary header, using variable labels where present. Each
+#'   data frame's embedded header is dropped; each `tt_table` contributes
+#'   its body. Panel headings and indent follow [puttab()]. Numeric
+#'   source display formats are retained. Cannot combine with `blocks`,
+#'   explicit `layout`, `spacing`, `display`, `append`, `sheetreplace`,
+#'   `columnmerge`, `style` or `borders`.
+#' @param noindent,headershade,borderstyle,font,fontsize,zebra,digits,open
+#'   Frame-panel mode only: passed to [puttab()]. Explicit
+#'   `headershade = FALSE` overrides session shading. `noindent` disables
+#'   panel row indentation.
 #' @param blocks The blocks: a Stata block specification string, or a list
 #'   (see Blocks).
 #' @param xlsx The workbook (Stata's `using`): sheet blocks are read from
 #'   it and the composite is written to it. Optional when every block is a
-#'   `tt_table`; the workbook is then created if needed.
-#' @param sheet Output sheet (required with `xlsx`). An existing sheet
-#'   (matched without regard to case) is refused unless `append` or
-#'   `sheetreplace` is given.
+#'   `tt_table` or `frames` is given; the workbook is then created if needed.
+#' @param sheet Output sheet (required with `xlsx`). In block mode an
+#'   existing sheet (matched without regard to case) is refused unless
+#'   `append` or `sheetreplace` is given. In `frames` mode the sheet is
+#'   created or replaced, as by [puttab()], preserving unrelated sheets.
 #' @param layout `"vstack"` (default) or `"hstack"`.
 #' @param title Title in column `A` above the table, bold Arial 12.
 #' @param note,footnote Note below the table, italic Arial 8 (`footnote` is
@@ -109,7 +126,10 @@
 #'   is its header row, the other rows its body (the analogue of Stata's
 #'   `frame()`). It is returned invisibly when a file is written or
 #'   `display = TRUE` has printed it (assign it and print it to see it).
-#'   `$stored` holds Stata's
+#'   In `frames` mode the result uses puttab's layout and stored counts,
+#'   plus `n_frames`, `frames` (source identities in order), and
+#'   `blocks_loaded`; `source` is `"frames"`. Invalid frame-panel arguments
+#'   raise `tabtools_error_layout`. For block mode, `$stored` holds Stata's
 #'   `r()` results: `blocks_loaded`, `rows_written`, `cols_out`, `layout`,
 #'   and, with `xlsx`, `rows_out`, `append_start`, `note_row`, `sheet`,
 #'   `book`, `table_start`, `title_cell`; `csv`, `markdown`,
@@ -130,8 +150,12 @@
 #' * Side-by-side (`hstack`) `tt_table` blocks whose rows differ at a
 #'   position (by the table's row keys, else the row labels) give a warning
 #'   naming them; the rows are still placed by position, as in Stata.
-#' * The files are written together at the end, as in Stata; a failure
-#'   while copying them into place restores the files that were replaced.
+#' * In block mode the files are written together at the end, as in Stata;
+#'   a failure while copying them into place restores replaced files.
+#'   In `frames` mode, as in native Stata, [puttab()] writes CSV, Markdown
+#'   and Excel sequentially after validating source metadata and targets;
+#'   a later write failure can leave an earlier sink written. Existing
+#'   output sheets are replaced while unrelated sheets are preserved.
 #'   There is no `frame()`: the returned table is the composite.
 #' * Stata's `stacktab: N blocks -> N rows written -> sheet S` line, printed
 #'   when a workbook is written, is a message; nothing is printed for the
@@ -165,12 +189,41 @@
 #' stacktab(list(list(table = a, label = "Any HRT use"),
 #'               list(table = b, label = "By estrogen dose")),
 #'          columnmerge = "B+C as aHR (95% CI)")
+#'
+#' # Frames are panels with one common header
+#' stacktab(frames = list(primary = list(data = primary, label = "Primary"),
+#'                        dose = list(data = dose, label = "Dose")))
 #' @export
-stacktab <- function(blocks, xlsx = NULL, sheet = NULL, layout = "vstack", title = NULL,
+stacktab <- function(blocks = NULL, xlsx = NULL, sheet = NULL, layout = "vstack", title = NULL,
                      note = NULL, footnote = NULL, columnmerge = NULL, style = NULL,
                      borders = NULL, spacing = 0, csv = NULL, markdown = NULL,
                      mdappend = FALSE, display = FALSE, append = FALSE,
-                     sheetreplace = FALSE) {
+                     sheetreplace = FALSE, frames = NULL, noindent = FALSE,
+                     headershade = FALSE, borderstyle = NULL, font = NULL,
+                     fontsize = NULL, zebra = FALSE, digits = NULL, open = FALSE) {
+  if (!is.null(frames)) {
+    forbidden <- c(blocks = !is.null(blocks), layout = !missing(layout),
+                   columnmerge = !is.null(columnmerge), style = !is.null(style),
+                   borders = !is.null(borders), spacing = !missing(spacing),
+                   display = !missing(display), append = !missing(append),
+                   sheetreplace = !missing(sheetreplace))
+    if (any(forbidden)) {
+      .puttab_abort(paste0("frames cannot be combined with ", paste(names(forbidden)[forbidden], collapse = ", "), "."))
+    }
+    if (!is.null(xlsx) && is.null(sheet)) .puttab_abort("sheet is required with xlsx in frames mode.")
+    args <- list(xlsx = xlsx, title = title, footnote = note %||% footnote, csv = csv,
+                 markdown = markdown, mdappend = mdappend, borderstyle = borderstyle,
+                 font = font, fontsize = fontsize, zebra = zebra, digits = digits, open = open,
+                 noindent = noindent)
+    if (!is.null(note) && !is.null(footnote)) .puttab_abort("note and footnote may not be combined.")
+    if (!missing(headershade)) args$headershade <- headershade
+    if (!is.null(sheet)) args$sheet <- sheet
+    return(.stacktab_frames(frames, args))
+  }
+  if (!missing(noindent) || !missing(headershade) || !missing(borderstyle) ||
+      !missing(font) || !missing(fontsize) || !missing(zebra) || !missing(digits) || !missing(open)) {
+    .puttab_abort("noindent, headershade, borderstyle, font, fontsize, zebra, digits and open require frames.")
+  }
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   for (a in c("mdappend", "display", "append", "sheetreplace")) {

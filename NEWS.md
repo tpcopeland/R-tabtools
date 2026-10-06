@@ -1,5 +1,16 @@
 # tabtools (development version)
 
+* `puttab()` now boxes non-academic tables and supports `hlines`, `vlines`,
+  `boldrows`, ordered panels, repeated source or literal panel headers,
+  `panelinline`, `noindent`, and spanning headers. Layout coordinates and
+  widths are validated before export. Markdown promotes the first panel
+  row under `noheader`; literal labels remain escaped.
+* `puttab(nformat = ...)` formats integer columns and imported Stata `fc`
+  formats retain grouping. Dates and value labels retain their display.
+  Explicit `headershade = FALSE` overrides session shading.
+* `stacktab(frames = ...)` stacks equal-width in-memory sources as panels,
+  with one common header, optional headings and stored source identities.
+
 * `table1_tc(nosmdhighlight = TRUE)` disables Excel SMD highlighting, as
   `smdthreshold = -1` does. Combining the switch with an explicit threshold
   is refused, matching Stata. Markdown has no SMD highlighting.

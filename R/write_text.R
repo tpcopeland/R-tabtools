@@ -132,6 +132,7 @@ tt_write_csv <- function(x, path) {
   nc <- ncol(x$body)
   esc <- if (escape) function(v) .md_escape(v, dollar) else identity
   if (!length(h)) return(rep("", nc))
+  if (length(x$meta$puttab_spans)) return(esc(.puttab_md_header(x)))
   g <- .tt_cells(x, extraspace = TRUE)
   # layout$md_header = "first" (comptab's rate mode): the first header row
   # as it is, blank cells included (Stata's `strictheaders`).
@@ -240,6 +241,8 @@ tt_write_csv <- function(x, path) {
 tt_write_markdown <- function(x, path, append = FALSE) {
   .tt_check_table(x)
   x <- .tt_blank_text(x)
+  view <- .puttab_md_view(x)
+  x <- view$table
   .tt_check_path(path, "\\.(md|markdown|qmd|rmd)$", "markdown", "a .md, .markdown, .qmd, or .rmd file")
   existing <- append && file.exists(path)
   # Pandoc reads a .qmd/.rmd file with tex_math_dollars, so a "$" pair there
@@ -262,10 +265,14 @@ tt_write_markdown <- function(x, path, append = FALSE) {
   # in a puttab table, whose rows are all data: Stata's `keepblank` (since
   # Stata-Tools 68c37a90, codex audit C3; task C7), so the Markdown has as
   # many rows as the workbook and the CSV.
-  keep_blank <- identical(x$command, "puttab")
+  keep_blank <- identical(x$command, "puttab") || isTRUE(x$layout$md_keep_blank)
   for (i in seq_len(nrow(b))) {
     cells <- c(.md_label_cell(b[i, 1], dollar), .md_escape(b[i, -1], dollar))
     if (!keep_blank && !any(nzchar(cells))) next
+    if (i %in% view$bold_rows) {
+      nonblank <- nzchar(cells)
+      cells[nonblank] <- paste0("**", cells[nonblank], "**")
+    }
     lines <- c(lines, paste0("|", paste0(" ", cells, " |", collapse = "")))
     n_body <- n_body + 1L
   }
