@@ -2,6 +2,7 @@ name,kind,row,col,value
 _golden_id,meta,,,RW07
 _golden_tabtools_version,meta,,,2.1.14
 _golden_fvgen_version,meta,,,
+_cells_from,meta,,,2.5.1@712044f8
 _golden_stata_version,meta,,,17
 N_derived_suppressed,scalar,,,2
 N_secondary_suppressed,scalar,,,3

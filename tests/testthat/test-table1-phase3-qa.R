@@ -200,6 +200,9 @@ test_that("wtcompare + smallcells with a coded group N: crude and weighted codes
   # (desctab.ado:994-1007 interleaves Cr_/Wt_ per group).
   tt <- table1_tc(p3_review_data("sg3"), by = "arm", vars = "x contn \\ k cat \\ b bin", wt = "w",
                   wtcompare = TRUE, wtn = TRUE, smallcells = 4, catrowperc = TRUE, slashN = TRUE, smd = TRUE)
+  # S17's cells, console cells and suppression map come from tabtools 2.5.1
+  # (Stata-Tools 712044f8: derivable-count protection); its SMD header and
+  # note stay in 2.1.14's form (_stored.csv meta row `_cells_from`).
   p3_expect(tt, "S17")
   m <- tt$stored$suppression
   expect_identical(unname(m["r3", c("Cr_3", "Wt_3")]), c(0, 3))

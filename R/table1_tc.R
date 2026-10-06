@@ -461,7 +461,7 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   if (!is.null(smallcells) && implicit_percent) {
     cli::cli_abort(c("{.arg smallcells} cannot be combined with percent-only display.",
                      "i" = "Use percent_n, wtn, or the default n (%); percentages are withheld for any variable that carries a suppressed count."),
-                   call = NULL)
+                   class = "tabtools_error_smallcells_percent_only", call = NULL)
   }
   if (smd && is.null(by)) cli::cli_abort("{.arg smd} requires {.arg by}.", call = NULL)
   if (smdtype_given && !smd) {
@@ -554,7 +554,9 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
             missingsummary = missingsummary, test_args = test_args, smallcells = smallcells,
             # _desctab_collect.ado (2.1.17): shared group/total Ns cannot be withheld
             # per variable once the table has two or more variables.
-            sc_nvars = length(specs))
+            sc_nvars = length(specs),
+            sc_names = vapply(specs, function(x) as.character(x$name), ""),
+            sc_labels = vapply(specs, function(x) as.character(x$label), ""))
   # desctab.ado:132-138: the small-cell note joins any user footnote.
   sc_note <- if (!is.null(smallcells)) tt_sc_footnote(smallcells) else NULL
   if (!is.null(sc_note) && !grepl(sc_note, footnote %||% "", fixed = TRUE)) {
@@ -577,6 +579,7 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
     if (!is.null(smd_note)) tt$stored$smdnote <- smd_note
   }
   tt$meta$sample_accounting <- .t1_sample_accounting(sample_input, specs, gp, o, wtcompare)
+  if (!is.null(smallcells)) tt <- .t1_sc_mask_ledger(tt, gp, length(specs))
   if (!is.null(smallcells)) {
     sc <- .t1_sc_stored(tt, gp, by, smallcells, total = total != "none" && gp$G > 1L,
                         wtcompare = wtcompare)

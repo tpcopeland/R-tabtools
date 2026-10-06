@@ -12,6 +12,17 @@
 # missing row (used by missingsummary rows), and its column-margin codes
 # (combined into the N row).
 
+# The variable name for a refusal message (Stata names the variable, not its
+# label): the spec whose label starts the record's label (varlabplus appends
+# text), else the label itself.
+.t1_sc_varname <- function(o, label) {
+  label <- trimws(label)
+  hit <- which(vapply(o$sc_labels, function(l) startsWith(label, l), NA))
+  if (!length(hit)) return(label)
+  hit <- hit[which.max(nchar(o$sc_labels[hit]))]
+  o$sc_names[hit]
+}
+
 # Group sample sizes (column margins of every block).
 .t1_sc_sample_n <- function(o, gp, col_masks) {
   vapply(col_masks[seq_len(gp$G)], function(m) sum(o$wx$d[m]), 0)
@@ -30,7 +41,7 @@
   tot <- K > G
   b <- tt_sc_block_cont(nn[seq_len(G)], .t1_sc_sample_n(o, gp, col_masks),
                         missingsummary = o$missingsummary, total = tot)
-  v <- tt_sc_variable(b, o$smallcells, fixedmargins = o$sc_nvars > 1L, variable = rec$label)
+  v <- tt_sc_variable(b, o$smallcells, fixedmargins = o$sc_nvars > 1L, variable = .t1_sc_varname(o, rec$label))
   codes <- v$cells[1, ]
   for (k in which(codes > 0)) rec$cells[k] <- c(tt_sc_render(nn[k], codes[k], o$smallcells, o$nformat))
   rec$codes <- codes
@@ -62,7 +73,7 @@
                        include_missing = o$missing, missing_level = missing_level,
                        missingsummary = o$missingsummary, slashN = o$slashN,
                        catrowperc = o$catrowperc, total = tot)
-  v <- tt_sc_variable(b, k_sc, fixedmargins = o$sc_nvars > 1L, variable = trimws(recs[[1]]$label))
+  v <- tt_sc_variable(b, k_sc, fixedmargins = o$sc_nvars > 1L, variable = .t1_sc_varname(o, recs[[1]]$label))
   if (binary) tx <- list(tx)
   first <- if (binary) 1L else 2L
   for (li in seq_len(nrow(v$cells))) {
@@ -254,4 +265,69 @@
        N_secondary_suppressed = sum(m == 2),
        N_derived_suppressed = sum(m == 3),
        suppression = m)
+}
+
+#' Mask the sample-accounting ledger under smallcells
+#'
+#' The ledger holds raw counts (`missing_n`, `observed_n`, group `input_n`,
+#' exclusion `n`) that the printed table withholds: the hidden missing count
+#' of a protected variable, and a group or total N shown as a marker. Under
+#' `smallcells`, every count metric of a population belonging to a variable
+#' that carries any suppression code (or a derived suppression) is set to
+#' `NA` with status `unavailable` and reason `suppressed_by_smallcells`; so
+#' are the group and table populations whose N is withheld, and the N-bearing
+#' metrics (`input_n`, `eligible_n`, `excluded_n`, `zero_weight_n`,
+#' `missing_n`) of other variables' populations in a withheld group.
+#' Unsuppressed variables keep their counts. Statuses other than `available`
+#' are left alone.
+#' @keywords internal
+#' @noRd
+.t1_sc_mask_ledger <- function(tt, gp, n_specs) {
+  s <- tt$meta$sample_accounting
+  rc <- tt$meta$row_codes
+  cc <- tt$meta$crude_codes
+  types <- tt$rows$type
+  G <- gp$G
+  head <- which(types %in% c("var", "cat_header"))
+  blk <- cumsum(seq_along(types) %in% head)
+  any_code <- function(i) any(c(rc[[i]], cc[[i]]) > 0) || isTRUE(tt$meta$derived_rows[i])
+  flagged <- if (length(head) == n_specs) {
+    vapply(seq_along(head), function(b) any(vapply(which(blk == b), any_code, NA)), NA)
+  } else rep(TRUE, n_specs)  # fail safe: cannot map blocks to variables
+  sc <- pmax(tt$meta$sample_codes, tt$meta$crude_sample_codes %||% 0)
+  K <- length(sc)
+  nwith <- sc > 0
+  all_metrics <- .tt_sample_metrics
+  n_metrics <- c("input_n", "eligible_n", "excluded_n", "zero_weight_n", "missing_n")
+  pid <- sub("^(crude|weighted)/", "", s$populations$id)
+  parts <- strsplit(pid, "/", fixed = TRUE)
+  mask_all <- logical(length(pid))
+  mask_n <- logical(length(pid))
+  for (j in seq_along(pid)) {
+    p <- parts[[j]]
+    if (p[1] == "table") mask_all[j] <- any(nwith)
+    else if (p[1] == "group") mask_all[j] <- nwith[as.integer(p[2])]
+    else if (p[1] == "variable") {
+      i <- as.integer(p[2])
+      col <- if (p[3] == "table") if (K > G) K else NA_integer_ else as.integer(p[4])
+      mask_all[j] <- isTRUE(flagged[i])
+      mask_n[j] <- if (p[3] == "table") any(nwith) else isTRUE(nwith[col])
+    }
+  }
+  ids <- s$populations$id
+  m <- s$measures
+  pos <- match(m$population_id, ids)
+  hit <- m$status == "available" & (mask_all[pos] | (mask_n[pos] & m$metric %in% n_metrics))
+  m$value[hit] <- NA_real_
+  m$status[hit] <- "unavailable"
+  m$reason[hit] <- "suppressed_by_smallcells"
+  e <- s$exclusions
+  ehit <- e$status == "available" & (mask_all | mask_n)[match(e$population_id, ids)]
+  e$n[ehit] <- NA_real_
+  e$status[ehit] <- "unavailable"
+  s$measures <- m
+  s$exclusions <- e
+  .tt_validate_sample_accounting(s)
+  tt$meta$sample_accounting <- s
+  tt
 }

@@ -1,20 +1,5 @@
 # tabtools (development version)
 
-* `table1_tc(smallcells =)` now protects counts that are not printed but follow
-  from printed ones (Stata tabtools 2.1.17). A categorical variable's hidden
-  missing count (group N minus the printed levels) and a binary variable's
-  hidden negative and missing counts (from the denominator its percentage or
-  `n/N` releases) are treated as primary cells when below `smallcells`: cells
-  are coded `<k` or the greater-than-or-equal marker as needed, the
-  variable's percentages are withheld, and its p-value reads `Suppressed`.
-  Before, a table with `N=14`, `A 6 (50)`, `B 6 (50)` released a missing count
-  of 2 by subtraction. In a table of two or more variables the group and
-  total N are shared by every variable and are never withheld; a count that
-  only withholding them could protect now stops with an error of class
-  `tabtools_error_smallcells_shared_margin`. `smallcells` with `wtcompare` is
-  refused unless `wtn` or `percent_n` is given, because the weighted columns
-  would be percent-only.
-
 These follow Stata tabtools 2.4.0. Until the Stata goldens are regenerated
 from 2.4.0, the golden tests translate the new pair header, note and
 footnote back to 2.1.14's form.
@@ -37,6 +22,24 @@ footnote back to 2.1.14's form.
   match cobalt 4.6.3 on continuous and binary variables.
 * `stored$smdtype` (with `smd = TRUE`) and `stored$smdnote` (when there
   is a note), as Stata's `r(smdtype)` and `r(smdnote)`.
+
+* `table1_tc(smallcells =)` now protects counts that are not printed but follow
+  from printed ones (Stata tabtools 2.1.17). A categorical variable's hidden
+  missing count (group N minus the printed levels) and a binary variable's
+  hidden negative and missing counts (from the denominator its percentage or
+  `n/N` releases) are treated as primary cells when below `smallcells`: cells
+  are coded `<k` or the greater-than-or-equal marker as needed, the
+  variable's percentages are withheld, and its p-value reads `Suppressed`.
+  Before, a table with `N=14`, `A 6 (50)`, `B 6 (50)` released a missing count
+  of 2 by subtraction. In a table of two or more variables the group and
+  total N are shared by every variable and are never withheld; a count that
+  only withholding them could protect now stops with an error of class
+  `tabtools_error_smallcells_shared_margin`. `smallcells` with `wtcompare` is
+  refused unless `wtn` or `percent_n` is given, because the weighted columns
+  would be percent-only.
+  The sample-accounting ledger (`$meta$sample_accounting` and the
+  `as.data.frame()` attribute) withholds the same counts, as `NA` with
+  status `unavailable` and reason `suppressed_by_smallcells`.
 
 # tabtools 0.1.0
 

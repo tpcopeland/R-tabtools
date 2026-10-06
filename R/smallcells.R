@@ -419,7 +419,8 @@ tt_smallcells <- function(counts, smallcells, exact = NULL, sensitive = NULL,
   if (res$status == 0L) {
     cli::cli_abort(
       "{.arg smallcells}: exact-disclosure protection could not be certified for this count block.",
-      class = c("tabtools_error_smallcells", "tabtools_smallcells_uncertified"), call = NULL
+      class = c("tabtools_error_smallcells", "tabtools_error_smallcells_uncertified",
+                "tabtools_smallcells_uncertified"), call = NULL
     )
   }
   res$status <- NULL

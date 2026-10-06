@@ -144,9 +144,18 @@ capture program drop _rv_call
 program define _rv_call
     table1_tc [fweight=fw], vars(x contn \ c bin) by(g) smallcells(3) nopvalue csv(`"`1'"')
 end
-rv_run RW11 "`out'/strby" "`out'"
+* tabtools 2.1.17+ refuses RW11 (r(498), shared group N) and RW12 (r(198),
+* wtcompare percent-only). Captured so regeneration continues; the R side
+* asserts both refusals (test-table1-review-p3.R) and reads no RW11/RW12 files.
+capture noisily rv_run RW11 "`out'/strby" "`out'"
+local _rw11_rc = _rc
+capture log close rv
+display as text "RW11 rc = `_rw11_rc' (498 expected under tabtools >= 2.1.17)"
 capture program drop _rv_call
 program define _rv_call
     table1_tc, vars(x contn \ c bin) by(g) wt(w) wtcompare smallcells(3) csv(`"`1'"')
 end
-rv_run RW12 "`out'/strby" "`out'"
+capture noisily rv_run RW12 "`out'/strby" "`out'"
+local _rw12_rc = _rc
+capture log close rv
+display as text "RW12 rc = `_rw12_rc' (198 expected under tabtools >= 2.1.17)"
