@@ -20,10 +20,13 @@ test_that("smdpair resolves a numeric token that is only a label (BUG-1)", {
 test_that("a value/label ambiguity is refused under auto and resolved by smdpair_as", {
   d <- b3_data(1:3, c("3", "1", "2"))
   f <- function(...) table1_tc(d, by = "arm", vars = c(age = "contn"), smd = TRUE, ...)
-  expect_error(f(smdpair = c(3, 2)), class = "tabtools_error_smdpair_ambiguous")
+  e <- expect_error(f(smdpair = c(3, 2)), class = "tabtools_error_smdpair_ambiguous")
+  expect_s3_class(e, "tabtools_error_smdpair")
   expect_identical(b3_hdr(f(smdpair = c(3, 2), smdpair_as = "values")), "SMD (2 vs 1)")
   expect_identical(b3_hdr(f(smdpair = c(3, 2), smdpair_as = "labels")), "SMD (3 vs 2)")
-  expect_error(f(smdpair = c(3, 2), smdpair_as = "bogus"))
+  expect_error(f(smdpair = c(3, 2), smdpair_as = "bogus"), class = "tabtools_error_smdpair_as")
+  expect_error(f(smdpair_as = "values"), class = "tabtools_error_smdpair_as")
+  expect_no_error(f(smdpair_as = "auto"))
 })
 
 test_that("a label equal to its own value is not ambiguous", {
@@ -59,15 +62,22 @@ test_that(".tt_infer_cols recognises every SMD header (BUG-3)", {
     expect_identical(tabtools:::.tt_infer_cols(hdr(s), 5, "descriptor")$role[5], "smd", info = s)
   }
   expect_identical(tabtools:::.tt_infer_cols(hdr("Group 4"), 5, "descriptor")$role[5], "group")
+  # A group literally named like an SMD header keeps the group role when its
+  # second header row says N=..., as a real SMD column's is blank.
+  for (s in c("Max SMD", "SMD (x vs y)", "Pop. SB", "SMD")) {
+    h <- list(list(text = c("Characteristic", "Group 1", "Group 2", s)),
+              list(text = c("", "N=10", "N=10", "N=10")))
+    expect_identical(tabtools:::.tt_infer_cols(h, 4, "descriptor")$role[4], "group", info = s)
+  }
 })
 
-test_that("the xlsx SMD column fits a long pair header (BUG-4)", {
+test_that("the xlsx SMD column stays at Stata's fixed 8 (desctab.ado:2203-2204)", {
   set.seed(1)
   d <- data.frame(arm = factor(rep(c("LongGroupNameA", "LongGroupNameB", "LongGroupNameC"), each = 10)),
                   age = stats::rnorm(30, 50, 10))
   lay <- tabtools:::.xlsx_layout_table1(table1_tc(d, by = "arm", vars = c(age = "contn"), smd = TRUE))
   w <- lay$rules[lay$rules$op == 13, ]
-  expect_true(max(w$value[w$c1 == max(w$c1)], na.rm = TRUE) > 8)
+  expect_identical(w$value[w$c1 == max(w$c1)], 8)
 })
 
 test_that("automatic notes join a paragraph footnote as paragraphs; unspaced stays (BUG-5)", {

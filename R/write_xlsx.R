@@ -389,11 +389,10 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
   for (j in p_pos) add("width", 1, 1, j, j, value = 10)
   for (j in test_pos) add("width", 1, 1, j, j, value = text_width(j, 12))
   for (j in stat_pos) add("width", 1, 1, j, j, value = text_width(j, 14))
-  # Sized from the header rows with the text_width() rule, minimum 8: a pair
-  # header "SMD (A vs B)" must fit. Body cells are not measured because a
-  # smallcells "Suppressed" marker there stays clipped, as in Stata (goldens).
-  smd_width <- function(j) max(8, ceiling(max(.blen(grid[2:3, j])) * 0.85) + 2)
-  for (j in smd_pos) add("width", 1, 1, j, j, value = smd_width(j))
+  # Stata hard-codes the SMD column width to 8 (desctab.ado:2203-2204,
+  # "13 1 1 smd_pos smd_pos 8"); parity outranks fitting a long pair header.
+  # A measured width is pending a Stata-side change.
+  for (j in smd_pos) add("width", 1, 1, j, j, value = 8)
 
   add("font", 1, num_rows, 1, num_cols, value = style$fontsize)
   add("font", 1, 1, 1, num_cols, value = style$fontsize + 2)

@@ -366,6 +366,12 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Table 1"
   total <- match.arg(total)
+  smdpair_as <- tryCatch(rlang::arg_match(smdpair_as, c("auto", "values", "labels")),
+    error = function(e) cli::cli_abort("{.arg smdpair_as} must be one of {.val auto}, {.val values} or {.val labels}.",
+                                       class = "tabtools_error_smdpair_as", call = NULL))
+  if (smdpair_as != "auto" && is.null(smdpair)) {
+    cli::cli_abort("{.arg smdpair_as} requires {.arg smdpair}.", class = "tabtools_error_smdpair_as", call = NULL)
+  }
   smdtype_given <- !base::missing(smdtype)
   smdtype <- match.arg(smdtype)
   for (a in c("missing", "test", "statistic", "headerperc", "smd", "nopvalue", "varlabplus",
