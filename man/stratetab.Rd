@@ -33,7 +33,15 @@ stratetab(
   csv = NULL,
   markdown = NULL,
   mdappend = FALSE,
-  open = FALSE
+  open = FALSE,
+  cformat = NULL,
+  sep = ", ",
+  smallcells = NULL,
+  nosmallcells = FALSE,
+  masktext = NULL,
+  zeroexact = FALSE,
+  zerocells = NULL,
+  zerocells_persontime = FALSE
 )
 }
 \arguments{
@@ -122,6 +130,42 @@ so the outcome and statistic headers are joined as \code{outcome: statistic} (fo
 \item{mdappend}{Append to an existing \code{markdown} file.}
 
 \item{open}{Open the workbook after writing (interactive sessions).}
+
+\item{cformat}{Stata numeric display format for each rate and its limits,
+using supported \verb{\%w.df}, \verb{\%w.dg} and \code{c} suffix formats (also with a
+comma decimal mark). Explicit \code{digits} with \code{cformat} raises
+\code{tabtools_error_format_conflict}; omitted digits use the session default,
+then 1. \verb{\%g} uses the existing package formatter, whose significant-digit
+formatting can differ from Stata at high precision; fixed \verb{\%f} formats
+are recommended for exact decimal display parity.}
+
+\item{sep}{Literal interval separator for rates and rate ratios. Default
+\code{", "}; an empty string also selects this default. Whitespace and
+macro-looking text are retained. A decimal-comma \code{cformat} with a comma
+separator raises \code{tabtools_error_format_separator}.}
+
+\item{smallcells}{Nonnegative integer threshold. Event counts from 1 to
+threshold minus 1 use \code{masktext}, with their person-time and rate hidden.
+Ratios involving a masked count are hidden. Omitted, uses session
+\code{tabtools.smallcells}, then 0; explicit NULL disables masking.}
+
+\item{nosmallcells}{Ignore the session small-cell default for this call.
+Cannot be combined with an explicit non-NULL \code{smallcells}.}
+
+\item{masktext}{Publication text for a masked event count. Resolves from
+the explicit argument, session \code{tabtools.masktext}, then \verb{<threshold}.
+An explicit non-NULL value requires an active threshold.}
+
+\item{zeroexact}{Fill missing zero-event bounds with the exact Poisson
+limits 0 and \code{-log((1-level/100)/2)/Y}, scaled by \code{ratescale}. The level is
+resolved as a percentage from the source blocks and \code{level}; supplied
+finite bounds are retained, and an existing zero lower bound with a
+missing upper is completed.}
+
+\item{zerocells}{Optional zero-event display override: \code{"dash"} or \code{"blank"}
+replaces events and rates, while analytical numbers remain available.}
+
+\item{zerocells_persontime}{Also withhold person-time under \code{zerocells}.}
 }
 \value{
 A \code{tt_table} (\code{command = "stratetab"}), returned invisibly when
@@ -158,6 +202,12 @@ comptab's reference row, which is the first category row of each
 exposure block by position (\verb{$rows$type == "level"}, first within
 \verb{$rows$block}).
 
+\verb{$meta$rate_blocks} preserves each outcome/exposure's source data,
+grouping codes, labels and types, time units and sample attributes.
+\verb{$meta$rate_rows} additionally holds \code{category_code}, \code{category_type},
+publication \code{state} and per-cell \code{ci_method} (\code{"exact_poisson_zero"}
+for newly supplied zero bounds, \code{"none"} for no time, \code{"supplied"}
+when the original interval method is unknown).
 \verb{$meta$sample_accounting} carries the source ledger described in
 \code{\link[=tt_table]{tt_table()}}; unavailable record counts remain explicit.
 }
@@ -238,6 +288,22 @@ interval (\code{0.0} and an en dash in parentheses), as in Stata tabtools
 2.1.14.
 }
 
+\section{Publication masks and no person-time}{
+
+Small-cell protection is primary only; it promises no complementary
+protection. All publication sinks use the masked body. \verb{$stored$rates},
+\verb{$stored$ratios}, \verb{$meta$rate_rows} and \verb{$meta$rate_blocks} remain raw
+analytical payloads and must not be published as protected output.
+\verb{$stored$smallcells} records integer \code{threshold}, \code{mode = "primary"},
+\code{n_masked} (event cells) and \code{n_linked} (linked person-time/rate/ratio cells).
+Cells with zero person-time print empty, including ratio references, hold
+missing rates and count in \verb{$stored$N_nopt}. Events without person-time,
+or a table without any positive person-time, raise
+\code{tabtools_error_rate_no_time}. \code{N_nopt} counts zero source exposure; a
+positive source exposure that underflows after \code{pyscale} can render empty
+without increasing this source diagnostic.
+}
+
 \section{Differences from Stata}{
 
 \itemize{
@@ -285,6 +351,10 @@ stratetab(list(tt_rates(men, "years", "event", by = "arm"),
           outcomes = 1, outlabels = "Death", explabels = c("Men", "Women"),
           rateratio = TRUE)
 
+# Exact zero-event bounds and primary publication protection
+stratetab(blocks, outcomes = 2, zeroexact = TRUE, smallcells = 5,
+          cformat = "\%12.2f", sep = "; ")
+
 # Written to a workbook, the table is returned invisibly
 tab <- stratetab(blocks, outcomes = 2, xlsx = tempfile(fileext = ".xlsx"))
 
@@ -304,6 +374,11 @@ cv_f <- blk(c(134, 128), c(24380, 19520), c(0.00550, 0.00656),
             c(0.00462, 0.00549), c(0.00652, 0.00781))
 stratetab(list(cv_m, cv_f), outcomes = 1, outlabels = "CV events",
           explabels = c("Male", "Female"), rateratio = TRUE)
+}
+\references{
+StataCorp (2025). Stata 19 Base Reference Manual, R ci,
+Methods and formulas: Poisson mean; Technical note on zero counts.
+Stata 19 Survival Analysis Reference Manual, ST strate, Remarks.
 }
 \seealso{
 \code{\link[=tt_rates]{tt_rates()}} for the blocks; \code{\link[=regtab]{regtab()}} for the hazard-ratio

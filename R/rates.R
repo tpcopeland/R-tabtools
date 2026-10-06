@@ -31,7 +31,7 @@
 #'
 #' The interval is `exp(log(D/Y) -/+ z / sqrt(D))` with `z =
 #' qnorm(0.5 + level/2)`, missing when there are no events (`strate.ado`).
-#' Records outside the analysis sample (exit at or before entry, missing
+#' By default, records outside the analysis sample (exit at or before entry, missing
 #' time) are dropped, and so are records with a missing grouping value
 #' unless `missing = TRUE`; groups are sorted by the grouping columns,
 #' missing last. Not ported: the jackknife intervals `strate` uses for
@@ -69,7 +69,8 @@
 #'   (`NA`) when they carry none; a value that contradicts the labels is an
 #'   error.
 #' @param entry Late-entry time: a number or a column name (`stset
-#'   enter(time #)`); records ending at or before entry are dropped.
+#'   enter(time #)`); negative follow-up is dropped and zero follow-up is
+#'   controlled by `zero_time`.
 #' @param fweight Optional frequency-weight column (`stset [fweight=]`).
 #' @param missing Keep missing grouping values as a group (`missing`).
 #' @param float_time Emulate Stata's single-precision person-time. `NULL`
@@ -77,6 +78,15 @@
 #'   numbers within int range (|x| <= 32,740) are byte/int in a Stata dataset,
 #'   so person-time becomes float; anything else is treated as double. Set
 #'   `TRUE`/`FALSE` when the source dataset's storage type is known.
+#' @param zero_time `"exclude"` (default) retains the existing stset rule:
+#'   zero-length records do not enter the rate. `"retain"` includes records
+#'   ending exactly at entry, counting their events and zero exposure.
+#'   Negative intervals are always excluded. A retained or supplied group
+#'   with events and zero person-time raises `tabtools_error_rate_no_time`;
+#'   a retained zero-event, zero-time group has missing rates and bounds.
+#'   Applies only to time and event data.
+#' @references StataCorp (2025). Stata 19 Survival Analysis Reference Manual,
+#'   ST strate, Remarks: quadratic approximation for the log-rate.
 #' @return A data frame: the grouping columns (with their `"label"`
 #'   attributes), then `D` (events), `Y` (person-time / per), `Rate`,
 #'   `Lower`, `Upper`; attributes `per`, `level` (a proportion, `NA` when
@@ -84,6 +94,11 @@
 #'   and event data, `event` (the event column's name) and `event_label`
 #'   (its `"label"` attribute, `NULL` when it has none). [stratetab()]
 #'   labels its exposure blocks and outcomes from these.
+#'   For time/event data, `zero_time` records the selection mode and
+#'   `zero_length` is an audit list: integer `records` and `event_records`,
+#'   numeric frequency-weighted `events`, and logical `retained`, for
+#'   zero-length records with valid weights and groups. This diagnostic is
+#'   retained even under the default exclusion rule.
 #'   The `sample_accounting` attribute carries the source ledger described
 #'   in [tt_table()], including explicit unknown counts for supplied rates.
 #' @seealso [stratetab()], which formats these blocks as a rate table.
@@ -101,7 +116,12 @@
 #' @export
 tt_rates <- function(data, time = NULL, event = NULL, by = NULL, strata = NULL, per = 1,
                      level = NULL, entry = NULL, fweight = NULL, missing = FALSE,
-                     float_time = NULL) {
+                     float_time = NULL, zero_time = "exclude") {
+  if (!is.character(zero_time) || length(zero_time) != 1L || is.na(zero_time) ||
+      !zero_time %in% c("exclude", "retain")) {
+    cli::cli_abort("{.arg zero_time} must be exclude or retain.",
+                   class = "tabtools_error_rate_zero_time", call = NULL)
+  }
   if (!is.data.frame(data)) cli::cli_abort("{.arg data} must be a data frame.", call = NULL)
   if (!is.logical(missing) || length(missing) != 1L || is.na(missing)) {
     cli::cli_abort("{.arg missing} must be TRUE or FALSE.", call = NULL)
@@ -119,6 +139,10 @@ tt_rates <- function(data, time = NULL, event = NULL, by = NULL, strata = NULL, 
   if (is.null(time) && is.null(event)) {
     if (!nrow(data)) {
       cli::cli_abort("The strate data contain no observations.", class = "tabtools_error_rate_empty", call = NULL)
+    }
+    if (!identical(zero_time, "exclude")) {
+      cli::cli_abort("{.arg zero_time} applies only to time and event data.",
+                     class = "tabtools_error_rate_zero_time", call = NULL)
     }
     # The level of supplied intervals is theirs, not a default (plan 7.4):
     # read from the column labels unless the caller states it.
@@ -156,9 +180,20 @@ tt_rates <- function(data, time = NULL, event = NULL, by = NULL, strata = NULL, 
   # st sample: stset keeps records with non-missing time after entry
   # (_st == 0 otherwise); strate then marks out missing weights, time, and
   # (without `missing`) grouping values.
-  use <- !is.na(t) & !is.na(t0) & t > t0 & !is.na(w)
+  valid <- !is.na(t) & !is.na(t0) & !is.na(w)
+  zero_length <- valid & t == t0
+  use <- valid & (t > t0 | (zero_time == "retain" & zero_length))
   if (!is.null(fweight)) use <- use & w > 0
-  if (!missing) for (g in groups) use <- use & !is.na(data[[g]])
+  group_ok <- rep(TRUE, nrow(data))
+  if (!missing) for (g in groups) group_ok <- group_ok & !is.na(data[[g]])
+  use <- use & group_ok
+  # Even on the legacy exclusion path, events on zero-length records are
+  # auditable; weights/groups use the same inclusion rules as rate totals.
+  zero_eligible <- zero_length & group_ok & !is.na(w) & w > 0
+  zero_events <- list(records = as.integer(sum(zero_eligible)),
+                      event_records = as.integer(sum(zero_eligible & d > 0)),
+                      events = sum((w * d)[zero_eligible]),
+                      retained = identical(zero_time, "retain"))
   # strate: "no observations" (r(2000)).
   if (!is.null(fweight) && !any(!is.na(w) & w > 0)) {
     cli::cli_abort("No observations: every frequency weight is zero or missing.", call = NULL)
@@ -197,16 +232,17 @@ tt_rates <- function(data, time = NULL, event = NULL, by = NULL, strata = NULL, 
     lab <- attr(data[[g]], "label", exact = TRUE)
     if (!is.null(lab)) attr(out[[g]], "label") <- lab
   }
-  res <- .rate_ci(out, D, Y, level)
+  res <- .rate_ci(out, D, Y, level, allow_zero = zero_time == "retain")
   sample <- .rate_sample_accounting(data, out, groups, event, t, t0, ev, w, use,
-                                    fweight, missing)
+                                    fweight, missing, zero_time)
   structure(res, per = per, level = level, ci_method = "lognormal", by = by, strata = strata,
             event = event, event_label = attr(data[[event]], "label", exact = TRUE),
-            sample_accounting = sample)
+            sample_accounting = sample, zero_time = zero_time,
+            zero_length = zero_events)
 }
 
 .rate_sample_accounting <- function(data, out, groups, event, t, t0, ev, w, use,
-                                    fweight, missing) {
+                                    fweight, missing, zero_time = "exclude") {
   population <- function(sel, id, scope, group = NA_character_) {
     used <- sel & use
     weights <- .tt_sample_weights(w[used])
@@ -217,7 +253,8 @@ tt_rates <- function(data, time = NULL, event = NULL, by = NULL, strata = NULL, 
     exclusions <- list()
     remaining <- sel
     rules <- list(missing_exit = is.na(t), missing_entry = is.na(t0),
-                  no_follow_up = !is.na(t) & !is.na(t0) & t <= t0,
+                  no_follow_up = !is.na(t) & !is.na(t0) &
+                    (t < t0 | (zero_time == "exclude" & t == t0)),
                   missing_weight = is.na(w))
     if (!is.null(fweight)) rules$zero_frequency_weight <- !is.na(w) & w == 0
     if (!missing && length(groups)) {
@@ -332,6 +369,10 @@ tt_rates_from_strate <- function(data, by = NULL, per = 1, level = NULL) {
   }
   if (is.null(by)) by <- setdiff(names(data), need)
   .rate_check_cols(data, by)
+  if (any(!is.na(data$D) & data$D > 0 & !is.na(data$Y) & data$Y == 0)) {
+    cli::cli_abort("The rate block has events without person-time.",
+                   class = "tabtools_error_rate_no_time", call = NULL)
+  }
   out <- data[, c(by, need), drop = FALSE]
   rownames(out) <- NULL
   if (is.null(sample)) {
@@ -399,18 +440,23 @@ tt_rates_from_strate <- function(data, by = NULL, per = 1, level = NULL) {
   w
 }
 
-.rate_ci <- function(out, D, Y, level) {
-  if (any(!is.finite(D)) || any(!is.finite(Y) | Y <= 0)) {
+.rate_ci <- function(out, D, Y, level, allow_zero = FALSE) {
+  if (allow_zero && any(D > 0 & Y == 0)) {
+    cli::cli_abort("The rate totals have events without person-time.",
+                   class = "tabtools_error_rate_no_time", call = NULL)
+  }
+  if (any(!is.finite(D)) || any(!is.finite(Y) | Y < 0 | (!allow_zero & Y == 0))) {
     cli::cli_abort(c("Rate totals must contain finite event counts and positive, finite person-time.",
                      "i" = "Check the time and weight scales; person-time can underflow when stored as single precision ({.arg float_time})."),
                    class = "tabtools_error_rate_totals", call = NULL)
   }
   z <- stats::qnorm(0.5 + level / 2)
-  rate <- D / Y
+  rate <- rep(NA_real_, length(D))
+  rate[Y > 0] <- D[Y > 0] / Y[Y > 0]
   se <- sqrt(1 / D)
   lo <- ifelse(D == 0, NA_real_, exp(log(rate) - z * se))
   hi <- ifelse(D == 0, NA_real_, exp(log(rate) + z * se))
-  if (any(!is.finite(rate)) || any(D > 0 & (!is.finite(lo) | !is.finite(hi)))) {
+  if (any(Y > 0 & !is.finite(rate)) || any(D > 0 & (!is.finite(lo) | !is.finite(hi)))) {
     cli::cli_abort(c("The rate or its confidence bounds overflowed.",
                      "i" = "Use less extreme time and weight scales."),
                    class = "tabtools_error_rate_totals", call = NULL)

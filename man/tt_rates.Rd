@@ -15,7 +15,8 @@ tt_rates(
   entry = NULL,
   fweight = NULL,
   missing = FALSE,
-  float_time = NULL
+  float_time = NULL,
+  zero_time = "exclude"
 )
 }
 \arguments{
@@ -50,7 +51,8 @@ or \code{"Lower 97,5\% ..."} under Stata's \verb{set dp comma}), and it is unkno
 (\code{NA}) when they carry none; a value that contradicts the labels is an
 error.}
 
-\item{entry}{Late-entry time: a number or a column name (\verb{stset enter(time #)}); records ending at or before entry are dropped.}
+\item{entry}{Late-entry time: a number or a column name (\verb{stset enter(time #)}); negative follow-up is dropped and zero follow-up is
+controlled by \code{zero_time}.}
 
 \item{fweight}{Optional frequency-weight column (\code{stset [fweight=]}).}
 
@@ -61,6 +63,14 @@ error.}
 numbers within int range (|x| <= 32,740) are byte/int in a Stata dataset,
 so person-time becomes float; anything else is treated as double. Set
 \code{TRUE}/\code{FALSE} when the source dataset's storage type is known.}
+
+\item{zero_time}{\code{"exclude"} (default) retains the existing stset rule:
+zero-length records do not enter the rate. \code{"retain"} includes records
+ending exactly at entry, counting their events and zero exposure.
+Negative intervals are always excluded. A retained or supplied group
+with events and zero person-time raises \code{tabtools_error_rate_no_time};
+a retained zero-event, zero-time group has missing rates and bounds.
+Applies only to time and event data.}
 }
 \value{
 A data frame: the grouping columns (with their \code{"label"}
@@ -70,6 +80,11 @@ unknown), \code{ci_method} (\code{"lognormal"}), \code{by}, \code{strata}, and, 
 and event data, \code{event} (the event column's name) and \code{event_label}
 (its \code{"label"} attribute, \code{NULL} when it has none). \code{\link[=stratetab]{stratetab()}}
 labels its exposure blocks and outcomes from these.
+For time/event data, \code{zero_time} records the selection mode and
+\code{zero_length} is an audit list: integer \code{records} and \code{event_records},
+numeric frequency-weighted \code{events}, and logical \code{retained}, for
+zero-length records with valid weights and groups. This diagnostic is
+retained even under the default exclusion rule.
 The \code{sample_accounting} attribute carries the source ledger described
 in \code{\link[=tt_table]{tt_table()}}, including explicit unknown counts for supplied rates.
 }
@@ -82,7 +97,7 @@ of the file \verb{strate, output()} saves.
 }
 \details{
 The interval is \verb{exp(log(D/Y) -/+ z / sqrt(D))} with \code{z = qnorm(0.5 + level/2)}, missing when there are no events (\code{strate.ado}).
-Records outside the analysis sample (exit at or before entry, missing
+By default, records outside the analysis sample (exit at or before entry, missing
 time) are dropped, and so are records with a missing grouping value
 unless \code{missing = TRUE}; groups are sorted by the grouping columns,
 missing last. Not ported: the jackknife intervals \code{strate} uses for
@@ -106,6 +121,10 @@ s <- data.frame(arm = c("A", "B"), `_D` = c(30, 42), `_Y` = c(1000, 950),
                 `_Rate` = c(0.03, 0.0442), `_Lower` = c(0.021, 0.0327),
                 `_Upper` = c(0.0429, 0.0598), check.names = FALSE)
 tt_rates(s, level = 0.95)
+}
+\references{
+StataCorp (2025). Stata 19 Survival Analysis Reference Manual,
+ST strate, Remarks: quadratic approximation for the log-rate.
 }
 \seealso{
 \code{\link[=stratetab]{stratetab()}}, which formats these blocks as a rate table.
