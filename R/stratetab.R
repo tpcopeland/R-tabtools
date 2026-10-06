@@ -9,9 +9,9 @@
 # (`_D _Y _Rate _Lower _Upper` per category, :303-462). R takes the same
 # blocks as tt_rates() results (computed from time/event data), as
 # strate-shaped data frames, or as the .dta files themselves. The numbers
-# pass through Stata's local macros (`local D_o1_e1_1 = _D[1]`, :420-458),
-# which keep 16 significant digits (12 in e-notation), so every value is
-# rounded the same way here (stata_macro_num()) before it is formatted.
+# preserve the full double-precision scaled rates and limits (2.5.1,
+# stratetab.ado:527-531,556-558,585-587). Event counts and person-time still
+# pass through Stata's decimal local macros; rates use lossless %21x text.
 
 #' Incidence-rate table: events, person-years and rates
 #'
@@ -117,6 +117,34 @@
 #'   repeat (the same `by` in every exposure) or a block has no grouping
 #'   column, `"Exposure 1"`, `"Exposure 2"`, ..., as in Stata.
 #' @param digits Decimals for rates and their bounds, 0 to 10 (default 1).
+#' @param cformat Stata numeric display format for each rate and its limits,
+#'   using supported `%w.df`, `%w.dg` and `c` suffix formats (also with a
+#'   comma decimal mark). Explicit `digits` with `cformat` raises
+#'   `tabtools_error_format_conflict`; omitted digits use the session default,
+#'   then 1. `%g` uses the existing package formatter, whose significant-digit
+#'   formatting can differ from Stata at high precision; fixed `%f` formats
+#'   are recommended for exact decimal display parity.
+#' @param sep Literal interval separator for rates and rate ratios. Default
+#'   `", "`; an empty string also selects this default. Whitespace and
+#'   macro-looking text are retained. A decimal-comma `cformat` with a comma
+#'   separator raises `tabtools_error_format_separator`.
+#' @param smallcells Nonnegative integer threshold. Event counts from 1 to
+#'   threshold minus 1 use `masktext`, with their person-time and rate hidden.
+#'   Ratios involving a masked count are hidden. Omitted, uses session
+#'   `tabtools.smallcells`, then 0; explicit NULL disables masking.
+#' @param nosmallcells Ignore the session small-cell default for this call.
+#'   Cannot be combined with an explicit non-NULL `smallcells`.
+#' @param masktext Publication text for a masked event count. Resolves from
+#'   the explicit argument, session `tabtools.masktext`, then `<threshold`.
+#'   An explicit non-NULL value requires an active threshold.
+#' @param zeroexact Fill missing zero-event bounds with the exact Poisson
+#'   limits 0 and `-log((1-level/100)/2)/Y`, scaled by `ratescale`. The level is
+#'   resolved as a percentage from the source blocks and `level`; supplied
+#'   finite bounds are retained, and an existing zero lower bound with a
+#'   missing upper is completed.
+#' @param zerocells Optional zero-event display override: `"dash"` or `"blank"`
+#'   replaces events and rates, while analytical numbers remain available.
+#' @param zerocells_persontime Also withhold person-time under `zerocells`.
 #' @param eventdigits Decimals for events, 0 to 10 (default 0).
 #' @param pydigits Decimals for person-years, 0 to 10 (default 0).
 #' @param unitlabel Rate unit in the header (default `"1,000"`: `Per 1,000
@@ -152,6 +180,22 @@
 #'   2.1.14; `markdown_rows` counts the data rows.
 #' @param mdappend Append to an existing `markdown` file.
 #' @param open Open the workbook after writing (interactive sessions).
+#' @section Publication masks and no person-time:
+#' Small-cell protection is primary only; it promises no complementary
+#' protection. All publication sinks use the masked body. `$stored$rates`,
+#' `$stored$ratios`, `$meta$rate_rows` and `$meta$rate_blocks` remain raw
+#' analytical payloads and must not be published as protected output.
+#' `$stored$smallcells` records integer `threshold`, `mode = "primary"`,
+#' `n_masked` (event cells) and `n_linked` (linked person-time/rate/ratio cells).
+#' Cells with zero person-time print empty, including ratio references, hold
+#' missing rates and count in `$stored$N_nopt`. Events without person-time,
+#' or a table without any positive person-time, raise
+#' `tabtools_error_rate_no_time`. `N_nopt` counts zero source exposure; a
+#' positive source exposure that underflows after `pyscale` can render empty
+#' without increasing this source diagnostic.
+#' @references StataCorp (2025). Stata 19 Base Reference Manual, R ci,
+#'   Methods and formulas: Poisson mean; Technical note on zero counts.
+#'   Stata 19 Survival Analysis Reference Manual, ST strate, Remarks.
 #' @return A `tt_table` (`command = "stratetab"`), returned invisibly when
 #'   `xlsx`, `csv` or `markdown` writes a file (assign it and print it to see
 #'   it). `$stored` holds Stata's `r()` results: `N_rows` (the
@@ -188,6 +232,12 @@
 #'   exposure block by position (`$rows$type == "level"`, first within
 #'   `$rows$block`).
 #'
+#'   `$meta$rate_blocks` preserves each outcome/exposure's source data,
+#'   grouping codes, labels and types, time units and sample attributes.
+#'   `$meta$rate_rows` additionally holds `category_code`, `category_type`,
+#'   publication `state` and per-cell `ci_method` (`"exact_poisson_zero"`
+#'   for newly supplied zero bounds, `"none"` for no time, `"supplied"`
+#'   when the original interval method is unknown).
 #'   `$meta$sample_accounting` carries the source ledger described in
 #'   [tt_table()]; unavailable record counts remain explicit.
 #' @section Differences from Stata:
@@ -234,6 +284,10 @@
 #'           outcomes = 1, outlabels = "Death", explabels = c("Men", "Women"),
 #'           rateratio = TRUE)
 #'
+#' # Exact zero-event bounds and primary publication protection
+#' stratetab(blocks, outcomes = 2, zeroexact = TRUE, smallcells = 5,
+#'           cformat = "%12.2f", sep = "; ")
+#'
 #' # Written to a workbook, the table is returned invisibly
 #' tab <- stratetab(blocks, outcomes = 2, xlsx = tempfile(fileext = ".xlsx"))
 #'
@@ -261,7 +315,28 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
                       footnote = NULL, level = NULL, font = NULL, fontsize = NULL,
                       borderstyle = NULL, headershade = FALSE, headercolor = NULL,
                       zebra = FALSE, zebracolor = NULL, csv = NULL, markdown = NULL,
-                      mdappend = FALSE, open = FALSE) {
+                      mdappend = FALSE, open = FALSE, cformat = NULL, sep = ", ",
+                      smallcells = NULL, nosmallcells = FALSE, masktext = NULL,
+                      zeroexact = FALSE, zerocells = NULL, zerocells_persontime = FALSE) {
+  format <- .tt_resolve_numeric_format(cformat, if (missing(digits)) NULL else digits,
+                                       digits_given = !missing(digits), sep = sep,
+                                       default_digits = 1L)
+  digits <- format$digits
+  mask <- .st_resolve_mask(smallcells, !missing(smallcells), nosmallcells,
+                           masktext, !missing(masktext))
+  for (a in c("zeroexact", "zerocells_persontime")) {
+    v <- get(a)
+    if (!is.logical(v) || length(v) != 1L || is.na(v)) {
+      cli::cli_abort("{.arg {a}} must be TRUE or FALSE.", call = NULL)
+    }
+  }
+  if (!is.null(zerocells) && (!is.character(zerocells) || length(zerocells) != 1L ||
+                             is.na(zerocells) || !zerocells %in% c("dash", "blank"))) {
+    cli::cli_abort("{.arg zerocells} must be NULL, dash or blank.", call = NULL)
+  }
+  if (zerocells_persontime && is.null(zerocells)) {
+    cli::cli_abort("{.arg zerocells_persontime} requires {.arg zerocells}.", call = NULL)
+  }
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Results"
@@ -341,6 +416,8 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
   # Read every block (stratetab.ado:303-462) and resolve the level.
   data <- .st_read_blocks(blocks, outcomes, n_exp, pyscale, ratescale, level_pct)
   ci_level <- .st_resolve_level(data$levels, level_pct)
+  data <- .st_rate_states(data, zeroexact, ci_level, ratescale)
+
   .st_check_pers(data$pers, ratescale_given)
   .st_check_scales(data$pers, pyscale, ratescale, unitlabel)
   ci_txt <- .tt_level_text(ci_level)
@@ -351,7 +428,12 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
   tt <- .st_build(data, irr, outcomes, n_exp, outlabels, ids, explabels, ci_level, ci_txt,
                   unitlabel = unitlabel, digits = digits, eventdigits = eventdigits,
                   pydigits = pydigits, ratiodigits = ratiodigits, rateratio = rateratio,
-                  title = title %||% "", footnote = footnote %||% "", style = style, sheet = sheet)
+                  title = title %||% "", footnote = footnote %||% "", style = style, sheet = sheet,
+                  format = format, mask = mask, zerocells = zerocells,
+                  zerocells_persontime = zerocells_persontime)
+  tt$meta$rate_blocks <- data$blocks
+  tt$meta$numeric_format <- format
+  tt$meta$zeroexact <- zeroexact
   tt$meta$sample_accounting <- .tt_sample_bind(data$samples,
     prefixes = paste0("block", seq_along(data$samples)), commands = rep("stratetab", length(data$samples)))
 
@@ -383,6 +465,70 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
 }
 
 # ---------------------------------------------------------------------------
+# P.4 primary publication masks; raw numerical companions remain analytical.
+.st_resolve_mask <- function(smallcells, threshold_given, nosmallcells, masktext, text_given) {
+  if (!is.logical(nosmallcells) || length(nosmallcells) != 1L || is.na(nosmallcells)) {
+    cli::cli_abort("{.arg nosmallcells} must be TRUE or FALSE.", call = NULL)
+  }
+  if (nosmallcells && threshold_given && !is.null(smallcells)) {
+    cli::cli_abort("{.arg smallcells} and {.arg nosmallcells} may not be combined.",
+                   class = "tabtools_error_smallcells_conflict", call = NULL)
+  }
+  threshold <- if (nosmallcells) 0L else if (threshold_given) smallcells %||% 0L else
+    getOption("tabtools.smallcells") %||% 0L
+  threshold <- .check_int_range(threshold, "smallcells", 0, .Machine$integer.max)
+  text <- if (text_given) masktext else getOption("tabtools.masktext")
+  if (!is.null(text)) {
+    .tt_check_text_arg(text, "masktext")
+    if (text_given && threshold == 0L) cli::cli_abort("{.arg masktext} requires a small-cell threshold.",
+                                       class = "tabtools_error_smallcells_masktext", call = NULL)
+  }
+  list(threshold = threshold, text = text %||% paste0("<", threshold))
+}
+
+# stratetab.ado:515-543, 591-600: no time is distinct from a zero rate.
+.st_rate_states <- function(data, zeroexact, level, ratescale) {
+  any_time <- FALSE
+  for (key in names(data$cell)) {
+    cl <- data$cell[[key]]
+    for (stat in c("Rate", "Lower", "Upper")) {
+      cl[[stat]][!is.finite(cl[[stat]])] <- NA_real_
+    }
+    empty <- !is.na(cl$raw_Y) & cl$raw_Y == 0
+    if (any(empty & !is.na(cl$D) & cl$D > 0)) {
+      cli::cli_abort("The rate block has events without person-time.",
+                     class = "tabtools_error_rate_no_time", call = NULL)
+    }
+    any_time <- any_time || any(cl$raw_Y > 0, na.rm = TRUE)
+    cl$ci_method <- rep(cl$source_ci_method, length(cl$D))
+    zero <- zeroexact & !is.na(cl$D) & cl$D == 0 & !is.na(cl$raw_Y) & cl$raw_Y > 0
+    lower_fill <- zero & is.na(cl$source_lower) & is.na(cl$source_upper)
+    cl$Lower[lower_fill] <- 0
+    # Native stratetab also completes an existing zero lower bound when
+    # only the source upper is missing (stratetab.ado:541-543).
+    upper_fill <- zero & is.na(cl$source_upper) & !is.na(cl$Lower) & cl$Lower == 0
+    cl$Upper[upper_fill] <- -log((1 - level / 100) / 2) / cl$raw_Y[upper_fill] * ratescale
+    cl$ci_method[upper_fill] <- "exact_poisson_zero"
+    # Generated exact bounds can overflow just as scaled source bounds can.
+    cl$Upper[!is.finite(cl$Upper)] <- NA_real_
+    cl$Rate[empty] <- cl$Lower[empty] <- cl$Upper[empty] <- NA_real_
+    cl$ci_method[empty] <- "none"
+    data$cell[[key]] <- cl
+  }
+  if (!any_time) cli::cli_abort("No rate cell has person-time.",
+                               class = "tabtools_error_rate_no_time", call = NULL)
+  data
+}
+
+.st_fmt_rate_spec <- function(est, lo, hi, format) {
+  value <- .tt_format_numeric(est, format)
+  out <- paste0(value, " (", .tt_format_numeric(lo, format), format$sep,
+                .tt_format_numeric(hi, format), ")")
+  nob <- is.na(lo) | is.na(hi)
+  out[nob] <- paste0(value[nob], " (\u2013)")
+  out
+}
+
 # Arguments
 
 # pyscale()/ratescale(): positive and nonmissing (stratetab.ado:122-131,
@@ -513,6 +659,7 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
     s <- b
   } else {
     s <- tryCatch(tt_rates_from_strate(b, level = NULL), error = function(e) {
+      if (inherits(e, "tabtools_error_rate_no_time")) stop(e)
       cli::cli_abort("Block {k} is not a valid strate block.", parent = e, call = NULL)
     })
     level <- if (is.na(attr(s, "level"))) NA_real_ else round(attr(s, "level") * 100, 10)
@@ -529,7 +676,13 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
     x
   })
   names(num) <- stats
-  list(s = s, level = level, per = per, num = num)
+  # Normalizing a supplied block historically adds a lognormal attribute;
+  # its presence is not evidence about the original interval method.
+  source_method <- attr(b, "ci_method", exact = TRUE)
+  if (!is.character(source_method) || length(source_method) != 1L ||
+      is.na(source_method) || !nzchar(source_method)) source_method <- "supplied"
+  attr(s, "ci_method") <- source_method
+  list(s = s, level = level, per = per, num = num, ci_method = source_method)
 }
 
 # The block's category labels (stratetab.ado:358-412): the first column
@@ -603,12 +756,14 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
   levels <- numeric()
   pers <- numeric()
   samples <- list()
+  raw_blocks <- list()
   k <- 0L
   for (e in seq_len(n_exp)) {
     for (o in seq_len(outcomes)) {
       k <- k + 1L
       rb <- .st_read_block(blocks[[k]], k)
       samples[k] <- list(attr(rb$s, "sample_accounting", exact = TRUE))
+      raw_blocks[k] <- list(rb$s)
       levels[k] <- rb$level
       pers[k] <- rb$per
       .st_check_block_level(levels, k, level_pct)
@@ -633,16 +788,20 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
       cell[[paste(o, e)]] <- list(
         D = stata_macro_num(b$D[idx]),
         Y = stata_macro_num(b$Y[idx] / pyscale),
-        Rate = stata_macro_num(b$Rate[idx] * ratescale),
-        Lower = stata_macro_num(b$Lower[idx] * ratescale),
-        Upper = stata_macro_num(b$Upper[idx] * ratescale)
+        Rate = b$Rate[idx] * ratescale,
+        Lower = b$Lower[idx] * ratescale,
+        Upper = b$Upper[idx] * ratescale,
+        raw_Y = b$Y[idx],
+        source_ci_method = rb$ci_method,
+        source_lower = b$Lower[idx], source_upper = b$Upper[idx],
+        category_data = rb$s[idx, setdiff(names(rb$s), names(b)), drop = FALSE]
       )
     }
   }
   if (!sum(lengths(cats))) {
     cli::cli_abort("The rate blocks contain no observations.", class = "tabtools_error_rate_empty", call = NULL)
   }
-  list(cats = cats, cell = cell, levels = levels, pers = pers, samples = samples)
+  list(cats = cats, cell = cell, levels = levels, pers = pers, samples = samples, blocks = raw_blocks)
 }
 
 # Block k's level against `level` and against the blocks before it
@@ -746,7 +905,7 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
       d_exp <- b$D
       r_ref <- a$Rate[ref]
       r_exp <- b$Rate
-      ok <- gt0(d_ref) & gt0(d_exp) & gt0(r_ref)
+      ok <- gt0(d_ref) & gt0(d_exp) & gt0(r_ref) & a$Y[ref] > 0 & b$Y > 0
       est <- stata_macro_num(r_exp / r_ref)
       se <- stata_macro_num(sqrt(1 / d_exp + 1 / d_ref))
       lo <- stata_macro_num(exp(log(est) - z * se))
@@ -754,7 +913,7 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
       est[!ok] <- NA_real_
       lo[!ok] <- NA_real_
       hi[!ok] <- NA_real_
-      out[[paste(o, e)]] <- list(est = est, lo = lo, hi = hi)
+      out[[paste(o, e)]] <- list(est = est, lo = lo, hi = hi, ref_D = d_ref, ref_Y = a$Y[ref])
     }
   }
   out
@@ -780,8 +939,8 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
   if (d == 0L) trimws(stata_fmt(stata_round(v, 1), "%24.0fc")) else trimws(stata_fmt(v, paste0("%24.", d, "fc")))
 }
 
-.st_fmt_ci <- function(est, lo, hi, d) {
-  paste0(.st_fmt_fixed(est, d), " (", .st_fmt_fixed(lo, d), ", ", .st_fmt_fixed(hi, d), ")")
+.st_fmt_ci <- function(est, lo, hi, d, sep = ", ") {
+  paste0(.st_fmt_fixed(est, d), " (", .st_fmt_fixed(lo, d), sep, .st_fmt_fixed(hi, d), ")")
 }
 
 # A rate without bounds (strate gives none for zero events) shows the en
@@ -819,7 +978,7 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
 
 .st_build <- function(data, irr, outcomes, n_exp, outlabels, ids, explabels, ci_level, ci_txt,
                       unitlabel, digits, eventdigits, pydigits, ratiodigits, rateratio,
-                      title, footnote, style, sheet) {
+                      title, footnote, style, sheet, format, mask, zerocells, zerocells_persontime) {
   cpo <- if (rateratio) 4L else 3L
   nc <- 1L + outcomes * cpo
   starts <- 2L + (seq_len(outcomes) - 1L) * cpo
@@ -837,6 +996,7 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
   rvar <- character()
   rlevel <- character()
   long <- list()
+  n_masked <- n_linked <- 0L
   for (e in seq_len(n_exp)) {
     body[[length(body) + 1L]] <- c(explabels[e], rep("", nc - 1L))
     rtype <- c(rtype, "var")
@@ -853,17 +1013,39 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
       j <- starts[o]
       m[, j] <- .st_fmt_events(cl$D, eventdigits)
       m[, j + 1L] <- .st_fmt_py(cl$Y, pydigits)
-      m[, j + 2L] <- .st_fmt_rate(cl$Rate, cl$Lower, cl$Upper, digits)
+      m[, j + 2L] <- .st_fmt_rate_spec(cl$Rate, cl$Lower, cl$Upper, format)
+      masked <- !is.na(cl$D) & cl$D >= 1 & cl$D < mask$threshold
+      empty <- !is.na(cl$Y) & cl$Y == 0
+      zero <- !is.null(zerocells) & !is.na(cl$D) & cl$D == 0 & !empty
+      n_masked <- n_masked + sum(masked)
+      n_linked <- n_linked + 2L * sum(masked & !empty)
+      m[masked, j] <- mask$text
+      m[masked, j + 1L] <- m[masked, j + 2L] <- "\u2013"
+      ztext <- if (identical(zerocells, "dash")) "\u2013" else ""
+      m[zero, j] <- m[zero, j + 2L] <- ztext
+      if (zerocells_persontime) m[zero, j + 1L] <- ztext
+      m[empty, j:(j + 2L)] <- ""
       r <- if (rateratio && e > 1L) irr[[paste(o, e)]] else NULL
       if (rateratio) {
         m[, j + 3L] <- if (e == 1L) "Ref." else
-          ifelse(is.na(r$est), "\u2013", .st_fmt_ci(r$est, r$lo, r$hi, ratiodigits))
+          ifelse(is.na(r$est), "\u2013", .st_fmt_ci(r$est, r$lo, r$hi, ratiodigits, format$sep))
+        if (!is.null(r)) {
+          linked <- masked | (!is.na(r$ref_D) & r$ref_D >= 1 & r$ref_D < mask$threshold)
+          m[linked, j + 3L] <- "\u2013"
+          n_linked <- n_linked + sum(linked & !empty & !is.na(r$ref_Y) & r$ref_Y > 0)
+          m[!is.na(r$ref_Y) & r$ref_Y == 0, j + 3L] <- ""
+        }
+        m[empty, j + 3L] <- ""
       }
       na <- rep(NA_real_, n)
       long[[length(long) + 1L]] <- data.frame(
         row = length(body) + seq_len(n), exposure = e, exposure_label = explabels[e],
         category = cats, outcome = o, outcome_id = ids[o], outcome_label = outlabels[o],
         events = cl$D, person_years = cl$Y, rate = cl$Rate, lower = cl$Lower, upper = cl$Upper,
+        state = ifelse(empty, "empty", ifelse(masked, "masked", "est")),
+        ci_method = cl$ci_method,
+        category_code = if (ncol(cl$category_data)) as.character(if (is.factor(cl$category_data[[1L]])) as.integer(cl$category_data[[1L]]) else unclass(cl$category_data[[1L]])) else "Overall",
+        category_type = if (ncol(cl$category_data)) paste(class(cl$category_data[[1L]]), collapse = "/") else "overall",
         irr = if (is.null(r)) na else r$est, irr_lower = if (is.null(r)) na else r$lo,
         irr_upper = if (is.null(r)) na else r$hi, stringsAsFactors = FALSE)
     }
@@ -889,7 +1071,10 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
   all_cats <- unlist(data$cats)
   ex_idx <- rep(seq_len(n_exp), lengths(data$cats))
   cnames <- .st_matrix_names(ids, paste0("outcome", seq_len(outcomes)))
-  stored <- list(N_rows = 3 + nrow(body), N_exposures = n_exp, N_outcomes = outcomes,
+  stored <- list(smallcells = list(threshold = as.integer(mask$threshold), mode = "primary",
+                                   n_masked = as.integer(n_masked), n_linked = as.integer(n_linked)),
+                 N_nopt = as.integer(sum(vapply(data$cell, function(cl) sum(cl$raw_Y == 0, na.rm = TRUE), 0L))),
+                 N_rows = 3 + nrow(body), N_exposures = n_exp, N_outcomes = outcomes,
                  ci_level = ci_level, outcome_ids = paste(ids, collapse = " \\ "),
                  methods = paste0("Incidence rates and confidence intervals were formatted at the ", ci_txt,
                                   "% level; rate-ratio intervals use an independent-rate log-normal approximation at the same level."))

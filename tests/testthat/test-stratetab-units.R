@@ -145,9 +145,13 @@ test_that("adversarial blocks: zero events, zero person-time, empty and mismatch
   expect_true(all(is.na(tt$stored$ratios)))
   # Zero person-time: strate's rate is missing, and so are its bounds.
   zy <- st_block(cats = "A", D = 0, Y = 0, rate = NA_real_, lo = NA_real_, hi = NA_real_)
-  tt <- stratetab(zy)
-  expect_identical(unname(unlist(tt$body[2, ])), c("   A", "0", "0", ". (\u2013)"))
-  expect_true(is.na(tt$stored$rates[1, 1]))
+  # Stata 2.5.1 refuses a table without any source person-time.
+  expect_error(stratetab(zy), class = "tabtools_error_rate_no_time")
+  # A no-time category alongside a usable exposure is empty, not zero/dash.
+  tt <- stratetab(list(st_block(cats = "A", D = 1, Y = 10), zy), outcomes = 1)
+  expect_identical(unname(unlist(tt$body[4, ])), c("   A", "", "", ""))
+  expect_true(is.na(tt$stored$rates[2, 1]))
+  expect_identical(tt$stored$N_nopt, 1L)
   # Missing events with a rate: Stata's `missing > 0` passes, the bounds go missing.
   me <- st_block(cats = "A", D = NA_real_, Y = 10, rate = 0.5, lo = 0.2, hi = 0.9)
   tt <- stratetab(list(st_block(cats = "A", D = 4, Y = 10, rate = 0.4, lo = 0.2, hi = 0.8), me),
@@ -176,9 +180,10 @@ test_that("a single outcome and extreme scales", {
   expect_identical(ncol(tt$body), 4L)
   expect_identical(tt$header[[1]]$text, c("Exposure", "Death", "", ""))
   expect_identical(colnames(tt$stored$rates), "Death")
-  # A rate beyond %11.df switches to Stata's e-notation (golden S06).
+  # Stata 2.5.1 uses %24.df for rates (stratetab.ado:778-790), so the
+  # exact powers of ten below remain fixed notation; IRRs still use %11.
   big <- stratetab(st_block(), ratescale = 1e12, digits = 3)
-  expect_identical(big$body$c4[2], "1.000e+10 (5.000e+09, 2.000e+10)")
+  expect_identical(big$body$c4[2], "10000000000.000 (5000000000.000, 20000000000.000)")
   # Tiny scales round to zero; an overflowing product is missing (a
   # missing bound, too, so the cell has no interval: stratetab.ado:643).
   expect_identical(stratetab(st_block(), ratescale = 1e-10)$body$c4[2], "0.0 (0.0, 0.0)")
@@ -217,7 +222,12 @@ test_that("stored results, frame characteristics, and rate rows", {
   rr <- tt$meta$rate_rows
   expect_identical(nrow(rr), 8L)
   expect_named(rr, c("row", "exposure", "exposure_label", "category", "outcome", "outcome_id", "outcome_label",
-                     "events", "person_years", "rate", "lower", "upper", "irr", "irr_lower", "irr_upper"))
+                     "events", "person_years", "rate", "lower", "upper", "state", "ci_method", "category_code", "category_type",
+                     "irr", "irr_lower", "irr_upper"))
+  expect_identical(rr$state, rep("est", 8))
+  expect_identical(rr$ci_method, rep("supplied", 8))
+  expect_identical(rr$category_code, rep(c("A", "A", "B", "B"), 2))
+  expect_identical(rr$category_type, rep("character", 8))
   expect_identical(rr$row, rep(c(2L, 3L, 5L, 6L), each = 2))
   # The body cells are these numbers as displayed.
   expect_identical(tt$body$c2[rr$row[rr$outcome == 1]], stata_fmt(rr$events[rr$outcome == 1], "%24.0fc"))

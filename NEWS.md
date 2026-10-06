@@ -4,6 +4,14 @@
   separator. Console, CSV, Markdown, Excel and presentation converters show
   separate paragraphs, including automatic notes and significance legends;
   Excel adds styled note rows and repeats explicit note row heights.
+* `stratetab()` adds rate display formats, literal interval separators, primary
+  publication masks with raw analytical retention, exact zero-event bounds,
+  and zero-event/no-time display controls. Scaled rates retain full double
+  precision before rounding, correcting the S08 154.27 cell. Console headers
+  show the Exposure label once, matching Stata's native console layout.
+* `tt_rates(zero_time = "retain")` counts zero-length records and events;
+  the default keeps its existing exclusion rule and now records an auditable
+  `zero_length` diagnostic. Events without person-time are refused.
 
 * `table1_tc(nosmdhighlight = TRUE)` disables Excel SMD highlighting, as
   `smdthreshold = -1` does. Combining the switch with an explicit threshold
