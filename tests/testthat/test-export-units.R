@@ -395,7 +395,7 @@ test_that("display prints the listing, a blank line, and the note, as Stata's di
   out <- capture.output(invisible(stacktab(list(a), title = "T", note = "N", display = TRUE)))
   # Right-aligned, and a column at least 2 wide (Stata's list).
   expect_identical(out, c("", "T", "  +---------+", "  |  k    v |", "  |  x    1 |",
-                          "  |         |", "  +---------+", "", "N", ""))
+                          "  |         |", "  +---------+", "", "N"))
   expect_length(capture.output(invisible(stacktab(list(a)))), 0L)
 })
 
