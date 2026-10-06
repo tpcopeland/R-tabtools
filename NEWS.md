@@ -1,3 +1,28 @@
+# tabtools (development version)
+
+These follow Stata tabtools 2.4.0. Until the Stata goldens are regenerated
+from 2.4.0, the golden tests translate the new pair header, note and
+footnote back to 2.1.14's form.
+
+* `table1_tc()` with three or more groups and `smd = TRUE` names the pair
+  its SMD compares wherever the table goes. The column header reads
+  `SMD (A vs B)`, a footnote says "SMD compares A vs B only (the first two
+  of 3 groups).", and the console note uses the same text. Before, only a
+  console note said so, and every export (Excel, CSV, Markdown, gt,
+  tinytable, `as.data.frame()`) showed a bare "SMD" column.
+* New `smdpair`: the two groups a pair SMD compares, by `by` value or
+  label. The header names the pair, and with three or more groups the
+  footnote adds "chosen with smdpair()".
+* New `smdtype` for balance across all groups. `"population"` reports the
+  population standardized bias of McCaffrey et al. (2013, eq. 5 and
+  section 4.2): the largest |group mean - overall mean| / overall SD.
+  `"maxpair"` reports the largest pairwise SMD (Lopez and Gutman 2017,
+  eq. 27), with every pair on the all-groups pooled SD. `"pair"` (the
+  default) is the existing statistic. Without weights both new types
+  match cobalt 4.6.3 on continuous and binary variables.
+* `stored$smdtype` (with `smd = TRUE`) and `stored$smdnote` (when there
+  is a note), as Stata's `r(smdtype)` and `r(smdnote)`.
+
 # tabtools 0.1.0
 
 First release: an R implementation of the Stata `tabtools` commands

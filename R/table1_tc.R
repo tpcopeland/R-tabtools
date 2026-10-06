@@ -150,7 +150,11 @@
 #'   `sqrt((s1^2 + s2^2) / 2)` (log scale for `contln`), the difference in
 #'   proportions over their pooled SD `sqrt((p1 (1 - p1) + p2 (1 - p2)) / 2)`
 #'   for `bin`, and Yang and Dalton's multivariate SMD over the
-#'   first K - 1 levels for `cat`, as in Stata.
+#'   first K - 1 levels for `cat`, as in Stata. With more than two groups
+#'   this compares only the first two levels of `by` (or the `smdpair`):
+#'   the header then names the pair (`SMD (A vs B)`) and a footnote says
+#'   so, so every export shows what was compared. See `smdtype` for
+#'   statistics over all groups.
 #' @param nopvalue Suppress the p-value column.
 #' @param format,percformat,nformat Stata display formats for continuous
 #'   statistics, percentages, and counts (`"%5.1f"` as in [sprintf()]; a
@@ -181,6 +185,36 @@
 #' @param wtn Show effective counts, `(sum w_cell / sum w_group) * N_group`,
 #'   in weighted cells (requires `wt`).
 #' @param smdthreshold SMD highlighting threshold; `-1` disables.
+#' @param smdtype What the SMD column (with `smd = TRUE`) reports:
+#'   * `"pair"` (default): the two-group SMD above, header `SMD`.
+#'   * `"population"`: the population standardized bias of McCaffrey et al.
+#'     (2013, eq. 5), header `Pop. SB`. Each group's mean is compared with
+#'     the mean of all analysed records, in units of their SD, and the
+#'     largest absolute value over groups is shown. Under `wt` the group
+#'     means are weighted but the overall mean and SD stay unweighted (the
+#'     population the weights aim at); under `fweight` both are
+#'     frequency-weighted. `bin` uses `sqrt(p (1 - p))` of the overall
+#'     proportion. `cat` takes the largest value over levels, each level
+#'     standardized by its overall proportion (as in the twang package).
+#'   * `"maxpair"`: the largest absolute pairwise SMD over all pairs of
+#'     groups (Lopez and Gutman 2017, eq. 27), header `Max SMD`. Every pair
+#'     shares one denominator, the root of the mean of all groups'
+#'     variances (`p (1 - p)` for `bin`; for `cat` the Yang-Dalton
+#'     covariance averaged over all groups). With two groups it equals the
+#'     absolute `"pair"` SMD.
+#'
+#'   For `"population"` and `"maxpair"` a footnote states the definition.
+#'   A group with no values for a variable leaves that variable's statistic
+#'   blank. `smdthreshold` highlights any of the three. As Stata tabtools
+#'   2.4.0 `smdtype()`.
+#' @param smdpair The two groups of `by` a `"pair"` SMD compares, instead of
+#'   the first two: a length-2 character or numeric vector. With a numeric
+#'   `by` a number names a `by` value; anything else is matched against the
+#'   group labels (the values of a character or factor `by`, or the value
+#'   labels of a labelled numeric `by`). Each must name exactly one group.
+#'   The header names the pair (`SMD (C vs A)`); with more than two groups a
+#'   footnote adds "chosen with smdpair()". Requires `smd = TRUE` and
+#'   `smdtype = "pair"`. As Stata tabtools 2.4.0 `smdpair()`.
 #' @param xlsx,sheet,title,footnote,open Excel target and annotations.
 #' @param borderstyle One of `"thin"`, `"default"`, `"medium"`, `"academic"`.
 #' @param font,fontsize Excel font family and size; `NULL` uses the session
@@ -227,6 +261,8 @@
 #'     Stata stores `.d` for a suppressed value); `varlist` and `types`: the
 #'     variables and their resolved types; `fisher_simulated`: variables
 #'     whose Fisher p-value was simulated (with p-values);
+#'   * with `smd = TRUE`: `smdtype`, and `smdnote`, the note naming what the
+#'     SMD column compares (when there is one; it is also in the footnote);
 #'   * for the files written: `xlsx`, `sheet`, `markdown`, `markdown_rows`,
 #'     `markdown_cols`;
 #'   * with `smallcells`: `smallcells`, `N_primary_suppressed`,
@@ -241,6 +277,20 @@
 #' Yang D, Dalton JE (2012). A unified approach to measuring the effect size
 #' between two groups using SAS. *SAS Global Forum 2012*, paper 335-2012.
 #' (The standardized mean differences.)
+#'
+#' McCaffrey DF, Griffin BA, Almirall D, Slaughter ME, Ramchand R, Burgette
+#' LF (2013). A tutorial on propensity score estimation for multiple
+#' treatments using generalized boosted models. *Statistics in Medicine*
+#' 32(19), 3388-3414. \doi{10.1002/sim.5753} (`smdtype = "population"`.)
+#'
+#' Lopez MJ, Gutman R (2017). Estimation of causal effects with multiple
+#' treatments: a review and new ideas. *Statistical Science* 32(3),
+#' 432-454. \doi{10.1214/17-STS612} (`smdtype = "maxpair"`.)
+#'
+#' Austin PC (2009). Balance diagnostics for comparing the distribution of
+#' baseline covariates between treatment groups in propensity-score matched
+#' samples. *Statistics in Medicine* 28(25), 3083-3107.
+#' \doi{10.1002/sim.3697} (The 0.1 `smdthreshold` convention.)
 #'
 #' Kish L (1965). *Survey Sampling*. New York: Wiley. (The effective sample
 #' size under `wt`.)
@@ -273,6 +323,11 @@
 #' # A methods paragraph for the paper
 #' tab$stored$methods
 #'
+#' # Three groups: balance over all of them, not just the first two
+#' d3 <- data.frame(arm = rep(c("A", "B", "C"), each = 20),
+#'                  age = c(seq(40, 59), seq(41, 60), seq(55, 74)))
+#' table1_tc(d3, by = "arm", vars = c(age = "contn"), smd = TRUE, smdtype = "population")
+#'
 #' # desctab() is the same command
 #' desctab(d, by = "arm", vars = c("age", "sex"))
 #' @order 1
@@ -291,6 +346,7 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
                       catrowperc = FALSE, pdp = 3, highpdp = 2,
                       missingsummary = FALSE, smallcells = NULL,
                       wtcompare = FALSE, wtn = FALSE, smdthreshold = 0.1,
+                      smdtype = c("pair", "population", "maxpair"), smdpair = NULL,
                       xlsx = NULL, sheet = "Table 1", title = NULL,
                       footnote = NULL, open = FALSE, borderstyle = NULL,
                       font = NULL, fontsize = NULL, boldp = NULL,
@@ -302,6 +358,8 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Table 1"
   total <- match.arg(total)
+  smdtype_given <- !base::missing(smdtype)
+  smdtype <- match.arg(smdtype)
   for (a in c("missing", "test", "statistic", "headerperc", "smd", "nopvalue", "varlabplus",
               "spacelowpercent", "extraspace", "percent", "percent_n", "slashN", "catrowperc",
               "missingsummary", "wtcompare", "wtn", "open", "zebra", "headershade", "mdappend", "dots")) {
@@ -399,6 +457,14 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
                    call = NULL)
   }
   if (smd && is.null(by)) cli::cli_abort("{.arg smd} requires {.arg by}.", call = NULL)
+  if (smdtype_given && !smd) {
+    cli::cli_abort("{.arg smdtype} requires {.code smd = TRUE}.", call = NULL)
+  }
+  if (!is.null(smdpair) && !smd) cli::cli_abort("{.arg smdpair} requires {.code smd = TRUE}.", call = NULL)
+  if (!is.null(smdpair) && smdtype != "pair") {
+    cli::cli_abort("{.arg smdpair} requires {.code smdtype = \"pair\"}: population and maxpair use every group.",
+                   call = NULL)
+  }
   if (wtcompare && is.null(wt)) cli::cli_abort("{.arg wtcompare} requires {.arg wt}.", call = NULL)
   if (wtcompare && is.null(by)) cli::cli_abort("{.arg wtcompare} requires {.arg by}.", call = NULL)
   style <- tt_resolve_style(font = font, fontsize = fontsize, borderstyle = borderstyle,
@@ -449,10 +515,13 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   if (!is.null(wprep)) data <- .t1_keep_rows(data, wprep$keep)
   gp <- .t1_groups(data, by, total != "none", labels, by_full = by_full)
   touse <- !is.na(gp$gid)
+  smd_pair <- if (is.null(smdpair)) NULL else
+    .t1_resolve_smdpair(smdpair, gp, by_numeric = !(is.character(data[[by]]) || is.factor(data[[by]])))
   specs <- lapply(specs, .t1_resolve_var, data = data, touse = touse,
                   include_missing = missing, labels = labels)
   o <- list(total = total, missing = missing, test = test, statistic = statistic,
-            headerperc = headerperc, smd = smd, nopvalue = nopvalue, format = format,
+            headerperc = headerperc, smd = smd, smdtype = smdtype, smdpair = smd_pair,
+            nopvalue = nopvalue, format = format,
             # desctab.ado:350-354 (2.1.10+): without format() a geometric SD
             # gets two decimals (%4.2f), not the %2.0f that prints "x/1".
             gsdformat = if (base::missing(format)) "%4.2f" else NULL,
@@ -481,8 +550,22 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   if (!is.null(sc_note) && !grepl(sc_note, footnote %||% "", fixed = TRUE)) {
     footnote <- if (is.null(footnote) || !nzchar(footnote)) sc_note else paste(footnote, sc_note)
   }
+  # The SMD column's comparison travels with every export as a footnote
+  # (desctab.ado, tabtools 2.4.0: joined with a backslash when the footnote
+  # already uses that line separator, and not repeated).
+  smd_note <- if (smd) .t1_smd_note(smdtype, gp, smd_pair) else NULL
+  if (!is.null(smd_note) && !grepl(smd_note, footnote %||% "", fixed = TRUE)) {
+    footnote <- if (is.null(footnote) || !nzchar(footnote)) smd_note
+                else if (grepl(" \\ ", footnote, fixed = TRUE)) paste(footnote, "\\", smd_note)
+                else paste(footnote, smd_note)
+  }
   tt <- .t1_run_passes(data, specs, gp, o, style, title, footnote, sheet, labels,
                        wprep = wprep, wtcompare = wtcompare, show_wtn = percent_n || wtn)
+  # r(smdtype) whenever smd is on; r(smdnote) when there is a note.
+  if (smd) {
+    tt$stored$smdtype <- smdtype
+    if (!is.null(smd_note)) tt$stored$smdnote <- smd_note
+  }
   tt$meta$sample_accounting <- .t1_sample_accounting(sample_input, specs, gp, o, wtcompare)
   if (!is.null(smallcells)) {
     sc <- .t1_sc_stored(tt, gp, by, smallcells, total = total != "none" && gp$G > 1L,

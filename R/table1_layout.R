@@ -384,9 +384,12 @@
       # ones): the bare label on a categorical block, else the row label.
       if (is.null(rows[[i]]$key)) rows[[i]]$key <- if (type %in% c("cat", "cate")) spec$label else rows[[1]]$label
     }
+    smdtype <- o$smdtype %||% "pair"
+    pair <- o$smdpair %||% c(1L, 2L)
     smd <- if (!o$smd || G < 2L) NA_real_
-           else if (isTRUE(o$wx$kind %in% c("wt", "fw"))) .t1w_smd(type, v, gid, o$wx$w, o$wx$kind)
-           else .t1_smd(type, v, gid, 1L, 2L)
+           else if (smdtype != "pair") .t1_smd_multi(type, v, gid, G, smdtype, o$wx$w, o$wx$kind %||% "none")
+           else if (isTRUE(o$wx$kind %in% c("wt", "fw"))) .t1w_smd(type, v, gid, o$wx$w, o$wx$kind, pair[1], pair[2])
+           else .t1_smd(type, v, gid, pair[1], pair[2])
     rows[[1]]$p <- tst$p
     rows[[1]]$test <- tst$test
     rows[[1]]$statistic <- tst$statistic
@@ -450,7 +453,7 @@
   grp_idx <- function(key) if (key == "T") K else as.integer(sub("^g", "", key))
 
   header1 <- vapply(keys, function(k) switch(k, label = " ", test = "Test", statistic = "Statistic",
-                                                 p = "p-value", smd = "SMD", glab[grp_idx(k)]), "")
+                                                 p = "p-value", smd = .t1_smd_header(o$smdtype, gp, o$smdpair), glab[grp_idx(k)]), "")
   pf <- .t1_percfootnotes(o)
   descriptor <- .t1_descriptor(has, o)
   header2 <- vapply(keys, function(k) switch(k, label = descriptor, test = "", statistic = "", p = "",
@@ -518,10 +521,10 @@
   meta <- list(sheet = sheet, extraspace = isTRUE(o$extraspace))
   # Phase 3: the row records, for small-cell finishing (.t1_finish_pass()).
   if (!is.null(o$wx)) meta$blocks <- blocks
-  if (o$smd && G > 2L) {
-    meta$console_before <- sprintf("Note: SMD computed for first two groups only (%s vs %s)",
-                                   gp$note_labels[1], gp$note_labels[2])
-  }
+  # desctab.ado (tabtools 2.4.0): the console omits the footnote, so the
+  # note naming what the SMD column compares prints above the listing.
+  smd_note <- if (o$smd) .t1_smd_note(o$smdtype, gp, o$smdpair) else NULL
+  if (!is.null(smd_note)) meta$console_before <- paste("Note:", smd_note)
   # table_row: the body row's row in r(table) (NA when it has none).
   rows$table_row <- NA_integer_
   if (!is.null(stored$table)) rows$table_row[tr] <- seq_along(tr)
@@ -545,4 +548,62 @@
   prev <- c("N", keys[-n])
   blk <- cumsum(keys != prev)
   as.integer(ifelse(blk == 0L, -2L, blk))
+}
+
+# SMD column header and the note naming what it compares (desctab.ado,
+# tabtools 2.4.0). A pair SMD over 3+ groups, or a pair chosen with
+# smdpair, names the pair in its header, so no sink shows a bare "SMD"
+# beside groups it ignores; "Pop. SB" and "Max SMD" fit the column's
+# 7-character console width. `pair` holds the two group indices from
+# smdpair (NULL: the first two groups).
+.t1_smd_header <- function(smdtype, gp, pair = NULL) {
+  smdtype <- smdtype %||% "pair"
+  if (smdtype == "population") return("Pop. SB")
+  if (smdtype == "maxpair") return("Max SMD")
+  if (gp$G <= 2L && is.null(pair)) return("SMD")
+  lv <- pair %||% c(1L, 2L)
+  sprintf("SMD (%s vs %s)", gp$note_labels[lv[1]], gp$note_labels[lv[2]])
+}
+
+# The note joins the footnote, so the comparison travels with every export;
+# NULL for a two-group pair SMD, whose header says it all.
+.t1_smd_note <- function(smdtype, gp, pair = NULL) {
+  smdtype <- smdtype %||% "pair"
+  G <- gp$G
+  if (smdtype == "population") {
+    return(paste0("Pop. SB: largest absolute difference between a group mean and the overall mean, ",
+                  "in overall-sample SDs, across the ", G, " groups (McCaffrey et al. 2013)."))
+  }
+  if (smdtype == "maxpair") {
+    return(paste0("Max SMD: largest absolute pairwise difference across the ", G,
+                  " groups, in the root-mean of the group variances."))
+  }
+  if (G <= 2L) return(NULL)
+  lv <- pair %||% c(1L, 2L)
+  sprintf("SMD compares %s vs %s only (%s).", gp$note_labels[lv[1]], gp$note_labels[lv[2]],
+          if (is.null(pair)) sprintf("the first two of %d groups", G)
+          else sprintf("2 of %d groups, chosen with smdpair()", G))
+}
+
+# smdpair (desctab.ado, tabtools 2.4.0): the two by() groups the pair SMD
+# compares, as group indices. With a numeric by() a number names a by()
+# value; anything else is matched against the group labels (a string by()'s
+# values, or a labelled numeric by()'s label text). Each must name exactly
+# one group, and the two must differ.
+.t1_resolve_smdpair <- function(smdpair, gp, by_numeric) {
+  if (!(is.character(smdpair) || is.numeric(smdpair)) || length(smdpair) != 2L || anyNA(smdpair)) {
+    cli::cli_abort("{.arg smdpair} must name exactly two groups of {.arg by}.", call = NULL)
+  }
+  out <- vapply(seq_len(2L), function(i) {
+    tok <- smdpair[[i]]
+    num <- suppressWarnings(as.numeric(tok))
+    hit <- if (by_numeric && !is.na(num)) which(gp$codes == num) else which(gp$note_labels == as.character(tok))
+    if (length(hit) != 1L) {
+      cli::cli_abort("{.arg smdpair}: {.val {as.character(tok)}} does not name exactly one group of {.arg by}.",
+                     call = NULL)
+    }
+    hit
+  }, 1L)
+  if (out[1] == out[2]) cli::cli_abort("{.arg smdpair} must name two different groups.", call = NULL)
+  out
 }

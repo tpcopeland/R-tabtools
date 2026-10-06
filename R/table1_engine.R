@@ -629,13 +629,7 @@
   dims <- length(p1)
   if (dims < 1L || length(p2) != dims || anyNA(c(p1, p2)) || any(c(p1, p2) < 0)) return(NA_real_)
   s <- ((diag(p1, dims) - tcrossprod(p1)) + (diag(p2, dims) - tcrossprod(p2))) / 2
-  if (qr(s)$rank < dims) return(NA_real_)
-  d <- p1 - p2
-  d2 <- tryCatch(drop(crossprod(d, solve(s, d))), error = function(e) NA_real_)
-  if (is.na(d2)) return(NA_real_)
-  if (d2 < 0 && d2 > -1e-12) d2 <- 0
-  if (d2 < 0) return(NA_real_)
-  sqrt(d2)
+  .t1_cat_smd_s(p1, p2, s)
 }
 
 #' Standardized mean difference between the first two groups
@@ -691,4 +685,111 @@
     }
   }
   if (is.na(out) || !.st_ok(out)) NA_real_ else stata_macro_num(out)
+}
+
+#' Multi-group balance statistic for `smdtype = "population"` or `"maxpair"`
+#'
+#' `"population"`: McCaffrey et al. (2013, Stat Med 32:3388) section 4.1.2
+#' eq. (5), `max_g |mean_g - mean_pop| / sd_pop`. The group means carry the
+#' weights. The pooled sample (all G groups) is the reference, with mean and
+#' SD unweighted under `wt` (eq. 5's "unweighted mean and standard deviation
+#' of the covariate for the pooled sample") and frequency-weighted under
+#' `fweight`, since frequency weights replicate records. Continuous SD
+#' uses `n - 1`; binary uses `sqrt(p_pop (1 - p_pop))`; categorical takes the
+#' largest of the per-level values with `sqrt(p_pop,l (1 - p_pop,l))`, as
+#' twang 2.6.2 does per factor level.
+#'
+#' `"maxpair"`: Lopez and Gutman (2017, Stat Sci 32:432) eq. (27), the
+#' largest absolute pairwise difference. Every pair shares one denominator,
+#' the root of the mean of the G group variances (cobalt 4.6.3
+#' `s.d.denom = "pooled"`). Binary uses `p_g (1 - p_g)`; categorical is the
+#' Yang-Dalton Mahalanobis distance with `S` averaged over all G groups.
+#' Group means and variances are weighted as in `.t1w_smd()`, so with
+#' G = 2 this is `abs()` of the `"pair"` SMD.
+#'
+#' A group with no usable values for the variable (fewer than two for a
+#' continuous `"maxpair"` variance) leaves the statistic `NA`.
+#' @return Non-negative statistic or `NA`.
+#' @keywords internal
+#' @noRd
+.t1_smd_multi <- function(type, v, gid, G, smdtype, w = NULL, kind = "none") {
+  if (is.null(w) || !kind %in% c("wt", "fw")) {
+    w <- rep(1, length(v))
+    kind <- "none"
+  }
+  # Mean and variance as .t1w_smd() forms them (unit weights: mean(), var()).
+  wmv <- function(y, ww) {
+    n <- length(y)
+    sw <- sum(ww)
+    if (!n || !is.finite(sw) || sw <= 0) return(c(NA_real_, NA_real_))
+    m <- sum(ww * y) / sw
+    ss <- sum(ww * (y - m)^2)
+    vv <- if (kind == "fw") {
+      if (sw > 1) ss / (sw - 1) else NA_real_
+    } else if (n > 1) n / (sw * (n - 1)) * ss else NA_real_
+    c(m, vv)
+  }
+  # The population reference ignores analytic weights (McCaffrey eq. 5).
+  wpop <- if (kind == "fw") w else rep(1, length(v))
+  ok <- !is.na(gid) & gid >= 1L & gid <= G & !is.na(v)
+  y <- v
+  if (type == "contln") {
+    ok <- ok & v > 0
+    y <- log(ifelse(ok, v, NA))
+  }
+  if (!all(vapply(seq_len(G), function(g) any(ok & gid == g), NA))) return(NA_real_)
+  out <- NA_real_
+  if (type %in% c("contn", "contln", "conts", "bin", "bine")) {
+    bin <- type %in% c("bin", "bine")
+    st <- vapply(seq_len(G), function(g) {
+      k <- ok & gid == g
+      wmv(y[k], w[k])
+    }, numeric(2))
+    m <- st[1, ]
+    if (smdtype == "population") {
+      pop <- wmv(y[ok], wpop[ok])
+      den <- if (bin) sqrt(pop[1] * (1 - pop[1])) else sqrt(pop[2])
+      if (!anyNA(m) && !is.na(den) && is.finite(den) && den > 0) out <- max(abs(m - pop[1])) / den
+    } else {
+      vg <- if (bin) m * (1 - m) else st[2, ]
+      den <- sqrt(mean(vg))
+      if (!anyNA(m) && !is.na(den) && is.finite(den) && den > 0) out <- (max(m) - min(m)) / den
+    }
+  } else {
+    lv <- sort(unique(y[ok]), method = "radix")
+    if (length(lv) < 2L) return(NA_real_)
+    share <- function(k, levels) {
+      tot <- sum(w[k])
+      vapply(levels, function(l) sum(w[k & y == l]), 0) / tot
+    }
+    pg <- vapply(seq_len(G), function(g) share(ok & gid == g, lv), numeric(length(lv)))
+    if (smdtype == "population") {
+      tot <- sum(wpop[ok])
+      pp <- vapply(lv, function(l) sum(wpop[ok & y == l]), 0) / tot
+      den <- sqrt(pp * (1 - pp))
+      if (!anyNA(pg) && all(den > 0)) out <- max(abs(pg - pp) / den)
+    } else {
+      keep <- seq_len(length(lv) - 1L)
+      pk <- pg[keep, , drop = FALSE]
+      if (anyNA(pk)) return(NA_real_)
+      s <- Reduce(`+`, lapply(seq_len(G), function(g) diag(pk[, g], length(keep)) - tcrossprod(pk[, g]))) / G
+      vals <- numeric()
+      for (a in seq_len(G - 1L)) for (b in (a + 1L):G) vals <- c(vals, .t1_cat_smd_s(pk[, a], pk[, b], s))
+      if (length(vals) && !anyNA(vals)) out <- max(vals)
+    }
+  }
+  if (is.na(out) || !.st_ok(out)) NA_real_ else stata_macro_num(out)
+}
+
+# Mahalanobis distance sqrt(d' S^-1 d) for a given S (.t1_cat_smd() with a
+# covariance pooled over more than the two compared groups).
+.t1_cat_smd_s <- function(p1, p2, s) {
+  dims <- length(p1)
+  if (qr(s)$rank < dims) return(NA_real_)
+  d <- p1 - p2
+  d2 <- tryCatch(drop(crossprod(d, solve(s, d))), error = function(e) NA_real_)
+  if (is.na(d2)) return(NA_real_)
+  if (d2 < 0 && d2 > -1e-12) d2 <- 0
+  if (d2 < 0) return(NA_real_)
+  sqrt(d2)
 }

@@ -15,6 +15,7 @@ p3_agg <- function() as.data.frame(haven::read_dta(test_path("fixtures", "table1
 # in a row; Stata's sepby(factor_sep) draws no rule between the two (same
 # label), which the label-text blocks now reproduce.
 p3_expect <- function(tt, id, mask = "p,test,statistic", console = TRUE) {
+  tt <- golden_strip_smd_note(tt)
   expect_identical(golden_check_derived(tt), character(), label = paste(id, "derived suppression cells"))
   want <- golden_read_cells_file(file.path(p3_dir(), paste0(id, ".csv")))
   mm <- golden_compare_cells(tt, want, mask)

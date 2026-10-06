@@ -15,8 +15,8 @@
 #   bash qa/tools/check_local.sh --source-tests  # also the ubuntu job's source-tree tests
 #   bash qa/tools/check_local.sh --no-deps       # skip step 1
 #
-# --full also installs ipw (validation_wttab.R needs it; Suggests does not
-# list it). --source-tests runs the test suite from the source tree, where
+# --full also installs ipw (validation_wttab.R needs it) and cobalt and
+# twang (crossval_smd_balance.R needs them); Suggests lists none of them. --source-tests runs the test suite from the source tree, where
 # the StataCorp fixtures that .Rbuildignore drops exist, as the ubuntu
 # release job does (CI never runs those tests on macOS).
 #
@@ -60,7 +60,7 @@ if $deps; then
   Rscript -e 'options(repos = c(CRAN = "https://cloud.r-project.org"))
     for (p in c("remotes", "rcmdcheck")) if (!requireNamespace(p, quietly = TRUE)) install.packages(p)
     remotes::install_deps(commandArgs(TRUE)[1], dependencies = TRUE, upgrade = "always")
-    if (commandArgs(TRUE)[2] == "true" && !requireNamespace("ipw", quietly = TRUE)) install.packages("ipw")' \
+    if (commandArgs(TRUE)[2] == "true") for (p in c("ipw", "cobalt", "twang")) if (!requireNamespace(p, quietly = TRUE)) install.packages(p)' \
     "$src" "$full"
 fi
 

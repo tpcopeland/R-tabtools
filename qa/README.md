@@ -11,14 +11,15 @@ Rscript qa/run_all.R                 # full lane (default)
 Rscript qa/run_all.R adversarial     # installed adversarial cases only
 Rscript qa/run_all.R sample          # installed sample-accounting cases only
 Rscript qa/run_all.R interaction     # seeded combinations across adapters
+Rscript qa/run_all.R crossval        # table1_tc() balance statistics against cobalt and twang
 Rscript qa/run_all.R quick           # adversarial and sample-accounting cases
-Rscript qa/run_all.R core            # quick + interaction, examples, weight validation
+Rscript qa/run_all.R core            # quick + interaction + crossval, examples, weight validation
 NOT_CRAN=true Rscript -e 'devtools::test(filter = "adversarial|sample-accounting")'
 NOT_CRAN=true Rscript -e 'testthat::test_file("qa/test_adversarial_regression.R", load_package = "none")'
 bash qa/tools/check_local.sh         # the CI release job on this machine (use on a Mac instead of the macOS CI job)
 ```
 
-The GitHub Actions R-CMD-check workflow runs only when started by hand, and is kept disabled between runs (see **CI** below): `gh workflow enable R-CMD-check`, then `gh workflow run R-CMD-check --ref main` (Linux and Windows), `-f os=macos` (macOS only) or `-f os=all` (all five jobs). `qa/tools/check_local.sh` runs the steps of the macOS CI release job locally: it installs the dependencies, runs `R CMD check --as-cran` on the built tarball (failing on a WARNING), then runs the `quick` and `interaction` lanes. With `--full` it runs the full lane instead (installing `ipw`, which `validation_wttab.R` needs and Suggests does not list); `--source-tests` also runs the test suite from a copy of the source tree, as the ubuntu release job does; `--no-deps` skips installing dependencies.
+The GitHub Actions R-CMD-check workflow runs only when started by hand, and is kept disabled between runs (see **CI** below): `gh workflow enable R-CMD-check`, then `gh workflow run R-CMD-check --ref main` (Linux and Windows), `-f os=macos` (macOS only) or `-f os=all` (all five jobs). `qa/tools/check_local.sh` runs the steps of the macOS CI release job locally: it installs the dependencies, runs `R CMD check --as-cran` on the built tarball (failing on a WARNING), then runs the `quick` and `interaction` lanes. With `--full` it runs the full lane instead (installing `ipw`, which `validation_wttab.R` needs, and `cobalt` and `twang`, which `crossval_smd_balance.R` needs; Suggests lists none of them); `--source-tests` also runs the test suite from a copy of the source tree, as the ubuntu release job does; `--no-deps` skips installing dependencies.
 
 The single-file command uses whichever installed copy `library(tabtools)` finds. The lane runner builds and installs the current source into a temporary library and verifies that it resolves there. Use separate scratch copies for concurrent runs to avoid sharing compilation and snapshot files. The runner prints one `RESULT:` line per executed file and ends with `RESULT: TOTAL`; a missing total line is a failure. `PASS` means every comparison ran without failure; `INCOMPLETE` means comparisons were skipped, including under `--allow-incomplete`.
 
@@ -72,6 +73,7 @@ comparisons. Timings and evidence are in the interaction plan above.
 | `bench_fisher.R` | yes | Wall-clock bounds for Fisher's exact test: workspace escalation and the simulated fallback (one check per case). |
 | `bench_fweight.R` | yes | Time (5 s) and memory (100 MB of R heap) bounds for `fweight` hypothesis tests, up to a total frequency of 5e7 (one check per case). |
 | `validation_wttab.R` | yes | `wttab()` on real `ipw::ipwpoint()`/`ipwtm()` objects (ipw is not in Suggests; the fast lane uses a duck-typed list) and against WeightIt's own ESS and weight ranges (ATE, ATT, ATO, multi-category). A missing comparator package is a skip: the script is then INCOMPLETE, or SKIP when neither ran. |
+| `crossval_smd_balance.R` | yes | `table1_tc(smd = TRUE)` balance statistics against independent implementations. `smdtype = "population"` (McCaffrey et al. 2013 eq. 5) against cobalt 4.6.3 (`pairwise = FALSE, s.d.denom = "all"`), unweighted and under `wt`, and against twang 2.6.2 `mnps()` ATE eq. 5 values, unweighted and with twang's own weights. `"maxpair"` against cobalt (`pairwise = TRUE, s.d.denom = "pooled"`, unweighted; cobalt keeps the unweighted SD under weights, so weighted maxpair is checked through the two-group identity maxpair = \|pair\|), and categorical maxpair against a base-R Yang-Dalton oracle. `"pair"` and `smdpair` against cobalt on the two compared arms. Also: fweight equals the record-expanded data for every type, and `wtcompare` with `smdtype`. cobalt's `Min.Diff`/`Max.Diff` are signed extremes, so the comparison takes the larger absolute value. The categorical fixture puts the largest imbalance on the first and then the last level, so a dropped level cannot hide. |
 | `demo_parity.R` | yes | The R demo (`qa/demo/demo_tabtools.R`) against the Stata demo: runs `tests/testthat/test-demo-parity.R` (every ported sheet, the console log and its Markdown, the Markdown report; `golden/demo/manifest.csv`). Fails on a skip too. `--update` regenerates the Stata side (see the parity harness below). |
 | `test_adversarial_descriptive.R` | yes | Observed and weighted denominators, covariate-specific missingness, lognormal exclusions, frequency expansion, row percentages, retained-sample weight cutpoints and ESS across extreme scales. |
 | `test_adversarial_regression.R` | yes | Complete-case fitted models, absent covariates and factor levels, rank deficiency, clustered sample alignment, failed convergence and insufficient variance samples. |
@@ -106,8 +108,9 @@ Fit guards use stored diagnostics rather than treating every warning as failure.
 | `adversarial` | The `test_adversarial_*.R` files listed above. |
 | `sample` | The `test_sample_accounting_*.R` files listed above. |
 | `interaction` | The `test_interaction_matrix_*.R` files listed above. |
+| `crossval` | `crossval_smd_balance.R`. |
 | `quick` | `adversarial` plus `sample`. |
-| `core` | `quick` plus `interaction`, `check_examples.R` and `validation_wttab.R`. |
+| `core` | `quick` plus `interaction`, `crossval`, `check_examples.R` and `validation_wttab.R`. |
 | `full` (default) | `core` plus `bench_fisher.R`, `bench_fweight.R` and `demo_parity.R`. |
 | `benchmark` | `bench_fisher.R` and `bench_fweight.R` only. |
 
@@ -194,7 +197,7 @@ styling, validation and provenance through composition.
 
 | Export | Fast lane (`tests/testthat/`) | QA lane |
 |---|---|---|
-| `table1_tc()`, `desctab()` | `test-golden-table1.R` (every table1 golden); `test-table1-*.R` (engine, weights, fweight tests, validation, review fixes, H7/H10/H17 in `test-table1-hardening.R`); `test-smallcells-*.R`; `test-classifier-units.R`, `test-golden-classifier.R` (automatic typing); `test-writers-hardening.R` (H8 targets); `test-codex-audit.R` (D1 weight scale, D5 typing); `test-adversarial-descriptive.R`; `test-sample-accounting-descriptive.R` | `check_examples.R`, `bench_fisher.R`, `bench_fweight.R`, `test_adversarial_descriptive.R`, `test_sample_accounting_descriptive.R` |
+| `table1_tc()`, `desctab()` | `test-golden-table1.R` (every table1 golden); `test-table1-*.R` (engine, weights, fweight tests, validation, review fixes, H7/H10/H17 in `test-table1-hardening.R`); `test-smallcells-*.R`; `test-classifier-units.R`, `test-golden-classifier.R` (automatic typing); `test-writers-hardening.R` (H8 targets); `test-codex-audit.R` (D1 weight scale, D5 typing); `test-table1-smdtype.R` (`smdtype`, `smdpair`, pair header and footnote); `test-adversarial-descriptive.R`; `test-sample-accounting-descriptive.R` | `check_examples.R`, `bench_fisher.R`, `bench_fweight.R`, `test_adversarial_descriptive.R`, `test_sample_accounting_descriptive.R`, `crossval_smd_balance.R` (`smdtype`, `smdpair`) |
 | `regtab()` | `test-golden-regtab.R` (every regtab golden); `test-regtab-*.R`; `test-stubs.R` (the model allow-list); `test-model-zoo.R`; `test-writers-hardening.R` (H8); `test-codex-audit.R` (R1, R2 GEE; R4 outcome identity); `test-adversarial-regression.R`; `test-sample-accounting-models.R` | `check_examples.R`, `test_adversarial_regression.R`, `test_sample_accounting_models.R` |
 | `tt_vcov()`, `tt_vce_types()`, `tt_ci_methods()` | `test-regtab-vce.R`, `test-regtab-5w-review.R`, `test-regtab-generics.R`, `test-regtab-gee.R`, `test-regtab-h19-gee-scale.R`, `test-codex-audit.R` (R1, R2, R3); `test-adversarial-regression.R` | `check_examples.R`, `test_adversarial_regression.R` |
 | `tt_mi()` | `test-regtab-mi.R` (MI01-MI08, mice integration), `test-regtab-stats-tokens.R` (`mi_m`, `fmi`), `test-codex-audit.R` (R3: `tt_vcov()` refuses what `regtab()` refuses); `test-adversarial-regression.R`, `test-adversarial-mi-identity.R`; `test-sample-accounting-models.R` | `check_examples.R`, `test_adversarial_regression.R`, `test_adversarial_mi_identity.R`, `test_sample_accounting_models.R` |

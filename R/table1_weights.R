@@ -622,9 +622,9 @@
 #' Stata keeps the result in a macro, so it is rounded to macro precision.
 #' @keywords internal
 #' @noRd
-.t1w_smd <- function(type, v, g, w, kind) {
-  g1 <- !is.na(g) & g == 1L
-  g2 <- !is.na(g) & g == 2L
+.t1w_smd <- function(type, v, g, w, kind, level1 = 1L, level2 = 2L) {
+  g1 <- !is.na(g) & g == level1
+  g2 <- !is.na(g) & g == level2
   wmean_sd <- function(y, ww) {
     n <- length(y)
     if (!n || sum(ww) <= 0) return(c(NA_real_, NA_real_))

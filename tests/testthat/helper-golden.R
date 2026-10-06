@@ -1208,3 +1208,29 @@ run_golden_scenario <- function(id, patch = NULL) {
     expect_sink_match(path, id, ext, tt = tt)
   }
 }
+
+# Pending golden regeneration (2026-10-05): Stata tabtools 2.4.0 names the
+# pair of a 3+ group SMD in the header ("SMD (A vs B)"), the console note
+# and the footnote. R follows 2.4.0; the goldens are still 2.1.14's (bare
+# "SMD" header, "Note: SMD computed for first two groups only (A vs B)",
+# no footnote). The new form must appear exactly when 2.1.14 printed its
+# note; it is then turned back into 2.1.14's so the rest of the table is
+# compared. Delete this once the goldens come from 2.4.0
+# (~/Stata-Dev/_take_action/2026-10-05-tabtools-smd-multigroup.md).
+golden_strip_smd_note <- function(tt) {
+  pre <- tt$meta$console_before %||% character()
+  rx <- "^Note: SMD compares (.*) vs (.*) only \\(the first two of [0-9]+ groups\\)\\.$"
+  hit <- grepl(rx, pre)
+  smd_col <- which(tt$cols$role == "smd")
+  head_new <- length(smd_col) == 1L && grepl("^SMD \\(.* vs .*\\)$", tt$header[[1]]$text[smd_col])
+  foot_rx <- " ?SMD compares .* only \\(the first two of [0-9]+ groups\\)\\.$"
+  foot_new <- grepl(foot_rx, tt$footnote)
+  testthat::expect_identical(c(head_new, foot_new), rep(any(hit), 2L),
+                             label = "2.4.0 pair header and footnote iff a 3+ group pair SMD")
+  if (any(hit)) {
+    tt$meta$console_before[hit] <- sub(rx, "Note: SMD computed for first two groups only (\\1 vs \\2)", pre[hit])
+    tt$header[[1]]$text[smd_col] <- "SMD"
+    tt$footnote <- sub(foot_rx, "", tt$footnote)
+  }
+  tt
+}

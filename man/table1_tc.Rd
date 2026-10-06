@@ -42,6 +42,8 @@ table1_tc(
   wtcompare = FALSE,
   wtn = FALSE,
   smdthreshold = 0.1,
+  smdtype = c("pair", "population", "maxpair"),
+  smdpair = NULL,
   xlsx = NULL,
   sheet = "Table 1",
   title = NULL,
@@ -145,7 +147,11 @@ groups (requires \code{by}): the difference in means over the pooled SD
 \code{sqrt((s1^2 + s2^2) / 2)} (log scale for \code{contln}), the difference in
 proportions over their pooled SD \code{sqrt((p1 (1 - p1) + p2 (1 - p2)) / 2)}
 for \code{bin}, and Yang and Dalton's multivariate SMD over the
-first K - 1 levels for \code{cat}, as in Stata.}
+first K - 1 levels for \code{cat}, as in Stata. With more than two groups
+this compares only the first two levels of \code{by} (or the \code{smdpair}):
+the header then names the pair (\verb{SMD (A vs B)}) and a footnote says
+so, so every export shows what was compared. See \code{smdtype} for
+statistics over all groups.}
 
 \item{nopvalue}{Suppress the p-value column.}
 
@@ -186,6 +192,40 @@ or \code{percent_n}).}
 in weighted cells (requires \code{wt}).}
 
 \item{smdthreshold}{SMD highlighting threshold; \code{-1} disables.}
+
+\item{smdtype}{What the SMD column (with \code{smd = TRUE}) reports:
+\itemize{
+\item \code{"pair"} (default): the two-group SMD above, header \code{SMD}.
+\item \code{"population"}: the population standardized bias of McCaffrey et al.
+(2013, eq. 5), header \verb{Pop. SB}. Each group's mean is compared with
+the mean of all analysed records, in units of their SD, and the
+largest absolute value over groups is shown. Under \code{wt} the group
+means are weighted but the overall mean and SD stay unweighted (the
+population the weights aim at); under \code{fweight} both are
+frequency-weighted. \code{bin} uses \code{sqrt(p (1 - p))} of the overall
+proportion. \code{cat} takes the largest value over levels, each level
+standardized by its overall proportion (as in the twang package).
+\item \code{"maxpair"}: the largest absolute pairwise SMD over all pairs of
+groups (Lopez and Gutman 2017, eq. 27), header \verb{Max SMD}. Every pair
+shares one denominator, the root of the mean of all groups'
+variances (\code{p (1 - p)} for \code{bin}; for \code{cat} the Yang-Dalton
+covariance averaged over all groups). With two groups it equals the
+absolute \code{"pair"} SMD.
+}
+
+For \code{"population"} and \code{"maxpair"} a footnote states the definition.
+A group with no values for a variable leaves that variable's statistic
+blank. \code{smdthreshold} highlights any of the three. As Stata tabtools
+2.4.0 \code{smdtype()}.}
+
+\item{smdpair}{The two groups of \code{by} a \code{"pair"} SMD compares, instead of
+the first two: a length-2 character or numeric vector. With a numeric
+\code{by} a number names a \code{by} value; anything else is matched against the
+group labels (the values of a character or factor \code{by}, or the value
+labels of a labelled numeric \code{by}). Each must name exactly one group.
+The header names the pair (\verb{SMD (C vs A)}); with more than two groups a
+footnote adds "chosen with smdpair()". Requires \code{smd = TRUE} and
+\code{smdtype = "pair"}. As Stata tabtools 2.4.0 \code{smdpair()}.}
 
 \item{xlsx, sheet, title, footnote, open}{Excel target and annotations.}
 
@@ -246,6 +286,8 @@ as ..." sentence alone;
 Stata stores \code{.d} for a suppressed value); \code{varlist} and \code{types}: the
 variables and their resolved types; \code{fisher_simulated}: variables
 whose Fisher p-value was simulated (with p-values);
+\item with \code{smd = TRUE}: \code{smdtype}, and \code{smdnote}, the note naming what the
+SMD column compares (when there is one; it is also in the footnote);
 \item for the files written: \code{xlsx}, \code{sheet}, \code{markdown}, \code{markdown_rows},
 \code{markdown_cols};
 \item with \code{smallcells}: \code{smallcells}, \code{N_primary_suppressed},
@@ -366,6 +408,11 @@ tab
 # A methods paragraph for the paper
 tab$stored$methods
 
+# Three groups: balance over all of them, not just the first two
+d3 <- data.frame(arm = rep(c("A", "B", "C"), each = 20),
+                 age = c(seq(40, 59), seq(41, 60), seq(55, 74)))
+table1_tc(d3, by = "arm", vars = c(age = "contn"), smd = TRUE, smdtype = "population")
+
 # desctab() is the same command
 desctab(d, by = "arm", vars = c("age", "sex"))
 }
@@ -373,6 +420,20 @@ desctab(d, by = "arm", vars = c("age", "sex"))
 Yang D, Dalton JE (2012). A unified approach to measuring the effect size
 between two groups using SAS. \emph{SAS Global Forum 2012}, paper 335-2012.
 (The standardized mean differences.)
+
+McCaffrey DF, Griffin BA, Almirall D, Slaughter ME, Ramchand R, Burgette
+LF (2013). A tutorial on propensity score estimation for multiple
+treatments using generalized boosted models. \emph{Statistics in Medicine}
+32(19), 3388-3414. \doi{10.1002/sim.5753} (\code{smdtype = "population"}.)
+
+Lopez MJ, Gutman R (2017). Estimation of causal effects with multiple
+treatments: a review and new ideas. \emph{Statistical Science} 32(3),
+432-454. \doi{10.1214/17-STS612} (\code{smdtype = "maxpair"}.)
+
+Austin PC (2009). Balance diagnostics for comparing the distribution of
+baseline covariates between treatment groups in propensity-score matched
+samples. \emph{Statistics in Medicine} 28(25), 3083-3107.
+\doi{10.1002/sim.3697} (The 0.1 \code{smdthreshold} convention.)
 
 Kish L (1965). \emph{Survey Sampling}. New York: Wiley. (The effective sample
 size under \code{wt}.)

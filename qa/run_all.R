@@ -1,5 +1,5 @@
 # qa/run_all.R - the developer QA lane in one command (Milestone H, H16).
-#   Rscript qa/run_all.R [full|adversarial|sample|interaction|quick|core|benchmark]
+#   Rscript qa/run_all.R [full|adversarial|sample|interaction|crossval|quick|core|benchmark]
 #
 # 1. Builds the package (R CMD build --no-build-vignettes) and installs the
 #    tarball, byte-compiled, into a temporary library. Nothing is installed
@@ -42,6 +42,7 @@ run <- c(
   bench_fisher.R = "Fisher exact test wall-clock bounds (workspace escalation, simulated fallback)",
   bench_fweight.R = "fweight tests: time (5 s) and memory (100 MB) bounds up to a total frequency of 5e7",
   validation_wttab.R = "wttab() on real ipw::ipwpoint()/ipwtm() objects and against WeightIt's own summaries",
+  crossval_smd_balance.R = "table1_tc() smdtype population/maxpair/pair against cobalt and twang",
   demo_parity.R = "the R demo (qa/demo/demo_tabtools.R) against the Stata demo, sheet by sheet (Milestone D)",
   test_adversarial_descriptive.R = "missing values, sparse groups, weight filtering and observed denominators",
   test_adversarial_regression.R = "complete-case models, unavailable terms and unreliable model inference",
@@ -74,7 +75,8 @@ interaction_files <- c("test_interaction_matrix_descriptive.R",
                        "test_interaction_matrix_survival_survey_gee.R",
                        "test_interaction_matrix_composition.R",
                        "test_interaction_matrix_independent.R")
-testthat_files <- c(adversarial_files, sample_files, interaction_files)
+crossval_files <- "crossval_smd_balance.R"
+testthat_files <- c(adversarial_files, sample_files, interaction_files, crossval_files)
 LANES <- list(
   quick = c(adversarial_files, sample_files),
   core = c(testthat_files, "check_examples.R", "validation_wttab.R"),
@@ -82,6 +84,7 @@ LANES <- list(
   adversarial = adversarial_files,
   sample = sample_files,
   interaction = interaction_files,
+  crossval = crossval_files,
   benchmark = c("bench_fisher.R", "bench_fweight.R")
 )
 if (!lane %in% names(LANES)) stop("unknown QA lane: ", lane)
