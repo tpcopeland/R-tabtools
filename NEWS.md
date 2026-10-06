@@ -1,5 +1,16 @@
 # tabtools (development version)
 
+* `table1_tc(smdpair=)` now resolves a token by value or by label as Stata does:
+  a numeric token that only matches a value label (labels "2020", "2021") works;
+  a token that is one group's value and another's label is refused unless the
+  new `smdpair_as = "values"` or `"labels"` (Stata `smdpair(..., values|labels)`)
+  says which is meant. A logical `by` accepts `TRUE`/`FALSE` in `smdpair`.
+* The SMD column headers `SMD (A vs B)`, `Pop. SB` and `Max SMD` are recognised
+  as the SMD role by hand-built tables, and the xlsx SMD column is sized to its
+  header (minimum width 8) instead of a fixed 8.
+* When a `table1_tc()` footnote uses ` \ ` paragraphs, the automatic small-cell
+  and SMD notes are appended as their own paragraphs.
+
 These follow Stata tabtools 2.4.0. Until the Stata goldens are regenerated
 from 2.4.0, the golden tests translate the new pair header, note and
 footnote back to 2.1.14's form.
