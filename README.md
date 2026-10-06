@@ -1,6 +1,6 @@
 # tabtools for R — publication-ready descriptive and regression tables
 
-**Version 0.1.0** | 2026-10-05
+**Version 0.1.1** | 2026-10-06
 
 tabtools makes the tables of a clinical or epidemiological paper: a Table 1 of baseline characteristics, regression tables, incidence rates beside hazard ratios, treatment effects and margins, and inverse-probability-weight diagnostics. Every table prints in the console and writes to Excel, Word, HTML, Markdown and CSV with the same rows, labels, indented category levels and Reference rows in each.
 
@@ -203,6 +203,7 @@ QA suites and how to run them are documented in [`qa/README.md`](qa/README.md).
 
 ## Version History
 
+- **0.1.1**: bug fixes from the 2026-10-06 audits (small-cell protection of derivable hidden counts, centered SDs, `smdpair` resolution, `tt_stack()`/`tt_merge()` group keys, Stata colour names, ordinal link labels and others), plus SMD pair naming, `smdpair` and `smdtype`. See NEWS.md.
 - **0.1.0**: first release. Descriptive, regression, incidence-rate, treatment-effect, weight-diagnostic and composite tables (`table1_tc()`/`desctab()`, `regtab()`, `regtab_uv()`, `stratetab()`, `tt_rates()`, `effecttab()`, `wttab()`, `comptab()`, `hrcomptab()`, `puttab()`, `stacktab()`), table composition (`tt_merge()`, `tt_stack()`), and converters to flextable, gt, gtsummary and tinytable.
 
 See [`NEWS.md`](NEWS.md) for details.

@@ -1,7 +1,7 @@
 Package: tabtools
 Title: Publication-Ready Descriptive and Regression Tables
-Version: 0.1.0
-Date: 2026-10-05
+Version: 0.1.1
+Date: 2026-10-06
 Authors@R: c(
     person("Timothy P", "Copeland", role = c("aut", "cre"),
            email = "timothy.copeland@ki.se"),

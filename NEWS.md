@@ -1,18 +1,12 @@
-# tabtools (development version)
+# tabtools 0.1.1
 
+Bug fixes from the 2026-10-06 audits, plus the Table 1 SMD work that follows
+Stata tabtools 2.4.0. Until the Stata goldens are regenerated from 2.5.1, the
+golden tests translate the new SMD pair header, note and footnote back to
+2.1.14's form.
 
-These follow Stata tabtools 2.4.0. Until the Stata goldens are regenerated
-from 2.4.0, the golden tests translate the new pair header, note and
-footnote back to 2.1.14's form.
+## New features
 
-* Continuous-variable SDs are computed about the mean, as Stata 2.1.15
-  does, in the unweighted, `wt` and `fweight` paths. Values far from zero
-  (`1e8 + c(0.1, 0.2, 0.3, 0.4)`) no longer show SD 0 or a missing SD from
-  cancelling raw moments. A constant column that showed `2.68±.` now
-  shows `2.68±0.00`, and geometric SDs (`contln`) change with it. With
-  extreme weights (about 1e160 and up) Stata 2.5.1 prints a missing SD when
-  the square of the centered weighted sum overflows; tabtools keeps the
-  finite SD there, as before.
 * `table1_tc()` with three or more groups and `smd = TRUE` names the pair
   its SMD compares wherever the table goes. The column header reads
   `SMD (A vs B)`, a footnote says "SMD compares A vs B only (the first two
@@ -21,7 +15,9 @@ footnote back to 2.1.14's form.
   tinytable, `as.data.frame()`) showed a bare "SMD" column.
 * New `smdpair`: the two groups a pair SMD compares, by `by` value or
   label. The header names the pair, and with three or more groups the
-  footnote adds "chosen with smdpair()".
+  footnote adds "chosen with smdpair()". New `smdpair_as = "values"` or
+  `"labels"` (Stata `smdpair(..., values|labels)`) says how its tokens are
+  read when a token is one group's value and another's label.
 * New `smdtype` for balance across all groups. `"population"` reports the
   population standardized bias of McCaffrey et al. (2013, eq. 5 and
   section 4.2): the largest |group mean - overall mean| / overall SD.
@@ -31,28 +27,8 @@ footnote back to 2.1.14's form.
   match cobalt 4.6.3 on continuous and binary variables.
 * `stored$smdtype` (with `smd = TRUE`) and `stored$smdnote` (when there
   is a note), as Stata's `r(smdtype)` and `r(smdnote)`.
-* `table1_tc(smdpair=)` now resolves a token by value or by label as Stata does:
-  a numeric token that only matches a value label (labels "2020", "2021") works;
-  a token that is one group's value and another's label is refused unless the
-  new `smdpair_as = "values"` or `"labels"` (Stata `smdpair(..., values|labels)`)
-  says which is meant. A logical `by` accepts `TRUE`/`FALSE` in `smdpair`.
-* The SMD column headers `SMD (A vs B)`, `Pop. SB` and `Max SMD` are recognised
-  as the SMD role by hand-built tables.
-* When a `table1_tc()` footnote uses ` \ ` paragraphs, the automatic small-cell
-  and SMD notes are appended as their own paragraphs.
 
-* `effecttab()` warns once per call (class `tabtools_warning_ratio_interval`),
-  naming each term, when a data frame stating a ratio null (`null.value = 1`)
-  or headed as a ratio (`effect = "RR"`, `"OR"`, ...) derives a Wald interval
-  from `std.error` whose lower bound is 0 or below. The linear delta-method
-  interval is kept, as Stata's `nlcom` and `margins` give it; supply a
-  log-scale interval to avoid the warning. The `marginaleffects` ratio
-  warning now also fires at a lower bound of exactly 0.
-* `regtab()` on a `glmmTMB` fit says so, in a console note (class
-  `tabtools_note_tmb_cov_ci`) and in the footnote of every sink, when a random-effect covariance interval is
-  left blank because glmmTMB's parameterization could not be matched to
-  `VarCorr()`. The refusal of `cs()`/`ar1()` terms now has class
-  `tabtools_error_tmb_covstruct`.
+## Fixed
 
 * `table1_tc(smallcells =)` now protects counts that are not printed but follow
   from printed ones (Stata tabtools 2.1.17). A categorical variable's hidden
@@ -71,11 +47,23 @@ footnote back to 2.1.14's form.
   The sample-accounting ledger (`$meta$sample_accounting` and the
   `as.data.frame()` attribute) withholds the same counts, as `NA` with
   status `unavailable` and reason `suppressed_by_smallcells`.
-* Changed: `tabtools_options()` takes only named arguments (`...` is its first
-  formal), so `tabtools_options("digits")`, which used to set the session font
-  to "digits", now aborts with a hint to use `tabtools_options()$digits`.
-  Partial matching of option names (for example `fontsiz =`) no longer works.
-  `tabtools_options()` and `tabtools_options(clear = TRUE)` are unchanged.
+* Continuous-variable SDs are computed about the mean, as Stata 2.1.15
+  does, in the unweighted, `wt` and `fweight` paths. Values far from zero
+  (`1e8 + c(0.1, 0.2, 0.3, 0.4)`) no longer show SD 0 or a missing SD from
+  cancelling raw moments. A constant column that showed `2.68±.` now
+  shows `2.68±0.00`, and geometric SDs (`contln`) change with it. With
+  extreme weights (about 1e160 and up) Stata 2.5.1 prints a missing SD when
+  the square of the centered weighted sum overflows; tabtools keeps the
+  finite SD there, as before.
+* `table1_tc(smdpair=)` resolves a token by value or by label as Stata does:
+  a numeric token that only matches a value label (labels "2020", "2021")
+  works, and a token that is one group's value and another's label is refused
+  unless `smdpair_as` says which is meant. A logical `by` accepts
+  `TRUE`/`FALSE` in `smdpair`.
+* The SMD column headers `SMD (A vs B)`, `Pop. SB` and `Max SMD` are recognised
+  as the SMD role by hand-built tables.
+* When a `table1_tc()` footnote uses ` \ ` paragraphs, the automatic small-cell
+  and SMD notes are appended as their own paragraphs.
 * `regtab(sep = " ")` is accepted, as in Stata, and renders `(a b)` intervals;
   the separator is no longer trimmed. An empty `sep` means the default `", "`,
   as in `effecttab()`.
@@ -93,6 +81,34 @@ footnote back to 2.1.14's form.
 * `polr`/`clm` fits with a non-logit, non-probit link (cloglog, loglog,
   cauchit, ...) are no longer labelled `oprobit`; the table footnote names the
   link scale and the methods text says "ordinal regression (<link> link)".
+* `effecttab()` warns once per call (class `tabtools_warning_ratio_interval`),
+  naming each term, when a data frame stating a ratio null (`null.value = 1`)
+  or headed as a ratio (`effect = "RR"`, `"OR"`, ...) derives a Wald interval
+  from `std.error` whose lower bound is 0 or below. The linear delta-method
+  interval is kept, as Stata's `nlcom` and `margins` give it; supply a
+  log-scale interval to avoid the warning. The `marginaleffects` ratio
+  warning now also fires at a lower bound of exactly 0.
+* `regtab()` on a `glmmTMB` fit says so, in a console note (class
+  `tabtools_note_tmb_cov_ci`) and in the footnote of every sink, when a
+  random-effect covariance interval is left blank because glmmTMB's
+  parameterization could not be matched to `VarCorr()`. The refusal of
+  `cs()`/`ar1()` terms now has class `tabtools_error_tmb_covstruct`.
+
+## Changed
+
+* `tabtools_options()` takes only named arguments (`...` is its first
+  formal), so `tabtools_options("digits")`, which used to set the session font
+  to "digits", now aborts with a hint to use `tabtools_options()$digits`.
+  Partial matching of option names (for example `fontsiz =`) no longer works.
+  `tabtools_options()` and `tabtools_options(clear = TRUE)` are unchanged.
+
+## Known issues (shared with Stata tabtools 2.5.1)
+
+* With `slashN`, the printed `n/N` denominators can still let a protected
+  count be reconstructed in some small tables. Stata 2.5.1 gives the same
+  cells; the fix will follow Stata's.
+* The Excel SMD column keeps Stata's fixed width of 8, so a long
+  `SMD (A vs B)` header can be clipped.
 
 # tabtools 0.1.0
 
