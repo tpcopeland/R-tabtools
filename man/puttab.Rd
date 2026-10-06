@@ -26,7 +26,16 @@ puttab(
   csv = NULL,
   markdown = NULL,
   mdappend = FALSE,
-  open = FALSE
+  open = FALSE,
+  hlines = NULL,
+  vlines = NULL,
+  boldrows = NULL,
+  panel = NULL,
+  panelheader = NULL,
+  panelinline = FALSE,
+  noindent = FALSE,
+  spanheader = NULL,
+  nformat = NULL
 )
 }
 \arguments{
@@ -63,13 +72,14 @@ Automatic notes are separate paragraphs in every sink.}
 \code{\link[=tabtools_options]{tabtools_options()}}, else Arial 10).}
 
 \item{borderstyle}{\code{"default"} or \code{"thin"}, \code{"medium"}, or \code{"academic"}
-(medium rules). puttab draws horizontal rules only.}
+(medium horizontal rules). The other styles box the table and close
+the first column with a right rule.}
 
 \item{headercolor, zebracolor}{Colours for \code{headershade} and \code{zebra}.}
 
 \item{zebra}{Shade every second data row, starting with the second.}
 
-\item{headershade}{Shade the header row.}
+\item{headershade}{Shade header rows.}
 
 \item{digits}{Decimal places for numeric columns that are not all whole
 numbers, 0 to 6 (default from \code{\link[=tabtools_options]{tabtools_options()}}, else 2).}
@@ -77,7 +87,10 @@ numbers, 0 to 6 (default from \code{\link[=tabtools_options]{tabtools_options()}
 \item{varlabels}{Use variable labels (the \code{"label"} attribute) as the
 header; a column without one keeps its name.}
 
-\item{noheader}{Write no header row.}
+\item{noheader}{Write no header row in Excel or CSV. In Markdown the
+first body row supplies the required GFM header when it is a panel
+heading or panel header (including inline); otherwise use a blank
+header so data rows retain their role.}
 
 \item{noembedheader}{Export a first row that repeats the variable labels
 as data (Stata's \code{noembedheader}): the header is still built from the
@@ -91,18 +104,62 @@ labels under \code{varlabels}, but the row is not taken for the header.}
 \item{mdappend}{Append to an existing \code{markdown} file.}
 
 \item{open}{Open the workbook after writing (interactive sessions).}
+
+\item{hlines, boldrows}{Whole-number exported body rows: rules above
+\code{hlines} and bold \code{boldrows}. Panel headings and panel headers count
+as body rows. Coordinates outside the table are refused. Excel only.}
+
+\item{vlines}{Whole-number exported columns, starting with the label
+column as 1: add a right rule. Excel only, including academic style.}
+
+\item{panel}{Data frames only: name of one source column. Changes in its
+values start panels in input order, with a bold merged heading using
+its value label or text. Blank panels have no heading or indentation.
+This column is always excluded from the visible body, even in \code{vars}.}
+
+\item{panelheader}{Repeated panel header, requiring \code{panel}: names of
+character source columns (always excluded from the visible body),
+one per exported column; or \code{list(text = c("", "Events", ...))} for
+literal per-column text. A single Stata string of quoted literals
+(plain or compound quotes) is also accepted. All-blank headers are
+omitted. Source headers are read at each panel's first exported row.}
+
+\item{panelinline}{Combine a heading and a nonblank panel header into
+one bold row. Requires \code{panelheader}; its first cell must be blank
+wherever a panel has a heading. Otherwise refuse the call.}
+
+\item{noindent}{Disable the three leading spaces under panel headings.
+Requires \code{panel}.}
+
+\item{spanheader}{Spanning labels above the header, given as Stata's
+\verb{"\\"Counts\\" 2/3 \\\\ \\"Rates\\" 4/5"} or a list of spans, each
+\code{list(text = "Counts", first = 2, last = 3)}. \code{last} defaults to
+\code{first}. Labels are literal. Empty labels, overlaps, invalid ranges
+and \code{noheader} are refused. Markdown prefixes every covered header
+with the span label; CSV retains a separate span row.}
+
+\item{nformat}{Stata \verb{\%f} or \verb{\%g} numeric format, optionally ending in
+\code{c}, for integer-valued numeric columns, including matrix columns.
+Default \code{NULL} uses whole numbers. Width is widened to 32; decimals
+must be fewer than 32. Fractional columns retain \code{digits}. Imported
+Stata formats ending in \code{fc} retain grouping, whereas \code{gc} does not
+request grouping. Value labels and dates retain their display.}
 }
 \value{
 A \code{tt_table} (\code{command = "puttab"}), returned invisibly when
 \code{xlsx}, \code{csv} or \code{markdown} writes a file (assign it and print it to see
 it). \verb{$stored} holds Stata's \code{r()} results: \code{n_rows} (title,
 header, data, and footnote rows), \code{n_cols}, \code{n_datarows}, \code{source}
-(\code{"data"}, \code{"matrix"}, or \code{"table"}), and, for the files written,
+(\code{"data"}, \code{"matrix"}, or \code{"table"}), \code{n_panels} (headings,
+including inline headings), \code{n_spans}, and, for the files written,
 \code{sheet}, \code{file}, \code{csv}, \code{markdown}, \code{markdown_rows}, and
 \code{markdown_cols}.
 
 \verb{$meta$sample_accounting} carries the source ledger described in
 \code{\link[=tt_table]{tt_table()}}; unavailable record counts remain explicit.
+For \code{puttab()}, omitted \code{headershade} uses the session setting and an
+explicit \code{FALSE} disables ordinary, spanning and panel header shading.
+Invalid layout arguments raise \code{tabtools_error_layout} before writing.
 }
 \description{
 Turns a table that already exists -- a data frame, a numeric matrix
@@ -186,6 +243,12 @@ attr(d$ci, "label") <- "95\% CI"
 path <- tempfile(fileext = ".xlsx")
 puttab(d, xlsx = path, sheet = "Block", varlabels = TRUE,
        title = "Primary model", zebra = TRUE)
+
+# Panel variables and source panel headers are excluded automatically
+panels <- data.frame(group = c("A", "A", "B"),
+                     term = c("Age", "Female", "Age"), n = c(1500, 800, 900))
+puttab(panels, panel = "group", panelinline = TRUE,
+       panelheader = list(text = c("", "Count")), nformat = "\%12.0fc")
 }
 \seealso{
 \code{\link[=stacktab]{stacktab()}} to assemble puttab sheets into one composite.

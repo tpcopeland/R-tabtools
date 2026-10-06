@@ -5,7 +5,7 @@
 \title{Assemble a composite table from blocks}
 \usage{
 stacktab(
-  blocks,
+  blocks = NULL,
   xlsx = NULL,
   sheet = NULL,
   layout = "vstack",
@@ -21,7 +21,16 @@ stacktab(
   mdappend = FALSE,
   display = FALSE,
   append = FALSE,
-  sheetreplace = FALSE
+  sheetreplace = FALSE,
+  frames = NULL,
+  noindent = FALSE,
+  headershade = FALSE,
+  borderstyle = NULL,
+  font = NULL,
+  fontsize = NULL,
+  zebra = FALSE,
+  digits = NULL,
+  open = FALSE
 )
 }
 \arguments{
@@ -30,11 +39,12 @@ stacktab(
 
 \item{xlsx}{The workbook (Stata's \code{using}): sheet blocks are read from
 it and the composite is written to it. Optional when every block is a
-\code{tt_table}; the workbook is then created if needed.}
+\code{tt_table} or \code{frames} is given; the workbook is then created if needed.}
 
-\item{sheet}{Output sheet (required with \code{xlsx}). An existing sheet
-(matched without regard to case) is refused unless \code{append} or
-\code{sheetreplace} is given.}
+\item{sheet}{Output sheet (required with \code{xlsx}). In block mode an
+existing sheet (matched without regard to case) is refused unless
+\code{append} or \code{sheetreplace} is given. In \code{frames} mode the sheet is
+created or replaced, as by \code{\link[=puttab]{puttab()}}, preserving unrelated sheets.}
 
 \item{layout}{\code{"vstack"} (default) or \code{"hstack"}.}
 
@@ -75,13 +85,33 @@ first row is the header).}
 \item{append}{Write below the used rows of an existing \code{sheet}.}
 
 \item{sheetreplace}{Replace an existing \code{sheet}.}
+
+\item{frames}{Explicit in-memory panel mode: a named list of data frames
+or \code{tt_table} sources. Each entry may instead be
+\code{list(data = source, label = "Panel heading")}. Names identify sources
+and must be unique; an unnamed list gets \code{frame1}, \code{frame2}, etc.
+Labels are literal; omitted or blank labels add no heading. Columns
+stack by position and must have equal counts. The first source supplies
+the only ordinary header, using variable labels where present. Each
+data frame's embedded header is dropped; each \code{tt_table} contributes
+its body. Panel headings and indent follow \code{\link[=puttab]{puttab()}}. Numeric
+source display formats are retained. Cannot combine with \code{blocks},
+explicit \code{layout}, \code{spacing}, \code{display}, \code{append}, \code{sheetreplace},
+\code{columnmerge}, \code{style} or \code{borders}.}
+
+\item{noindent, headershade, borderstyle, font, fontsize, zebra, digits, open}{Frame-panel mode only: passed to \code{\link[=puttab]{puttab()}}. Explicit
+\code{headershade = FALSE} overrides session shading. \code{noindent} disables
+panel row indentation.}
 }
 \value{
 A \code{tt_table} (\code{command = "stacktab"}): the composite's first row
 is its header row, the other rows its body (the analogue of Stata's
 \code{frame()}). It is returned invisibly when a file is written or
 \code{display = TRUE} has printed it (assign it and print it to see it).
-\verb{$stored} holds Stata's
+In \code{frames} mode the result uses puttab's layout and stored counts,
+plus \code{n_frames}, \code{frames} (source identities in order), and
+\code{blocks_loaded}; \code{source} is \code{"frames"}. Invalid frame-panel arguments
+raise \code{tabtools_error_layout}. For block mode, \verb{$stored} holds Stata's
 \code{r()} results: \code{blocks_loaded}, \code{rows_written}, \code{cols_out}, \code{layout},
 and, with \code{xlsx}, \code{rows_out}, \code{append_start}, \code{note_row}, \code{sheet},
 \code{book}, \code{table_start}, \code{title_cell}; \code{csv}, \code{markdown},
@@ -165,8 +195,12 @@ Stata's \code{stacktab} does.
 \item Side-by-side (\code{hstack}) \code{tt_table} blocks whose rows differ at a
 position (by the table's row keys, else the row labels) give a warning
 naming them; the rows are still placed by position, as in Stata.
-\item The files are written together at the end, as in Stata; a failure
-while copying them into place restores the files that were replaced.
+\item In block mode the files are written together at the end, as in Stata;
+a failure while copying them into place restores replaced files.
+In \code{frames} mode, as in native Stata, \code{\link[=puttab]{puttab()}} writes CSV, Markdown
+and Excel sequentially after validating source metadata and targets;
+a later write failure can leave an earlier sink written. Existing
+output sheets are replaced while unrelated sheets are preserved.
 There is no \code{frame()}: the returned table is the composite.
 \item Stata's \verb{stacktab: N blocks -> N rows written -> sheet S} line, printed
 when a workbook is written, is a message; nothing is printed for the
@@ -202,6 +236,10 @@ b <- puttab(dose, varlabels = TRUE)
 stacktab(list(list(table = a, label = "Any HRT use"),
               list(table = b, label = "By estrogen dose")),
          columnmerge = "B+C as aHR (95\% CI)")
+
+# Frames are panels with one common header
+stacktab(frames = list(primary = list(data = primary, label = "Primary"),
+                       dose = list(data = dose, label = "Dose")))
 }
 \seealso{
 \code{\link[=puttab]{puttab()}} to write the source blocks.

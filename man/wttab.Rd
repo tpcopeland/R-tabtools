@@ -107,13 +107,14 @@ Automatic notes are separate paragraphs in every sink.}
 \code{\link[=tabtools_options]{tabtools_options()}}, else Arial 10).}
 
 \item{borderstyle}{\code{"default"} or \code{"thin"}, \code{"medium"}, or \code{"academic"}
-(medium rules). puttab draws horizontal rules only.}
+(medium horizontal rules). The other styles box the table and close
+the first column with a right rule.}
 
 \item{headercolor, zebracolor}{Colours for \code{headershade} and \code{zebra}.}
 
 \item{zebra}{Shade every second data row, starting with the second.}
 
-\item{headershade}{Shade the header row.}
+\item{headershade}{Shade header rows.}
 
 \item{csv}{Also write the table to this \code{.csv} file.}
 

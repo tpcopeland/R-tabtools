@@ -82,15 +82,51 @@
 #' @param font,fontsize Font family and size (defaults from
 #'   [tabtools_options()], else Arial 10).
 #' @param borderstyle `"default"` or `"thin"`, `"medium"`, or `"academic"`
-#'   (medium rules). puttab draws horizontal rules only.
+#'   (medium horizontal rules). The other styles box the table and close
+#'   the first column with a right rule.
 #' @param headercolor,zebracolor Colours for `headershade` and `zebra`.
 #' @param zebra Shade every second data row, starting with the second.
-#' @param headershade Shade the header row.
+#' @param headershade Shade header rows.
 #' @param digits Decimal places for numeric columns that are not all whole
 #'   numbers, 0 to 6 (default from [tabtools_options()], else 2).
+#' @param nformat Stata `%f` or `%g` numeric format, optionally ending in
+#'   `c`, for integer-valued numeric columns, including matrix columns.
+#'   Default `NULL` uses whole numbers. Width is widened to 32; decimals
+#'   must be fewer than 32. Fractional columns retain `digits`. Imported
+#'   Stata formats ending in `fc` retain grouping, whereas `gc` does not
+#'   request grouping. Value labels and dates retain their display.
+#' @param hlines,boldrows Whole-number exported body rows: rules above
+#'   `hlines` and bold `boldrows`. Panel headings and panel headers count
+#'   as body rows. Coordinates outside the table are refused. Excel only.
+#' @param vlines Whole-number exported columns, starting with the label
+#'   column as 1: add a right rule. Excel only, including academic style.
+#' @param panel Data frames only: name of one source column. Changes in its
+#'   values start panels in input order, with a bold merged heading using
+#'   its value label or text. Blank panels have no heading or indentation.
+#'   This column is always excluded from the visible body, even in `vars`.
+#' @param panelheader Repeated panel header, requiring `panel`: names of
+#'   character source columns (always excluded from the visible body),
+#'   one per exported column; or `list(text = c("", "Events", ...))` for
+#'   literal per-column text. A single Stata string of quoted literals
+#'   (plain or compound quotes) is also accepted. All-blank headers are
+#'   omitted. Source headers are read at each panel's first exported row.
+#' @param panelinline Combine a heading and a nonblank panel header into
+#'   one bold row. Requires `panelheader`; its first cell must be blank
+#'   wherever a panel has a heading. Otherwise refuse the call.
+#' @param noindent Disable the three leading spaces under panel headings.
+#'   Requires `panel`.
+#' @param spanheader Spanning labels above the header, given as Stata's
+#'   `"\"Counts\" 2/3 \\ \"Rates\" 4/5"` or a list of spans, each
+#'   `list(text = "Counts", first = 2, last = 3)`. `last` defaults to
+#'   `first`. Labels are literal. Empty labels, overlaps, invalid ranges
+#'   and `noheader` are refused. Markdown prefixes every covered header
+#'   with the span label; CSV retains a separate span row.
 #' @param varlabels Use variable labels (the `"label"` attribute) as the
 #'   header; a column without one keeps its name.
-#' @param noheader Write no header row.
+#' @param noheader Write no header row in Excel or CSV. In Markdown the
+#'   first body row supplies the required GFM header when it is a panel
+#'   heading or panel header (including inline); otherwise use a blank
+#'   header so data rows retain their role.
 #' @param noembedheader Export a first row that repeats the variable labels
 #'   as data (Stata's `noembedheader`): the header is still built from the
 #'   labels under `varlabels`, but the row is not taken for the header.
@@ -103,12 +139,16 @@
 #'   `xlsx`, `csv` or `markdown` writes a file (assign it and print it to see
 #'   it). `$stored` holds Stata's `r()` results: `n_rows` (title,
 #'   header, data, and footnote rows), `n_cols`, `n_datarows`, `source`
-#'   (`"data"`, `"matrix"`, or `"table"`), and, for the files written,
+#'   (`"data"`, `"matrix"`, or `"table"`), `n_panels` (headings,
+#'   including inline headings), `n_spans`, and, for the files written,
 #'   `sheet`, `file`, `csv`, `markdown`, `markdown_rows`, and
 #'   `markdown_cols`.
 #'
 #'   `$meta$sample_accounting` carries the source ledger described in
 #'   [tt_table()]; unavailable record counts remain explicit.
+#' For `puttab()`, omitted `headershade` uses the session setting and an
+#' explicit `FALSE` disables ordinary, spanning and panel header shading.
+#' Invalid layout arguments raise `tabtools_error_layout` before writing.
 #' @section Differences from Stata:
 #' * No output file is required: without `xlsx` and `markdown` (Stata
 #'   needs one of them), the table is returned for printing, further
@@ -137,19 +177,34 @@
 #' path <- tempfile(fileext = ".xlsx")
 #' puttab(d, xlsx = path, sheet = "Block", varlabels = TRUE,
 #'        title = "Primary model", zebra = TRUE)
+#'
+#' # Panel variables and source panel headers are excluded automatically
+#' panels <- data.frame(group = c("A", "A", "B"),
+#'                      term = c("Age", "Female", "Age"), n = c(1500, 800, 900))
+#' puttab(panels, panel = "group", panelinline = TRUE,
+#'        panelheader = list(text = c("", "Count")), nformat = "%12.0fc")
 #' @export
 puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
                    title = NULL, footnote = NULL, font = NULL, fontsize = NULL,
                    borderstyle = NULL, headercolor = NULL, zebracolor = NULL,
                    zebra = FALSE, headershade = FALSE, digits = NULL,
                    varlabels = FALSE, noheader = FALSE, noembedheader = FALSE, csv = NULL,
-                   markdown = NULL, mdappend = FALSE, open = FALSE) {
+                   markdown = NULL, mdappend = FALSE, open = FALSE,
+                   hlines = NULL, vlines = NULL, boldrows = NULL, panel = NULL,
+                   panelheader = NULL, panelinline = FALSE, noindent = FALSE,
+                   spanheader = NULL, nformat = NULL) {
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Table"
   for (a in c("zebra", "headershade", "varlabels", "noheader", "noembedheader", "mdappend", "open")) {
     v <- get(a)
     if (!is.logical(v) || length(v) != 1L || is.na(v)) cli::cli_abort("{.arg {a}} must be TRUE or FALSE.", call = NULL)
+  }
+  for (a in c("panelinline", "noindent")) .puttab_check_flag(get(a), a)
+  nformat <- .puttab_nformat(nformat)
+  ph <- .puttab_panel_spec(x, panel, panelheader, panelinline, noindent)
+  if (inherits(x, "tt_table") && !is.null(nformat)) {
+    .puttab_abort("nformat does not apply to a tt_table source, whose cells are text.")
   }
   has_xlsx <- !is.null(xlsx)
   .tt_check_sheet_xlsx(sheet_given, has_xlsx)
@@ -170,16 +225,44 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   for (a in c("title", "footnote")) .tt_check_text_arg(get(a), a)
   footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   style <- tt_resolve_style(font = font, fontsize = fontsize, borderstyle = borderstyle,
-                            headershade = headershade, zebra = zebra,
+                            headershade = if (missing(headershade)) getOption("tabtools.headershade") %||% FALSE else headershade, zebra = zebra,
                             headercolor = headercolor, zebracolor = zebracolor)
   src <- .puttab_source(x, vars = vars, subset = subset, digits = digits,
-                        varlabels = varlabels, noheader = noheader, noembedheader = noembedheader)
+                        varlabels = varlabels, noheader = noheader, noembedheader = noembedheader,
+                        nformat = nformat, panel_spec = ph)
+  if (!is.null(ph)) src <- .puttab_panelize_source(src, x, ph, panelinline, noindent, digits)
+  spans <- .puttab_spans(spanheader, ncol(src$body), noheader)
+  rules <- list(hlines = .puttab_coordinates(hlines, nrow(src$body), "hlines"),
+                vlines = .puttab_coordinates(vlines, ncol(src$body), "vlines"),
+                boldrows = .puttab_coordinates(boldrows, nrow(src$body), "boldrows"))
   .tt_preflight_targets(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend)
   title <- title %||% src$title %||% ""
   footnote <- footnote %||% src$footnote %||% ""
   tt <- .puttab_table(src$header, src$body, title = title, footnote = footnote, style = style,
-                      sheet = sheet, source = src$source, sample = src$sample)
+                      sheet = sheet, source = src$source, sample = src$sample,
+                      panels = src$panels, spans = spans, rules = rules)
 
+  .puttab_export(tt, xlsx = xlsx, csv = csv, markdown = markdown,
+                 sheet = sheet, sheet_given = sheet_given, mdappend = mdappend, open = open)
+}
+
+# All frame metadata is finalized before this shared, sequential sink phase.
+.puttab_export <- function(tt, xlsx = NULL, csv = NULL, markdown = NULL,
+                           sheet = "Table", sheet_given = FALSE, mdappend = FALSE, open = FALSE) {
+  .puttab_check_flag(mdappend, "mdappend")
+  .puttab_check_flag(open, "open")
+  has_xlsx <- !is.null(xlsx)
+  has_md <- !is.null(markdown)
+  .tt_check_sheet_xlsx(sheet_given, has_xlsx)
+  if (open && !has_xlsx) .puttab_abort("open requires xlsx.")
+  if (mdappend && !has_md) .puttab_abort("mdappend requires markdown.")
+  if (has_xlsx) .tt_check_path(xlsx, "\\.xlsx$", "xlsx", "a .xlsx file")
+  if (!is.null(csv)) .tt_check_csv_path(csv)
+  if (has_md) .tt_check_path(markdown, "\\.(md|markdown|qmd|rmd)$", "markdown",
+                            "a .md, .markdown, .qmd, or .rmd file")
+  sheet <- .check_sheet(sheet)
+  .tt_check_table(tt)
+  .tt_preflight_targets(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend)
   # Sinks in Stata's order: CSV, Markdown, then the workbook (puttab.ado:363-553).
   if (!is.null(csv)) {
     tt_write_csv(tt, csv)
@@ -201,7 +284,7 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
     tt$stored$file <- xlsx
     tt$meta$sheet <- sheet
     message(sprintf("puttab: wrote %d data rows x %d cols (%s source) to sheet %s in %s",
-                    nrow(tt$body), ncol(tt$body), src$source, sheet, xlsx))
+                    nrow(tt$body), ncol(tt$body), tt$stored$source, sheet, xlsx))
   }
   if (has_xlsx || has_md || !is.null(csv)) invisible(tt) else tt
 }
@@ -221,21 +304,32 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
 
 # A puttab tt_table from header text (NULL for none) and a character body.
 .puttab_table <- function(header, body, title, footnote, style, sheet = "Table", source = "data",
-                          command = "puttab", sample = NULL) {
+                          command = "puttab", sample = NULL, panels = NULL, spans = list(), rules = list()) {
   body <- as.data.frame(body, stringsAsFactors = FALSE)
   K <- ncol(body)
   hdr <- if (is.null(header)) list() else list(list(text = header))
+  if (length(spans)) {
+    span_text <- rep("", K)
+    for (s in spans) span_text[s$first] <- s$text
+    hdr <- c(list(list(text = span_text)), hdr)
+  }
   cols <- data.frame(role = c("label", rep("value", K - 1L)), model = NA_integer_,
                      console_width = NA_integer_, stringsAsFactors = FALSE)
   rows <- data.frame(type = rep("var", nrow(body)), indent = rep(0L, nrow(body)))
+  if (!is.null(panels)) {
+    rows$type[panels$heading] <- "cat_header"
+    rows$type[union(panels$header, panels$inline)] <- "n_header"
+  }
   layout <- list(indent = 0L, align = "right", console_sepby = FALSE, console_title = TRUE,
                  console_blank = TRUE, header_style = "plain", xlsx_rules = "puttab",
                  sheet = "Table", csv_reservedrow = FALSE)
   nr <- nzchar(title) + length(hdr) + nrow(body) + length(.tt_footnote_paragraphs(footnote))
-  stored <- list(n_rows = nr, n_cols = K, n_datarows = nrow(body), source = source)
+  stored <- list(n_rows = nr, n_cols = K, n_datarows = nrow(body), source = source,
+                 n_panels = if (is.null(panels)) 0L else panels$n_panels, n_spans = length(spans))
   tt_table(body = body, header = hdr, rows = rows, cols = cols, title = title,
            footnote = footnote, style = style, stored = stored, command = command,
-           layout = layout, meta = list(sheet = sheet,
+           layout = layout, meta = list(sheet = sheet, puttab_panels = panels, puttab_spans = spans,
+             puttab_rules = rules,
              sample_accounting = .tt_sample_bind(list(sample), prefixes = "source",
                                                   commands = command)))
 }
@@ -243,7 +337,8 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
 # ---------------------------------------------------------------------------
 # Sources
 
-.puttab_source <- function(x, vars, subset, digits, varlabels, noheader, noembedheader = FALSE) {
+.puttab_source <- function(x, vars, subset, digits, varlabels, noheader, noembedheader = FALSE,
+                           nformat = NULL, panel_spec = NULL) {
   if (inherits(x, "tt_table")) {
     if (!is.null(vars) || !is.null(subset)) {
       cli::cli_abort("{.arg vars} and {.arg subset} apply to a data frame source only.", call = NULL)
@@ -254,9 +349,9 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
     # puttab.ado:220-228: the matrix is the whole source.
     if (!is.null(vars)) cli::cli_abort("{.arg vars} is not allowed with a matrix source; the matrix is the source.", call = NULL)
     if (!is.null(subset)) cli::cli_abort("{.arg subset} is not allowed with a matrix source.", call = NULL)
-    return(.puttab_from_matrix(x, digits, noheader))
+    return(.puttab_from_matrix(x, digits, noheader, nformat))
   }
-  if (is.data.frame(x)) return(.puttab_from_data(x, vars, subset, digits, varlabels, noheader, noembedheader))
+  if (is.data.frame(x)) return(.puttab_from_data(x, vars, subset, digits, varlabels, noheader, noembedheader, nformat, panel_spec))
   cli::cli_abort("{.arg x} must be a data frame, a numeric matrix, or a {.cls tt_table}, not {.obj_type_friendly {x}}.",
                  call = NULL)
 }
@@ -272,14 +367,14 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
        sample = x$meta[["sample_accounting", exact = TRUE]])
 }
 
-.puttab_from_matrix <- function(x, digits, noheader) {
+.puttab_from_matrix <- function(x, digits, noheader, nformat = NULL) {
   if (!is.numeric(x) && !is.logical(x)) {
     cli::cli_abort("A matrix source must be numeric, not {.cls {typeof(x)}}.", call = NULL)
   }
   if (!nrow(x) || !ncol(x)) cli::cli_abort("The matrix source is empty.", call = NULL)
   rn <- .puttab_stripe(rownames(x), "r", nrow(x))
   cn <- .puttab_stripe(colnames(x), "c", ncol(x))
-  vals <- vapply(seq_len(ncol(x)), function(j) .puttab_fmt_num(as.numeric(x[, j]), digits),
+  vals <- vapply(seq_len(ncol(x)), function(j) .puttab_fmt_num(as.numeric(x[, j]), digits, nformat = nformat),
                  character(nrow(x)))
   # vapply() returns a vector for a one-row matrix.
   body <- cbind(rn, matrix(vals, nrow(x)))
@@ -298,7 +393,8 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   sub("^_:", "", nm)
 }
 
-.puttab_from_data <- function(x, vars, subset, digits, varlabels, noheader, noembedheader = FALSE) {
+.puttab_from_data <- function(x, vars, subset, digits, varlabels, noheader, noembedheader = FALSE,
+                              nformat = NULL, panel_spec = NULL) {
   if (!is.null(vars)) {
     if (!is.character(vars) || !length(vars) || anyNA(vars)) {
       cli::cli_abort("{.arg vars} must be a character vector of column names.", call = NULL)
@@ -315,6 +411,8 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   # two columns of one name, so a data frame with duplicate names exported
   # its first column twice and lost the second.
   idx <- if (is.null(vars)) seq_along(x) else match(vars, names(x))
+  if (!is.null(panel_spec)) idx <- idx[!names(x)[idx] %in% panel_spec$exclude]
+  if (!length(idx)) .puttab_abort("No columns remain after excluding panel and panelheader variables.")
   use <- names(x)[idx]
   nested <- use[vapply(idx, function(j) is.matrix(x[[j]]) || is.data.frame(x[[j]]), TRUE)]
   if (length(nested)) {
@@ -354,11 +452,11 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   if (!noheader) header <- if (varlabels) vapply(seq_along(idx), function(k) var_label(x[[idx[k]]], use[k]), "") else use
   n <- sum(keep)
   # The Stata display format travels separately: `[` drops attributes.
-  body <- vapply(idx, function(j) .puttab_fmt_col(x[[j]][keep], digits, attr(x[[j]], "format.stata", exact = TRUE)),
+  body <- vapply(idx, function(j) .puttab_fmt_col(.puttab_subset_col(x[[j]], keep), digits, attr(x[[j]], "format.stata", exact = TRUE), nformat),
                  character(n), USE.NAMES = FALSE)
   body <- matrix(body, n)
   list(header = unname(header), body = body, source = "data",
-       sample = attr(x, "sample_accounting", exact = TRUE))
+       sample = attr(x, "sample_accounting", exact = TRUE), source_rows = which(keep))
 }
 
 .puttab_is_headerrow <- function(d) {
@@ -381,10 +479,10 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
 }
 
 # One column as display text (_puttab_fmt_num, puttab.ado:618-672).
-.puttab_fmt_col <- function(v, digits, fmt = attr(v, "format.stata", exact = TRUE)) {
+.puttab_fmt_col <- function(v, digits, fmt = attr(v, "format.stata", exact = TRUE), nformat = NULL) {
   if (is.list(v)) cli::cli_abort("List columns cannot be exported.", call = NULL)
   if (inherits(v, "Date") || inherits(v, "POSIXt")) return(.stata_datetime(v, fmt))
-  if (is.logical(v)) return(.puttab_fmt_num(as.numeric(v), digits))
+  if (is.logical(v)) return(.puttab_fmt_num(as.numeric(v), digits, fmt, nformat))
   if (is.factor(v)) {
     out <- as.character(v)
     out[is.na(out)] <- ""
@@ -394,19 +492,15 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   if (is.numeric(v) && !is.null(labs) && is.numeric(labs)) {
     code <- as.numeric(v)
     lab_codes <- as.numeric(labs)
-    out <- .puttab_fmt_num(code, digits)
+    out <- .puttab_fmt_num(code, digits, fmt, nformat)
     # match() treats every NA alike; Stata labels an extended missing value
     # (.a, .b, ...) by its own code and never a system missing ".". haven
     # reads those as tagged NAs, told apart by na_tag() (review F1).
-    hit <- match(code, lab_codes, incomparables = NA)
-    miss <- which(is.na(code))
-    if (length(miss) && anyNA(lab_codes) && requireNamespace("haven", quietly = TRUE)) {
-      hit[miss] <- match(haven::na_tag(code[miss]), haven::na_tag(lab_codes), incomparables = NA)
-    }
+    hit <- .puttab_label_matches(code, lab_codes)
     out[!is.na(hit)] <- names(labs)[hit[!is.na(hit)]]
     return(out)
   }
-  if (is.numeric(v)) return(.puttab_fmt_num(as.numeric(v), digits))
+  if (is.numeric(v)) return(.puttab_fmt_num(as.numeric(v), digits, fmt, nformat))
   out <- as.character(v)
   out[is.na(out)] <- ""
   out
@@ -416,11 +510,14 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
 # decimals (Stata's %32.0f / %32.<d>f); no minus sign on a value that
 # rounds to zero; missing -> blank. Stata has no infinities; R writes them
 # as "Inf"/"-Inf".
-.puttab_fmt_num <- function(v, digits) {
+.puttab_fmt_num <- function(v, digits, imported_fmt = NULL, nformat = NULL) {
   out <- rep("", length(v))
   fin <- is.finite(v)
   allint <- all(v[fin] == floor(v[fin]))
-  fmt <- if (allint) "%32.0f" else paste0("%32.", digits, "f")
+  comma <- is.character(imported_fmt) && length(imported_fmt) == 1L &&
+    !is.na(imported_fmt) && grepl("^%-?0?[0-9]+\\.[0-9]+fc$", imported_fmt)
+  fmt <- if (allint && !is.null(nformat)) nformat else
+    paste0("%32.", if (allint) 0L else digits, "f", if (comma) "c" else "")
   s <- trimws(stata_fmt(v[fin], fmt))
   out[fin] <- sub("^-(0(\\.0+)?)$", "\\1", s)
   inf <- !is.na(v) & is.infinite(v)
@@ -527,12 +624,14 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
 .xlsx_layout_puttab <- function(x) {
   cells <- .tt_cells(x)
   nh <- length(x$header)
-  if (nh > 1L) cli::cli_abort("A puttab layout has at most one header row.", call = NULL)
+  if (nh > 2L || (nh > 1L && !length(x$meta$puttab_spans))) {
+    .puttab_abort("A puttab layout has one header row plus an optional span row.")
+  }
   K <- ncol(x$body)
   xK <- K + 1L
   nb <- nrow(x$body)
   style <- x$style
-  hdr_row <- if (nh) 2L else 0L
+  hdr_row <- if (nh) 1L + nh else 0L
   data_start <- 2L + nh
   last_data <- data_start + nb - 1L
   foot <- nzchar(x$footnote)
@@ -552,7 +651,9 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   # [12, 50], others [8, 32].
   add("width", 1, 1, 1, 1, value = 1)
   for (j in seq_len(K)) {
-    col <- grid[seq.int(2L, last_data), j + 1L]
+    width_rows <- setdiff(seq.int(2L, last_data),
+                          c(if (nh == 2L) 2L, data_start - 1L + x$meta$puttab_panels$heading))
+    col <- grid[width_rows, j + 1L]
     col <- col[nzchar(col)]
     w <- if (length(col)) ceiling(max(.blen(col)) * 0.95) + 2 else 10
     w <- if (j == 1L) min(max(w, 12), 50) else min(max(w, 8), 32)
@@ -572,7 +673,7 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   if (nh) {
     add("bold", hdr_row, hdr_row, 2, xK, code = 1)
     add("halign", hdr_row, hdr_row, 2, xK, code = 2)
-    add("top", hdr_row, hdr_row, 2, xK, code = hb)
+    add("top", 2L, 2L, 2, xK, code = hb)
     add("bottom", hdr_row, hdr_row, 2, xK, code = hb)
     if (style$headershade) add("fill", hdr_row, hdr_row, 2, xK, color = style$headercolor)
   } else {
@@ -580,6 +681,7 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   }
   if (K >= 2L && nb) add("halign", data_start, last_data, 3, xK, code = 2)
   if (nb) add("bottom", last_data, last_data, 2, xK, code = hb)
+  R <- c(R, .puttab_layout_rules(x, data_start, last_data))
   if (style$zebra && data_start + 1L <= last_data) {
     for (r in seq.int(data_start + 1L, last_data, by = 2L)) add("fill", r, r, 2, xK, color = style$zebracolor)
   }
