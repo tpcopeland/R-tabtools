@@ -159,3 +159,79 @@ test_that("smdtype is validated and requires smd = TRUE", {
                "requires")
   expect_error(table1_tc(d, by = "arm", vars = c(age = "contn"), smd = TRUE, smdtype = "bogus"))
 })
+
+test_that("nosmdhighlight disables Excel styling and preserves SMD values for every type", {
+  d <- smd3_data()
+  for (st in c("pair", "population", "maxpair")) {
+    run <- function(...) table1_tc(d, by = "arm", vars = c(age = "contn", sex = "bin", grp = "cat"),
+                                   smd = TRUE, smdtype = st, nopvalue = TRUE, ...)
+    normal <- run()
+    disabled <- run(nosmdhighlight = TRUE)
+    threshold <- run(smdthreshold = -1)
+    expect_identical(disabled, threshold)
+    expect_identical(disabled$stored, normal$stored)
+    expect_identical(disabled$body, normal$body)
+    expect_identical(disabled$style$smdthreshold, -1)
+    expect_identical(normal, run(nosmdhighlight = FALSE))
+    # Inspect the actual Excel layout rules: the default fixture exceeds
+    # the threshold; neither disabling spelling emits an SMD fill rule.
+    normal_rules <- .xlsx_layout_table1(normal)$rules
+    disabled_rules <- .xlsx_layout_table1(disabled)$rules
+    expect_true(any(normal_rules$color == normal$style$smdcolor, na.rm = TRUE))
+    expect_false(any(disabled_rules$color == disabled$style$smdcolor, na.rm = TRUE))
+    md_normal <- withr::local_tempfile(fileext = ".md")
+    md_disabled <- withr::local_tempfile(fileext = ".md")
+    tt_write_markdown(normal, md_normal)
+    tt_write_markdown(disabled, md_disabled)
+    expect_identical(readLines(md_normal), readLines(md_disabled))
+  }
+})
+
+test_that("nosmdhighlight rejects invalid switches and explicit threshold combinations", {
+  run <- function(...) table1_tc(smd3_data(), by = "arm", vars = c(age = "contn"), smd = TRUE, ...)
+  for (bad in list(NA, NULL, logical(), c(TRUE, FALSE), 1, "TRUE")) {
+    expect_error(run(nosmdhighlight = bad), class = "tabtools_error_smdhighlight")
+  }
+  for (threshold in c(-1, 0.1, 0.5)) {
+    expect_error(run(nosmdhighlight = TRUE, smdthreshold = threshold),
+                 class = "tabtools_error_smdhighlight")
+    expect_identical(run(nosmdhighlight = FALSE, smdthreshold = threshold),
+                     run(smdthreshold = threshold))
+  }
+  expect_identical(desctab(smd3_data(), by = "arm", vars = c(age = "contn"), smd = TRUE,
+                           nosmdhighlight = TRUE), run(smdthreshold = -1))
+})
+
+test_that("frequency-weighted multi-group SMD equals expanded records for every row kind", {
+  d <- smd3_data()
+  d$f <- rep(c(1, 3, 2), length.out = nrow(d))
+  expanded <- d[rep(seq_len(nrow(d)), d$f), ]
+  for (st in c("population", "maxpair")) {
+    for (vars in list(c(age = "contn"), c(sex = "bin"), c(grp = "cat"))) {
+      weighted <- table1_tc(d, by = "arm", vars = vars, smd = TRUE,
+                            smdtype = st, fweight = "f", nopvalue = TRUE)
+      replicated <- table1_tc(expanded, by = "arm", vars = vars, smd = TRUE,
+                              smdtype = st, nopvalue = TRUE)
+      expect_equal(weighted$stored$table, replicated$stored$table, tolerance = 1e-12)
+    }
+  }
+})
+
+test_that("empty-variable groups blank all multi-group row kinds with either weight kind", {
+  d <- smd3_data()
+  d$w <- rep(c(0.5, 2, 3), length.out = nrow(d))
+  d$f <- rep(c(1, 3, 2), length.out = nrow(d))
+  # The group remains in by() and has positive weights, but lacks every
+  # covariate value. It must not silently disappear from the SMD contrast.
+  d[d$arm == "C", c("age", "sex", "grp")] <- NA
+  for (st in c("population", "maxpair")) {
+    for (weights in list(list(), list(wt = "w"), list(fweight = "f"))) {
+      tt <- do.call(table1_tc, c(list(data = d, by = "arm", vars = c(age = "contn", sex = "bin", grp = "cat"),
+                                     smd = TRUE, smdtype = st, nopvalue = TRUE), weights))
+      expect_identical(rownames(tt$stored$table), c("age", "sex", "grp"))
+      expect_identical(unname(tt$stored$table[, "smd"]), rep(NA_real_, 3))
+      smd_col <- which(tt$cols$role == "smd")
+      expect_true(all(tt$body[, smd_col] == ""))
+    }
+  }
+})

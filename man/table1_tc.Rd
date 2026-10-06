@@ -64,7 +64,8 @@ table1_tc(
   mdappend = FALSE,
   test_args = NULL,
   dots = FALSE,
-  excel = NULL
+  excel = NULL,
+  nosmdhighlight = FALSE
 )
 
 desctab(data, vars = NULL, by = NULL, ...)
@@ -192,7 +193,7 @@ or \code{percent_n}).}
 \item{wtn}{Show effective counts, \verb{(sum w_cell / sum w_group) * N_group},
 in weighted cells (requires \code{wt}).}
 
-\item{smdthreshold}{SMD highlighting threshold; \code{-1} disables.}
+\item{smdthreshold}{SMD highlighting threshold in Excel; \code{-1} disables.}
 
 \item{smdtype}{What the SMD column (with \code{smd = TRUE}) reports:
 \itemize{
@@ -216,7 +217,7 @@ absolute \code{"pair"} SMD.
 
 For \code{"population"} and \code{"maxpair"} a footnote states the definition.
 A group with no values for a variable leaves that variable's statistic
-blank. \code{smdthreshold} highlights any of the three. As Stata tabtools
+blank. \code{smdthreshold} highlights any of the three in Excel. As Stata tabtools
 2.4.0 \code{smdtype()}.}
 
 \item{smdpair}{The two groups of \code{by} a \code{"pair"} SMD compares, instead of
@@ -279,6 +280,11 @@ and, like every switch in \code{test_args}, must be \code{TRUE} or \code{FALSE}.
 
 \item{excel}{Synonym of \code{xlsx} (Stata's original option name); it wins
 when both are given.}
+
+\item{nosmdhighlight}{Logical; default \code{FALSE}. Set \code{TRUE} to leave SMD
+cells unhighlighted in Excel, equivalent to \code{smdthreshold = -1}. May
+not be combined with an explicitly supplied \code{smdthreshold} (error class
+\code{tabtools_error_smdhighlight}). Markdown does not highlight SMD cells.}
 
 \item{...}{For \code{desctab()}: further arguments passed on to \code{table1_tc()}.}
 }

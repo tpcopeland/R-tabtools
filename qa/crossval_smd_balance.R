@@ -24,6 +24,7 @@ library(tabtools)
 # categorical imbalance sits on a chosen level (the first or the last level
 # is where a dropped-level bug would hide it).
 xv_data <- function(seed, n = 420, hot = "e") {
+  withr::local_preserve_seed()
   set.seed(seed)
   arm <- sample(c("A", "B", "C"), n, TRUE, prob = c(0.45, 0.35, 0.20))
   lv <- c("e", "n", "s", "w")
@@ -113,6 +114,7 @@ test_that("population SB matches twang's mnps eq. 5 values, unweighted and with 
   # covariate enters as a factor (as a 0/1 number it would take twang's
   # continuous n / (n - 1) SD).
   td <- data.frame(arm = factor(d$arm), age = d$age, sex = factor(d$sex), reg = factor(d$reg))
+  withr::local_preserve_seed()
   set.seed(1)
   m <- suppressWarnings(twang::mnps(arm ~ age + sex + reg, data = td, estimand = "ATE",
                                     n.trees = 300, stop.method = "es.max", verbose = FALSE))
@@ -200,4 +202,110 @@ test_that("wtcompare shows the weighted pass's population SB under the Pop. SB h
   expect_match(tt$footnote, "Pop. SB: largest absolute difference", fixed = TRUE)
   expect_equal(tt$stored$table[, "smd"], xv_smd(d, smdtype = "population", wt = "w"),
                tolerance = 1e-12, ignore_attr = TRUE)
+})
+
+# Stata 2.5.1 parity matrix ----
+# Same-author oracle: catches cross-language divergence, but cannot detect
+# a shared method error. cobalt/twang above remain the independent checks.
+# Source contract: table1_tc.sthlp:325-359; desctab.ado:389-405, 676-692,
+# 1843-1849; _desctab_collect.ado:1598-1726. Set TABTOOLS_STATA_DIR to the
+# directory containing the pinned 2.5.1 ado files. No installed Stata ado
+# or old golden-presentation translation is used as the oracle.
+
+xv_stata_matrix <- function(d, cases, stata_dir) {
+  scratch <- tempfile("tabtools-smd-stata-")
+  dir.create(scratch)
+  on.exit(unlink(scratch, recursive = TRUE), add = TRUE)
+  # Numeric codes preserve categorical shares and arm order across languages.
+  sd <- d
+  sd$arm <- match(sd$arm, c("A", "B", "C"))
+  sd$reg <- match(sd$reg, sort(unique(sd$reg)))
+  utils::write.csv(sd, file.path(scratch, "data.csv"), row.names = FALSE, na = ".")
+  # Refuse quote/newline injection into Stata source; ordinary spaces work.
+  if (grepl('["\r\n`]', stata_dir)) stop("TABTOOLS_STATA_DIR contains a Stata quoting character")
+  body <- c("version 17.0", "clear all", "set more off",
+            sprintf('adopath ++ "%s"', stata_dir),
+            "quietly findfile desctab.ado",
+            sprintf('assert r(fn) == "%s/desctab.ado"', stata_dir),
+            'file open result using "results.csv", write text replace',
+            'file write result "id,row,smd" _n',
+            'file open meta using "metadata.txt", write text replace')
+  for (i in seq_len(nrow(cases))) {
+    ca <- cases[i, ]
+    weight <- if (ca$weight == "fw") "[fweight=f]" else ""
+    weight_option <- if (ca$weight == "wt") "wt(w)" else ""
+    body <- c(body, 'import delimited using "data.csv", clear asdouble',
+              if (ca$empty != "none") sprintf("replace %s = . if arm == 3", ca$empty),
+              sprintf("quietly table1_tc %s, by(arm) vars(age contn \\ crp contln \\ sex bin \\ reg cat) smd smdtype(%s) nopvalue %s",
+                      weight, ca$type, weight_option),
+              "matrix S = r(table)",
+              sprintf('file write meta "%s|`r(smdtype)\'|`r(smdnote)\'" _n', ca$id),
+              "local names : rownames S", 'local col = colnumb(S, "smd")',
+              "forvalues j = 1/`=rowsof(S)' {",
+              "    local row : word `j' of `names'",
+              sprintf('    file write result "%s,`row\'," %%21.16g (S[`j\', `col\']) _n', ca$id),
+              "}")
+  }
+  body <- c(body, "file close result", "file close meta", 'display "SMD_PARITY_COMPLETE"')
+  writeLines(body, file.path(scratch, "smd.do"))
+  proc <- processx::run(Sys.which("stata-mp"), c("-b", "do", "smd.do"), wd = scratch,
+                       error_on_status = FALSE, timeout = 120000)
+  # Batch Stata exits 0 on do-file errors. The completion marker and error
+  # codes are decisive; licence-bearing logs stay inside task scratch.
+  logs <- list.files(scratch, pattern = "\\.log$", full.names = TRUE)
+  if (length(logs) != 1L) stop("Stata SMD oracle did not produce exactly one log")
+  log <- readLines(logs, warn = FALSE)
+  errors <- grep("^r\\([0-9]+\\);", trimws(log), value = TRUE)
+  if (proc$status != 0L || length(errors) || !any(trimws(log) == "SMD_PARITY_COMPLETE") ||
+      !any(grepl("end of do-file", log, fixed = TRUE))) {
+    stop("Stata SMD oracle failed: ", paste(errors, collapse = ", "))
+  }
+  list(table = utils::read.csv(file.path(scratch, "results.csv"), na.strings = ".", strip.white = TRUE),
+       meta = strsplit(readLines(file.path(scratch, "metadata.txt")), "|", fixed = TRUE))
+}
+
+test_that("Stata 2.5.1 agrees on every weighted multi-group row kind and empty-group case", {
+  skip_if(!nzchar(Sys.which("stata-mp")), "stata-mp not on PATH")
+  skip_if_not_installed("processx")
+  stata_dir <- Sys.getenv("TABTOOLS_STATA_DIR")
+  skip_if(!nzchar(stata_dir), "set TABTOOLS_STATA_DIR to the pinned Stata 2.5.1 source directory")
+  stata_dir <- normalizePath(stata_dir, mustWork = TRUE)
+  expect_match(readLines(file.path(stata_dir, "desctab.ado"), n = 1L), "Version 2.5.1", fixed = TRUE)
+  cases <- expand.grid(type = c("population", "maxpair"), weight = c("none", "wt", "fw"),
+                       empty = c("none", "age", "crp", "sex", "reg"), stringsAsFactors = FALSE)
+  cases$id <- sprintf("SMD%02d", seq_len(nrow(cases)))
+  d <- xv_data(20261015, n = 90)
+  # All four category levels and all three arms are present. Unequal group
+  # sizes, variances and weights distinguish a shared scale from pair SDs.
+  expect_identical(sort(unique(d$arm)), c("A", "B", "C"))
+  expect_identical(sort(unique(d$reg)), c("e", "n", "s", "w"))
+  ref <- xv_stata_matrix(d, cases, stata_dir)
+  expect_identical(sort(unique(ref$table$id)), cases$id)
+  expect_identical(nrow(ref$table), 120L)
+  expect_length(ref$meta, 30L)
+  for (i in seq_len(nrow(cases))) {
+    ca <- cases[i, ]
+    dd <- d
+    if (ca$empty != "none") dd[dd$arm == "C", ca$empty] <- NA
+    weights <- switch(ca$weight, none = list(), wt = list(wt = "w"), fw = list(fweight = "f"))
+    tt <- do.call(table1_tc, c(list(data = dd, by = "arm", vars = xv_vars, smd = TRUE,
+                                   smdtype = ca$type, nopvalue = TRUE), weights))
+    rows <- ref$table[ref$table$id == ca$id, ]
+    expect_identical(rows$row, rownames(tt$stored$table), info = ca$id)
+    # Same closed-form algorithm; tolerance permits floating-point order
+    # and Stata macro rounding, not a different variance convention.
+    expect_equal(unname(tt$stored$table[, "smd"]), rows$smd, tolerance = 1e-10, label = ca$id)
+    expect_identical(ref$meta[[i]], c(ca$id, tt$stored$smdtype, tt$stored$smdnote))
+    if (ca$empty != "none") {
+      expect_true(is.na(rows$smd[rows$row == ca$empty]), info = ca$id)
+      expect_true(all(is.finite(rows$smd[rows$row != ca$empty])), info = ca$id)
+    } else {
+      expect_true(all(is.finite(rows$smd)), info = ca$id)
+    }
+  }
+  expect_identical(sum(is.na(ref$table$smd)), 24L)
+  expect_identical(sum(is.finite(ref$table$smd)), 96L)
+  cat(sprintf("STATA MATRIX RECEIPT scenarios=%d cells=%d missing=%d finite=%d metadata=%d\n",
+              length(unique(ref$table$id)), nrow(ref$table), sum(is.na(ref$table$smd)),
+              sum(is.finite(ref$table$smd)), length(ref$meta)))
 })

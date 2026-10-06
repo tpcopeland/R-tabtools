@@ -188,7 +188,11 @@
 #'   `wt` and `by`).
 #' @param wtn Show effective counts, `(sum w_cell / sum w_group) * N_group`,
 #'   in weighted cells (requires `wt`).
-#' @param smdthreshold SMD highlighting threshold; `-1` disables.
+#' @param smdthreshold SMD highlighting threshold in Excel; `-1` disables.
+#' @param nosmdhighlight Logical; default `FALSE`. Set `TRUE` to leave SMD
+#'   cells unhighlighted in Excel, equivalent to `smdthreshold = -1`. May
+#'   not be combined with an explicitly supplied `smdthreshold` (error class
+#'   `tabtools_error_smdhighlight`). Markdown does not highlight SMD cells.
 #' @param smdtype What the SMD column (with `smd = TRUE`) reports:
 #'   * `"pair"` (default): the two-group SMD above, header `SMD`.
 #'   * `"population"`: the population standardized bias of McCaffrey et al.
@@ -209,7 +213,7 @@
 #'
 #'   For `"population"` and `"maxpair"` a footnote states the definition.
 #'   A group with no values for a variable leaves that variable's statistic
-#'   blank. `smdthreshold` highlights any of the three. As Stata tabtools
+#'   blank. `smdthreshold` highlights any of the three in Excel. As Stata tabtools
 #'   2.4.0 `smdtype()`.
 #' @param smdpair The two groups of `by` a `"pair"` SMD compares, instead of
 #'   the first two: a length-2 character or numeric vector. With a numeric
@@ -365,11 +369,24 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
                       highlight = NULL, zebra = FALSE, headershade = FALSE,
                       headercolor = NULL, zebracolor = NULL,
                       csv = NULL, markdown = NULL, mdappend = FALSE,
-                      test_args = NULL, dots = FALSE, excel = NULL) {
+                      test_args = NULL, dots = FALSE, excel = NULL, nosmdhighlight = FALSE) {
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Table 1"
   total <- match.arg(total)
+  if (!is.logical(nosmdhighlight) || length(nosmdhighlight) != 1L || is.na(nosmdhighlight)) {
+    cli::cli_abort("{.arg nosmdhighlight} must be TRUE or FALSE.",
+                   class = "tabtools_error_smdhighlight", call = NULL)
+  }
+  # desctab.ado:389-405 (2.5.1): explicit threshold and switch conflict,
+  # including an explicit -1; an omitted threshold is changed to -1.
+  if (nosmdhighlight) {
+    if (!base::missing(smdthreshold)) {
+      cli::cli_abort("{.arg nosmdhighlight} and {.arg smdthreshold} may not be combined.",
+                     class = "tabtools_error_smdhighlight", call = NULL)
+    }
+    smdthreshold <- -1
+  }
   smdpair_as <- tryCatch(rlang::arg_match(smdpair_as, c("auto", "values", "labels")),
     error = function(e) cli::cli_abort("{.arg smdpair_as} must be one of {.val auto}, {.val values} or {.val labels}.",
                                        class = "tabtools_error_smdpair_as", call = NULL))
