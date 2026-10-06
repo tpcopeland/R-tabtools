@@ -141,11 +141,11 @@
 .stata_sum <- function(x) .Call(tt_seqsum_c, as.double(x))
 
 # Mean and SD the way _t1tcfc_collect_mata computes them
-# (_desctab_collect.ado:1535-1557): sums in data order (squares formed
-# first), ss = sum(y^2) - sum(y)^2 / n, tiny negative ss clamped to 0,
+# (_desctab_collect.ado:1883-1902, tabtools 2.1.15 F05): sums in data order,
+# ss about the mean (.t1_centered_ss()), tiny negative ss clamped to 0,
 # var = ss / (n - 1). A negative var (ss < -1e-8) has no square root in
-# Mata, so the SD is missing and prints as "." (a constant 2.675 in 15,000
-# rows gives "2.68\u00b1.", as Stata does).
+# Mata, so the SD is missing and prints as "." (before the centered SD, a
+# constant 2.675 in 15,000 rows gave "2.68\u00b1."; now "2.68\u00b10.00").
 #
 # Overflow (Milestone H, H10; probed in Stata 17 on tabtools 2.1.11 and
 # 2.1.12): a sum
@@ -157,13 +157,36 @@
 # missing), so a finite quotient of an overflowing square is kept: R forms
 # it as sx * (sx / n) when sx * sx is out of range. Stata's range ends at
 # 8.99e307 (R's at 1.80e308), and R applies Stata's limit (.st_sum()).
+# Corrected two-pass sum of squares as Mata forms it in tabtools >= 2.1.15
+# (_desctab_collect.ado:1893-1901, F05): with wdev = w :* (y :- mean) and
+# wdev2 = wdev :* (y :- mean), ss = sum(wdev2) - sum(wdev)^2 / sw. The raw
+# moment sum(w y^2) (`sx2`, NA when it overflows) still decides overflow
+# exactly as before: ss is missing when sx2 or the mean is missing or any
+# wdev2 is beyond Stata's range. Tiny negatives are clamped to 0 (:1901).
+.t1_centered_ss <- function(w, y, mean, sw, sx2) {
+  if (is.na(mean) || is.na(sx2)) return(NA_real_)
+  d <- y - mean
+  wdev <- w * d
+  wdev2 <- wdev * d
+  if (!all(.st_ok(wdev)) || !all(.st_ok(wdev2))) return(NA_real_)
+  sd1 <- .st_sum(wdev)
+  if (is.na(sd1)) return(NA_real_)
+  # Mata's `sum(wdev)^2 / swg` (:1899) has no extended range, unlike
+  # `a * a / b`: an overflowing square is missing (Stata 17: a = -6.86e156,
+  # b = 3e40 gives "." for a^2/b but 1.5708e273 for a*a/b).
+  sq <- sd1 * sd1
+  if (!.st_ok(sq)) return(NA_real_)
+  ss <- .st_num(.st_sum(wdev2) - sq / sw)
+  if (!is.na(ss) && ss < 0 && ss > -1e-8) ss <- 0
+  ss
+}
+
 .t1_mean_sd <- function(y) {
   n <- length(y)
   if (!n) return(c(mean = NA_real_, sd = NA_real_))
   sx <- .st_sum(y)
   if (is.na(sx)) return(c(mean = NA_real_, sd = NA_real_))
-  ss <- .st_num(.st_sum(y * y) - .t1_sq_over(sx, n))
-  if (!is.na(ss) && ss < 0 && ss > -1e-8) ss <- 0
+  ss <- .t1_centered_ss(rep(1, n), y, sx / n, n, .st_sum(y * y))
   v <- if (n > 1) ss / (n - 1) else NA_real_
   c(mean = sx / n, sd = if (!is.na(v) && v >= 0) sqrt(v) else NA_real_)
 }

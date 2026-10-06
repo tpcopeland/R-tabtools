@@ -5,6 +5,13 @@ These follow Stata tabtools 2.4.0. Until the Stata goldens are regenerated
 from 2.4.0, the golden tests translate the new pair header, note and
 footnote back to 2.1.14's form.
 
+* Continuous-variable SDs are computed about the mean, as Stata 2.1.15
+  does, in the unweighted, `wt` and `fweight` paths. Values far from zero
+  (`1e8 + c(0.1, 0.2, 0.3, 0.4)`) no longer show SD 0 or a missing SD from
+  cancelling raw moments. A constant column that showed `2.68±.` now
+  shows `2.68±0.00`, and geometric SDs (`contln`) change with it. A
+  weighted SD is still missing when the square of the centered weighted sum
+  overflows, as in Stata.
 * `table1_tc()` with three or more groups and `smd = TRUE` names the pair
   its SMD compares wherever the table goes. The column header reads
   `SMD (A vs B)`, a footnote says "SMD compares A vs B only (the first two

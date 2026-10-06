@@ -184,10 +184,12 @@
 
 #' Weighted summary of one continuous variable in one column
 #'
-#' `_desctab_collect.ado:1504-1559`. Observations need a non-missing value
+#' `_desctab_collect.ado:1860-1920`. Observations need a non-missing value
 #' and a positive statistic weight (contln: also x > 0). `n` is the display
 #' count (records under wt(), frequencies under fweight). Mean `sum(w y) /
-#' sum(w)`; `ss = sum(w y^2) - sum(w y)^2 / sum(w)` (tiny negatives clamped);
+#' sum(w)`; `ss` about the mean,
+#' `sum(w d^2) - sum(w d)^2 / sum(w)` with d = y - mean (tiny negatives
+#' clamped);
 #' variance `n / (sum(w) (n - 1)) * ss` under wt() (Stata `[aw=]`), else
 #' `ss / (sum(w) - 1)` (`[fw=]`, the unweighted formula when w = 1). The sums
 #' are Mata `sum()`s, in double and in data order (.stata_sum(); products
@@ -221,9 +223,9 @@
   # product w * y or w * y^2 beyond the double range makes Stata divide the
   # weights by a power of two and start again (.t1w_wscale()); a sum that
   # still holds a missing product (a y^2 beyond the range) is missing, so
-  # the SD is ".", and a mean whose sum overflows is a blank cell. Mata's
-  # `sx * sx / sw` keeps a finite quotient of an overflowing square
-  # (.t1_sq_over()).
+  # the SD is ".", and a mean whose sum overflows is a blank cell. The
+  # centered ss squares sum(w d) with Mata's `^2`, which has no extended
+  # range, so an overflowing square is a missing SD (.t1_centered_ss()).
   if (kind == "wt" && (is.na(sw) || !all(.st_ok(p1)) || !all(.st_ok(p2)))) {
     w <- w / .t1w_wscale(w)
     sw <- .st_sum(w)
@@ -233,8 +235,9 @@
   if (is.na(sw) || sw <= 0) return(list(n = n, a = NA_real_, b = NA_real_, c = NA_real_))
   sx <- .st_sum(p1)
   if (is.na(sx)) return(list(n = n, a = NA_real_, b = NA_real_, c = NA_real_))
-  ss <- .st_num(.st_sum(p2) - .t1_sq_over(sx, sw))
-  if (!is.na(ss) && ss < 0 && ss > -1e-8) ss <- 0
+  # Centered (_desctab_collect.ado:1893-1901, tabtools 2.1.15 F05); the
+  # raw-moment sum of w y^2 only gates overflow.
+  ss <- .t1_centered_ss(w, y, sx / sw, sw, .st_sum(p2))
   v <- NA_real_
   if (kind == "wt") {
     if (nobs > 1) {
