@@ -71,15 +71,19 @@
 #' percentages are withheld for a variable carrying a suppressed count, its
 #' p-value, test, statistic, and SMD read `Suppressed`, and a standard note
 #' joins the footnote. As in Stata, the engine protects the counts the table
-#' shows, not the ones that can be worked out from them: a categorical
-#' variable's hidden missing count is N minus its shown level counts, and a
-#' binary variable's hidden negative count follows from its n (%) cell, so a
-#' small count of either kind can be read off the table. `missingsummary`
-#' and `slashN` show these counts, which are then protected. With
-#' `wtcompare` and neither `wtn` nor `percent_n`, a protected variable's
-#' weighted column shows effective counts rather than percentages, as Stata
-#' does, so give `wtn` or `percent_n` when using `smallcells` with
-#' `wtcompare`.
+#' shows, and also the ones that follow from them (Stata 2.1.17): a
+#' categorical variable's hidden missing count is N minus its shown level
+#' counts, and a binary variable's hidden negative and missing counts follow
+#' from the denominator its n (%) cell releases. A hidden count below `k` is
+#' protected as a primary cell, as if `missingsummary` or `slashN` printed it:
+#' shown cells get a greater-than-or-equal marker where needed, percentages
+#' are withheld, and the p-value is suppressed. The group and total Ns are
+#' shared by every variable, so in a table of two or more variables they are
+#' never withheld as complementary cells; a count that could only be
+#' protected by withholding them is refused with an error of class
+#' `tabtools_error_smallcells`. `smallcells` cannot be combined with
+#' percent-only display, which includes `wtcompare` without `wtn` or
+#' `percent_n`.
 #' Count totals, artificial flow bounds, and required flows must be below
 #' 2^53 for small-cell certification to preserve single-count changes;
 #' larger frequency-weighted blocks are refused with `smallcells`.
@@ -214,7 +218,14 @@
 #'   labels of a labelled numeric `by`). Each must name exactly one group.
 #'   The header names the pair (`SMD (C vs A)`); with more than two groups a
 #'   footnote adds "chosen with smdpair()". Requires `smd = TRUE` and
-#'   `smdtype = "pair"`. As Stata tabtools 2.4.0 `smdpair()`.
+#'   `smdtype = "pair"`. As Stata tabtools 2.4.0 `smdpair()`. A token that is
+#'   the value of one group and the label of another (value labels that are
+#'   themselves numbers) is refused under `smdpair_as = "auto"`. A label equal
+#'   to its own group's value is not ambiguous. A logical `by` takes `TRUE` /
+#'   `FALSE` (or the strings), read as 1 / 0.
+#' @param smdpair_as `"auto"` (default), `"values"` or `"labels"`: read every
+#'   `smdpair` token as a `by` value or as label text. As Stata's
+#'   `smdpair(..., values|labels)`.
 #' @param xlsx,sheet,title,footnote,open Excel target and annotations.
 #' @param borderstyle One of `"thin"`, `"default"`, `"medium"`, `"academic"`.
 #' @param font,fontsize Excel font family and size; `NULL` uses the session
@@ -347,6 +358,7 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
                       missingsummary = FALSE, smallcells = NULL,
                       wtcompare = FALSE, wtn = FALSE, smdthreshold = 0.1,
                       smdtype = c("pair", "population", "maxpair"), smdpair = NULL,
+                      smdpair_as = c("auto", "values", "labels"),
                       xlsx = NULL, sheet = "Table 1", title = NULL,
                       footnote = NULL, open = FALSE, borderstyle = NULL,
                       font = NULL, fontsize = NULL, boldp = NULL,
@@ -358,6 +370,12 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Table 1"
   total <- match.arg(total)
+  smdpair_as <- tryCatch(rlang::arg_match(smdpair_as, c("auto", "values", "labels")),
+    error = function(e) cli::cli_abort("{.arg smdpair_as} must be one of {.val auto}, {.val values} or {.val labels}.",
+                                       class = "tabtools_error_smdpair_as", call = NULL))
+  if (smdpair_as != "auto" && is.null(smdpair)) {
+    cli::cli_abort("{.arg smdpair_as} requires {.arg smdpair}.", class = "tabtools_error_smdpair_as", call = NULL)
+  }
   smdtype_given <- !base::missing(smdtype)
   smdtype <- match.arg(smdtype)
   for (a in c("missing", "test", "statistic", "headerperc", "smd", "nopvalue", "varlabplus",
@@ -450,11 +468,14 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   }
   # desctab.ado:282-293: weighted tables default to percent-only, which
   # smallcells() cannot protect.
-  implicit_percent <- percent || (!is.null(wt) && !(percent_n || wtn) && !wtcompare)
+  # tabtools 2.1.17 (desctab.ado:~300): wtcompare is exempt from that default,
+  # but its weighted columns are percent-only without wtn/percent_n, so it is
+  # refused on the same terms.
+  implicit_percent <- percent || (!is.null(wt) && !(percent_n || wtn))
   if (!is.null(smallcells) && implicit_percent) {
     cli::cli_abort(c("{.arg smallcells} cannot be combined with percent-only display.",
                      "i" = "Use percent_n, wtn, or the default n (%); percentages are withheld for any variable that carries a suppressed count."),
-                   call = NULL)
+                   class = "tabtools_error_smallcells_percent_only", call = NULL)
   }
   if (smd && is.null(by)) cli::cli_abort("{.arg smd} requires {.arg by}.", call = NULL)
   if (smdtype_given && !smd) {
@@ -516,7 +537,8 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   gp <- .t1_groups(data, by, total != "none", labels, by_full = by_full)
   touse <- !is.na(gp$gid)
   smd_pair <- if (is.null(smdpair)) NULL else
-    .t1_resolve_smdpair(smdpair, gp, by_numeric = !(is.character(data[[by]]) || is.factor(data[[by]])))
+    .t1_resolve_smdpair(smdpair, gp, by_numeric = !(is.character(data[[by]]) || is.factor(data[[by]])),
+                        as = smdpair_as, by_logical = is.logical(data[[by]]))
   specs <- lapply(specs, .t1_resolve_var, data = data, touse = touse,
                   include_missing = missing, labels = labels)
   o <- list(total = total, missing = missing, test = test, statistic = statistic,
@@ -544,20 +566,23 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
             spacelowpercent = spacelowpercent,
             extraspace = extraspace, percent = percent, percent_n = percent_n, slashN = slashN,
             catrowperc = catrowperc, pdp = pdp, highpdp = highpdp,
-            missingsummary = missingsummary, test_args = test_args, smallcells = smallcells)
+            missingsummary = missingsummary, test_args = test_args, smallcells = smallcells,
+            # _desctab_collect.ado (2.1.17): shared group/total Ns cannot be withheld
+            # per variable once the table has two or more variables.
+            sc_nvars = length(specs),
+            sc_names = vapply(specs, function(x) as.character(x$name), ""),
+            sc_labels = vapply(specs, function(x) as.character(x$label), ""))
   # desctab.ado:132-138: the small-cell note joins any user footnote.
   sc_note <- if (!is.null(smallcells)) tt_sc_footnote(smallcells) else NULL
   if (!is.null(sc_note) && !grepl(sc_note, footnote %||% "", fixed = TRUE)) {
-    footnote <- if (is.null(footnote) || !nzchar(footnote)) sc_note else paste(footnote, sc_note)
+    footnote <- .t1_join_note(footnote, sc_note)
   }
   # The SMD column's comparison travels with every export as a footnote
   # (desctab.ado, tabtools 2.4.0: joined with a backslash when the footnote
   # already uses that line separator, and not repeated).
   smd_note <- if (smd) .t1_smd_note(smdtype, gp, smd_pair) else NULL
   if (!is.null(smd_note) && !grepl(smd_note, footnote %||% "", fixed = TRUE)) {
-    footnote <- if (is.null(footnote) || !nzchar(footnote)) smd_note
-                else if (grepl(" \\ ", footnote, fixed = TRUE)) paste(footnote, "\\", smd_note)
-                else paste(footnote, smd_note)
+    footnote <- .t1_join_note(footnote, smd_note)
   }
   tt <- .t1_run_passes(data, specs, gp, o, style, title, footnote, sheet, labels,
                        wprep = wprep, wtcompare = wtcompare, show_wtn = percent_n || wtn)
@@ -567,6 +592,7 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
     if (!is.null(smd_note)) tt$stored$smdnote <- smd_note
   }
   tt$meta$sample_accounting <- .t1_sample_accounting(sample_input, specs, gp, o, wtcompare)
+  if (!is.null(smallcells)) tt <- .t1_sc_mask_ledger(tt, gp, length(specs))
   if (!is.null(smallcells)) {
     sc <- .t1_sc_stored(tt, gp, by, smallcells, total = total != "none" && gp$G > 1L,
                         wtcompare = wtcompare)

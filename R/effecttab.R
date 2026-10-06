@@ -374,6 +374,7 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
   additive <- rep(NA, M)
   log_scale <- rep("", M)
   p_null_default <- rep(FALSE, M)
+  lo_bad <- vector("list", M)
   samples <- vector("list", M)
   for (m in seq_len(M)) {
     pieces <- .et_pieces(fits[[m]])
@@ -396,6 +397,7 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
     }
     notes[[m]] <- unique(unlist(lapply(rows, function(r) attr(r, "notes"))))
     p_null_default[m] <- any(vapply(rows, function(r) isTRUE(attr(r, "p_null_default")), NA))
+    lo_bad[[m]] <- do.call(rbind, lapply(rows, function(r) attr(r, "lo_bad")))
     model_id[m] <- if (from_matrix) paste0("matrix:", m) else attr(rows[[1]], "model_id") %||% ""
     r <- do.call(rbind, rows)
     # teffects rows: contrasts first, then the potential-outcome means.
@@ -412,6 +414,15 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
     cli::cli_abort(c("The p-values of model {which(p_null_default)[1]} were derived from {.field std.error} against a null of 0, but the effect is headed {.val {effect}}, a ratio.",
                      "i" = "Add a {.field null.value} column (1 for a ratio on its own scale), or a {.field p.value} column."),
                    class = "tabtools_error_df_null", call = NULL)
+  }
+  # D5: a derived Wald interval of a ratio that reaches 0 or below (a frame
+  # stating null.value 1, or headed as a ratio); one warning per call.
+  ratio_hdr <- .et_is_ratio_header(effect)
+  bad_terms <- unique(unlist(lapply(lo_bad, function(b) if (is.null(b)) character() else b$term[b$null_one | ratio_hdr])))
+  if (length(bad_terms)) {
+    cli::cli_warn(c("A ratio's derived confidence interval reaches 0 or below for {.val {bad_terms}}: the Wald interval is symmetric on the ratio scale.",
+                    "i" = "Supply {.field conf.low} and {.field conf.high} computed on the log scale (for example {.code exp(estimate +/- q * se)}), or give a log-scale estimate and standard error."),
+                  class = "tabtools_warning_ratio_interval", call = NULL)
   }
   # Notes the inputs raise (p-values of ratios recomputed against 1, a
   # non-zero null) join the footnote, in every sink.

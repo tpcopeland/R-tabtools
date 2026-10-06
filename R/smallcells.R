@@ -177,7 +177,7 @@
 # The whole decision procedure (`_ttsc_run`, :352-587). Returns
 # list(status = -1 invalid input | 0 uncertifiable | 1 certified, ...).
 .sc_run <- function(counts, exact, sensitive, rowexact, rowsensitive, colexact,
-                    colsensitive, grandexact, grandsensitive, k) {
+                    colsensitive, grandexact, grandsensitive, k, fixedmargins = FALSE) {
   nr <- nrow(counts)
   nc <- ncol(counts)
   bad <- list(status = -1L)
@@ -276,7 +276,11 @@
   }
 
   # Full-block fallback (:509-530): mark every published positive cell and
-  # margin truthfully ("<k" below the threshold, ">=k" otherwise).
+  # margin truthfully ("<k" below the threshold, ">=k" otherwise). Under
+  # `fixedmargins` (tabtools 2.1.17, _tabtools_smallcells.ado:521-535) the
+  # column and grand margins are never withheld: desctab prints each group
+  # N once for every variable, so withholding them here would protect
+  # nothing.
   if (failures > 0) {
     for (i in seq_len(nr)) {
       for (j in seq_len(nc)) {
@@ -289,11 +293,11 @@
       }
     }
     for (j in seq_len(nc)) {
-      if (colstate[j] == 0 && colexact[j] == 1 && coltotals[j] > 0) {
+      if (!fixedmargins && colstate[j] == 0 && colexact[j] == 1 && coltotals[j] > 0) {
         colstate[j] <- if (coltotals[j] < k) 1 else 2
       }
     }
-    if (grandstate == 0 && grandexact == 1 && grand > 0) {
+    if (!fixedmargins && grandstate == 0 && grandexact == 1 && grand > 0) {
       grandstate <- if (grand < k) 1 else 2
     }
     failures <- .sc_failures(counts, state, rowstate, colstate, grandstate, k)
@@ -361,6 +365,9 @@
 #' @param rowexact,rowsensitive,colexact,colsensitive 0/1 vectors for the row
 #'   and column margins. Default all 0.
 #' @param grandexact,grandsensitive 0/1 flags for the grand total.
+#' @param fixedmargins When `TRUE`, column and grand margins are never
+#'   withheld as complementary cells (they are published elsewhere, e.g. the
+#'   group N shared by every variable of a table; Stata 2.1.17).
 #' @return A list: `mask` (0 shown, 1 primary, 2 complementary), `rowmask`,
 #'   `colmask`, `totalmask`, `n_primary`, `n_secondary`, `smallcells`.
 #'   Errors of class `tabtools_smallcells_input` (Stata r(198)) or
@@ -370,7 +377,7 @@
 tt_smallcells <- function(counts, smallcells, exact = NULL, sensitive = NULL,
                           rowexact = NULL, rowsensitive = NULL,
                           colexact = NULL, colsensitive = NULL,
-                          grandexact = 0, grandsensitive = 0) {
+                          grandexact = 0, grandsensitive = 0, fixedmargins = FALSE) {
   k <- .sc_check_threshold(smallcells)
   counts <- as.matrix(counts)
   nr <- nrow(counts)
@@ -404,14 +411,16 @@ tt_smallcells <- function(counts, smallcells, exact = NULL, sensitive = NULL,
     .sc_abort_input("Grand-margin flags must be 0 or 1.")
   }
   res <- .sc_run(counts, exact, sensitive, rowexact, rowsensitive, colexact,
-                 colsensitive, grandexact, grandsensitive, k)
+                 colsensitive, grandexact, grandsensitive, k,
+                 fixedmargins = isTRUE(fixedmargins))
   if (res$status == -1L) {
     .sc_abort_input("Counts and masks must be conformable nonnegative integer/binary matrices.")
   }
   if (res$status == 0L) {
     cli::cli_abort(
       "{.arg smallcells}: exact-disclosure protection could not be certified for this count block.",
-      class = "tabtools_smallcells_uncertified", call = NULL
+      class = c("tabtools_error_smallcells", "tabtools_error_smallcells_uncertified",
+                "tabtools_smallcells_uncertified"), call = NULL
     )
   }
   res$status <- NULL
@@ -494,8 +503,11 @@ tt_sc_block_cont <- function(n, sample_n, missingsummary = FALSE, total = FALSE)
 #' Rows: the displayed levels, then hidden rows (`_desctab_collect.ado:
 #' 694-773`): binary variables add the negative and missing rows; categorical
 #' variables add a missing row unless `missing` shows it as a level (then
-#' `missing_level` is its row index, 0 if absent). Hidden rows are published
-#' only when `missingsummary` or `slashN` (row-percent-free) prints them.
+#' `missing_level` is its row index, 0 if absent). Hidden rows are always
+#' sensitive (tabtools 2.1.17: they follow by subtraction from the printed
+#' levels and group N, or from a printed percentage's denominator) and are
+#' exact (published) only when `missingsummary` or `slashN`
+#' (row-percent-free) prints them.
 #' Level-row margins are published with `total` or `slashN` + `catrowperc`.
 #' @param level_counts Level x group matrix of counts (one row, the positive
 #'   count, for binary variables).
@@ -526,6 +538,11 @@ tt_sc_block_cat <- function(level_counts, nonmiss, sample_n, binary = FALSE,
     missrow <- nl + 2L
     counts[negrow, ] <- nonmiss - level_counts[1, ]
     counts[missrow, ] <- sample_n - nonmiss
+    # tabtools 2.1.17 (_desctab_collect.ado:~762): the hidden rows are
+    # sensitive even when not printed: a printed percentage releases the
+    # non-missing denominator, so negative and missing follow by subtraction.
+    sensitive[negrow, ] <- 1
+    sensitive[missrow, ] <- 1
     if (missingsummary || slash_den) {
       exact[missrow, ] <- 1
       sensitive[missrow, ] <- 1
@@ -537,6 +554,8 @@ tt_sc_block_cat <- function(level_counts, nonmiss, sample_n, binary = FALSE,
   } else if (!include_missing) {
     missrow <- nrr
     counts[missrow, ] <- sample_n - nonmiss
+    # Levels plus the group N give the missing row (2.1.17).
+    sensitive[missrow, ] <- 1
     if (missingsummary || (slashN && !catrowperc)) {
       exact[missrow, ] <- 1
       sensitive[missrow, ] <- 1
@@ -548,6 +567,9 @@ tt_sc_block_cat <- function(level_counts, nonmiss, sample_n, binary = FALSE,
   rowexact <- rowsensitive <- rep(0, nrr)
   rowexact[seq_len(nl)] <- row_released
   rowsensitive[seq_len(nl)] <- row_released
+  # Hidden rows' row totals are sensitive whenever the level-row margins are
+  # released (2.1.17, _desctab_collect.ado:~807).
+  if (nrr > nl) rowsensitive[(nl + 1L):nrr] <- row_released
   if (missrow > 0L && missingsummary && total) {
     rowexact[missrow] <- 1
     rowsensitive[missrow] <- 1
@@ -569,6 +591,9 @@ tt_sc_block_cat <- function(level_counts, nonmiss, sample_n, binary = FALSE,
 #' Mirrors `_desctab_collect.ado:670-690` (continuous) and `:769-836`
 #' (categorical/binary). Columns of every returned mask are the groups, then
 #' the total column when `block$total` is set.
+#' @param fixedmargins `TRUE` when the table has two or more variables (they
+#'   share the group and total N, which therefore cannot be withheld).
+#' @param variable Variable name for the refusal message.
 #' @return list: `cells` (levels x columns; the N row for continuous
 #'   variables), `missing` (the missing row's codes, or 0), `denominator`
 #'   (slashN denominator codes: 1 small denominator, 3 derived), `sample`
@@ -577,11 +602,23 @@ tt_sc_block_cat <- function(level_counts, nonmiss, sample_n, binary = FALSE,
 #'   are withheld), `n_primary`, `n_secondary`, and the raw engine result.
 #' @keywords internal
 #' @noRd
-tt_sc_variable <- function(block, smallcells) {
+tt_sc_variable <- function(block, smallcells, fixedmargins = FALSE, variable = NULL) {
   k <- .sc_check_threshold(smallcells)
-  res <- tt_smallcells(block$counts, k, block$exact, block$sensitive,
-                       block$rowexact, block$rowsensitive, block$colexact,
-                       block$colsensitive, block$grandexact, block$grandsensitive)
+  res <- tryCatch(
+    tt_smallcells(block$counts, k, block$exact, block$sensitive,
+                  block$rowexact, block$rowsensitive, block$colexact,
+                  block$colsensitive, block$grandexact, block$grandsensitive,
+                  fixedmargins = fixedmargins),
+    tabtools_smallcells_uncertified = function(e) {
+      if (!isTRUE(fixedmargins)) stop(e)
+      # _desctab_collect.ado (2.1.17): with two or more variables a count
+      # that only withholding a group or total N could protect is refused.
+      cli::cli_abort(c(
+        "{if (is.null(variable)) 'A variable' else paste0('Variable ', variable)}: a count below {k} can only be protected by withholding a group or total N, which the other variables in the table release.",
+        "i" = "Combine sparse levels or leave the variable out of this table."),
+        class = c("tabtools_error_smallcells", "tabtools_error_smallcells_shared_margin"),
+        call = NULL)
+    })
   g <- ncol(block$counts)
   tot <- isTRUE(block$total)
   with_total <- function(body, margin) if (tot) cbind(body, margin, deparse.level = 0) else body

@@ -389,6 +389,9 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
   for (j in p_pos) add("width", 1, 1, j, j, value = 10)
   for (j in test_pos) add("width", 1, 1, j, j, value = text_width(j, 12))
   for (j in stat_pos) add("width", 1, 1, j, j, value = text_width(j, 14))
+  # Stata hard-codes the SMD column width to 8 (desctab.ado:2203-2204,
+  # "13 1 1 smd_pos smd_pos 8"); parity outranks fitting a long pair header.
+  # A measured width is pending a Stata-side change.
   for (j in smd_pos) add("width", 1, 1, j, j, value = 8)
 
   add("font", 1, num_rows, 1, num_cols, value = style$fontsize)

@@ -141,11 +141,37 @@ test_that("descriptive weight metadata retains raw scale and stable record ESS",
   }
 })
 
+test_that("desctab alias and ledger under smallcells for one variable; counts are masked", {
+  d <- data.frame(g = c("A", "A", "B", "B", "B", "B", "B"), x = c(NA, NA, 2, 4, 5, 6, 8))
+  args <- list(data = d, vars = c(x = "contn"), by = "g", total = "after", nopvalue = TRUE,
+               smallcells = 3, missingsummary = TRUE)
+  t <- do.call(table1_tc, args)
+  expect_identical(do.call(desctab, args), t)
+  s <- t$meta$sample_accounting
+  expect_identical(attr(as.data.frame(t), "sample_accounting"), s)
+  m <- s$measures
+  id <- "variable/1/group/1"
+  # Group A (N = 2 < 3) carries a suppression code: its counts are withheld.
+  expect_true(any(grepl("^<3$", unlist(as.data.frame(t)[2, ]))))
+  cnt <- m[m$population_id == id & m$metric %in% c("input_n", "observed_n", "missing_n", "used_n"), ]
+  expect_true(all(is.na(cnt$value)))
+  expect_true(all(cnt$status == "unavailable"))
+  expect_true(all(cnt$reason == "suppressed_by_smallcells"))
+  expect_true(all(is.na(s$exclusions$n[s$exclusions$population_id == id])))
+  expect_identical(s$version, 1L)
+})
+
 test_that("desctab shares the full descriptive ledger including all-missing groups", {
   d <- data.frame(g = c("A", "A", "B", "B"), x = c(NA, NA, 2, 4),
                   cat = factor(c(NA, NA, NA, NA), levels = "unused"))
   args <- list(data = d, vars = c(x = "contn", cat = "cat"), by = "g", missing = TRUE,
                total = "after", nopvalue = TRUE, smallcells = 3, missingsummary = TRUE)
+  # Two variables share the group N, so under smallcells the count that only
+  # withholding it could protect is refused (Stata 2.1.17+: r(498)); the
+  # ledger checks below run without smallcells.
+  expect_error(do.call(table1_tc, args), class = "tabtools_error_smallcells_shared_margin")
+  expect_error(do.call(desctab, args), class = "tabtools_error_smallcells_shared_margin")
+  args$smallcells <- NULL
   t <- do.call(table1_tc, args)
   expect_identical(do.call(desctab, args), t)
   sa_desc_values(t, "variable/1/group/1", c(input_n = 2, observed_n = 0, used_n = 0,
