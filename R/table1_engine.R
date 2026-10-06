@@ -144,8 +144,8 @@
 # (_desctab_collect.ado:1883-1902, tabtools 2.1.15 F05): sums in data order,
 # ss about the mean (.t1_centered_ss()), tiny negative ss clamped to 0,
 # var = ss / (n - 1). A negative var (ss < -1e-8) has no square root in
-# Mata, so the SD is missing and prints as "." (a constant 2.675 in 15,000
-# rows gives "2.68\u00b1.", as Stata does).
+# Mata, so the SD is missing and prints as "." (before the centered SD, a
+# constant 2.675 in 15,000 rows gave "2.68\u00b1."; now "2.68\u00b10.00").
 #
 # Overflow (Milestone H, H10; probed in Stata 17 on tabtools 2.1.11 and
 # 2.1.12): a sum
@@ -171,7 +171,12 @@
   if (!all(.st_ok(wdev)) || !all(.st_ok(wdev2))) return(NA_real_)
   sd1 <- .st_sum(wdev)
   if (is.na(sd1)) return(NA_real_)
-  ss <- .st_num(.st_sum(wdev2) - .t1_sq_over(sd1, sw))
+  # Mata's `sum(wdev)^2 / swg` (:1899) has no extended range, unlike
+  # `a * a / b`: an overflowing square is missing (Stata 17: a = -6.86e156,
+  # b = 3e40 gives "." for a^2/b but 1.5708e273 for a*a/b).
+  sq <- sd1 * sd1
+  if (!.st_ok(sq)) return(NA_real_)
+  ss <- .st_num(.st_sum(wdev2) - sq / sw)
   if (!is.na(ss) && ss < 0 && ss > -1e-8) ss <- 0
   ss
 }

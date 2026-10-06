@@ -187,7 +187,9 @@
 #' `_desctab_collect.ado:1860-1920`. Observations need a non-missing value
 #' and a positive statistic weight (contln: also x > 0). `n` is the display
 #' count (records under wt(), frequencies under fweight). Mean `sum(w y) /
-#' sum(w)`; `ss` about the mean, `sum(w d^2) - sum(w d)^2 / sum(w)` with d = y - mean (tiny negatives clamped);
+#' sum(w)`; `ss` about the mean,
+#' `sum(w d^2) - sum(w d)^2 / sum(w)` with d = y - mean (tiny negatives
+#' clamped);
 #' variance `n / (sum(w) (n - 1)) * ss` under wt() (Stata `[aw=]`), else
 #' `ss / (sum(w) - 1)` (`[fw=]`, the unweighted formula when w = 1). The sums
 #' are Mata `sum()`s, in double and in data order (.stata_sum(); products
@@ -221,9 +223,9 @@
   # product w * y or w * y^2 beyond the double range makes Stata divide the
   # weights by a power of two and start again (.t1w_wscale()); a sum that
   # still holds a missing product (a y^2 beyond the range) is missing, so
-  # the SD is ".", and a mean whose sum overflows is a blank cell. Mata's
-  # `sx * sx / sw` keeps a finite quotient of an overflowing square
-  # (.t1_sq_over()).
+  # the SD is ".", and a mean whose sum overflows is a blank cell. The
+  # centered ss squares sum(w d) with Mata's `^2`, which has no extended
+  # range, so an overflowing square is a missing SD (.t1_centered_ss()).
   if (kind == "wt" && (is.na(sw) || !all(.st_ok(p1)) || !all(.st_ok(p2)))) {
     w <- w / .t1w_wscale(w)
     sw <- .st_sum(w)

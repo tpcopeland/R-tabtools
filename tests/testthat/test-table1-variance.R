@@ -44,3 +44,50 @@ test_that("table1_tc shows the corrected SD on every sink", {
     expect_false(any(grepl("\u00b10.0000000", unlist(df), fixed = TRUE)), info = k)
   }
 })
+
+test_that("Stata 2.5.1 @712044f8 oracle strings for 1e8 + c(.1,.2,.3,.4)", {
+  # Strings from stata-mp running table1_tc, vars(x contn %24.15g), by(g),
+  # none / wt(w) / fweight(f) on the 8-row data below.
+  d <- data.frame(g = rep(1:2, each = 4), x = rep(y, 2), w = rep(c(1, 2), 4),
+                  f = rep(c(1L, 2L), 4))
+  want <- c(none = "100000000.25\u00b1.129099448721044",
+            wt = "100000000.266667\u00b1.127656951332388",
+            fw = "100000000.266667\u00b1.121106017609084")
+  args <- list(none = list(), wt = list(wt = "w"), fw = list(fweight = "f"))
+  for (k in names(args)) {
+    t1 <- do.call(table1_tc, c(list(d, by = "g", vars = "x contn %24.15g"), args[[k]]))
+    df <- as.data.frame(t1)
+    expect_true(want[[k]] %in% unlist(df), info = k)
+  }
+})
+
+test_that("csv, markdown and as.data.frame show the same corrected SD", {
+  d <- data.frame(g = rep(1:2, each = 4), x = rep(y, 2))
+  csv <- tempfile(fileext = ".csv"); md <- tempfile(fileext = ".md")
+  on.exit(unlink(c(csv, md)))
+  t1 <- table1_tc(d, by = "g", vars = "x contn %9.7f", csv = csv, markdown = md)
+  want <- "\u00b10.1290994"
+  expect_true(any(grepl(want, unlist(as.data.frame(t1)), fixed = TRUE)))
+  expect_true(any(grepl(want, readLines(csv, encoding = "UTF-8"), fixed = TRUE)))
+  expect_true(any(grepl(want, readLines(md, encoding = "UTF-8"), fixed = TRUE)))
+})
+
+test_that("weighted overflow regimes keep Stata semantics", {
+  one <- function(y, w) tabtools:::.t1w_cont_stats(y, w, rep(1, length(y)), "contn", "wt")
+  # mean (sum w*y) overflows even after rescaling-free weights -> blank mean and SD
+  s <- one(c(5e307, 5e307, 5e307), rep(1, 3))
+  expect_true(is.na(s$a)); expect_true(is.na(s$b))
+  # raw moment sum(w y^2) missing (y^2 out of range): SD missing, mean kept
+  s <- one(c(1e160, 2e160, 3e160), rep(1, 3))
+  expect_false(is.na(s$a)); expect_true(is.na(s$b))
+  # sum(wdev)^2 overflow: Mata ^2 has no extended range -> SD missing
+  # (Stata 2.5.1: 1.101299626e+133 +- .)
+  yy <- c(2.9026338025909847e133, -1.3002621865103486e133, 1.7015272624644451e133)
+  s <- one(yy, rep(1e40, 3))
+  expect_equal(s$a, 1.101299626e133, tolerance = 1e-9)
+  expect_true(is.na(s$b))
+  # huge weights are rescaled (probability weights are scale-free)
+  s1 <- one(c(1, 2, 3, 4), rep(1e307, 4))
+  s2 <- one(c(1, 2, 3, 4), rep(1, 4))
+  expect_equal(s1$b, s2$b)
+})
