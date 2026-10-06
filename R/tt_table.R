@@ -403,10 +403,15 @@ validate_tt_table <- function(x) {
     special <- c(Test = "test", Statistic = "statistic", "p-value" = "p", SMD = "smd")
     j <- nc
     last_rank <- Inf
-    while (j > 1L && f[j] %in% names(special) && !nzchar(second[j])) {
-      rank <- match(f[j], names(special))
+    # The SMD header comes from .t1_smd_header(): "SMD", "SMD (A vs B)",
+    # "Pop. SB" or "Max SMD".
+    smd_fixed <- c("SMD", .t1_smd_header("population", NULL), .t1_smd_header("maxpair", NULL))
+    is_smd <- function(h) h %in% smd_fixed || (startsWith(h, "SMD (") && endsWith(h, ")"))
+    key_of <- function(h) if (is_smd(h)) "SMD" else h
+    while (j > 1L && (f[j] %in% names(special) || is_smd(f[j])) && !nzchar(second[j])) {
+      rank <- match(key_of(f[j]), names(special))
       if (rank >= last_rank) break
-      role[j] <- special[[f[j]]]
+      role[j] <- special[[key_of(f[j])]]
       last_rank <- rank
       j <- j - 1L
     }
