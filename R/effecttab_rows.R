@@ -546,7 +546,7 @@ tt_effect_rows.predictions <- function(x, type = c("teffects", "margins"), data 
   # scale and can reach below 0, which no ratio can be (Muse audit P1-28).
   # Kept as marginaleffects (and Stata's nlcom) gives it, with a warning and
   # a footnote naming the log-scale route.
-  if (any(ratio & is.finite(num$conf.low) & num$conf.low < 0)) {
+  if (any(ratio & is.finite(num$conf.low) & num$conf.low <= 0)) {
     cli::cli_warn(c("A ratio's confidence interval reaches below 0 ({.code comparison = \"ratio\"} gives a symmetric delta-method interval).",
                     "i" = "Use {.code comparison = \"lnratioavg\", transform = exp} for an interval on the log scale."),
                   class = "tabtools_warning_ratio_interval", call = NULL)
@@ -915,6 +915,15 @@ tt_effect_rows.matrix <- function(x, type = c("teffects", "margins"), data = NUL
   has_null <- "null.value" %in% names(x)
   null <- if (has_null) as.numeric(x$null.value) else rep(0, n)
   if (has_null && anyNA(null)) cli::cli_abort("Column {.field null.value} may not be missing.", call = NULL)
+  # D5 (plan 2026-10-06): a ratio-scale frame (null 1) keeps the linear
+  # delta-method Wald, as Stata's nlcom/margins do, but an interval derived
+  # from it that reaches 0 or below cannot be a ratio's: say so.
+  ratio_bad <- need & is.finite(null) & null == 1 & is.finite(lo) & lo <= 0
+  if (any(ratio_bad)) {
+    cli::cli_warn(c("A ratio's derived confidence interval reaches 0 or below (row {which(ratio_bad)[1]}): the Wald interval is symmetric on the ratio scale.",
+                    "i" = "Supply {.field conf.low} and {.field conf.high} computed on the log scale (for example {.code exp(estimate +/- q * se)}), or give a log-scale estimate and standard error."),
+                  class = "tabtools_warning_ratio_interval", call = NULL)
+  }
   p_derived <- FALSE
   if (!"p.value" %in% names(x)) {
     x$p.value <- rep(NA_real_, n)

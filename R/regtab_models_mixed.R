@@ -256,7 +256,7 @@ tt_regtab_check.glmmTMB <- function(fit, i) {
       cli::cli_abort(c(
         "{.fn regtab} does not support the {.fn {code}} covariance structure of the random-effect term {.code {names(rs)[t]}} (model {i}).",
         "i" = "Supported: unstructured ({.code (1 + x | g)}, Stata {.code cov(unstructured)}) and diagonal ({.code diag(1 + x | g)}, Stata {.code cov(independent)})."
-      ), call = NULL)
+      ), class = "tabtools_error_tmb_covstruct", call = NULL)
     }
   }
   if (identical(stats::family(fit)$family, "nbinom1")) {
@@ -784,8 +784,9 @@ tt_regtab_check.glmmTMB <- function(fit, i) {
 # of a unit lower-triangular factor L, correlation = D^-1/2 L L' D^-1/2),
 # with their variance from sdreport(). Covariance standard errors use the
 # delta method on that scale (numerical gradient); the factor's fill order
-# is checked against VarCorr() and a mismatch leaves the CI blank. Terms
-# with other structures (cs, ar1, ...) get no CIs. Residual: the gaussian
+# is checked against VarCorr() and a mismatch leaves the CI blank, with a
+# console note. Terms with other structures (cs, ar1, ...) never get here:
+# tt_regtab_check.glmmTMB() refuses them (class tabtools_error_tmb_covstruct). Residual: the gaussian
 # dispersion parameter (`betadisp`, ln sigma; `betad` in older versions).
 .rt_tmb_cor <- function(t, k) {
   L <- diag(k)
@@ -835,6 +836,12 @@ tt_regtab_check.glmmTMB <- function(fit, i) {
           }, 0)
           cs[a, b] <- cs[b, a] <- sqrt(drop(crossprod(gr, Vb %*% gr)))
         }
+      } else {
+        # No silent blank (CAT P1-8): the factor's fill order disagrees with
+        # VarCorr(), so the covariance intervals of this term stay blank.
+        cli::cli_inform(c("Note: the covariance interval(s) of the random-effect term {.code {names(rs)[t]}} are blank.",
+                          "i" = "glmmTMB's correlation parameterization could not be matched to {.fn VarCorr}."),
+                        class = "tabtools_note_tmb_cov_ci")
       }
     }
     cov_se[[t]] <- cs

@@ -1,5 +1,17 @@
 # tabtools (development version)
 
+* `effecttab()` warns (class `tabtools_warning_ratio_interval`) when a ratio
+  frame (`null.value = 1`) with a `std.error` and no interval derives a
+  Wald interval whose lower bound is 0 or below. The linear delta-method
+  interval is kept, as Stata's `nlcom` and `margins` give it; supply a
+  log-scale interval to avoid the warning. The `marginaleffects` ratio
+  warning now also fires at a lower bound of exactly 0.
+* `regtab()` on a `glmmTMB` fit says so (message class
+  `tabtools_note_tmb_cov_ci`) when a random-effect covariance interval is
+  left blank because glmmTMB's parameterization could not be matched to
+  `VarCorr()`. The refusal of `cs()`/`ar1()` terms now has class
+  `tabtools_error_tmb_covstruct`.
+
 These follow Stata tabtools 2.4.0. Until the Stata goldens are regenerated
 from 2.4.0, the golden tests translate the new pair header, note and
 footnote back to 2.1.14's form.
