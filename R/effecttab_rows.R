@@ -546,7 +546,7 @@ tt_effect_rows.predictions <- function(x, type = c("teffects", "margins"), data 
   # scale and can reach below 0, which no ratio can be (Muse audit P1-28).
   # Kept as marginaleffects (and Stata's nlcom) gives it, with a warning and
   # a footnote naming the log-scale route.
-  if (any(ratio & is.finite(num$conf.low) & num$conf.low < 0)) {
+  if (any(ratio & is.finite(num$conf.low) & num$conf.low <= 0)) {
     cli::cli_warn(c("A ratio's confidence interval reaches below 0 ({.code comparison = \"ratio\"} gives a symmetric delta-method interval).",
                     "i" = "Use {.code comparison = \"lnratioavg\", transform = exp} for an interval on the log scale."),
                   class = "tabtools_warning_ratio_interval", call = NULL)
@@ -915,6 +915,12 @@ tt_effect_rows.matrix <- function(x, type = c("teffects", "margins"), data = NUL
   has_null <- "null.value" %in% names(x)
   null <- if (has_null) as.numeric(x$null.value) else rep(0, n)
   if (has_null && anyNA(null)) cli::cli_abort("Column {.field null.value} may not be missing.", call = NULL)
+  # D5 (plan 2026-10-06): a ratio-scale frame keeps the linear delta-method
+  # Wald, as Stata's nlcom/margins do, but a derived interval reaching 0 or
+  # below cannot be a ratio's. Recorded here, warned once per effecttab()
+  # call where the effect header is known.
+  attr(x, "lo_bad") <- need & is.finite(lo) & lo <= 0
+  attr(x, "null_one") <- is.finite(null) & null == 1
   p_derived <- FALSE
   if (!"p.value" %in% names(x)) {
     x$p.value <- rep(NA_real_, n)
@@ -945,6 +951,8 @@ tt_effect_rows.data.frame <- function(x, type = c("teffects", "margins"), data =
   wald_level <- if (!is.na(lev)) lev else if (!is.na(level_pct)) level_pct else 95
   x <- .et_df_wald(x, wald_level)
   p_null_default <- isTRUE(attr(x, "p_null_default"))
+  lo_bad <- attr(x, "lo_bad")
+  null_one <- attr(x, "null_one")
   if (is.na(lev) && isTRUE(attr(x, "derived"))) lev <- wald_level
   n <- nrow(x)
   col <- function(v, default = NA) if (v %in% names(x)) x[[v]] else rep(default, n)
@@ -994,6 +1002,10 @@ tt_effect_rows.data.frame <- function(x, type = c("teffects", "margins"), data =
                      estimator = if (is.character(est_attr) && length(est_attr) == 1L) est_attr else NULL,
                      model_id = id_attr %||% "", estimand = estimand)
   attr(rows, "p_null_default") <- p_null_default
+  # Terms (else row numbers) whose derived interval reaches 0 or below.
+  tn <- .et_df_terms(x) %||% rep(NA_character_, n)
+  tn <- ifelse(is.na(tn) | !nzchar(tn), paste0("row ", seq_len(n)), tn)
+  attr(rows, "lo_bad") <- data.frame(term = tn[lo_bad], null_one = null_one[lo_bad], stringsAsFactors = FALSE)
   rows
 }
 

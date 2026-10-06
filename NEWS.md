@@ -32,6 +32,19 @@ footnote back to 2.1.14's form.
 * When a `table1_tc()` footnote uses ` \ ` paragraphs, the automatic small-cell
   and SMD notes are appended as their own paragraphs.
 
+* `effecttab()` warns once per call (class `tabtools_warning_ratio_interval`),
+  naming each term, when a data frame stating a ratio null (`null.value = 1`)
+  or headed as a ratio (`effect = "RR"`, `"OR"`, ...) derives a Wald interval
+  from `std.error` whose lower bound is 0 or below. The linear delta-method
+  interval is kept, as Stata's `nlcom` and `margins` give it; supply a
+  log-scale interval to avoid the warning. The `marginaleffects` ratio
+  warning now also fires at a lower bound of exactly 0.
+* `regtab()` on a `glmmTMB` fit says so, in a console note (class
+  `tabtools_note_tmb_cov_ci`) and in the footnote of every sink, when a random-effect covariance interval is
+  left blank because glmmTMB's parameterization could not be matched to
+  `VarCorr()`. The refusal of `cs()`/`ar1()` terms now has class
+  `tabtools_error_tmb_covstruct`.
+
 # tabtools 0.1.0
 
 First release: an R implementation of the Stata `tabtools` commands
