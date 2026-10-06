@@ -71,15 +71,19 @@
 #' percentages are withheld for a variable carrying a suppressed count, its
 #' p-value, test, statistic, and SMD read `Suppressed`, and a standard note
 #' joins the footnote. As in Stata, the engine protects the counts the table
-#' shows, not the ones that can be worked out from them: a categorical
-#' variable's hidden missing count is N minus its shown level counts, and a
-#' binary variable's hidden negative count follows from its n (%) cell, so a
-#' small count of either kind can be read off the table. `missingsummary`
-#' and `slashN` show these counts, which are then protected. With
-#' `wtcompare` and neither `wtn` nor `percent_n`, a protected variable's
-#' weighted column shows effective counts rather than percentages, as Stata
-#' does, so give `wtn` or `percent_n` when using `smallcells` with
-#' `wtcompare`.
+#' shows, and also the ones that follow from them (Stata 2.1.17): a
+#' categorical variable's hidden missing count is N minus its shown level
+#' counts, and a binary variable's hidden negative and missing counts follow
+#' from the denominator its n (%) cell releases. A hidden count below `k` is
+#' protected as a primary cell, as if `missingsummary` or `slashN` printed it:
+#' shown cells get a greater-than-or-equal marker where needed, percentages
+#' are withheld, and the p-value is suppressed. The group and total Ns are
+#' shared by every variable, so in a table of two or more variables they are
+#' never withheld as complementary cells; a count that could only be
+#' protected by withholding them is refused with an error of class
+#' `tabtools_error_smallcells`. `smallcells` cannot be combined with
+#' percent-only display, which includes `wtcompare` without `wtn` or
+#' `percent_n`.
 #' Count totals, artificial flow bounds, and required flows must be below
 #' 2^53 for small-cell certification to preserve single-count changes;
 #' larger frequency-weighted blocks are refused with `smallcells`.
@@ -450,7 +454,10 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   }
   # desctab.ado:282-293: weighted tables default to percent-only, which
   # smallcells() cannot protect.
-  implicit_percent <- percent || (!is.null(wt) && !(percent_n || wtn) && !wtcompare)
+  # tabtools 2.1.17 (desctab.ado:~300): wtcompare is exempt from that default,
+  # but its weighted columns are percent-only without wtn/percent_n, so it is
+  # refused on the same terms.
+  implicit_percent <- percent || (!is.null(wt) && !(percent_n || wtn))
   if (!is.null(smallcells) && implicit_percent) {
     cli::cli_abort(c("{.arg smallcells} cannot be combined with percent-only display.",
                      "i" = "Use percent_n, wtn, or the default n (%); percentages are withheld for any variable that carries a suppressed count."),
@@ -544,7 +551,10 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
             spacelowpercent = spacelowpercent,
             extraspace = extraspace, percent = percent, percent_n = percent_n, slashN = slashN,
             catrowperc = catrowperc, pdp = pdp, highpdp = highpdp,
-            missingsummary = missingsummary, test_args = test_args, smallcells = smallcells)
+            missingsummary = missingsummary, test_args = test_args, smallcells = smallcells,
+            # _desctab_collect.ado (2.1.17): shared group/total Ns cannot be withheld
+            # per variable once the table has two or more variables.
+            sc_nvars = length(specs))
   # desctab.ado:132-138: the small-cell note joins any user footnote.
   sc_note <- if (!is.null(smallcells)) tt_sc_footnote(smallcells) else NULL
   if (!is.null(sc_note) && !grepl(sc_note, footnote %||% "", fixed = TRUE)) {

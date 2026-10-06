@@ -145,7 +145,7 @@ test_that("desctab shares the full descriptive ledger including all-missing grou
   d <- data.frame(g = c("A", "A", "B", "B"), x = c(NA, NA, 2, 4),
                   cat = factor(c(NA, NA, NA, NA), levels = "unused"))
   args <- list(data = d, vars = c(x = "contn", cat = "cat"), by = "g", missing = TRUE,
-               total = "after", nopvalue = TRUE, smallcells = 3, missingsummary = TRUE)
+               total = "after", nopvalue = TRUE, missingsummary = TRUE)
   t <- do.call(table1_tc, args)
   expect_identical(do.call(desctab, args), t)
   sa_desc_values(t, "variable/1/group/1", c(input_n = 2, observed_n = 0, used_n = 0,

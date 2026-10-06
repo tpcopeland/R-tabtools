@@ -154,8 +154,12 @@ test_that("a coded N row: headerperc reads missing and prints '(.)', with and wi
   a <- golden_fixture("auto")
   p3_expect(table1_tc(a, by = "rep78", vars = "price contn \\ foreign bin", headerperc = TRUE,
                       smallcells = 5), "S10")
-  p3_expect(table1_tc(a, by = "rep78", vars = "price contn \\ foreign bin", headerperc = TRUE,
-                      total = "after", smallcells = 5), "S11")
+  # Stata 2.1.17+ refuses this table (S11 stopped with r(498)): a count below 5
+  # can only be protected by withholding the group or total N, which the other
+  # variable releases (qa/stata/make_table1_phase3.do, tabtools 2.5.1).
+  expect_error(table1_tc(a, by = "rep78", vars = "price contn \\ foreign bin", headerperc = TRUE,
+                         total = "after", smallcells = 5),
+               class = "tabtools_error_smallcells_shared_margin")
 })
 
 test_that("smallcells without by(), with conts", {

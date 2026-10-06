@@ -30,7 +30,7 @@
   tot <- K > G
   b <- tt_sc_block_cont(nn[seq_len(G)], .t1_sc_sample_n(o, gp, col_masks),
                         missingsummary = o$missingsummary, total = tot)
-  v <- tt_sc_variable(b, o$smallcells)
+  v <- tt_sc_variable(b, o$smallcells, fixedmargins = o$sc_nvars > 1L, variable = rec$label)
   codes <- v$cells[1, ]
   for (k in which(codes > 0)) rec$cells[k] <- c(tt_sc_render(nn[k], codes[k], o$smallcells, o$nformat))
   rec$codes <- codes
@@ -62,7 +62,7 @@
                        include_missing = o$missing, missing_level = missing_level,
                        missingsummary = o$missingsummary, slashN = o$slashN,
                        catrowperc = o$catrowperc, total = tot)
-  v <- tt_sc_variable(b, k_sc)
+  v <- tt_sc_variable(b, k_sc, fixedmargins = o$sc_nvars > 1L, variable = trimws(recs[[1]]$label))
   if (binary) tx <- list(tx)
   first <- if (binary) 1L else 2L
   for (li in seq_len(nrow(v$cells))) {
