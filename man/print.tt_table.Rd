@@ -21,7 +21,7 @@ vector, with one element per line of the console listing.
 \description{
 Mirrors Stata \verb{list ..., noobs noheader table}: table1_tc shows
 both header rows, left-aligned columns, and a rule after every variable
-block (\code{sepby}), followed by any notes; regtab prints the title above,
+block (\code{sepby}), followed by notes and footnote paragraphs; regtab prints the title above,
 right-aligned columns without separators, then a blank line.
 \code{format()} returns the same listing as a character vector of lines.
 }

@@ -95,7 +95,13 @@ tt_layout_defaults <- function(command) {
 #' @param rows Optional per-row metadata (data.frame). Missing columns are
 #'   filled with defaults; see Details.
 #' @param cols Optional per-column metadata (data.frame).
-#' @param title,footnote Strings; `NULL` or `""` for none.
+#' @param title A single string; `NULL` or `""` for none.
+#' @param footnote Paragraph text; `NULL`, `character()`, or `""` for none.
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @param style A style list (font, font size, border style, fills); `NULL`
 #'   (the default) takes the session defaults set by [tabtools_options()].
 #' @param stored Named list, the `r()` analogue.
@@ -147,8 +153,10 @@ tt_layout_defaults <- function(command) {
 #'   each `TRUE` or `FALSE`; numeric, non-missing `rows$block` (required
 #'   when `console_sepby`); logical, non-missing `rows$dim`;
 #'   whole-number, non-negative, non-missing `rows$indent`; list `meta`; numeric
-#'   `rows$p` and `rows$smd`; character `rows$key`, `rows$var`, `rows$level`; `title` and `footnote` each a single
-#'   non-missing string, or `NULL` for none. An object that passes renders with `print()`,
+#'   `rows$p` and `rows$smd`; character `rows$key`, `rows$var`, `rows$level`; `title` a single
+#'   non-missing string and `footnote` non-missing character paragraphs,
+#'   or `NULL` for none. The constructor stores footnotes as a scalar with
+#'   spaced-backslash separators. An object that passes renders with `print()`,
 #'   [tt_write_csv()] and [tt_write_markdown()]; [tt_write_xlsx()] also needs
 #'   an Excel layout (`layout$xlsx_rules`). Descriptive, regression,
 #'   stratetab and comptab layouts need a body row and a value column;
@@ -264,7 +272,7 @@ tt_table <- function(body, header, rows = NULL, cols = NULL, title = NULL,
   rows <- .tt_complete_rows(rows, body)
   x <- structure(list(
     body = body, header = header, rows = rows, cols = cols,
-    title = title %||% "", footnote = footnote %||% "",
+    title = title %||% "", footnote = .tt_footnote_text(footnote),
     style = style, stored = stored, command = command, layout = lay,
     meta = meta, notes = notes
   ), class = "tt_table")
@@ -275,7 +283,7 @@ tt_table <- function(body, header, rows = NULL, cols = NULL, title = NULL,
 # renderers treat it as "" (Phase 6 review P3-6), as tt_table() does.
 .tt_blank_text <- function(x) {
   if (is.null(x$title)) x$title <- ""
-  if (is.null(x$footnote)) x$footnote <- ""
+  x$footnote <- .tt_footnote_text(x$footnote)
   x
 }
 
@@ -366,6 +374,10 @@ validate_tt_table <- function(x) {
   # would be written as a literal "NA".
   for (f in c("title", "footnote")) {
     v <- x[[f]]
+    if (identical(f, "footnote")) {
+      .tt_check_footnote_arg(v)
+      next
+    }
     if (!is.null(v) && (!is.character(v) || length(v) != 1L || is.na(v))) {
       bad("{.field {f}} must be a single non-missing string (or {.code NULL} for none).")
     }
@@ -466,7 +478,7 @@ format.tt_table <- function(x, ...) tt_console_lines(x)
 #'
 #' Mirrors Stata `list ..., noobs noheader table`: table1_tc shows
 #' both header rows, left-aligned columns, and a rule after every variable
-#' block (`sepby`), followed by any notes; regtab prints the title above,
+#' block (`sepby`), followed by notes and footnote paragraphs; regtab prints the title above,
 #' right-aligned columns without separators, then a blank line.
 #' `format()` returns the same listing as a character vector of lines.
 #'
@@ -547,7 +559,9 @@ as.data.frame.tt_table <- function(x, row.names = NULL, optional = FALSE, ...) {
     while (nrow(g) && all(!nzchar(trimws(g[1, ])))) g <- g[-1, , drop = FALSE]
   }
   if (title && nzchar(x$title)) g <- rbind(pad(x$title), g)
-  if (footnote && nzchar(x$footnote)) g <- rbind(g, pad(x$footnote))
+  if (footnote) {
+    for (para in .tt_footnote_paragraphs(x$footnote)) g <- rbind(g, pad(para))
+  }
   dimnames(g) <- NULL
   g
 }

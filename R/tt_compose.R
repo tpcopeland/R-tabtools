@@ -38,6 +38,11 @@
 #'   columns in the header.
 #' @param title,footnote Title and footnote of the result (default: the
 #'   first table's).
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @return A `tt_table`; `stored$tables` holds each table's `stored`.
 #'   `meta$sample_accounting` preserves each source ledger separately, as
 #'   described in [tt_table()].
@@ -202,7 +207,9 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   meta$pvals <- pv
   meta$regtab_rows <- NULL
   meta$stack_group_rows <- if (length(head_pos)) head_pos
+  meta$stars_notes <- unique(unlist(lapply(tabs, .tt_stars_note), use.names = FALSE))
   meta$xlsx_footnote <- .tt_compose_xlsx_footnote(tabs, footnote)
+  footnote <- meta$xlsx_footnote %||% footnote
   meta$frame <- .tt_merge_frame(tabs, if (fold) hdr[[1]]$text[-1][!duplicated(cols$model[-1])])
   meta$sample_accounting <- .tt_sample_bind(
     lapply(tabs, function(t) t$meta[["sample_accounting", exact = TRUE]]),
@@ -236,6 +243,11 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
 #'   above each block.
 #' @param title,footnote Title and footnote of the result (default: the
 #'   first table's).
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @return A `tt_table`; `stored$tables` holds each table's `stored`.
 #'   `meta$sample_accounting` preserves each source ledger separately, as
 #'   described in [tt_table()].
@@ -312,7 +324,9 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   meta$pvals <- pv
   meta$regtab_rows <- NULL
   meta$stack_group_rows <- if (length(head_rows)) head_rows
+  meta$stars_notes <- unique(unlist(lapply(tabs, .tt_stars_note), use.names = FALSE))
   meta$xlsx_footnote <- .tt_compose_xlsx_footnote(tabs, footnote)
+  footnote <- meta$xlsx_footnote %||% footnote
   meta$frame <- .tt_stack_frame(tabs)
   meta$sample_accounting <- .tt_sample_bind(
     lapply(tabs, function(t) t$meta[["sample_accounting", exact = TRUE]]),
@@ -411,14 +425,17 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
 .tt_compose_xlsx_footnote <- function(tabs, footnote) {
   notes <- unique(unlist(lapply(tabs, .tt_stars_note)))
   if (!length(notes)) return(NULL)
-  note <- paste(notes, collapse = "; ")
-  fn <- trimws(footnote %||% "")
-  if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, "; ", note)
+  .tt_append_footnotes(footnote, setdiff(notes, .tt_footnote_paragraphs(footnote)))
 }
 
 # A regtab table's stars note: what its workbook footnote adds to its
 # footnote (R/regtab_layout.R).
 .tt_stars_note <- function(t) {
+  # Generated legend identity survives nested composition. Never infer it
+  # from user text, which may itself begin with '* p<'.
+  if (!is.null(t$meta$stars_notes)) return(t$meta$stars_notes)
+  # Legacy serialized regtab tables stored the generated legend only in
+  # xlsx_footnote, after the public user footnote, and marked stored$stars.
   if (!identical(t$stored$stars, "stars")) return(NULL)
   xf <- t$meta$xlsx_footnote %||% ""
   fn <- trimws(t$footnote %||% "")

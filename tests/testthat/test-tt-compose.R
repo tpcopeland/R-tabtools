@@ -154,12 +154,12 @@ test_that("stack review 3: the workbook footnote keeps the stars note after tt_m
     w <- tc_cells(p)
     w$value[w$row == max(w$row) & w$col == 2]
   }
-  expect_identical(foot(tt_merge(a, b)), paste0("Crude; ", stars))
-  expect_identical(foot(tt_stack(a, b)), paste0("Crude; ", stars))
-  expect_identical(foot(tt_merge(b, a, footnote = "Mine.")), paste("Mine.", stars))
+  expect_identical(foot(tt_merge(a, b)), stars)
+  expect_identical(foot(tt_stack(a, b)), stars)
+  expect_identical(foot(tt_merge(b, a, footnote = "Mine.")), stars)
   expect_identical(foot(tt_stack(b, a)), stars)
-  # The footnote itself (console, CSV, Markdown) is unchanged, as regtab's.
-  expect_identical(tt_merge(a, b)$footnote, "Crude")
+  # The public footnote carries the same separate automatic legend.
+  expect_identical(tt_merge(a, b)$footnote, paste("Crude", "\\", stars))
   # No stars: the workbook writes the footnote.
   n <- tt_merge(regtab(lm(mpg ~ wt, d), footnote = "Plain"), regtab(lm(mpg ~ hp, d)))
   expect_null(n$meta$xlsx_footnote)

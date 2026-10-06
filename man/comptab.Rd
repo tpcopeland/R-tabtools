@@ -106,7 +106,12 @@ included), as a character vector named by row number
 first CSV row and the Markdown heading). Rate mode defaults to the
 rate table's title.}
 
-\item{footnote}{Footnote below the table.}
+\item{footnote}{Footnote below the table.
+Footnotes accept a character vector of paragraphs. The reserved token
+\code{" \\\\ "} (one backslash with surrounding spaces) splits each element,
+including a scalar, into paragraphs. Split pieces are trimmed and empty
+pieces dropped; unspaced and doubled backslashes remain literal.
+Automatic notes are separate paragraphs in every sink.}
 
 \item{font, fontsize}{Font family and size (defaults from
 \code{\link[=tabtools_options]{tabtools_options()}}, else Arial 10).}

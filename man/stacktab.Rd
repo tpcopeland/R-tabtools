@@ -41,7 +41,12 @@ it and the composite is written to it. Optional when every block is a
 \item{title}{Title in column \code{A} above the table, bold Arial 12.}
 
 \item{note, footnote}{Note below the table, italic Arial 8 (\code{footnote} is
-an alias; give one of them).}
+an alias; give one of them).
+Footnotes accept a character vector of paragraphs. The reserved token
+\code{" \\\\ "} (one backslash with surrounding spaces) splits each element,
+including a scalar, into paragraphs. Split pieces are trimmed and empty
+pieces dropped; unspaced and doubled backslashes remain literal.
+Automatic notes are separate paragraphs in every sink.}
 
 \item{columnmerge}{Column merges (see Column merges).}
 

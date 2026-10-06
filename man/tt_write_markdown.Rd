@@ -23,7 +23,7 @@ tt_write_markdown(x, path, append = FALSE)
 \verb{| --- |} separator; body cells trimmed and escaped, label indents written
 as \verb{&nbsp;}; rows blank in every column skipped (kept for a \code{\link[=puttab]{puttab()}}
 table, whose rows are all data); the footnote as
-\verb{*footnote*} after a blank line. With \code{append = TRUE} (Stata \code{mdappend})
+one \verb{*paragraph*} per paragraph, each after a blank line. With \code{append = TRUE} (Stata \code{mdappend})
 an existing file gains a blank line and the new table; otherwise an
 existing file is replaced.
 }

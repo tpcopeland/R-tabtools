@@ -172,6 +172,11 @@
 #'   first CSV row and the Markdown heading). Rate mode defaults to the
 #'   rate table's title.
 #' @param footnote Footnote below the table.
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @param font,fontsize Font family and size (defaults from
 #'   [tabtools_options()], else Arial 10).
 #' @param borderstyle `"default"`/`"thin"`, `"medium"`, or `"academic"`.
@@ -667,6 +672,7 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
     cli::cli_abort("{.arg markdown} must specify a .md, .markdown, .qmd, or .rmd file.", call = NULL)
   }
   for (f in c("title", "footnote")) .tt_check_text_arg(a[[f]], f)
+  a$footnote <- .tt_footnote_text(a$footnote)
   invisible(TRUE)
 }
 
@@ -1634,7 +1640,7 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
     }
   }
   if (foot) .xlsx_footnote_rules(add, nr, num_cols, style)
-  list(grid = grid, written = written, rules = do.call(rbind, R))
+  .xlsx_expand_footnotes(list(grid = grid, written = written, rules = do.call(rbind, R)))
 }
 
 # Rate mode (comptab.ado:1518-1645).
@@ -1729,5 +1735,5 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   }
   add("bottom", last, last, 2, total, code = hb)
   if (foot) .xlsx_footnote_rules(add, nr, total, style)
-  list(grid = grid, written = written, rules = do.call(rbind, R))
+  .xlsx_expand_footnotes(list(grid = grid, written = written, rules = do.call(rbind, R)))
 }

@@ -449,7 +449,7 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
     }
   }
   if (foot) .xlsx_footnote_rules(add, nr, num_cols, style)
-  list(grid = grid, written = written, rules = do.call(rbind, R))
+  .xlsx_expand_footnotes(list(grid = grid, written = written, rules = do.call(rbind, R)))
 }
 
 .xlsx_footnote_rules <- function(add, row, num_cols, style) {
@@ -684,5 +684,5 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
     for (i in which(x$rows$dim)) add("fontcolor", i + 3, i + 3, 2, num_cols, value = style$fontsize, color = style$dimcolor)
   }
   if (foot) .xlsx_footnote_rules(add, nr, num_cols, style)
-  list(grid = grid, written = written, rules = do.call(rbind, R))
+  .xlsx_expand_footnotes(list(grid = grid, written = written, rules = do.call(rbind, R)))
 }

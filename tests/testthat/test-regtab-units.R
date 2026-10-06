@@ -255,7 +255,7 @@ test_that("cell layout options: compact, nopvalue, stars, sep, digits, level", {
   expect_true(any(grepl("\\*", tt$body[[2]])))
   expect_identical(tt$meta$xlsx_footnote, "* p<0.05, ** p<0.01, *** p<0.001")
   tt <- regtab(f, stars = TRUE, starslevels = c(0.1, 0.05, 0.01), footnote = "Note")
-  expect_identical(tt$meta$xlsx_footnote, "Note; * p<.1, ** p<.05, *** p<.01")
+  expect_identical(tt$meta$xlsx_footnote, "Note \\ * p<.1, ** p<.05, *** p<.01")
   tt <- regtab(f, sep = " to ", digits = 3, level = 90)
   expect_identical(tt$header[[2]]$text[3], "90% CI")
   expect_match(tt$body[[3]][1], "^\\(-?[0-9]+\\.[0-9]{3} to -?[0-9]+\\.[0-9]{3}\\)$")

@@ -39,7 +39,14 @@ filled with defaults; see Details.}
 
 \item{cols}{Optional per-column metadata (data.frame).}
 
-\item{title, footnote}{Strings; \code{NULL} or \code{""} for none.}
+\item{title}{A single string; \code{NULL} or \code{""} for none.}
+
+\item{footnote}{Paragraph text; \code{NULL}, \code{character()}, or \code{""} for none.
+Footnotes accept a character vector of paragraphs. The reserved token
+\code{" \\\\ "} (one backslash with surrounding spaces) splits each element,
+including a scalar, into paragraphs. Split pieces are trimmed and empty
+pieces dropped; unspaced and doubled backslashes remain literal.
+Automatic notes are separate paragraphs in every sink.}
 
 \item{style}{A style list (font, font size, border style, fills); \code{NULL}
 (the default) takes the session defaults set by \code{\link[=tabtools_options]{tabtools_options()}}.}
@@ -115,8 +122,10 @@ whole-number, non-missing \code{from}/\code{to} inside the table; \code{rows$typ
 each \code{TRUE} or \code{FALSE}; numeric, non-missing \code{rows$block} (required
 when \code{console_sepby}); logical, non-missing \code{rows$dim};
 whole-number, non-negative, non-missing \code{rows$indent}; list \code{meta}; numeric
-\code{rows$p} and \code{rows$smd}; character \code{rows$key}, \code{rows$var}, \code{rows$level}; \code{title} and \code{footnote} each a single
-non-missing string, or \code{NULL} for none. An object that passes renders with \code{print()},
+\code{rows$p} and \code{rows$smd}; character \code{rows$key}, \code{rows$var}, \code{rows$level}; \code{title} a single
+non-missing string and \code{footnote} non-missing character paragraphs,
+or \code{NULL} for none. The constructor stores footnotes as a scalar with
+spaced-backslash separators. An object that passes renders with \code{print()},
 \code{\link[=tt_write_csv]{tt_write_csv()}} and \code{\link[=tt_write_markdown]{tt_write_markdown()}}; \code{\link[=tt_write_xlsx]{tt_write_xlsx()}} also needs
 an Excel layout (\code{layout$xlsx_rules}). Descriptive, regression,
 stratetab and comptab layouts need a body row and a value column;

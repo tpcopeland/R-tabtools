@@ -231,6 +231,11 @@
 #'   `smdpair` token as a `by` value or as label text. As Stata's
 #'   `smdpair(..., values|labels)`.
 #' @param xlsx,sheet,title,footnote,open Excel target and annotations.
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @param borderstyle One of `"thin"`, `"default"`, `"medium"`, `"academic"`.
 #' @param font,fontsize Excel font family and size; `NULL` uses the session
 #'   default ([tabtools_options()], else Arial 10). `fontsize` is a whole
@@ -415,6 +420,7 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   # wins when both are given.
   if (!is.null(excel)) xlsx <- excel
   for (a in c("title", "footnote")) .tt_check_text_arg(get(a), a)
+  footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   # desctab.ado:167: title("") is no title.
   if (!is.null(title) && is.character(title) && length(title) == 1L && !is.na(title) && !nzchar(title)) {
     title <- NULL
@@ -614,7 +620,7 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
     sc <- .t1_sc_stored(tt, gp, by, smallcells, total = total != "none" && gp$G > 1L,
                         wtcompare = wtcompare)
     tt$stored[names(sc)] <- sc
-    tt$notes <- sc_note
+    # The small-cell explanation is already a public footnote paragraph.
   }
   tt <- .t1_console_widths(tt, gp, by, wtcompare)
   tt$meta[c("row_codes", "sample_codes", "derived_rows", "crude_codes", "crude_cols",

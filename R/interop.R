@@ -153,7 +153,7 @@
   fs <- x$style$fontsize
   list(header = header, body = part(body_rows), merges = merges, widths = widths,
        title = x$title,
-       footnote = if (nrow(g) > last) g[nrow(g), 2] else "",
+       footnote = if (nrow(g) > last) .tt_footnote_text(g[seq.int(last + 1L, nrow(g)), 2]) else "",
        font = x$style$font, fontsize = fs, title_size = fs + 2,
        footnote_size = max(fs - 2, 6))
 }

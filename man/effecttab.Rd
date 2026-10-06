@@ -93,7 +93,12 @@ ignored, as in Stata), or Stata's string \code{'"N" 4642 4642'}.}
 
 \item{labelwidth}{Cap on the label column's width (default 45).}
 
-\item{title, footnote}{Title in cell A1 and footnote below the table.}
+\item{title, footnote}{Title in cell A1 and footnote below the table.
+Footnotes accept a character vector of paragraphs. The reserved token
+\code{" \\\\ "} (one backslash with surrounding spaces) splits each element,
+including a scalar, into paragraphs. Split pieces are trimmed and empty
+pieces dropped; unspaced and doubled backslashes remain literal.
+Automatic notes are separate paragraphs in every sink.}
 
 \item{xlsx}{Output \code{.xlsx} workbook (the sheet is replaced if it exists).}
 

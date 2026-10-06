@@ -225,6 +225,11 @@
 #'   ignored, as in Stata), or Stata's string `'"N" 4642 4642'`.
 #' @param labelwidth Cap on the label column's width (default 45).
 #' @param title,footnote Title in cell A1 and footnote below the table.
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @param xlsx Output `.xlsx` workbook (the sheet is replaced if it exists).
 #' @param sheet Sheet name (default `"Effects"`).
 #' @param open Open the workbook after writing (interactive sessions).
@@ -330,6 +335,7 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
   }
   if (labelwidth <= 0) labelwidth <- 45
   for (a in c("title", "footnote", "effect")) .tt_check_text_arg(get(a), a)
+  footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   # effect("") is Stata's default header (effecttab.ado:445).
   if (!is.null(effect) && !nzchar(effect)) effect <- NULL
   if (!is.null(method)) {
@@ -507,8 +513,7 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
                   commands = rep("effecttab", 2L))
 }
 
-# Sentences appended to the footnote, as regtab's vce_note is: after a
-# sentence end with a space, else after "; ".
+# Automatic notes appended as separate footnote paragraphs.
 # A note every model raises is said once; a note of some models only is
 # prefixed with each such model's label ("Model m" when unlabelled), so
 # a table of a ratio tested against 1 beside one tested against 2 does not
@@ -526,13 +531,7 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
   c(common, own)
 }
 
-.et_add_notes <- function(fn, notes) {
-  for (note in notes) {
-    fn <- trimws(fn)
-    fn <- if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, "; ", note)
-  }
-  fn
-}
+.et_add_notes <- function(fn, notes) .tt_append_footnotes(fn, notes)
 
 # A single unnamed list of one comparison and one prediction of the same
 # variable is one treatment-effect model (the contrast and its

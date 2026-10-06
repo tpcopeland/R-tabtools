@@ -669,6 +669,11 @@
 #' @param sep Confidence-interval delimiter, used verbatim (a single space is
 #'   allowed; an empty string means the default). Default `", "`.
 #' @param title,footnote Table title (cell A1) and footnote.
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @param nointercept,keepintercept Drop or keep the intercept row.
 #'   `nointercept` has three states: `NULL` (default), the intercept is
 #'   dropped when every model is on a ratio scale (for a data frame: an
@@ -1004,6 +1009,7 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
   if (open && !has_xlsx) cli::cli_abort("{.arg open} requires {.arg xlsx}.", call = NULL)
   .tt_preflight_targets(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend)
   for (a in c("title", "footnote")) .tt_check_text_arg(get(a), a)
+  footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   if (labelmatch && is.null(keep) && is.null(drop)) {
     cli::cli_abort("{.arg labelmatch} requires {.arg keep} or {.arg drop}.", call = NULL)
   }

@@ -585,13 +585,8 @@
           else sprintf("2 of %d groups, chosen with smdpair()", G))
 }
 
-# Join an automatic note to the user footnote (desctab.ado:139-148 small-cell
-# note, :694-699 SMD note; smallcells first, SMD second): not repeated; a
-# footnote already in paragraphs (" \\ ") gets the note as its own paragraph.
-.t1_join_note <- function(footnote, note) {
-  if (is.null(footnote) || !nzchar(footnote)) return(note)
-  if (grepl(" \\ ", footnote, fixed = TRUE)) paste(footnote, "\\", note) else paste(footnote, note)
-}
+# Automatic notes are separate paragraphs in every sink (Milestone P W02).
+.t1_join_note <- function(footnote, note) .tt_append_footnotes(footnote, note)
 
 # smdpair (desctab.ado:592-662, tabtools 2.4.0): the two by() groups the pair
 # SMD compares, as group indices. A token names a group by value (a number,

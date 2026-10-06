@@ -164,7 +164,9 @@ tt_as_gt <- function(x) {
     g <- gt::tab_caption(g, caption = gt::md(paste0("**", esc, "**")))
   }
   if (nzchar(s$footnote)) {
-    g <- gt::tab_source_note(g, source_note = s$footnote)
+    for (para in .tt_footnote_paragraphs(s$footnote)) {
+      g <- gt::tab_source_note(g, source_note = para)
+    }
     g <- gt::tab_style(g, style = gt::cell_text(style = "italic", size = paste0(s$footnote_size, "pt"),
                                                  align = "left"),
                        locations = gt::cells_source_notes())

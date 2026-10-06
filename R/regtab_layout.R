@@ -1123,16 +1123,13 @@ tt_regtab_build <- function(fits, infos, o) {
   # to the xlsx footnote.
   # A user-supplied variance is always named (task 5.18).
   if (length(re_notes)) {
-    note <- paste(re_notes, collapse = " ")
-    fn <- trimws(o$footnote %||% "")
-    o$footnote <- if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, ". ", note)
+    o$footnote <- .tt_append_footnotes(o$footnote, re_notes)
   }
   user_vce <- any(vapply(vces, identical, TRUE, "user"))
   if (isTRUE(o$vce_note) || user_vce) {
     note <- .rt_vce_footnote(fits1, infos, vces, o$cluster_spec %||% clusters, o$models, user_only = !isTRUE(o$vce_note))
     if (nzchar(note)) {
-      fn <- trimws(o$footnote %||% "")
-      o$footnote <- if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, ". ", note)
+      o$footnote <- .tt_append_footnotes(o$footnote, note)
     }
   }
   # polr/clm links with no Stata ordered command (cloglog, loglog, cauchit,
@@ -1143,15 +1140,14 @@ tt_regtab_build <- function(fits, infos, o) {
   ord_links <- ord_links[!is.na(ord_links)]
   if (length(ord_links)) {
     note <- sprintf("Ordinal model coefficients are on the %s link scale.", paste(ord_links, collapse = "/"))
-    fn <- trimws(o$footnote %||% "")
-    o$footnote <- if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, ". ", note)
+    o$footnote <- .tt_append_footnotes(o$footnote, note)
   }
   # xlsx footnote with the stars note (`regtab.ado:2985-2998`).
   xfoot <- o$footnote %||% ""
   if (o$stars) {
     note <- sprintf("* p<%s, ** p<%s, *** p<%s", o$starstext[1], o$starstext[2], o$starstext[3])
-    fn <- trimws(xfoot)
-    xfoot <- if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, "; ", note)
+    o$footnote <- .tt_append_footnotes(o$footnote, note)
+    xfoot <- o$footnote
   }
 
   # From the models, not the header (task H11; R/regtab_methods.R).
@@ -1188,6 +1184,7 @@ tt_regtab_build <- function(fits, infos, o) {
   )
   meta <- list(refcat = o$refcat, omitlabel = o$omitlabel, emptylabel = o$emptylabel,
                labelwidth = o$labelwidth, compact = o$compact, xlsx_footnote = xfoot,
+               stars_notes = if (o$stars) note else character(),
                pvals = pvals, sheet = o$sheet, regtab_rows = long, frame = frame_meta)
   samples <- o$sample_accounting %||% lapply(seq_len(M), function(m) {
     .tt_sample_model_population(fits[[m]], "fit", model = m)

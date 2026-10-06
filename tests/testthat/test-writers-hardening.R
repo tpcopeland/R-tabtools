@@ -248,7 +248,7 @@ test_that("review R6: a csv symlink onto the workbook target is refused, danglin
 test_that("review R9: title and footnote are checked as arguments", {
   d <- h8_data()
   expect_error(table1_tc(d, vars = c(x = "contn"), title = NA_character_), "`title` must be a single string")
-  expect_error(table1_tc(d, vars = c(x = "contn"), footnote = c("a", "b")), "`footnote` must be a single string")
+  expect_identical(table1_tc(d, vars = c(x = "contn"), footnote = c("a", "b"))$footnote, "a \\ b")
   expect_no_error(table1_tc(d, vars = c(x = "contn"), title = "", footnote = "Note."))
 })
 
@@ -264,7 +264,7 @@ test_that("review R15: tabtools_options() validates persist/clear; clear does no
 
 test_that("review R9: regtab() checks title and footnote as arguments too", {
   expect_error(regtab(h8_fit(), title = NA_character_), "`title` must be a single string")
-  expect_error(regtab(h8_fit(), footnote = 1), "`footnote` must be a single string")
+  expect_error(regtab(h8_fit(), footnote = 1), class = "tabtools_error_footnote")
 })
 
 test_that("Milestone D review P2-4: a non-ASCII string written again into a loaded workbook stays readable outside UTF-8", {

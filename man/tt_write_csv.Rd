@@ -16,7 +16,7 @@ tt_write_csv(x, path)
 }
 \description{
 Rows are the title (if any), the header rows, the body, and the footnote
-(if any); title and footnote sit in the first column with empty trailing
+paragraphs (if any), one row per paragraph; title and footnote sit in the first column with empty trailing
 fields (\verb{_tabtools_csv_write.ado}). Indents are kept. UTF-8, LF line
 endings.
 }

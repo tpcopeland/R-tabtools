@@ -1,5 +1,10 @@
 # tabtools (development version)
 
+* Footnotes accept character paragraph vectors or Stata's spaced-backslash
+  separator. Console, CSV, Markdown, Excel and presentation converters show
+  separate paragraphs, including automatic notes and significance legends;
+  Excel adds styled note rows and repeats explicit note row heights.
+
 * `table1_tc(nosmdhighlight = TRUE)` disables Excel SMD highlighting, as
   `smdthreshold = -1` does. Combining the switch with an explicit threshold
   is refused, matching Stata. Markdown has no SMD highlighting.

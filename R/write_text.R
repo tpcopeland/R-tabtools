@@ -61,7 +61,7 @@
 #' Write a tt_table as CSV
 #'
 #' Rows are the title (if any), the header rows, the body, and the footnote
-#' (if any); title and footnote sit in the first column with empty trailing
+#' paragraphs (if any), one row per paragraph; title and footnote sit in the first column with empty trailing
 #' fields (`_tabtools_csv_write.ado`). Indents are kept. UTF-8, LF line
 #' endings.
 #'
@@ -201,7 +201,7 @@ tt_write_csv <- function(x, path) {
 #' `| --- |` separator; body cells trimmed and escaped, label indents written
 #' as `&nbsp;`; rows blank in every column skipped (kept for a [puttab()]
 #' table, whose rows are all data); the footnote as
-#' `*footnote*` after a blank line. With `append = TRUE` (Stata `mdappend`)
+#' one `*paragraph*` per paragraph, each after a blank line. With `append = TRUE` (Stata `mdappend`)
 #' an existing file gains a blank line and the new table; otherwise an
 #' existing file is replaced.
 #'
@@ -269,7 +269,9 @@ tt_write_markdown <- function(x, path, append = FALSE) {
     lines <- c(lines, paste0("|", paste0(" ", cells, " |", collapse = "")))
     n_body <- n_body + 1L
   }
-  if (nzchar(x$footnote)) lines <- c(lines, "", paste0("*", .md_escape(x$footnote, dollar), "*"))
+  for (para in .tt_footnote_paragraphs(x$footnote)) {
+    lines <- c(lines, "", paste0("*", .md_escape(para, dollar), "*"))
+  }
   .write_lines_lf(lines, path, append = existing, arg = "path")
   invisible(structure(path, n_rows = n_body, n_cols = length(hdr)))
 }
@@ -335,8 +337,7 @@ tt_console_lines <- function(x) {
   }
   out <- c(out, edge, x$notes)
   if (lay$console_blank) out <- c(out, "")
-  # layout$console_footnote (comptab rate mode): the footnote and a blank
-  # line after the listing (comptab.ado:1442-1446).
-  if (isTRUE(lay$console_footnote) && nzchar(x$footnote)) out <- c(out, x$footnote, "")
+  # Every sink receives the same footnote paragraphs, after the listing.
+  for (para in .tt_footnote_paragraphs(x$footnote)) out <- c(out, para, "")
   out
 }

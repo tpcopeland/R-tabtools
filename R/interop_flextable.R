@@ -62,7 +62,7 @@ as_flextable.tt_table <- function(x, ...) {
   for (i in seq_len(nrow(s$header$text))) mapping[[paste0("h", i)]] <- s$header$text[i, ]
   ft <- flextable::set_header_df(ft, mapping = mapping, key = "col_keys")
   if (nzchar(s$footnote)) {
-    ft <- flextable::add_footer_lines(ft, values = .tt_nbsp_indent(s$footnote))
+    ft <- flextable::add_footer_lines(ft, values = .tt_nbsp_indent(.tt_footnote_paragraphs(s$footnote)))
   }
   ft <- flextable::border_remove(ft)
   ft <- flextable::font(ft, fontname = s$font, part = "all")

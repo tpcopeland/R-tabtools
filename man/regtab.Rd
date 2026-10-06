@@ -80,7 +80,12 @@ detection (not the exponentiation, which follows the model).}
 \item{sep}{Confidence-interval delimiter, used verbatim (a single space is
 allowed; an empty string means the default). Default \code{", "}.}
 
-\item{title, footnote}{Table title (cell A1) and footnote.}
+\item{title, footnote}{Table title (cell A1) and footnote.
+Footnotes accept a character vector of paragraphs. The reserved token
+\code{" \\\\ "} (one backslash with surrounding spaces) splits each element,
+including a scalar, into paragraphs. Split pieces are trimmed and empty
+pieces dropped; unspaced and doubled backslashes remain literal.
+Automatic notes are separate paragraphs in every sink.}
 
 \item{nointercept, keepintercept}{Drop or keep the intercept row.
 \code{nointercept} has three states: \code{NULL} (default), the intercept is
