@@ -67,7 +67,10 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   # repeat the stacked tables' keys under each heading: scope the body keys
   # by their heading, so headings merge with headings and never cross-join
   # with data rows (CAT P1-12). The scope is removed from the result.
+  orig_keys <- lapply(tabs, function(t) t$rows$key)
   tabs <- lapply(tabs, .tt_scope_group_keys)
+  scoped_to_orig <- unlist(unname(Map(function(t, o) if (length(o) == length(t$rows$key)) stats::setNames(o, t$rows$key),
+                               tabs, orig_keys)))
   for (k in seq_along(tabs)) {
     key <- tabs[[k]]$rows$key
     if (is.null(key) || anyNA(key)) {
@@ -102,7 +105,9 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   }))
   rownames(rows) <- NULL
   rows$block <- seq_len(nb)
-  rows$key <- .tt_unscope_key(rows$key)
+  head_pos <- which(startsWith(rows$key, .tt_head_prefix) &
+                      !grepl(.tt_scope_sep, substring(rows$key, nchar(.tt_head_prefix) + 1L), fixed = TRUE))
+  rows$key <- unname(scoped_to_orig[rows$key])
   # A row is dimmed only when every table that has it dims it, and its p is
   # the smallest of the tables' (stack review item 4).
   for (i in seq_len(nb)) {
@@ -196,6 +201,7 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   meta <- first$meta
   meta$pvals <- pv
   meta$regtab_rows <- NULL
+  meta$stack_group_rows <- if (length(head_pos)) head_pos
   meta$xlsx_footnote <- .tt_compose_xlsx_footnote(tabs, footnote)
   meta$frame <- .tt_merge_frame(tabs, if (fold) hdr[[1]]$text[-1][!duplicated(cols$model[-1])])
   meta$sample_accounting <- .tt_sample_bind(
@@ -216,7 +222,11 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
 #' optionally under a group label row; the result keeps the first table's
 #' header, which every table must share (the same header text and column
 #' roles), and its command's layout. Row keys are kept as they are, so a
-#' key may repeat across groups. Model columns retain unsafe effect-scale
+#' key may repeat across groups. With `groups`, a heading row has the key
+#' `group:<label>` (`group:<label>#1`, ... for a repeated label) and is flagged
+#' in `meta$stack_group_rows`; [tt_merge()] matches headings by that label and
+#' keeps each table's body rows under their heading. The prefix `group:` is
+#' reserved for these keys. Model columns retain unsafe effect-scale
 #' provenance from any group: for example, stacking an exponentiated ratio
 #' with a raw log ratio still prevents [hrcomptab()] from treating the
 #' entire column as hazard ratios.
@@ -266,6 +276,8 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   body <- NULL
   rows <- NULL
   pv <- NULL
+  head_rows <- integer()
+  gkeys <- if (!is.null(groups)) .tt_group_keys(groups)
   any_pv <- any(vapply(tabs, function(t) !is.null(t$meta$pvals), TRUE))
   nm <- max(c(0L, first$cols$model), na.rm = TRUE)
   for (k in seq_along(tabs)) {
@@ -277,9 +289,12 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
       g <- as.data.frame(as.list(c(groups[k], rep("", nc - 1L))), stringsAsFactors = FALSE, col.names = names(b))
       b <- rbind(g, b)
       g_row <- blank_row(t)[names(r)]
-      if ("key" %in% names(g_row)) g_row$key <- .tt_group_key(k, groups[k])
+      if ("key" %in% names(g_row)) g_row$key <- gkeys[k]
       r <- rbind(g_row, r)
     }
+    off <- nrow(body) %||% 0L
+    inner <- .tt_group_row_positions(t)
+    head_rows <- c(head_rows, if (!is.null(groups)) off + 1L, off + inner + !is.null(groups))
     body <- rbind(body, b)
     rows <- rbind(rows, r[names(first$rows)])
     if (any_pv) {
@@ -296,6 +311,7 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   meta <- first$meta
   meta$pvals <- pv
   meta$regtab_rows <- NULL
+  meta$stack_group_rows <- if (length(head_rows)) head_rows
   meta$xlsx_footnote <- .tt_compose_xlsx_footnote(tabs, footnote)
   meta$frame <- .tt_stack_frame(tabs)
   meta$sample_accounting <- .tt_sample_bind(
@@ -310,25 +326,38 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   validate_tt_table(out)
 }
 
-# Synthetic key of a tt_stack(groups =) heading row.
-.tt_group_key <- function(i, label) paste0("group:", i, ":", label)
+# Heading rows of tt_stack(groups =) are flagged by position in
+# meta$stack_group_rows (a user row keyed like a heading is never one) and
+# keyed "group:<label>" ("#1", "#2", ... for a repeated label).
+.tt_group_keys <- function(groups) make.unique(paste0("group:", groups), sep = "#")
 
 .tt_scope_sep <- "\u001f"
+.tt_head_prefix <- "\u001fH\u001f"
 
-# Body keys prefixed by the heading key above them (stacked tables with
-# headings only; a table whose keys are NULL/NA is returned as it is).
-.tt_scope_group_keys <- function(t) {
+# Positions of a table's flagged heading rows (empty when the flag is absent
+# or no longer agrees with the keys).
+.tt_group_row_positions <- function(t) {
+  pos <- t$meta[["stack_group_rows", exact = TRUE]]
   key <- t$rows$key
-  if (is.null(key) || anyNA(key)) return(t)
-  is_g <- grepl("^group:[0-9]+:", key) & t$rows$type == "var" & is.na(t$rows$var %||% NA_character_)
-  if (!any(is_g)) return(t)
-  head_key <- key[is_g][cumsum(is_g)]
-  if (any(cumsum(is_g) == 0L)) return(t)
-  t$rows$key <- ifelse(is_g, key, paste0(head_key, .tt_scope_sep, key))
-  t
+  if (is.null(pos) || is.null(key) || !is.numeric(pos) || any(pos < 1L | pos > length(key))) return(integer())
+  pos <- as.integer(pos)
+  if (anyNA(key[pos]) || !all(startsWith(key[pos], "group:"))) return(integer())
+  pos
 }
 
-.tt_unscope_key <- function(key) sub(paste0("^group:[0-9]+:[^", .tt_scope_sep, "]*", .tt_scope_sep), "", key)
+# Effective keys for tt_merge: a heading is "<head prefix><key>", and each
+# body row below it "<head prefix><key><sep><key>"; tables without flagged
+# headings are returned as they are.
+.tt_scope_group_keys <- function(t) {
+  key <- t$rows$key
+  pos <- .tt_group_row_positions(t)
+  if (is.null(key) || anyNA(key) || !length(pos)) return(t)
+  is_g <- seq_along(key) %in% pos
+  if (!is_g[1L]) return(t)
+  head_key <- paste0(.tt_head_prefix, key)[is_g][cumsum(is_g)]
+  t$rows$key <- ifelse(is_g, head_key, paste0(head_key, .tt_scope_sep, key))
+  t
+}
 
 .tt_compose_args <- function(tabs, fn) {
   if (length(tabs) == 1L && is.list(tabs[[1]]) && !inherits(tabs[[1]], "tt_table")) tabs <- tabs[[1]]

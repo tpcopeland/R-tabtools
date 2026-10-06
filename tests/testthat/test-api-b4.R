@@ -41,7 +41,7 @@ test_that("tt_stack(groups=) has deterministic keys and passes through tt_merge 
   t1 <- regtab(lm(mpg ~ wt, mtcars), stats = "n")
   s <- tt_stack(t1, t1, groups = c("A", "B"))
   expect_false(anyNA(s$rows$key))
-  expect_identical(s$rows$key[grepl("^group:", s$rows$key)], c("group:1:A", "group:2:B"))
+  expect_identical(s$rows$key[grepl("^group:", s$rows$key)], c("group:A", "group:B"))
   expect_identical(s$rows$key, tt_stack(t1, t1, groups = c("A", "B"))$rows$key)
   m <- tt_merge(s, s)
   expect_identical(nrow(m$body), nrow(s$body))
@@ -52,6 +52,32 @@ test_that("tt_stack(groups=) has deterministic keys and passes through tt_merge 
   m3 <- tt_merge(s, s3)
   expect_identical(sum(grepl("^group:", m3$rows$key)), 3L)
   expect_false(any(grepl("\u001f", m3$rows$key)))
+})
+
+test_that("tt_merge matches stack headings by label, not position (review 2)", {
+  a <- regtab(lm(mpg ~ wt, mtcars), stats = "n")
+  b <- regtab(lm(mpg ~ hp, mtcars), stats = "n")
+  m <- tt_merge(tt_stack(a, b, groups = c("A", "B")), tt_stack(b, a, groups = c("B", "A")))
+  expect_identical(m$rows$key, c("group:A", "wt", "_cons", "stat:n", "group:B", "hp", "_cons", "stat:n"))
+  expect_identical(m$body[[1]][c(1, 5)], c("A", "B"))
+  # the wt row of A holds a's estimate in the first table and (second table: A = a) the same
+  expect_identical(m$body[[2]][2], m$body[[5]][2])
+  expect_identical(m$meta$stack_group_rows, c(1L, 5L))
+  # repeated labels get an occurrence suffix
+  s <- tt_stack(a, a, groups = c("A", "A"))
+  expect_identical(s$rows$key[grepl("^group:", s$rows$key)], c("group:A", "group:A#1"))
+  expect_identical(nrow(tt_merge(s, s)$body), nrow(s$body))
+})
+
+test_that("a user row keyed like a heading is never merged onto one (review 3)", {
+  a <- regtab(lm(mpg ~ wt, mtcars), stats = "n")
+  u <- a
+  u$rows$key[1] <- "group:A"
+  m <- tt_merge(tt_stack(a, a, groups = c("A", "B")), tt_stack(u, a, groups = c("A", "B")))
+  expect_identical(sum(m$rows$key == "group:A"), 2L)
+  expect_identical(m$meta$stack_group_rows, c(1L, 6L))
+  # an unstacked table with that key is an ordinary row
+  expect_no_error(tt_merge(u, a))
 })
 
 test_that(".ct_tokens keeps compound quotes with inner double quotes (AUD BUG-8)", {
