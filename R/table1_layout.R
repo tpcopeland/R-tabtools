@@ -585,25 +585,59 @@
           else sprintf("2 of %d groups, chosen with smdpair()", G))
 }
 
-# smdpair (desctab.ado, tabtools 2.4.0): the two by() groups the pair SMD
-# compares, as group indices. With a numeric by() a number names a by()
-# value; anything else is matched against the group labels (a string by()'s
-# values, or a labelled numeric by()'s label text). Each must name exactly
-# one group, and the two must differ.
-.t1_resolve_smdpair <- function(smdpair, gp, by_numeric) {
-  if (!(is.character(smdpair) || is.numeric(smdpair)) || length(smdpair) != 2L || anyNA(smdpair)) {
-    cli::cli_abort("{.arg smdpair} must name exactly two groups of {.arg by}.", call = NULL)
+# Join an automatic note to the user footnote (desctab.ado:139-148 small-cell
+# note, :694-699 SMD note; smallcells first, SMD second): not repeated; a
+# footnote already in paragraphs (" \\ ") gets the note as its own paragraph.
+.t1_join_note <- function(footnote, note) {
+  if (is.null(footnote) || !nzchar(footnote)) return(note)
+  if (grepl(" \\ ", footnote, fixed = TRUE)) paste(footnote, "\\", note) else paste(footnote, note)
+}
+
+# smdpair (desctab.ado:592-662, tabtools 2.4.0): the two by() groups the pair
+# SMD compares, as group indices. A token names a group by value (a number,
+# numeric by() only) or by label (a string by()'s values, or a numeric by()'s
+# value-label text; an unlabelled value's label is the value itself). A token
+# naming one group by value and a DIFFERENT group by label is refused unless
+# `as` is "values" or "labels" (Stata's smdpair(..., values|labels)). Each
+# token must name exactly one group, and the two must differ. A logical by()
+# takes TRUE/FALSE (or "TRUE"/"FALSE"), read as 1/0.
+.t1_resolve_smdpair <- function(smdpair, gp, by_numeric, as = "auto", by_logical = FALSE) {
+  as <- match.arg(as, c("auto", "values", "labels"))
+  ok_type <- is.character(smdpair) || is.numeric(smdpair) || (is.logical(smdpair) && by_logical)
+  if (!ok_type || length(smdpair) != 2L || anyNA(smdpair)) {
+    cli::cli_abort("{.arg smdpair} must name exactly two groups of {.arg by}.",
+                   class = "tabtools_error_smdpair", call = NULL)
+  }
+  if (by_logical) {
+    smdpair <- vapply(as.list(smdpair), function(t) {
+      if (is.logical(t)) return(as.character(as.integer(t)))
+      u <- toupper(trimws(as.character(t)))
+      if (u == "TRUE") "1" else if (u == "FALSE") "0" else as.character(t)
+    }, "")
   }
   out <- vapply(seq_len(2L), function(i) {
-    tok <- smdpair[[i]]
+    tok <- as.character(smdpair[[i]])
     num <- suppressWarnings(as.numeric(tok))
-    hit <- if (by_numeric && !is.na(num)) which(gp$codes == num) else which(gp$note_labels == as.character(tok))
+    vhit <- if (by_numeric && !is.na(num) && as != "labels") which(gp$codes == num) else integer()
+    lhit <- if (as != "values" || !by_numeric) which(gp$note_labels == tok) else integer()
+    if (length(vhit) && length(lhit) && !identical(vhit, lhit)) {
+      vlab <- gp$note_labels[vhit[1]]
+      lval <- gp$codes[lhit[1]]
+      cli::cli_abort(c(
+        "{.arg smdpair}: {.val {tok}} is ambiguous: it is the value of the group labelled {.val {vlab}} and the label of the group with value {lval}.",
+        "i" = "Set {.code smdpair_as = \"values\"} or {.code smdpair_as = \"labels\"} to say which is meant."),
+        class = c("tabtools_error_smdpair_ambiguous", "tabtools_error_smdpair"), call = NULL)
+    }
+    hit <- union(vhit, lhit)
     if (length(hit) != 1L) {
-      cli::cli_abort("{.arg smdpair}: {.val {as.character(tok)}} does not name exactly one group of {.arg by}.",
-                     call = NULL)
+      cli::cli_abort("{.arg smdpair}: {.val {tok}} does not name exactly one group of {.arg by}.",
+                     class = "tabtools_error_smdpair", call = NULL)
     }
     hit
   }, 1L)
-  if (out[1] == out[2]) cli::cli_abort("{.arg smdpair} must name two different groups.", call = NULL)
+  if (out[1] == out[2]) {
+    cli::cli_abort("{.arg smdpair} must name two different groups.",
+                   class = "tabtools_error_smdpair", call = NULL)
+  }
   out
 }

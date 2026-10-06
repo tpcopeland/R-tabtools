@@ -44,6 +44,7 @@ table1_tc(
   smdthreshold = 0.1,
   smdtype = c("pair", "population", "maxpair"),
   smdpair = NULL,
+  smdpair_as = c("auto", "values", "labels"),
   xlsx = NULL,
   sheet = "Table 1",
   title = NULL,
@@ -225,7 +226,15 @@ group labels (the values of a character or factor \code{by}, or the value
 labels of a labelled numeric \code{by}). Each must name exactly one group.
 The header names the pair (\verb{SMD (C vs A)}); with more than two groups a
 footnote adds "chosen with smdpair()". Requires \code{smd = TRUE} and
-\code{smdtype = "pair"}. As Stata tabtools 2.4.0 \code{smdpair()}.}
+\code{smdtype = "pair"}. As Stata tabtools 2.4.0 \code{smdpair()}. A token that is
+the value of one group and the label of another (value labels that are
+themselves numbers) is refused under \code{smdpair_as = "auto"}. A label equal
+to its own group's value is not ambiguous. A logical \code{by} takes \code{TRUE} /
+\code{FALSE} (or the strings), read as 1 / 0.}
+
+\item{smdpair_as}{\code{"auto"} (default), \code{"values"} or \code{"labels"}: read every
+\code{smdpair} token as a \code{by} value or as label text. As Stata's
+\code{smdpair(..., values|labels)}.}
 
 \item{xlsx, sheet, title, footnote, open}{Excel target and annotations.}
 
