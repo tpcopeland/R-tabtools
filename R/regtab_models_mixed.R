@@ -821,14 +821,14 @@ tt_regtab_check.glmmTMB <- function(fit, i) {
     sel <- c(sel, if (ok) blk[seq_len(k)] else rep(NA_integer_, k))
     map[[t]] <- list(lnsd = i_sd, atr = integer(), pairs = matrix(0L, 0, 2))
     cs <- matrix(NA_real_, k, k)
-    if (k > 1L && identical(code, "us") && length(blk) == ntheta) {
+    if (k > 1L && identical(code, "us")) {
       tb <- pf[blk]
-      Vb <- Vfull[blk, blk, drop = FALSE]
+      Vb <- if (length(blk) == ntheta) Vfull[blk, blk, drop = FALSE]
       covf <- function(x) {
         sd <- exp(x[seq_len(k)])
         (sd %o% sd) * .rt_tmb_cor(x[-seq_len(k)], k)
       }
-      if (isTRUE(all.equal(covf(tb), re$terms[[t]]$Sigma, tolerance = 1e-6, check.attributes = FALSE))) {
+      if (length(blk) == ntheta && isTRUE(all.equal(covf(tb), re$terms[[t]]$Sigma, tolerance = 1e-6, check.attributes = FALSE))) {
         for (a in seq_len(k - 1L)) for (b in (a + 1L):k) {
           gr <- vapply(seq_along(tb), function(m) {
             h <- 1e-6 * max(1, abs(tb[m]))
@@ -837,11 +837,15 @@ tt_regtab_check.glmmTMB <- function(fit, i) {
           cs[a, b] <- cs[b, a] <- sqrt(drop(crossprod(gr, Vb %*% gr)))
         }
       } else {
-        # No silent blank (CAT P1-8): the factor's fill order disagrees with
-        # VarCorr(), so the covariance intervals of this term stay blank.
-        cli::cli_inform(c("Note: the covariance interval(s) of the random-effect term {.code {names(rs)[t]}} are blank.",
+        # No silent blank (CAT P1-8): the parameter block does not match
+        # VarCorr() (length or fill order), so this term's covariance
+        # intervals stay blank, said on the console and in the footnote.
+        term <- names(rs)[t]
+        cli::cli_inform(c("Note: the covariance interval(s) of the random-effect term {.code {term}} are blank.",
                           "i" = "glmmTMB's correlation parameterization could not be matched to {.fn VarCorr}."),
-                        class = "tabtools_note_tmb_cov_ci")
+                        class = "tabtools_note_tmb_cov_ci",
+                        footnote = paste0("Covariance intervals of the random-effect term ", term,
+                                          " are blank: glmmTMB's correlation parameterization could not be matched to VarCorr()."))
       }
     }
     cov_se[[t]] <- cs

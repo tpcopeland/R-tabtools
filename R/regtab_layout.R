@@ -917,8 +917,16 @@ tt_regtab_build <- function(fits, infos, o) {
     om[[m]]$vce <- keep$vce
     om[[m]]["cluster"] <- list(keep$cluster)
   }
+  # P1-8: a glmmTMB covariance interval left blank is explained in the
+  # footnote (every sink) as well as on the console.
+  re_notes <- character()
   trows <- lapply(seq_len(M), function(m) {
-    with_fb(m, tt_regtab_trailing_rows(fits1[[m]], infos[[m]], om[[m]])) %||%
+    withCallingHandlers(
+      with_fb(m, tt_regtab_trailing_rows(fits1[[m]], infos[[m]], om[[m]])),
+      tabtools_note_tmb_cov_ci = function(cnd) {
+        fn <- paste0("Model ", m, ": ", cnd$footnote)
+        if (!fn %in% re_notes) re_notes <<- c(re_notes, fn)
+      }) %||%
       .rt_row("", "", "", "")[0L, , drop = FALSE]
   })
   # Beside a multi-equation model every model takes the coleq#colname
@@ -1114,6 +1122,11 @@ tt_regtab_build <- function(fits, infos, o) {
   # variance, appended to the footnote (every sink), as the stars note is
   # to the xlsx footnote.
   # A user-supplied variance is always named (task 5.18).
+  if (length(re_notes)) {
+    note <- paste(re_notes, collapse = " ")
+    fn <- trimws(o$footnote %||% "")
+    o$footnote <- if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, ". ", note)
+  }
   user_vce <- any(vapply(vces, identical, TRUE, "user"))
   if (isTRUE(o$vce_note) || user_vce) {
     note <- .rt_vce_footnote(fits1, infos, vces, o$cluster_spec %||% clusters, o$models, user_only = !isTRUE(o$vce_note))
