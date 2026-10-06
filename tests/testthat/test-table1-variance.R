@@ -80,12 +80,15 @@ test_that("weighted overflow regimes keep Stata semantics", {
   # raw moment sum(w y^2) missing (y^2 out of range): SD missing, mean kept
   s <- one(c(1e160, 2e160, 3e160), rep(1, 3))
   expect_false(is.na(s$a)); expect_true(is.na(s$b))
-  # sum(wdev)^2 overflow: Mata ^2 has no extended range -> SD missing
-  # (Stata 2.5.1: 1.101299626e+133 +- .)
+  # sum(wdev)^2 overflows: deliberate deviation from Stata 2.5.1, which
+  # prints "1.101299626e+133 +- ." (Mata ^2 has no extended range); R keeps
+  # the finite a * (a / b) quotient, as 2.1.14 did (Stata-Dev item
+  # 2026-10-06-tabtools-centered-ss-square-overflow.md).
   yy <- c(2.9026338025909847e133, -1.3002621865103486e133, 1.7015272624644451e133)
   s <- one(yy, rep(1e40, 3))
   expect_equal(s$a, 1.101299626e133, tolerance = 1e-9)
-  expect_true(is.na(s$b))
+  expect_false(is.na(s$b))
+  expect_equal(s$b, one(yy, rep(1, 3))$b, tolerance = 1e-9)
   # huge weights are rescaled (probability weights are scale-free)
   s1 <- one(c(1, 2, 3, 4), rep(1e307, 4))
   s2 <- one(c(1, 2, 3, 4), rep(1, 4))

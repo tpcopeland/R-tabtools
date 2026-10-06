@@ -157,10 +157,10 @@ test_that("H10: weights whose squares overflow give the true ESS and Stata's SD 
   for (w in exact_num(c("1e200", "1e160"))) {
     d$w <- w
     out <- h10_cells(table1_tc(d, by = "g", vars = c(x = "contn", b = "bin"), wt = "w", smd = TRUE))
-    # Stata 2.5.1 (centered ss, sum(wdev)^2 without extended range): the 1e200
-    # weights' rounding residue squares out of range, so the SD is "."; 1e160 gives 3.
-    sdtxt <- if (w == 1e200) "x,6\u00b1.,16\u00b1." else "x,6\u00b13,16\u00b13,3.303"
-    expect_identical(out[3:5], c("Effective sample size,ESS=10,ESS=10,", if (w == 1e200) "x,6\u00b1.,16\u00b1.,3.303" else sdtxt, "b,50,50,0.000"),
+    # Stata 2.5.1 prints "6\u00b1." at 1e200 (its centered ss squares sum(wdev)
+    # with Mata ^2, no extended range); R keeps 2.1.14's finite SD on purpose
+    # (Stata-Dev item 2026-10-06-tabtools-centered-ss-square-overflow.md).
+    expect_identical(out[3:5], c("Effective sample size,ESS=10,ESS=10,", "x,6\u00b13,16\u00b13,3.303", "b,50,50,0.000"),
                      label = paste("weights", w))
   }
 })

@@ -224,8 +224,8 @@
   # weights by a power of two and start again (.t1w_wscale()); a sum that
   # still holds a missing product (a y^2 beyond the range) is missing, so
   # the SD is ".", and a mean whose sum overflows is a blank cell. The
-  # centered ss squares sum(w d) with Mata's `^2`, which has no extended
-  # range, so an overflowing square is a missing SD (.t1_centered_ss()).
+  # centered ss keeps the finite quotient of an overflowing square of
+  # sum(w d), where Stata 2.5.1 prints "." (.t1_centered_ss()).
   if (kind == "wt" && (is.na(sw) || !all(.st_ok(p1)) || !all(.st_ok(p2)))) {
     w <- w / .t1w_wscale(w)
     sw <- .st_sum(w)

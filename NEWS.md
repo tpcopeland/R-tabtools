@@ -9,9 +9,10 @@ footnote back to 2.1.14's form.
   does, in the unweighted, `wt` and `fweight` paths. Values far from zero
   (`1e8 + c(0.1, 0.2, 0.3, 0.4)`) no longer show SD 0 or a missing SD from
   cancelling raw moments. A constant column that showed `2.68±.` now
-  shows `2.68±0.00`, and geometric SDs (`contln`) change with it. A
-  weighted SD is still missing when the square of the centered weighted sum
-  overflows, as in Stata.
+  shows `2.68±0.00`, and geometric SDs (`contln`) change with it. With
+  extreme weights (about 1e160 and up) Stata 2.5.1 prints a missing SD when
+  the square of the centered weighted sum overflows; tabtools keeps the
+  finite SD there, as before.
 * `table1_tc()` with three or more groups and `smd = TRUE` names the pair
   its SMD compares wherever the table goes. The column header reads
   `SMD (A vs B)`, a footnote says "SMD compares A vs B only (the first two

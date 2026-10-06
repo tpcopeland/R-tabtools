@@ -171,12 +171,13 @@
   if (!all(.st_ok(wdev)) || !all(.st_ok(wdev2))) return(NA_real_)
   sd1 <- .st_sum(wdev)
   if (is.na(sd1)) return(NA_real_)
-  # Mata's `sum(wdev)^2 / swg` (:1899) has no extended range, unlike
-  # `a * a / b`: an overflowing square is missing (Stata 17: a = -6.86e156,
-  # b = 3e40 gives "." for a^2/b but 1.5708e273 for a*a/b).
-  sq <- sd1 * sd1
-  if (!.st_ok(sq)) return(NA_real_)
-  ss <- .st_num(.st_sum(wdev2) - sq / sw)
+  # Deliberate deviation from tabtools 2.5.1: Mata's `sum(wdev)^2 / swg`
+  # (:1899) has no extended range, so Stata prints a missing SD when the
+  # rounding residue sum(wdev) squares out of range (uniform weights of
+  # 1e200 on 1..20 give "6\u00b1."; 2.1.14 gave "6\u00b13"). R keeps the
+  # finite quotient as 2.1.14's `a * a / b` did (.t1_sq_over()). Stata-Dev
+  # item 2026-10-06-tabtools-centered-ss-square-overflow.md.
+  ss <- .st_num(.st_sum(wdev2) - .t1_sq_over(sd1, sw))
   if (!is.na(ss) && ss < 0 && ss > -1e-8) ss <- 0
   ss
 }
