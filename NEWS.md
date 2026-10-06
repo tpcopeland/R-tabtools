@@ -1,3 +1,12 @@
+# tabtools (development version)
+
+* `table1_tc(nosmdhighlight = TRUE)` disables Excel SMD highlighting, as
+  `smdthreshold = -1` does. Combining the switch with an explicit threshold
+  is refused, matching Stata. Markdown has no SMD highlighting.
+* SMD cross-validation now compares population and max-pair statistics for
+  continuous, binary and categorical rows, with importance and frequency
+  weights and groups with no values, directly against Stata 2.5.1.
+
 # tabtools 0.1.1
 
 Bug fixes from the 2026-10-06 audits, plus the Table 1 SMD work that follows
