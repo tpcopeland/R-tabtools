@@ -309,7 +309,11 @@ stacktab <- function(blocks = NULL, xlsx = NULL, sheet = NULL, layout = "vstack"
 
   if (display) {
     # stacktab.ado:512-545: the listing (title above), a blank line, the note.
-    cat(tt_console_lines(tt), sep = "\n")
+    lines <- tt_console_lines(tt)
+    # Paragraphs keep their leading/between-paragraph separators, but
+    # stacktab's status follows the last paragraph without a blank line.
+    if (length(.tt_footnote_paragraphs(tt$footnote))) lines <- lines[-length(lines)]
+    cat(lines, sep = "\n")
   }
 
   # Where the table goes (stacktab.ado:547-574), then the file preflight.
