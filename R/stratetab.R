@@ -129,6 +129,11 @@
 #'   exposure group 1.
 #' @param ratiodigits Decimals for rate ratios, 0 to 10 (default 2).
 #' @param footnote Footnote below the table (smaller italic font).
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @param level Confidence level of the blocks' intervals, a proportion
 #'   (`0.90`) or a percentage (`90`); required when a block does not record
 #'   its level (see Scaling and intervals).
@@ -302,6 +307,7 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
   outcomes <- as.integer(outcomes)
   level_pct <- .st_check_level(level)
   for (a in c("title", "footnote", "unitlabel")) .tt_check_text_arg(get(a), a)
+  footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   style <- tt_resolve_style(font = font, fontsize = fontsize, borderstyle = borderstyle,
                             headershade = headershade, zebra = zebra,
                             headercolor = headercolor, zebracolor = zebracolor)
@@ -1033,5 +1039,5 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
     add("font", nr, nr, 2, 2, value = max(style$fontsize - 2, 6))
     add("italic", nr, nr, 2, 2, code = 1)
   }
-  list(grid = grid, written = written, rules = do.call(rbind, R))
+  .xlsx_expand_footnotes(list(grid = grid, written = written, rules = do.call(rbind, R)))
 }

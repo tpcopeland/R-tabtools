@@ -132,6 +132,7 @@
 # `title` / `footnote` arguments: NULL, or one non-missing string (an NA
 # used to surface as an invalid-tt_table error; review R9).
 .tt_check_text_arg <- function(x, arg) {
+  if (arg %in% c("footnote", "note")) return(.tt_check_footnote_arg(x, arg))
   if (!is.null(x) && (!is.character(x) || length(x) != 1L || is.na(x))) {
     cli::cli_abort("{.arg {arg}} must be a single string.", call = NULL)
   }

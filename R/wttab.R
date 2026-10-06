@@ -177,6 +177,11 @@
 #'   `###` heading of the Markdown file).
 #' @param footnote Footnote below the table. `NULL` (default) explains the
 #'   ESS (and truncation); `""` for none.
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @inheritParams puttab
 #' @return A `tt_table` (`command = "wttab"`), returned invisibly when
 #'   `xlsx`, `csv` or `markdown` writes a file (assign it and print it to see
@@ -300,6 +305,7 @@ wttab <- function(x, weights = NULL, by = NULL, period = NULL, trunc = NULL, dat
   }
   digits <- .check_int_range(digits %||% getOption("tabtools.digits") %||% 2L, "digits", 0, 6)
   for (a in c("title", "footnote")) .tt_check_text_arg(get(a), a)
+  footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   style <- tt_resolve_style(font = font, fontsize = fontsize, borderstyle = borderstyle,
                             headershade = headershade, zebra = zebra,
                             headercolor = headercolor, zebracolor = zebracolor)
@@ -843,9 +849,9 @@ wttab <- function(x, weights = NULL, by = NULL, period = NULL, trunc = NULL, dat
   out <- "ESS = effective sample size, (sum of w)^2 / (sum of w^2); ESS (%) = 100 x ESS / N."
   if (trunc) {
     of <- if (trunc_by == "period") "of the weights in the same period" else "of all weights"
-    out <- paste(out, paste0("Truncated l/u: weights below the l-th or above the u-th percentile ", of,
+    out <- .tt_append_footnotes(out, paste0("Truncated l/u: weights below the l-th or above the u-th percentile ", of,
                              " set to that percentile; Truncated (n) counts the weights changed."))
   }
-  if (s_weights) out <- paste(out, "Weights include the sampling weights (s.weights).")
+  if (s_weights) out <- .tt_append_footnotes(out, "Weights include the sampling weights (s.weights).")
   out
 }

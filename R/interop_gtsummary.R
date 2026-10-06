@@ -42,6 +42,7 @@ tt_as_gtsummary <- function(x) {
   }
   .tt_need("gtsummary", "tt_as_gtsummary", version = "2.3.0")
   validate_tt_table(x)
+  x <- .tt_blank_text(x)
   nc <- ncol(x$body)
   # paste0() of a zero-length vector is "col_", not character(0): a
   # label-only table has no value columns (stack review item 6).
@@ -120,7 +121,9 @@ tt_as_gtsummary <- function(x) {
   }
   if (!is.null(x$title) && nzchar(x$title)) g <- gtsummary::modify_caption(g, x$title, text_interpret = "none")
   if (!is.null(x$footnote) && nzchar(x$footnote)) {
-    g <- gtsummary::modify_source_note(g, x$footnote, text_interpret = "none")
+    for (para in .tt_footnote_paragraphs(x$footnote)) {
+      g <- gtsummary::modify_source_note(g, para, text_interpret = "none")
+    }
   }
   g
 }

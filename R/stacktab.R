@@ -87,6 +87,11 @@
 #' @param title Title in column `A` above the table, bold Arial 12.
 #' @param note,footnote Note below the table, italic Arial 8 (`footnote` is
 #'   an alias; give one of them).
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @param columnmerge Column merges (see Column merges).
 #' @param style Row heights and column widths: a list with any of
 #'   `titlerowheight` (default 30), `noterowheight` (default 45), and
@@ -194,6 +199,8 @@ stacktab <- function(blocks, xlsx = NULL, sheet = NULL, layout = "vstack", title
   layout <- tolower(layout)
   if (append && sheetreplace) cli::cli_abort("{.arg append} and {.arg sheetreplace} may not be combined.", call = NULL)
   for (a in c("title", "note", "footnote")) .tt_check_text_arg(get(a), a)
+  note <- if (is.null(note)) NULL else .tt_footnote_text(note)
+  footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   if (!is.null(note) && nzchar(note) && !is.null(footnote) && nzchar(footnote)) {
     cli::cli_abort("{.arg note} and {.arg footnote} may not be combined.", call = NULL)
   }
@@ -249,7 +256,7 @@ stacktab <- function(blocks, xlsx = NULL, sheet = NULL, layout = "vstack", title
 
   if (display) {
     # stacktab.ado:512-545: the listing (title above), a blank line, the note.
-    cat(tt_console_lines(tt), if (nzchar(note)) note, sep = "\n")
+    cat(tt_console_lines(tt), sep = "\n")
   }
 
   # Where the table goes (stacktab.ado:547-574), then the file preflight.
@@ -970,7 +977,7 @@ stacktab <- function(blocks, xlsx = NULL, sheet = NULL, layout = "vstack", title
     add("italic", note_row, note_row, sc, end_col, code = 1)
     add("height", note_row, note_row, 1, 1, value = meta$note_height %||% 45)
   }
-  list(grid = grid, written = written, rules = do.call(rbind, R))
+  .xlsx_expand_footnotes(list(grid = grid, written = written, rules = do.call(rbind, R)))
 }
 
 .stacktab_write_xlsx <- function(tt, path, sheet, start_row, title_row, append) {

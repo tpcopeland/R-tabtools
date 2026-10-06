@@ -94,7 +94,12 @@ exposure group 1.}
 
 \item{ratiodigits}{Decimals for rate ratios, 0 to 10 (default 2).}
 
-\item{footnote}{Footnote below the table (smaller italic font).}
+\item{footnote}{Footnote below the table (smaller italic font).
+Footnotes accept a character vector of paragraphs. The reserved token
+\code{" \\\\ "} (one backslash with surrounding spaces) splits each element,
+including a scalar, into paragraphs. Split pieces are trimmed and empty
+pieces dropped; unspaced and doubled backslashes remain literal.
+Automatic notes are separate paragraphs in every sink.}
 
 \item{level}{Confidence level of the blocks' intervals, a proportion
 (\code{0.90}) or a percentage (\code{90}); required when a block does not record

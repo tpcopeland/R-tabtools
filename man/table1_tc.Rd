@@ -237,7 +237,12 @@ to its own group's value is not ambiguous. A logical \code{by} takes \code{TRUE}
 \code{smdpair} token as a \code{by} value or as label text. As Stata's
 \code{smdpair(..., values|labels)}.}
 
-\item{xlsx, sheet, title, footnote, open}{Excel target and annotations.}
+\item{xlsx, sheet, title, footnote, open}{Excel target and annotations.
+Footnotes accept a character vector of paragraphs. The reserved token
+\code{" \\\\ "} (one backslash with surrounding spaces) splits each element,
+including a scalar, into paragraphs. Split pieces are trimmed and empty
+pieces dropped; unspaced and doubled backslashes remain literal.
+Automatic notes are separate paragraphs in every sink.}
 
 \item{borderstyle}{One of \code{"thin"}, \code{"default"}, \code{"medium"}, \code{"academic"}.}
 

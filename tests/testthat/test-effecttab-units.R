@@ -446,7 +446,7 @@ test_that("F2: a plain ratio's p-value tests 1, with a footnote; hypothesis = 1 
   expect_equal(unname(tt$stored$table[1, 2]), 2 * stats::pnorm(-abs(z)))
   expect_false(isTRUE(all.equal(unname(tt$stored$table[1, 2]), r$p.value)))
   expect_identical(tt$footnote, "P-values of ratios test a ratio of 1.")
-  expect_identical(effecttab(r, footnote = "Weighted")$footnote, "Weighted; P-values of ratios test a ratio of 1.")
+  expect_identical(effecttab(r, footnote = "Weighted")$footnote, "Weighted \\ P-values of ratios test a ratio of 1.")
   # The interval is marginaleffects'.
   expect_identical(tt$body$c3[3], sprintf("(%.2f, %.2f)", r$conf.low, r$conf.high))
   # as_forest_data() and highlight read the corrected p-value.

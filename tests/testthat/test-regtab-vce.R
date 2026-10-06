@@ -467,7 +467,7 @@ test_that("vce_note describes each model's non-default variance in the footnote"
   tt <- regtab(crude, ipw, ipw, vce = list("stata", "robust", "cluster"), cluster = list(NULL, NULL, ~education),
                models = c("Crude", "IPTW", "IPTW (cl)"), vce_note = TRUE, footnote = "Weighted by IPTW")
   expect_identical(tt$footnote,
-                   "Weighted by IPTW. Standard errors, IPTW: robust; IPTW (cl): robust, clustered by education.")
+                   "Weighted by IPTW \\ Standard errors, IPTW: robust; IPTW (cl): robust, clustered by education.")
   expect_identical(regtab(crude, vce_note = TRUE)$footnote, "")
   expect_identical(regtab(ipw, vce = "robust", vce_note = TRUE)$footnote, "Standard errors: robust.")
 })

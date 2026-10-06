@@ -27,6 +27,7 @@ tt_as_tinytable <- function(x) {
   }
   .tt_need("tinytable", "tt_as_tinytable")
   validate_tt_table(x)
+  x <- .tt_blank_text(x)
   nc <- ncol(x$body)
   # Column names: the lowest header row; an empty one takes a one-cell
   # label from the row above (table1_tc's cells spanning both rows).
@@ -48,7 +49,7 @@ tt_as_tinytable <- function(x) {
   body[[1]] <- sub("^ +", "", body[[1]])
   names(body) <- low
   cap <- if (!is.null(x$title) && nzchar(x$title)) x$title else NULL
-  notes <- if (!is.null(x$footnote) && nzchar(x$footnote)) x$footnote else NULL
+  notes <- if (!is.null(x$footnote) && nzchar(x$footnote)) .tt_footnote_paragraphs(x$footnote) else NULL
   out <- tinytable::tt(body, caption = cap, notes = notes, colnames = nh > 0L)
   # Column groups, the lowest first (group_tt() adds each row on top).
   for (lv in seq_along(up)) {

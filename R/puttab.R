@@ -74,6 +74,11 @@
 #' @param title Title in cell `A1` (and the first row of the CSV and the
 #'   `###` heading of the Markdown file).
 #' @param footnote Italic footnote below the table.
+#'   Footnotes accept a character vector of paragraphs. The reserved token
+#'   `" \\ "` (one backslash with surrounding spaces) splits each element,
+#'   including a scalar, into paragraphs. Split pieces are trimmed and empty
+#'   pieces dropped; unspaced and doubled backslashes remain literal.
+#'   Automatic notes are separate paragraphs in every sink.
 #' @param font,fontsize Font family and size (defaults from
 #'   [tabtools_options()], else Arial 10).
 #' @param borderstyle `"default"` or `"thin"`, `"medium"`, or `"academic"`
@@ -163,6 +168,7 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   }
   digits <- .check_int_range(digits %||% getOption("tabtools.digits") %||% 2L, "digits", 0, 6)
   for (a in c("title", "footnote")) .tt_check_text_arg(get(a), a)
+  footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   style <- tt_resolve_style(font = font, fontsize = fontsize, borderstyle = borderstyle,
                             headershade = headershade, zebra = zebra,
                             headercolor = headercolor, zebracolor = zebracolor)
@@ -225,7 +231,7 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   layout <- list(indent = 0L, align = "right", console_sepby = FALSE, console_title = TRUE,
                  console_blank = TRUE, header_style = "plain", xlsx_rules = "puttab",
                  sheet = "Table", csv_reservedrow = FALSE)
-  nr <- nzchar(title) + length(hdr) + nrow(body) + nzchar(footnote)
+  nr <- nzchar(title) + length(hdr) + nrow(body) + length(.tt_footnote_paragraphs(footnote))
   stored <- list(n_rows = nr, n_cols = K, n_datarows = nrow(body), source = source)
   tt_table(body = body, header = hdr, rows = rows, cols = cols, title = title,
            footnote = footnote, style = style, stored = stored, command = command,
@@ -585,5 +591,5 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
     add("italic", total, total, 2, xK, code = 1)
     add("halign", total, total, 2, xK, code = 1)
   }
-  list(grid = grid, written = written, rules = do.call(rbind, R))
+  .xlsx_expand_footnotes(list(grid = grid, written = written, rules = do.call(rbind, R)))
 }

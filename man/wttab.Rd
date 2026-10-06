@@ -96,7 +96,12 @@ the sheet is replaced if it exists and the workbook created if needed.}
 \verb{###} heading of the Markdown file).}
 
 \item{footnote}{Footnote below the table. \code{NULL} (default) explains the
-ESS (and truncation); \code{""} for none.}
+ESS (and truncation); \code{""} for none.
+Footnotes accept a character vector of paragraphs. The reserved token
+\code{" \\\\ "} (one backslash with surrounding spaces) splits each element,
+including a scalar, into paragraphs. Split pieces are trimmed and empty
+pieces dropped; unspaced and doubled backslashes remain literal.
+Automatic notes are separate paragraphs in every sink.}
 
 \item{font, fontsize}{Font family and size (defaults from
 \code{\link[=tabtools_options]{tabtools_options()}}, else Arial 10).}

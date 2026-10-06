@@ -17,7 +17,7 @@ test_that("a three-group pair SMD names the compared pair in the footnote of eve
   tt <- table1_tc(d, by = "arm", vars = c(age = "contn", sex = "bin"), smd = TRUE,
                   footnote = "User note.")
   note <- "SMD compares A vs B only (the first two of 3 groups)."
-  expect_identical(tt$footnote, paste("User note.", note))
+  expect_identical(tt$footnote, paste("User note.", "\\", note))
   csv <- withr::local_tempfile(fileext = ".csv")
   tt_write_csv(tt, csv)
   expect_true(any(grepl(note, readLines(csv), fixed = TRUE)))
@@ -25,7 +25,7 @@ test_that("a three-group pair SMD names the compared pair in the footnote of eve
   tt_write_markdown(tt, md)
   expect_true(any(grepl(note, readLines(md), fixed = TRUE)))
   # The header names the pair too, so a sink without the footnote
-  # (as.data.frame(), the console listing) never shows a bare "SMD".
+  # (as.data.frame()) never shows a bare "SMD".
   expect_identical(tt$header[[1]]$text[tt$cols$role == "smd"], "SMD (A vs B)")
   expect_true("SMD (A vs B)" %in% unlist(as.data.frame(tt)[1, ]))
   expect_identical(tt$meta$console_before, paste("Note:", note))

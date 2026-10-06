@@ -14,7 +14,12 @@ tt_stack(..., groups = NULL, title = NULL, footnote = NULL)
 above each block.}
 
 \item{title, footnote}{Title and footnote of the result (default: the
-first table's).}
+first table's).
+Footnotes accept a character vector of paragraphs. The reserved token
+\code{" \\\\ "} (one backslash with surrounding spaces) splits each element,
+including a scalar, into paragraphs. Split pieces are trimmed and empty
+pieces dropped; unspaced and doubled backslashes remain literal.
+Automatic notes are separate paragraphs in every sink.}
 }
 \value{
 A \code{tt_table}; \code{stored$tables} holds each table's \code{stored}.
