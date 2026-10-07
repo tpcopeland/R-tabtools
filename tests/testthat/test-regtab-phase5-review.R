@@ -356,11 +356,16 @@ test_that("M73: glmmTMB honours noreeffects", {
 test_that("M67: a supplied p.value column is kept as it is, missing entries included", {
   df <- data.frame(term = c("(Intercept)", "x", "z"), estimate = c(1, 0.5, 0.2), std.error = c(0.1, 0.25, 0.1),
                    p.value = c(0.5, 0.3, NA), stringsAsFactors = FALSE)
+  attr(df, "effect_scale") <- "Coef."
+  attr(df, "inference_reference") <- "normal"
   tt <- regtab(df, keepintercept = TRUE)
   p <- stats::setNames(tt$body[[4]], tt$body[[1]])
   # A Wald test from std.error would give 0.046 for x and 0.046 for z.
   expect_identical(unname(p[c("x", "z")]), c("0.30", ""))
   # Without a p.value column, p comes from std.error.
-  tt2 <- regtab(df[, c("term", "estimate", "std.error")], keepintercept = TRUE)
+  df2 <- df[, c("term", "estimate", "std.error")]
+  attr(df2, "effect_scale") <- "Coef."
+  attr(df2, "inference_reference") <- "normal"
+  tt2 <- regtab(df2, keepintercept = TRUE)
   expect_identical(tt2$body[[4]][tt2$body[[1]] == "z"], "0.046")
 })

@@ -111,9 +111,13 @@ tt_as_gtsummary <- function(x) {
   if (any(indent > 0)) {
     g <- do.call(gtsummary::modify_indent, list(g, columns = "label", rows = quote(row_type == "level"), indent = 4L))
   }
+  # A reference can share its row with an absent or estimated model cell.
+  # Reuse the workbook's per-cell italics instead of a whole-row type.
+  italic <- if (identical(x$layout$xlsx_rules, "regression") && nrow(x$body))
+    .tt_render_spec(x, merged = FALSE)$body$italic else NULL
   refs <- which(x$rows$type %in% c("ref", "omitted", "empty"))
   for (j in seq_along(vcols)) {
-    it <- refs[nzchar(x$body[[j + 1L]][refs])]
+    it <- if (!is.null(italic)) which(italic[, j + 1L]) else refs[nzchar(x$body[[j + 1L]][refs])]
     if (!length(it)) next
     # Keys may be absent or repeat across stacked groups: select the
     # actual input rows, and let tbl_stack() qualify the predicate by table.

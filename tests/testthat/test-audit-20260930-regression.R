@@ -74,6 +74,8 @@ test_that("custom statistic labels cannot silently reuse the first function", {
 
 test_that("data-frame glance statistics cannot become factor codes or first rows", {
   x <- data.frame(term = "x", estimate = 1, std.error = 0.3)
+  attr(x, "effect_scale") <- "Coef."
+  attr(x, "inference_reference") <- "normal"
   attr(x, "glance") <- list(nobs = factor("200"))
   expect_error(regtab(x, stats = "n"), "nobs.*one number", class = "rlang_error")
   attr(x, "glance") <- data.frame(nobs = c(20, 200))
@@ -98,6 +100,6 @@ test_that("modelsummary glance statistics obey the same scalar contract", {
   expect_error(tt_from_modelsummary(x, exponentiate = FALSE),
                "exactly one row", class = "rlang_error")
   x$glance <- data.frame(nobs = 200)
-  out <- tt_from_modelsummary(x, exponentiate = FALSE)
+  out <- tt_from_modelsummary(x, exponentiate = FALSE, inference_reference = "normal")
   expect_identical(tail(regtab(out, stats = "n")$body[[2]], 1L), "200")
 })

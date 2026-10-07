@@ -671,7 +671,9 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
   type <- x$rows$type
   re <- which(type == "re")
   if (length(re)) add("top", re[1] + 3, re[1] + 3, 2, num_cols, code = hb)
-  for (kind in c("stat", "addrow")) {
+  # Native effecttab appends ordinary cells, without regtab statistics rules.
+  extra_kinds <- if (identical(x$command, "effecttab")) character() else c("stat", "addrow")
+  for (kind in extra_kinds) {
     rows <- which(type == kind)
     if (!length(rows)) next
     top_rows <- if (kind == "addrow" && !is.null(x$rows$inserted)) rows[!x$rows$inserted[rows]] else rows

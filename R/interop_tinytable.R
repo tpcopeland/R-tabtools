@@ -61,9 +61,13 @@ tt_as_tinytable <- function(x) {
   }
   lev <- which(x$rows$indent > 0)
   if (length(lev)) out <- tinytable::style_tt(out, i = lev, j = 1, indent = 1)
+  # A reference can share its row with an absent or estimated model cell.
+  # Reuse the workbook's per-cell italics instead of a whole-row type.
+  italic <- if (identical(x$layout$xlsx_rules, "regression") && nrow(x$body))
+    .tt_render_spec(x, merged = FALSE)$body$italic else NULL
   refs <- which(x$rows$type %in% c("ref", "omitted", "empty"))
   for (jj in seq_len(nc)[-1]) {
-    it <- refs[nzchar(x$body[[jj]][refs])]
+    it <- if (!is.null(italic)) which(italic[, jj]) else refs[nzchar(x$body[[jj]][refs])]
     if (length(it)) out <- tinytable::style_tt(out, i = it, j = jj, italic = TRUE)
   }
   if (nc > 1L) out <- tinytable::style_tt(out, j = seq_len(nc)[-1], align = "c")

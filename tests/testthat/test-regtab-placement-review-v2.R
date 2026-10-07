@@ -8,7 +8,7 @@ test_that("ordinary addrow ignores excess values and addcol still refuses them",
   expect_identical(one$body[[2L]][2L], "first")
   expect_identical(one$body[[3L]][2L], "")
   two <- regtab(d, d, addrow = list(list(label = "Inside", values = c("A", "B", "ignored"), after = "x")))
-  expect_identical(two$rows$key, c("x", "addrow:1"))
+  expect_identical(two$rows$key, c("x", "addrow:Inside"))
   expect_identical(two$body[[2L]][2L], "A")
   expect_identical(two$body[[5L]][2L], "B")
   expect_error(regtab(d, transpose = TRUE, addcol = list(Tail = c("first", "excess"))),

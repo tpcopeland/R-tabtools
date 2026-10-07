@@ -104,12 +104,17 @@ test_that("muse P1-7: a data frame's ratio limits must be positive and ordered",
   y <- data.frame(term = c("a", "b"), estimate = c(1.5, 2), conf.low = c(-0.1, 1.2),
                   conf.high = c(2.5, 3), p.value = c(0.1, 0.01))
   attr(y, "effect_scale") <- "OR"
+  attr(y, "conf.level") <- .95
   expect_error(regtab(y), "negative OR confidence limits")
   v <- data.frame(term = c("a", "b"), estimate = c(1.5, 2), conf.low = c(2.6, 1.2),
                   conf.high = c(2.5, 3), p.value = c(0.1, 0.01))
+  attr(v, "effect_scale") <- "OR"
+  attr(v, "conf.level") <- .95
   expect_error(regtab(v), "conf.low.*above.*conf.high")
   # Negative limits of a difference stay valid.
   w <- data.frame(term = "a", estimate = 0.5, conf.low = -0.1, conf.high = 1.1, p.value = 0.1)
+  attr(w, "effect_scale") <- "Coef."
+  attr(w, "conf.level") <- .95
   expect_s3_class(regtab(w), "tt_table")
 })
 
@@ -238,6 +243,9 @@ test_that("muse P2-11: multi-equation data frames with reordered levels are join
   t2 <- broom.helpers::tidy_plus_plus(f2, exponentiate = TRUE)
   attr(t1, "se_scale") <- "link"
   attr(t2, "se_scale") <- "link"
+  attr(t1, "effect_scale") <- attr(t2, "effect_scale") <- "RRR"
+  attr(t1, "conf.level") <- attr(t2, "conf.level") <- .95
+  attr(t1, "inference_reference") <- attr(t2, "inference_reference") <- "normal"
   tt <- regtab(t1, t2)
   lab <- trimws(tt$body[[1]])
   # Model 2's reference (mid) sits on the mid row, and its lo estimate on lo.

@@ -73,12 +73,12 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
   for (name in intersect(c(events, people, exposure), names(src))) {
     check_input_vector(src[[name]], name, nrow(src))
   }
-  source <- src[match(rn, rownames(src)), , drop = FALSE]
+  source <- .fc_align_source(src, rn)
   # Exact retained source comparison precedes computational compatibility.
   stored_data <- .fc_field(fit, "data")
   if (is.data.frame(stored_data)) {
     if (!all(rn %in% rownames(stored_data))) .fc_abort("Retained source row identities disagree.")
-    held <- stored_data[match(rn, rownames(stored_data)), , drop = FALSE]
+    held <- .fc_align_source(stored_data, rn)
     for (nm in intersect(names(source), names(held))) {
       if (!identical(.fc_freeze(source[[nm]]), .fc_freeze(held[[nm]]))) .fc_abort(paste0("Declared source disagrees with retained field `", nm, "`."))
     }
@@ -89,6 +89,16 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
     })
   if (!is.data.frame(mf) || !identical(rownames(mf), rn)) .fc_abort("Declared frame row identities disagree with the fit.")
   if (!is.null(retained)) {
+    # Rebuilt survival frames can lose fit-retained Stata label/code metadata.
+    # Restore from the declared, value-checked source, then compare exactly;
+    # never add attributes the retained fit did not carry.
+    labelled <- .rt_restore_attrs(mf, .fc_restore(fit, mf, source), warn = FALSE)
+    for (nm in intersect(names(mf), names(retained))) for (a in c("label", "labels")) {
+      if (is.null(attr(mf[[nm]], a, exact = TRUE)) &&
+          !is.null(attr(retained[[nm]], a, exact = TRUE))) {
+        attr(mf[[nm]], a) <- attr(labelled[[nm]], a, exact = TRUE)
+      }
+    }
     for (nm in names(retained)) {
       if (!nm %in% names(mf) || !identical(.fc_freeze(retained[[nm]]), .fc_freeze(mf[[nm]]))) {
         .fc_abort(paste0("Declared frame disagrees with retained field `", nm, "`."))
@@ -145,7 +155,10 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
   if (terms) {
     rows <- tt_regtab_rows(local, tt_model_info(local), vce = "model", interactions = "native")
     rows <- .rt_count_rows(rows, local)
-    info <- .fc_term_counts(rows, mf[take, , drop = FALSE], ev)
+    # Use the same validated code restoration as row extraction before
+    # positive-weight subsetting; [.factor otherwise drops its code labels.
+    term_frame <- .rt_restore_attrs(mf, local, warn = FALSE)
+    info <- .fc_term_counts(rows, .fc_align_source(term_frame, rownames(term_frame)[take]), ev)
     row_counts <- info$terms
     levels <- info$levels
     state_fields <- c("key", "status", "parent_key", "term_signature",
@@ -169,6 +182,19 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
                                  source_origin = origin, compatibility = "initial_only"))
   result$seal <- serialize(result, NULL, version = 2L)
   structure(result, class = "tt_fitcount")
+}
+
+# Row subsetting drops factor labels; keep metadata from the same source
+# column, without changing its selected values, levels or row identities.
+.fc_align_source <- function(source, rn) {
+  out <- source[match(rn, rownames(source)), , drop = FALSE]
+  for (nm in names(source)) for (a in c("label", "labels")) {
+    value <- attr(source[[nm]], a, exact = TRUE)
+    if (!is.null(value) && is.null(attr(out[[nm]], a, exact = TRUE))) {
+      attr(out[[nm]], a) <- value
+    }
+  }
+  out
 }
 
 .fc_abort <- function(message, parent = NULL) {

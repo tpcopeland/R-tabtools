@@ -1082,7 +1082,7 @@ in Stata; coefficients in R).
 coefficient or one contiguous factor block's last level, using keep/drop's
 factor-marker normalization. Missing or ambiguous anchors refuse before
 output. Anchors resolve before insertion; same-anchor entries retain input
-order and inherit indentation. Added rows have positional raw keys.
+order and inherit indentation. Added rows use \code{addrow:<label>} keys with collision-free occurrence suffixes.
 }
 
 \section{Session destinations}{

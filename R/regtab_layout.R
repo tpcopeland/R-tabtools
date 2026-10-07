@@ -171,6 +171,9 @@ tt_regtab_union <- function(mrows) {
       sc <- .rt_row(.rt_eq_key("lnsigma", "_cons"), "lnsigma", "var", "Scale: Intercept", "est",
                     term = "Log(scale)", estimate = w$estimate, conf.low = w$conf.low,
                     conf.high = w$conf.high, p.value = w$p.value, ancillary = TRUE, role = "ancillary")
+      # The added scale row carries the same Phase 4 count/state schema.
+      sc <- .rt_count_rows(sc, fit)
+      if ("count_events" %in% names(rows)) sc$count_events <- NA_real_
       first_anc <- which(rows$block == "/")[1]
       rows <- if (is.na(first_anc)) rbind(rows, sc) else
         rbind(rows[seq_len(first_anc - 1L), , drop = FALSE], sc, rows[first_anc:nrow(rows), , drop = FALSE])
@@ -481,6 +484,9 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
   dim <- (seen | constrained) & !significant
   heads <- which(u$rows$kind %in% c("cat_header", "int_header"))
   for (i in heads) {
+    # Native interaction levels are unindented; they do not form a nested
+    # category block for header dimming (regtab.ado:1877-1880).
+    if (u$rows$kind[i] == "int_header") { dim[i] <- FALSE; next }
     parent <- .rt_placement_parent(u$rows)
     child <- which(parent == u$rows$key[i] & !u$rows$kind %in% c("cat_header", "int_header"))
     dim[i] <- any(constrained[child]) && !any(significant[child])

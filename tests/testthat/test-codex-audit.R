@@ -53,14 +53,21 @@ test_that("CX-1: an unreadable workbook is refused by stacktab and puttab, the f
   expect_setequal(openxlsx2::wb_get_sheet_names(openxlsx2::wb_load(xl)), c("Keep", "New"))
 })
 
-test_that("CX-1: the direct appenders keep an unreadable Markdown file and append to it", {
+test_that("CX-1: direct appenders refuse unverifiable bytes and append once readable", {
   dir <- withr::local_tempdir()
   md <- file.path(dir, "doc.md")
   writeLines("ORIGINAL MUST SURVIVE", md)
+  before <- ca_bytes(md)
   ca_unreadable(md)
+  expect_no_warning(expect_error(
+    suppressMessages(puttab(data.frame(a = "new", b = "body"), markdown = md, mdappend = TRUE)),
+    "Could not write the `path` target", fixed = TRUE))
+  expect_no_warning(expect_error(tt_write_markdown(ca_block(), md, append = TRUE),
+    "Could not write the `path` target", fixed = TRUE))
+  Sys.chmod(md, "0600")
+  expect_identical(ca_bytes(md), before)
   suppressMessages(puttab(data.frame(a = "new", b = "body"), markdown = md, mdappend = TRUE))
   tt_write_markdown(ca_block(), md, append = TRUE)
-  Sys.chmod(md, "0600")
   out <- readLines(md)
   expect_identical(out[1], "ORIGINAL MUST SURVIVE")
   expect_identical(sum(out == "| new | body |"), 2L)
@@ -147,7 +154,8 @@ test_that("CX-2: a close-time write failure is an error naming the target", {
   expect_match(conditionMessage(e), basename(p), fixed = TRUE)
   m <- ca_dev_full(".md")
   expect_error(tt_write_markdown(tab, m), "Could not write the `path` target", fixed = TRUE)
-  expect_error(tt_write_markdown(tab, m, append = TRUE), "Could not write the `path` target", fixed = TRUE)
+  expect_no_warning(expect_error(tt_write_markdown(tab, m, append = TRUE),
+    "Could not write the `path` target", fixed = TRUE))
   # Through a command: no table comes back as if written.
   res <- tryCatch(suppressMessages(puttab(data.frame(a = "x"), csv = p)), error = function(e) NULL)
   expect_null(res)
@@ -274,6 +282,8 @@ test_that("CX-3: the other exporters refuse an ambiguous column name and accept 
   expect_error(regtab(f), "more than one column")
   expect_error(tt_effect_rows(f, type = "margins"), "more than one column")
   names(f)[3] <- "other"
+  attr(f, "effect_scale") <- "Coef."
+  attr(f, "inference_reference") <- "normal"
   expect_s3_class(regtab(f), "tt_table")
 })
 

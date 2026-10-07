@@ -73,6 +73,7 @@ test_that("every allowed class and the data-frame escape hatch pass the gate", {
     expect_invisible(tabtools:::.rt_check_model(f, 1L))
   }
   df <- data.frame(term = "x", estimate = 1)
+  attr(df, "effect_scale") <- "Coef."
   expect_invisible(tabtools:::.rt_check_model(df, 1L))
   expect_invisible(tabtools:::.rt_check_model(structure(df, class = c("tbl_df", "tbl", "data.frame")), 1L))
 })

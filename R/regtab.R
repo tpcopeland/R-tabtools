@@ -874,7 +874,7 @@
 #' coefficient or one contiguous factor block's last level, using keep/drop's
 #' factor-marker normalization. Missing or ambiguous anchors refuse before
 #' output. Anchors resolve before insertion; same-anchor entries retain input
-#' order and inherit indentation. Added rows have positional raw keys.
+#' order and inherit indentation. Added rows use `addrow:<label>` keys with collision-free occurrence suffixes.
 #'
 #' @param xlsx,sheet,open Excel target.
 #' @param borderstyle,font,fontsize,boldp,highlight,zebra,headershade,headercolor,zebracolor

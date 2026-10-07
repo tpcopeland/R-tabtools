@@ -44,7 +44,7 @@
     cli::cli_abort("Could not write the {.arg {arg}} target {.file {path}}.", parent = e, call = NULL)
   }
   # Verify the exact bytes before a caller records successful sink history.
-  previous <- if (append && file.exists(path)) tryCatch(readBin(path, "raw", file.size(path)), error = fail) else raw()
+  previous <- if (append && file.exists(path)) tryCatch(readBin(path, "raw", file.size(path)), warning = fail, error = fail) else raw()
   expected <- c(previous, charToRaw(paste0(paste(enc2utf8(lines), collapse = "\n"),
     if (length(lines)) "\n" else "")))
   con <- tryCatch(suppressWarnings(file(path, if (append) "ab" else "wb")), error = fail)
@@ -59,7 +59,7 @@
     NULL
   }, warning = function(w) w, error = function(e) e)
   if (!is.null(cond)) fail(cond)
-  actual <- tryCatch(readBin(path, "raw", file.size(path)), error = fail)
+  actual <- tryCatch(readBin(path, "raw", file.size(path)), warning = fail, error = fail)
   if (!identical(actual, expected)) {
     cli::cli_abort("Could not verify the {.arg {arg}} target {.file {path}}.", call = NULL)
   }
