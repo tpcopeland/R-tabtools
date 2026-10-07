@@ -27,7 +27,63 @@ imi_state <- function() {
        options = options(), directory = getwd(), sinks = c(sink.number(), sink.number(type = "message")))
 }
 
-imi_counts <- function(table, expected) {
+imi_capture_call <- function(expr) {
+  warnings <- list()
+  value <- tryCatch(withCallingHandlers(expr, warning = function(w) {
+    warnings[[length(warnings) + 1L]] <<- w
+    invokeRestart("muffleWarning")
+  }), error = identity)
+  list(value = value, warnings = warnings, state = imi_state())
+}
+
+# Independent schema for this single-source, single-model fixture. Opaque
+# source IDs are checked before any rename; all other metadata stays exact.
+imi_flat_source <- function(table) {
+  f <- table$meta$flat
+  nr <- nrow(table$body)
+  fields <- c("block_id", "row_keys", "row_types", "row_blocks", "states", "source_blocks", "composite")
+  character_vector <- function(x, n) is.character(x) && !is.object(x) &&
+    is.null(dim(x)) && length(x) == n && !anyNA(x)
+  character_matrix <- function(x) is.matrix(x) && is.character(x) &&
+    !is.object(x) && identical(dim(x), c(nr, 1L)) && !anyNA(x)
+  valid <- is.list(f) && identical(names(f), fields) && identical(f$composite, FALSE) &&
+    character_vector(f$block_id, 1L) && nzchar(f$block_id) &&
+    character_vector(f$row_blocks, nr) && all(f$row_blocks == f$block_id) &&
+    character_vector(f$row_keys, nr) && identical(f$row_keys, table$rows$key) &&
+    character_vector(f$row_types, nr) && identical(f$row_types, table$rows$type) &&
+    all(f$row_types %in% c("var", "level", "ref", "omitted", "empty", "re", "cat_header", "stat", "addrow", "header")) &&
+    character_matrix(f$states) && character_matrix(f$source_blocks)
+  if (!valid) stop("Invalid single-source flat identity schema or row transport.", call. = FALSE)
+  structural <- f$row_types %in% c("cat_header", "stat", "addrow", "header")
+  required <- f$states != "" & f$states != "absent"
+  if (any(f$states[structural, , drop = FALSE] != "") ||
+      any(!f$states[!structural, , drop = FALSE] %in%
+          c("est", "ref", "omit", "notest", "absent", "empty", "constrained", "masked")) ||
+      any(f$source_blocks != "" & f$source_blocks != f$block_id) ||
+      any(required & !nzchar(f$source_blocks))) {
+    stop("Invalid single-source flat identity cell transport or state.", call. = FALSE)
+  }
+  f
+}
+
+imi_rename_source <- function(later, initial) {
+  first <- imi_flat_source(initial)
+  second <- imi_flat_source(later)
+  if (identical(first$block_id, second$block_id)) {
+    stop("Independent calls must have distinct flat source identities.", call. = FALSE)
+  }
+  # Exactly one bijective later-ID -> initial-ID rename. Indexed replacement
+  # preserves all blanks, names, dimnames, attributes and semantic fields.
+  mapped <- later
+  for (field in c("block_id", "row_blocks", "source_blocks")) {
+    value <- mapped$meta$flat[[field]]
+    value[value == second$block_id] <- first$block_id
+    mapped$meta$flat[[field]] <- value
+  }
+  mapped
+}
+
+imi_counts <- function(table, expected, converted_accounting) {
   s <- table$meta$sample_accounting
   expect_type(s, "list")
   expect_equal(nrow(s$populations), 1L, tolerance = 0)
@@ -35,10 +91,10 @@ imi_counts <- function(table, expected) {
   expect_identical(m$status, rep("available", length(expected)))
   expect_equal(m$value, unname(expected), tolerance = 0)
   expect_false(any(grepl("imi-private-|imi-foreign-", unlist(table$meta), fixed = FALSE)))
-  expect_identical(attr(as.data.frame(table), "sample_accounting", exact = TRUE), s)
+  expect_identical(converted_accounting, s)
 }
 
-imi_native_rows <- function(table, fit) {
+imi_native_rows <- function(table, fit, variance) {
   b <- stats::coef(fit)
   V <- stats::vcov(fit)
   key <- ifelse(names(b) == "(Intercept)", "_cons", ifelse(names(b) == "gB", "2.g", names(b)))
@@ -50,10 +106,11 @@ imi_native_rows <- function(table, fit) {
   critical <- stats::qt(.975, stats::df.residual(fit))
   expect_equal(rows$conf.low[index], unname(b - critical * se), tolerance = 1e-12)
   expect_equal(rows$conf.high[index], unname(b + critical * se), tolerance = 1e-12)
-  expect_equal(tt_vcov(fit, "model"), V, tolerance = 1e-12)
+  expect_equal(variance, V, tolerance = 1e-12)
 }
 
 test_that("IMI-01 stored weighted lm survives mutable callers without state or private-ID leakage", {
+  seen_ids <- character()
   for (seed in c(7301L, 9403L)) {
     d <- imi_data(seed)
     accepted <- d$include & stats::complete.cases(d[c("y", "x", "g", "w")])
@@ -61,13 +118,12 @@ test_that("IMI-01 stored weighted lm survives mutable callers without state or p
     native_data <- d[used, ]
     oracle <- stats::lm(y ~ x + g, native_data, weights = w)
     fit <- stats::lm(y ~ x + g, d, weights = w, subset = include, na.action = na.exclude, model = TRUE)
-    expect_identical(class(fit)[1L], "lm")
     before_fit <- fit
     state <- imi_state()
-    initial <- regtab(fit, vce = "model", keepintercept = TRUE, stats = "n")
-    imi_native_rows(initial, oracle)
-    imi_counts(initial, c(eligible_n = sum(accepted), used_n = sum(used), fitted_n = sum(used),
-      frame_n = sum(accepted), zero_weight_n = sum(accepted & !used), reported_n = sum(used)))
+    first_call <- imi_capture_call(regtab(fit, vce = "model", keepintercept = TRUE, stats = "n"))
+    initial <- first_call$value
+    variance_call <- imi_capture_call(tt_vcov(oracle, "model"))
+    conversion_call <- imi_capture_call(attr(as.data.frame(initial), "sample_accounting", exact = TRUE))
     # The stored model survives a caller data rebind, changed values and
     # renumbered observations. Original-input size remains unrecoverable.
     d <- d[rev(seq_len(nrow(d))), ]
@@ -75,15 +131,78 @@ test_that("IMI-01 stored weighted lm survives mutable callers without state or p
     d$y <- -2000 + seq_len(nrow(d))
     d$w <- 1
     rownames(d) <- NULL
-    expect_warning(later <- regtab(fit, vce = "model", keepintercept = TRUE, stats = "n"),
-      "data no longer match its model frame", class = "rlang_warning")
-    expect_identical(later, initial)
+    later_call <- imi_capture_call(regtab(fit, vce = "model", keepintercept = TRUE, stats = "n"))
+    later <- later_call$value
+    invalid_call <- imi_capture_call(regtab(fit, vce = "invalid-vce"))
+    # Freeze every package outcome/state before an expectation can load a
+    # failure formatter. The complete options/RNG/directory/sink oracle stays.
+    for (call in list(first_call, variance_call, conversion_call, later_call, invalid_call)) {
+      expect_identical(call$state, state)
+    }
+    expect_identical(class(fit)[1L], "lm")
+    expect_s3_class(initial, "tt_table")
+    expect_s3_class(later, "tt_table")
+    for (call in list(first_call, variance_call, conversion_call, invalid_call)) expect_length(call$warnings, 0L)
+    expect_length(later_call$warnings, 1L)
+    if (length(later_call$warnings) == 1L) {
+      expect_s3_class(later_call$warnings[[1L]], "rlang_warning")
+      expect_match(conditionMessage(later_call$warnings[[1L]]), "data no longer match its model frame")
+    }
+    expect_s3_class(invalid_call$value, "rlang_error")
+    imi_native_rows(initial, oracle, variance_call$value)
+    imi_counts(initial, c(eligible_n = sum(accepted), used_n = sum(used), fitted_n = sum(used),
+      frame_n = sum(accepted), zero_weight_n = sum(accepted & !used), reported_n = sum(used)), conversion_call$value)
+    first <- imi_flat_source(initial)
+    second <- imi_flat_source(later)
+    ids <- c(first$block_id, second$block_id)
+    expect_false(anyDuplicated(c(seen_ids, ids)) > 0L)
+    seen_ids <- c(seen_ids, ids)
+    expect_identical(imi_rename_source(later, initial), initial)
     input <- later$meta$sample_accounting$measures
     expect_identical(input$status[input$metric == "input_n"], "unavailable")
     expect_true(is.na(input$value[input$metric == "input_n"]))
     expect_identical(fit, before_fit)
-    expect_error(regtab(fit, vce = "invalid-vce"), class = "rlang_error")
-    expect_identical(imi_state(), state)
+    # Corrupt IDs cannot be normalized into a pass, and semantic changes
+    # remain visible to the same exact whole-object comparison.
+    reused <- later
+    for (field in c("block_id", "row_blocks", "source_blocks")) {
+      value <- reused$meta$flat[[field]]
+      value[value == second$block_id] <- first$block_id
+      reused$meta$flat[[field]] <- value
+    }
+    expect_error(imi_rename_source(reused, initial), "distinct flat source identities")
+    for (field in c("block_id", "row_blocks", "source_blocks")) {
+      corrupt <- later
+      corrupt$meta$flat[[field]][1L] <- paste0(second$block_id, "-foreign")
+      expect_error(imi_rename_source(corrupt, initial), "Invalid single-source flat identity")
+    }
+    corrupt <- later
+    corrupt$meta$flat$source_blocks[which(second$states == "est")[1L]] <- ""
+    expect_error(imi_rename_source(corrupt, initial), "cell transport")
+    corrupt <- later
+    corrupt$meta$flat$row_blocks <- head(second$row_blocks, -1L)
+    expect_error(imi_rename_source(corrupt, initial), "row transport")
+    corrupt <- later
+    corrupt$meta$flat$source_blocks <- t(second$source_blocks)
+    expect_error(imi_rename_source(corrupt, initial), "identity schema")
+    corrupt <- later
+    corrupt$meta$flat$states <- NULL
+    expect_error(imi_rename_source(corrupt, initial), "identity schema")
+    for (bad_id in list(NA_character_, "", 1L)) {
+      corrupt <- later
+      corrupt$meta$flat$block_id <- bad_id
+      expect_error(imi_rename_source(corrupt, initial), "identity schema")
+    }
+    mutations <- list(later, later, later, later, later, later, later, later)
+    mutations[[1L]]$meta$flat$source_blocks[which(second$row_types == "stat")[1L], 1L] <- ""
+    dimnames(mutations[[2L]]$meta$flat$source_blocks) <- list(as.character(seq_len(nrow(later$body))), "model")
+    mutations[[3L]]$meta$flat$states[which(second$states == "est")[1L]] <- "omit"
+    mutations[[4L]]$meta$regtab_rows$estimate[1L] <- 12345
+    mutations[[5L]]$body[1L, 2L] <- "Changed literal"
+    mutations[[6L]]$meta$sample_accounting$measures$value[1L] <- 12345
+    mutations[[7L]]$header[[1L]]$text[1L] <- "Changed header"
+    attr(mutations[[8L]]$meta$flat, "probe") <- TRUE
+    for (mutated in mutations) expect_false(identical(imi_rename_source(mutated, initial), initial))
     cat(sprintf("\nIM-SEED case_id=IMI-01 seed=%d\n", seed))
   }
 })
