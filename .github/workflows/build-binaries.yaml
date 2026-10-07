@@ -37,7 +37,7 @@ jobs:
       # Without it the shared library requires the runner's macOS version.
       MACOSX_DEPLOYMENT_TARGET: '11.0'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -85,7 +85,7 @@ jobs:
           print(table1_tc(d, by = "am", vars = c(mpg = "contn %5.1f", cyl = "cat", vs = "bin")))
           print(regtab(glm(breaks ~ wool + tension, family = poisson, data = warpbreaks)))
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: tabtools-${{ runner.os }}-R${{ steps.build.outputs.rv }}
           path: |
