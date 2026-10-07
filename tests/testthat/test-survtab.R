@@ -272,3 +272,24 @@ test_that("no-failure survival console keeps the complete native empty-p geometr
   expect_identical(tt$meta$survival$exclusions$record_index, 5L)
   expect_identical(d, original)
 })
+
+test_that("review 2026-10-07 B4: log-rank prose handles >0.99 and fweight NR is explained", {
+  withr::local_options(list(tabtools.workbook = NULL, tabtools.markdown = NULL, tabtools.smallcells = NULL))
+  # survival::survdiff p = 0.9908 for these groups.
+  same <- data.frame(t = c(3, 6, 7, 10, 8, 2, 7, 3, 5, 10, 6, 1),
+                     e = c(1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1), g = rep(1:2, each = 6))
+  x <- survtab(same, time = "t", event = "e", times = 2, by = "g")
+  expect_gt(x$stored$logrank_p, 0.99)
+  logrank <- x$body[[1L]][x$meta$survtab_logrank_row]
+  expect_match(logrank, ", p > 0.99$")
+  expect_false(grepl("= >", logrank, fixed = TRUE))
+  expect_identical(.tt_p_prose(c("0.03", "<0.001", ">0.99")), c("p = 0.03", "p < 0.001", "p > 0.99"))
+  d <- data.frame(t = 1:8, e = c(1, 1, 1, 1, 1, 0, 1, 0), w = c(2, 1, 1, 1, 1, 1, 1, 1))
+  fw <- survtab(d, time = "t", event = "e", times = c(2, 4), median = TRUE, fweight = "w")
+  expect_identical(fw$body[[2L]][1L], "NR")
+  expect_match(fw$footnote, "NR here means not estimated", fixed = TRUE)
+  plain <- survtab(d, time = "t", event = "e", times = c(2, 4), median = TRUE)
+  expect_false(grepl("NR here means", plain$footnote, fixed = TRUE))
+  nomedian <- survtab(d, time = "t", event = "e", times = 2, fweight = "w")
+  expect_false(grepl("NR here means", nomedian$footnote, fixed = TRUE))
+})

@@ -145,11 +145,7 @@
     ptext <- format_p(values$p[show], pdp, highpdp)
     if (pstyle != "table") {
       letter <- if (pstyle == "Pfootnote") "P" else "p"
-      inequality <- substr(ptext, 1L, 1L) %in% c("<", ">")
-      prose <- paste0(letter, " = ", ptext)
-      prose[inequality] <- paste0(letter, " ", substr(ptext[inequality], 1L, 1L),
-                                  " ", substring(ptext[inequality], 2L))
-      ptext <- prose
+      ptext <- .tt_p_prose(ptext, letter)
     }
     text[show] <- ptext
     publication$p[show] <- values$p[show]

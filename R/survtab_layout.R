@@ -97,7 +97,7 @@
       label <- "Log-rank test not possible: no failures in the analysis sample"
     } else {
       p <- format_p(logrank$p, pdp, highpdp)
-      phrase <- if (startsWith(p, "<")) paste("p <", substring(p, 2L)) else paste("p =", p)
+      phrase <- .tt_p_prose(p)
       label <- paste0("Log-rank test: chi2(", logrank$df, ") = ", trimws(stata_fmt(logrank$chi2, "%6.2f")), ", ", phrase)
     }
     add(label, key = "logrank", state = rep("notest", G))
@@ -138,6 +138,10 @@
            paste(beyond_native, collapse = "; "), "."))
   if (grouped && logrank$no_failure) notes <- c(notes,
     "No failures in the analysis sample; the log-rank test is not possible and is omitted.")
+  # Native stci refuses medians under declared fweight; NR there means not
+  # estimated, which must not be read as "not reached".
+  if (median && prepared$declared_fweight) notes <- c(notes,
+    "With frequency weights, median survival is not estimated (as native stci); NR here means not estimated, not that the median was not reached.")
   methods <- "Survival was estimated using the Kaplan-Meier product-limit method with Greenwood variance."
   if (prepared$declared_fweight) methods <- paste(methods, "Frequency counts use independent-subject replication semantics.")
   if (any(prepared$earliest_entry > 0)) methods <- paste(methods,

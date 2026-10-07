@@ -435,3 +435,12 @@ stata_macro_text <- function(x) {
 stata_round <- function(x, u = 1) {
   floor(x / u + 0.5) * u
 }
+
+# Formatted p-value text as prose: "p = 0.03", "p < 0.001", "p > 0.99".
+.tt_p_prose <- function(ptext, letter = "p") {
+  inequality <- substr(ptext, 1L, 1L) %in% c("<", ">")
+  prose <- paste0(letter, " = ", ptext)
+  prose[inequality] <- paste0(letter, " ", substr(ptext[inequality], 1L, 1L),
+                              " ", substring(ptext[inequality], 2L))
+  prose
+}

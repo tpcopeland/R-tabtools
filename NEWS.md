@@ -203,6 +203,10 @@
   (`tabtools_warning_smallcells_unsupported`, once per call) when a session
   `smallcells` threshold is active instead of silently printing unmasked
   counts.
+* `survtab()` writes a log-rank p above the display ceiling as `p > 0.99`
+  (not `p = >0.99`), sharing `tabcell()`'s p-value prose. With `fweight`, the
+  median remains NR (native stci refuses it) and a footnote now says NR means
+  not estimated rather than not reached.
 
 # tabtools 0.1.1
 
