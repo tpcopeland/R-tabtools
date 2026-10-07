@@ -707,6 +707,8 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   }
   tt <- .t1_run_passes(data, specs, gp, o, style, title, footnote, sheet, labels,
                        wprep = wprep, wtcompare = wtcompare, show_wtn = percent_n || wtn)
+  # The marker withheld statistics carry, for workbook column sizing.
+  if (!is.null(smallcells)) tt$meta$smallcells_marker <- masktext %||% "Suppressed"
   # r(smdtype) whenever smd is on; r(smdnote) when there is a note.
   if (smd) {
     tt$stored$smdtype <- smdtype

@@ -407,11 +407,14 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
   for (j in test_pos) add("width", 1, 1, j, j, value = text_width(j, 12))
   for (j in stat_pos) add("width", 1, 1, j, j, value = text_width(j, 14))
   # Native 2.5.6 sizes SMD from its display-width header, with a floor
-  # for the exact smallcells derived-statistic marker (desctab.ado:2167-2180).
+  # for the exact smallcells derived-statistic marker (desctab.ado:2167-2180:
+  # its 10-character "Suppressed"); here the marker in effect, which R's
+  # masktext can replace.
+  marker <- x$meta[["smallcells_marker", exact = TRUE]] %||% "Suppressed"
   for (j in smd_pos) {
     w <- max(8, ceiling(.dwidth(grid[2L, j]) * 0.85) + 2)
-    if (isTRUE(x$stored$smallcells$threshold > 0) &&
-        any(grid[seq_len(num_rows), j] == "Suppressed")) w <- max(w, 10)
+    if (isTRUE(x$stored$smallcells$threshold > 0) && nzchar(marker) &&
+        any(grid[seq_len(num_rows), j] == marker)) w <- max(w, ceiling(.dwidth(marker)))
     add("width", 1, 1, j, j, value = w)
   }
 

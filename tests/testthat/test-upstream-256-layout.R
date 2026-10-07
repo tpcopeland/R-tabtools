@@ -47,3 +47,22 @@ test_that("table1 SMD width follows its display-width header and the active supp
   pair$header[[1L]]$text[which(pair$cols$role == "smd")] <- "SMD (東 vs B)"
   expect_identical(width(pair), 14)
 })
+
+test_that("review 2026-10-07 B5: the SMD width floor follows the masktext in effect", {
+  d <- data.frame(g = rep(1:2, each = 25L), x = 1:50, b = c(rep(0, 24L), 1, rep(0, 5L), rep(1, 20L)))
+  width <- function(x) {
+    l <- tabtools:::.xlsx_layout_table1(x)
+    st <- tabtools:::.xlsx_apply_rules(l$rules, nrow(l$grid), ncol(l$grid), x$style)
+    unname(st$widths[as.character(which(x$cols$role == "smd") + 1L)])
+  }
+  long <- table1_tc(d, by = "g", vars = "x contn \\ b bin", smd = TRUE, smallcells = 3L,
+                    masktext = "Withheld (small cell)")
+  smd <- long$body[[which(long$cols$role == "smd")]]
+  expect_true("Withheld (small cell)" %in% smd)
+  expect_false("Suppressed" %in% smd)
+  expect_identical(width(long), 21)
+  short <- table1_tc(d, by = "g", vars = "x contn \\ b bin", smd = TRUE, smallcells = 3L, masktext = "*")
+  expect_identical(width(short), 8)
+  blank <- table1_tc(d, by = "g", vars = "x contn \\ b bin", smd = TRUE, smallcells = 3L, masktext = "")
+  expect_identical(width(blank), 8)
+})

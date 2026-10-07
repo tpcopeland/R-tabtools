@@ -207,6 +207,8 @@
   (not `p = >0.99`), sharing `tabcell()`'s p-value prose. With `fweight`, the
   median remains NR (native stci refuses it) and a footnote now says NR means
   not estimated rather than not reached.
+* Table 1 workbook SMD columns size their small-cell floor from the marker in
+  effect (`masktext`), not only the default `"Suppressed"`.
 
 # tabtools 0.1.1
 
