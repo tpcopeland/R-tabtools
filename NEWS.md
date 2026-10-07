@@ -185,6 +185,10 @@
   counted from their retained fitting frame against an explicit `data`.
 * `regtab(reftop = TRUE)` on a native interaction block with several base
   cells is still refused (as in Stata 2.5.1), now with an accurate message.
+* Plain `tt_flat(keyed = FALSE)` exports of `comptab()`/`hrcomptab()` take
+  each column's outcome block from the published top header, so outcome-mapped
+  composites (which carry no model keys) no longer label every block with the
+  first outcome in `puttab(varlabels = TRUE)`.
 
 # tabtools 0.1.1
 
