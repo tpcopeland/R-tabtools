@@ -31,10 +31,74 @@ test_that("tt_stack() accepts a 0-row table (AUD BUG-7)", {
   t1 <- regtab(lm(mpg ~ wt, mtcars)); t0 <- t1
   t0$body <- t0$body[0, , drop = FALSE]; t0$rows <- t0$rows[0, , drop = FALSE]
   t0$meta$pvals <- t0$meta$pvals[0, , drop = FALSE]
+  expect_error(tt_stack(t1, t0), class = "tabtools_error_flat")
+  # Truncate the existing lineage with the rows; keep the source identity.
+  for (field in c("row_keys", "row_types", "row_blocks")) {
+    t0$meta$flat[[field]] <- t0$meta$flat[[field]][0]
+  }
+  for (field in c("states", "source_blocks")) {
+    t0$meta$flat[[field]] <- t0$meta$flat[[field]][0, , drop = FALSE]
+  }
+  expect_identical(nrow(tt_flat(t0)), 0L)
   s <- tt_stack(t1, t0)
   expect_identical(nrow(s$body), nrow(t1$body))
   s2 <- tt_stack(t1, t0, groups = c("A", "B"))
   expect_identical(nrow(s2$body), nrow(t1$body) + 2L)
+
+  before <- list(t1, t0)
+  # Literal two-row model, empty-first, and all-empty boundaries. Explicit
+  # headings count as rows even when their source contributes no body rows.
+  combinations <- list(list(t1, t0), list(t0, t1), list(t0, t0))
+  for (case in seq_along(combinations)) for (grouped in c(FALSE, TRUE)) {
+    tables <- combinations[[case]]
+    out <- tt_stack(tables, groups = if (grouped) c("A", "B") else NULL)
+    flat <- tt_flat(out)
+    expect_s3_class(flat, "tt_flat")
+    keys <- if (grouped) switch(case,
+      c("group:A", "wt", "_cons", "group:B"),
+      c("group:A", "group:B", "wt", "_cons"), c("group:A", "group:B")) else
+      if (case < 3L) c("wt", "_cons") else character()
+    types <- if (grouped) switch(case,
+      c("header", "var", "var", "header"),
+      c("header", "header", "var", "var"), c("header", "header")) else
+      if (case < 3L) c("var", "var") else character()
+    values <- if (grouped) switch(case,
+      c("A", "wt", "Intercept", "B"), c("A", "B", "wt", "Intercept"), c("A", "B")) else
+      if (case < 3L) c("wt", "Intercept") else character()
+    nr <- length(keys)
+    expected_states <- matrix("", nr, 1L)
+    expected_states[types == "var", 1L] <- "est"
+    prefix <- out$meta$flat$block_id
+    occurrence <- if (case < 3L) paste0(prefix, "/", case, "/", t1$meta$flat$block_id)
+    expected_sources <- matrix("", nr, 1L)
+    expected_sources[types == "var", 1L] <- if (case < 3L) occurrence else character()
+    expected_blocks <- if (grouped) switch(case,
+      c(paste0(prefix, "/1/heading"), rep(occurrence, 2L), paste0(prefix, "/2/heading")),
+      c(paste0(prefix, "/1/heading"), paste0(prefix, "/2/heading"), rep(occurrence, 2L)),
+      paste0(prefix, "/", 1:2, "/heading")) else
+      if (case < 3L) rep(occurrence, 2L) else character()
+    expect_identical(out$body[[1]], values)
+    expect_identical(nrow(out$body), nr)
+    expect_identical(out$rows$key, keys)
+    expect_identical(flat$`_term`, keys)
+    expect_identical(flat$`_rowtype`, types)
+    expect_identical(flat$`_order`, seq_len(nr))
+    expect_identical(flat$`_state_1`, expected_states[, 1L])
+    expect_identical(flat$`_block`, expected_blocks)
+    expect_identical(out$meta$flat$row_keys, keys)
+    expect_identical(out$meta$flat$row_types, types)
+    expect_identical(out$meta$flat$row_blocks, expected_blocks)
+    expect_identical(out$meta$flat$states, expected_states)
+    expect_identical(out$meta$flat$source_blocks, expected_sources)
+    expect_identical(attr(flat, "row_blocks"), expected_blocks)
+    expect_identical(attr(flat, "model_states"), expected_states)
+    expect_identical(attr(flat, "source_blocks"), expected_sources)
+    if (case < 3L) {
+      expect_identical(unname(as.matrix(out$body[types == "var", , drop = FALSE])),
+                       unname(as.matrix(t1$body)))
+    }
+  }
+  expect_identical(list(t1, t0), before)
 })
 
 test_that("tt_stack(groups=) has deterministic keys and passes through tt_merge (CAT P1-12)", {
@@ -73,6 +137,8 @@ test_that("a user row keyed like a heading is never merged onto one (review 3)",
   a <- regtab(lm(mpg ~ wt, mtcars), stats = "n")
   u <- a
   u$rows$key[1] <- "group:A"
+  expect_error(tt_stack(u, a, groups = c("A", "B")), class = "tabtools_error_flat")
+  u$meta$flat$row_keys[1] <- "group:A"
   m <- tt_merge(tt_stack(a, a, groups = c("A", "B")), tt_stack(u, a, groups = c("A", "B")))
   expect_identical(sum(m$rows$key == "group:A"), 2L)
   expect_identical(m$meta$stack_group_rows, c(1L, 6L))
