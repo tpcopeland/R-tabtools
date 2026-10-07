@@ -72,3 +72,23 @@ test_that("review 2026-10-07 B1: level accepts a proportion like ratetab and sur
   expect_identical(xt_table(f, rr = TRUE, level = 0.9)$stored$rr_lo, xt_table(f, rr = TRUE, level = 90)$stored$rr_lo)
   expect_error(xt_table(f, level = 1), class = "tabtools_error_crosstab_input")
 })
+
+test_that("review 2026-10-07 B2: an uncomputable Fisher test is unavailable, not fatal or approximated", {
+  xt_no_session()
+  f <- matrix(c(288, 281, 280, 316, 324, 285, 272, 329, 294, 326, 193, 195, 217, 196, 209,
+                93, 95, 110, 95, 98, 99, 106, 87, 95, 107, 1, 2, 1, 3, 3), 5)
+  expect_error(stats::fisher.test(f))
+  expect_warning(x <- xt_table(f), "could not be computed", class = "tabtools_warning_crosstab_inference")
+  expect_identical(x$stored$test_method, "Fisher exact")
+  expect_false(x$stored$test_available)
+  expect_match(x$stored$test_unavailable_reason, "FEXACT")
+  expect_true(is.na(x$stored$p))
+  expect_true(is.na(x$stored$chi2))
+  expect_identical(x$body[[1L]][nrow(f) + 2L], "Fisher's exact test: not computed")
+  expect_match(x$footnote, "no approximation was substituted", fixed = TRUE)
+  expect_match(x$stored$methods, "could not be computed", fixed = TRUE)
+  expect_identical(unname(x$stored$table), f)
+  ok <- xt_table(matrix(c(1, 3, 3, 1), 2))
+  expect_true(ok$stored$test_available)
+  expect_identical(ok$stored$test_unavailable_reason, "")
+})

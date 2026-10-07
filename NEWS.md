@@ -194,6 +194,11 @@
 * `crosstab(level = )` accepts a proportion or a percentage, as `ratetab()`,
   `survtab()` and `stratetab()` do; `level = 0.95` previously gave a 0.95%
   interval.
+* `crosstab()` no longer loses the whole table when an automatic or requested
+  Fisher exact test cannot be computed (FEXACT failures on large sparse r by c
+  tables): the test is shown as not computed, with a footnote, a
+  `tabtools_warning_crosstab_inference` warning and
+  `stored$test_available = FALSE`. No chi-squared approximation is substituted.
 
 # tabtools 0.1.1
 

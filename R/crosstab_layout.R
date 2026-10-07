@@ -24,7 +24,8 @@
   body[totalrow, seq_len(nc) + 1L] <- vapply(seq_len(nc), function(c) show_count(cs[c], sc$colmask[c]), "")
   body[totalrow, nc + 2L] <- show_count(n, sc$totalmask)
   marker <- o$masktext %||% "Suppressed"
-  p_phrase <- if (inference$p < .001) "p < 0.001" else paste0("p = ", stata_fmt(inference$p, "%5.3f"))
+  p_phrase <- if (!inference$test_available) "not computed" else if (inference$p < .001) "p < 0.001" else
+    paste0("p = ", stata_fmt(inference$p, "%5.3f"))
   body[nr + 2L, 1L] <- if (sc$derived) paste0(inference$test_name, ": ", marker) else
     if (inference$test_method == "Fisher exact") paste0(inference$test_name, ": ", p_phrase) else
       paste0(inference$test_name, ": chi2 = ", stata_fmt(inference$chi2, "%6.2f"), ", ", p_phrase)
@@ -69,6 +70,8 @@
     paste(c(if (o$or) "sample OR with native cc equal-tailed limits (Cornfield for zero counts)",
             if (o$rr) "RR with log-Wald limits", if (o$rd) "RD with binomial Wald limits"), collapse = "; "), ".")
   if (o$trend || o$cochran) methods <- paste0(methods, " Trend: ", inference$trend_method, ".")
+  if (!inference$test_available) methods <- paste0(methods, " The exact test could not be computed (",
+    inference$test_unavailable_reason, "); no approximation was substituted.")
   if (sc$derived) methods <- paste0(methods, " Count-dependent inference is withheld under strict count protection.")
   stored$methods <- paste0(methods, " Analysis performed in R ", getRversion(), ".")
   rs[sc$rowmask > 0L] <- NA_real_; cs[sc$colmask > 0L] <- NA_real_
@@ -85,6 +88,9 @@
                  console_blank = TRUE, console_footnote = TRUE, header_style = "plain",
                  xlsx_rules = "crosstab", sheet = sheet)
   note <- .xt_mask_note(o$smallcells, o$mode, o$masktext)
+  if (!inference$test_available && !sc$derived) note <- c(paste0(
+    "Fisher's exact test could not be computed for this table (", inference$test_unavailable_reason,
+    "); no approximation was substituted."), note)
   tt <- tt_table(body = body, header = list(c(sample$descriptor, sample$column$text, "Total")),
                  rows = rows, cols = cols, title = title, footnote = c(footnote, note), style = style,
                  stored = stored, command = "crosstab", layout = layout,

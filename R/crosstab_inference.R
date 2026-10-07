@@ -1,10 +1,16 @@
 # Epitab manual pp.53-55; native crosstab.ado:345-509. No continuity correction.
 .xt_fisher <- function(f, level) {
-  if (any(f > .Machine$integer.max)) .xt_abort("Exact Fisher counts exceed R's integer table limit.", "inference")
-  tryCatch(stats::fisher.test(f, conf.level = level / 100), error = function(e) {
-    .xt_abort("Exact Fisher inference could not be computed; reduce the table or counts. No approximation was substituted.",
-              "inference", parent = e)
-  })
+  # An exact test that cannot be computed is reported as unavailable (with
+  # its reason) rather than aborting the table or substituting chi-squared.
+  if (any(f > .Machine$integer.max)) {
+    return(list(p.value = NA_real_, reason = "counts exceed R's integer table limit"))
+  }
+  fit <- tryCatch(stats::fisher.test(f, conf.level = level / 100), error = function(e) e)
+  if (inherits(fit, "error")) {
+    reason <- strsplit(conditionMessage(fit), "\n", fixed = FALSE)[[1L]][1L]
+    return(list(p.value = NA_real_, reason = sub("[.]$", "", trimws(reason))))
+  }
+  list(p.value = fit$p.value, reason = NULL)
 }
 
 # Native cc delegates to Stata17 cci.ado (7.1.10): Cornfield starting
@@ -89,11 +95,20 @@
   expected <- outer(rowSums(f) / n, colSums(f))
   use_fisher <- o$exact || o$fisher || min(expected) < 5
   chi2 <- if (use_fisher) NA_real_ else sum((f - expected)^2 / expected)
-  p <- if (use_fisher) .xt_fisher(f, o$level)$p.value else
+  fisher <- if (use_fisher) .xt_fisher(f, o$level) else NULL
+  p <- if (use_fisher) fisher$p.value else
     stats::pchisq(chi2, (nrow(f) - 1L) * (ncol(f) - 1L), lower.tail = FALSE)
-  if (!is.finite(p)) .xt_abort("The ordinary test is undefined.", "inference")
+  unavailable <- !is.null(fisher$reason)
+  if (unavailable) {
+    cli::cli_warn(c("Fisher's exact test could not be computed for this {nrow(f)} by {ncol(f)} table; its p-value is reported as unavailable.",
+                    "i" = "Reason: {fisher$reason}. No chi-squared approximation was substituted."),
+                  class = "tabtools_warning_crosstab_inference", call = NULL)
+  } else if (!is.finite(p)) {
+    .xt_abort("The ordinary test is undefined.", "inference")
+  }
   out <- list(chi2 = chi2, p = p, test_name = if (use_fisher) "Fisher's exact test" else
-                "Pearson's chi-squared test", test_method = if (use_fisher) "Fisher exact" else "Pearson uncorrected")
+                "Pearson's chi-squared test", test_method = if (use_fisher) "Fisher exact" else "Pearson uncorrected",
+              test_available = !unavailable, test_unavailable_reason = fisher$reason %||% "")
   if (o$or || o$rr || o$rd) {
     if (!identical(dim(f), c(2L, 2L))) .xt_abort("or, rr and rd require a 2 by 2 table.", "association")
     a <- f[2L, 2L]; b <- f[2L, 1L]; c <- f[1L, 2L]; d <- f[1L, 1L]
