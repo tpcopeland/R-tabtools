@@ -44,6 +44,8 @@ work <- function() {
       times = c(1, 2), by = "group", difference = TRUE, events = TRUE, riskset = TRUE, rmst = 2))
   attr(specifications$SV006$data$group, "labels") <- c("a-b" = 1, "a b" = 2)
   notes <- list(SV002 = "No failures in the analysis sample; the log-rank test is not possible and is omitted.",
+    # R-only explanation of the native stci fweight median refusal (review 2026-10-07 B4).
+    SV005 = "With frequency weights, median survival is not estimated (as native stci); NR here means not estimated, not that the median was not reached.",
     SV006 = c(paste0("reverse reports 1 - Kaplan-Meier, which equals cumulative incidence only with a single event type ",
       "(no competing risks). With competing events, use a competing-risks estimator (Aalen-Johansen)."),
       "Times beyond the last observed follow-up repeat the final Kaplan-Meier estimate and are not supported by the data: a-b: 5 (last follow-up 2); a b: 5 (last follow-up 4)."))
