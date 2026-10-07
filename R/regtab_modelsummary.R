@@ -34,6 +34,11 @@
 #'   named ratio.
 #' @param se_scale Only for a `tidy` that is already exponentiated:
 #'   `"link"` or `"estimate"`.
+#' @param conf.level Confidence level of supplied intervals, when the backend
+#'   does not record it. Backend metadata is retained when omitted.
+#' @param inference_reference Explicit `"normal"` declaration when derived
+#'   inference has no row degrees of freedom. Backend metadata is retained
+#'   when omitted; regtab refuses missing evidence.
 #' @return A data frame for [regtab()], or a list of them.
 #' @seealso [regtab()]
 #' @examples
@@ -44,14 +49,15 @@
 #'   msum <- getExportedValue(pkg, "modelsummary")
 #'   fit <- glm(am ~ wt, family = binomial, data = mtcars)
 #'   ms <- msum(fit, output = "modelsummary_list")
-#'   regtab(tt_from_modelsummary(ms, exponentiate = TRUE, effect_scale = "OR"))
+#'   regtab(tt_from_modelsummary(ms, exponentiate = TRUE, effect_scale = "OR",
+#'                              conf.level = .95, inference_reference = "normal"))
 #' }
 #' @export
-tt_from_modelsummary <- function(x, exponentiate, effect_scale = NULL, se_scale = NULL) {
+tt_from_modelsummary <- function(x, exponentiate, effect_scale = NULL, se_scale = NULL, conf.level = NULL, inference_reference = NULL) {
   if (!inherits(x, "modelsummary_list") && is.list(x) && length(x) &&
       all(vapply(x, inherits, TRUE, "modelsummary_list"))) {
     return(lapply(x, tt_from_modelsummary, exponentiate = exponentiate, effect_scale = effect_scale,
-                  se_scale = se_scale))
+                  se_scale = se_scale, conf.level = conf.level, inference_reference = inference_reference))
   }
   if (!inherits(x, "modelsummary_list")) {
     cli::cli_abort("{.arg x} must be a {.cls modelsummary_list} ({.code modelsummary(model, output = \"modelsummary_list\")}).",
@@ -111,8 +117,10 @@ tt_from_modelsummary <- function(x, exponentiate, effect_scale = NULL, se_scale 
   } else {
     attr(out, "effect_scale") <- effect_scale %||% "Coef."
   }
-  cl <- attr(x$tidy, "conf_level", exact = TRUE) %||% attr(x$tidy, "ci", exact = TRUE)
+  cl <- conf.level %||% attr(x$tidy, "conf.level", exact = TRUE) %||% attr(x$tidy, "conf_level", exact = TRUE) %||% attr(x$tidy, "ci", exact = TRUE)
   if (is.numeric(cl) && length(cl) == 1L && "conf.low" %in% names(out)) attr(out, "conf.level") <- cl
+  reference <- inference_reference %||% attr(x$tidy, "inference_reference", exact = TRUE)
+  if (!is.null(reference)) attr(out, "inference_reference") <- reference
   # Statistics regtab shows as Stata does (stack review 12): AIC and BIC
   # are recomputed from the log-likelihood with Stata's parameter count
   # (the estimated coefficients; R's AIC for lm also counts sigma), and

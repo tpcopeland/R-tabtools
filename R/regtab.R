@@ -143,6 +143,68 @@
 #' `foreign#rep78` parent row and raw `1.foreign#3.rep78` rows, with base
 #' cells `refcat`, empty cells `emptylabel`, and aliased cells `omitlabel`.
 #'
+#' @section Structured model statistics:
+#' Structured statistic records extend the token interface. For example,
+#' `stats = list("n", list(name = "ev", pair = "total", label = "Events (total)",
+#' mincell = 5), list(text = c("Unweighted", "IPW"), label = "Weighting"))`
+#' uses exact case-preserved scalar names, with values supplied in ordered
+#' `stat_values` lists or available fitted-model scalars. Allowed fields are
+#' `name`, `pair`, `label`, `fmt`, `mincell`, `maskwith`, and `text`. Text records
+#' have only `text` and `label`; shorter text vectors are padded with blanks.
+#' A scalar unavailable in every model refuses; partial missing values stay
+#' blank. A pair with a missing first value stays blank. The strictest mincell
+#' threshold applies to every occurrence of a scalar; only values at least one
+#' and below that threshold are primary masks. Declared `maskwith` groups close
+#' transitively and withhold other available group values, including zeros.
+#' Pairs alone add no dependency. Literal replacement text cannot restore masked
+#' inference. Raw scalars remain explicitly labeled analytical metadata.
+#'
+#' @section Fit counts and minimum events:
+#' Use [tt_fitcount()] immediately after fitting, then pass its record through
+#' `fitcounts` in original model order. Captured unweighted counts take precedence
+#' over model event statistics; `obs` retains record N when `n` shows subjects.
+#' `people` and `exposure` require explicitly captured columns. Fit/source and
+#' record evidence are compared exactly at reuse. Explicit `data` capture freezes
+#' the caller's declared source with compatibility checks; unavailable historical
+#' predictors cannot be authenticated. It never reconstructs from later live data.
+#' Reporting VCE changes leave the original fitted-source identity intact.
+#' Invalid count/staleness inputs signal `tabtools_error_fitcount`; invalid rich
+#' specifications signal `tabtools_error_statspec` (formats retain their existing
+#' `tabtools_error_fmt` condition class).
+#'
+#' `mincount` requires `terms = TRUE` records and masks eligible factor levels,
+#' factor interactions and the positive level of plain 0/1 indicators. Continuous
+#' terms, genuine fitted bases and individually fixed coefficients are exempt.
+#' Unusable fitted variance/omission takes priority over low event counts, using
+#' `notestlabel`; low events use `emptylabel` (an en dash when omitted under
+#' mincount). A missing level in an included term uses `absentlabel` if excluded
+#' from the sample, and `notestlabel` if sample-held but unestimated. Entire
+#' missing terms stay blank. This is reporting hygiene, not complementary
+#' disclosure protection. Publication inference/forest values are invalidated;
+#' `stored$table` and `meta$regtab_raw_rows` remain raw analytical returns, labeled
+#' separately from `stored$publication_table` and `meta$regtab_rows`.
+#' Native `N_masked` includes threshold and unusable cells; `N_absent` counts
+#' missing levels. Typed `smallcells` counts only threshold masks and has zero
+#' linked masks. Rich statistic masks have separate `N_stats_masked` and
+#' `N_stats_linked` per-part occurrence counts and raw/protection provenance.
+#' [tt_failed_model()] explicitly opts into a blank failed column in this
+#' workflow; at least one valid fit is required. NULL/errors remain refused.
+#' MI `esampvaryok` and pooled-MI mincount are unsupported: existing equal-sample
+#' MI rules remain, and an average N is not substituted for sample evidence.
+#'
+#' @param fitcounts One `tt_fitcount` record for one model, or an exact-length
+#'   ordered list (NULL for unused records or failed placeholders).
+#' @param mincount NULL, or a positive integer event threshold for eligible terms.
+#' @param notestlabel Literal no-test text; NULL resolves to `emptylabel`.
+#' @param absentlabel Literal sample-excluded-level text, default blank; requires
+#'   `mincount` when explicitly non-NULL.
+#' @param cnslabel Literal fixed-coefficient text, default `"(constrained)"`.
+#' @param exposurelabel Optional literal label for requested `exposure`.
+#' @param statlabels Uniquely named character labels of requested canonical
+#'   built-in tokens (`F` uses its canonical capital letter).
+#' @param stat_values NULL, or one ordered named list of finite numeric/NA scalar
+#'   values per model. Authoritative fit-count aliases cannot be overridden.
+#'
 #' @section Model statistics:
 #' `stats` adds rows below the estimates, in Stata tabtools 2.1.12's fixed
 #' order:
@@ -677,8 +739,7 @@
 #' @param nointercept,keepintercept Drop or keep the intercept row.
 #'   `nointercept` has three states: `NULL` (default), the intercept is
 #'   dropped when every model is on a ratio scale (for a data frame: an
-#'   `effect_scale` with null 1, a ratio `stata_cmd`, or broom.helpers'
-#'   `exponentiate` attribute) unless `keepintercept = TRUE`; `TRUE` drops
+#'   explicit `effect_scale` with null 1) unless `keepintercept = TRUE`; `TRUE` drops
 #'   it for every model; `FALSE` keeps it, ratio scale or not. An explicit
 #'   `nointercept` wins over `keepintercept`: with both `TRUE` the
 #'   intercept is dropped, silently, as Stata drops it when given both
@@ -692,9 +753,9 @@
 #'   ... (and prints it unexponentiated under `keepintercept`); regtab keeps
 #'   and exponentiates it.
 #' @param noreeffects Omit random-effects rows of mixed models.
-#' @param stats Model statistics rows, as a vector or one space-separated
+#' @param stats Structured statistic records, or a vector/space-separated
 #'   string of tokens (case-insensitive): `"n"` (`"n_sub"`, `"subjects"`),
-#'   `"events"`, `"groups"`, `"mi_m"`, `"aic"`, `"qic"`, `"bic"`, `"ll"`,
+#'   `"obs"`, `"events"`, `"people"`, `"exposure"`, `"groups"`, `"mi_m"`, `"aic"`, `"qic"`, `"bic"`, `"ll"`,
 #'   `"icc"`, `"r2"`, `"r2_a"`, `"rmse"`, `"F"`, `"fmi"`, and the R-only
 #'   `"vce"`. The rows always come in that order, whatever the order of the
 #'   tokens, and a row no model reports is left out; see the section on
@@ -807,9 +868,39 @@
 #' @param vce_note Append a sentence naming each model's non-default
 #'   variance (robust, clustered, survey design, M-estimation) to the
 #'   footnote.
+#' @section Body insertion:
+#' `addrow` also accepts records `list(label = text, values = vector,
+#' after = term)` and native trailing `, after(term)`. A term is one exact
+#' coefficient or one contiguous factor block's last level, using keep/drop's
+#' factor-marker normalization. Missing or ambiguous anchors refuse before
+#' output. Anchors resolve before insertion; same-anchor entries retain input
+#' order and inherit indentation. Added rows have positional raw keys.
+#'
 #' @param xlsx,sheet,open Excel target.
 #' @param borderstyle,font,fontsize,boldp,highlight,zebra,headershade,headercolor,zebracolor
 #'   Styling options shared with [table1_tc()].
+#' @param reftop Move a fit-owned reference level to the top of its contiguous
+#'   factor block. Models with different reference levels in that block refuse.
+#' @param cellnote Literal publication replacements: a list of records
+#'   `list(row = "exact label", model = 1L, text = "literal")`, or the native
+#'   string `"row label" model# "text"` with backslash-separated entries.
+#'   Labels match exactly after trimming spaces and must match one coefficient
+#'   or factor-heading row. Last text wins; empty text blanks the cell.
+#'   Replacements clear CI/p text and publication numerics. Coefficient notes
+#'   set state `masked`; structural heading notes keep the blank state. Both carry
+#'   `override_origin = "cellnote"`/`override_text`. Raw analytical returns
+#'   remain separately labeled; no disclosure counters increase.
+#' @param transpose Models as rows, statistics and term estimate/CI/p blocks
+#'   as columns. Implies `compact`; refuses `addrow`, `dimnonsig`, `highlight`
+#'   and `boldp`. Keyed [tt_flat()] and composition refuse this orientation;
+#'   `tt_flat(x, keyed = FALSE)` returns a plain publication data frame.
+#' @param collabels Named character vector of exact raw terms and literal
+#'   transposed headers; native term/quoted-label strings are also accepted.
+#'   Normalized `c.`/factor base markers are ignored. `equation::term` or
+#'   `equation:term` selects one equation; unqualified terms select all copies.
+#' @param addcol Custom transposed columns, as a named list of model values
+#'   or records `list(label, values, after = term)`. Short vectors leave blank
+#'   cells; excess values refuse. Repeated anchors retain specification order.
 #' @param csv,markdown,mdappend Additional export targets; `csv` must be a
 #'   `.csv` file, and every target is checked before any is written, as in
 #'   [table1_tc()].
@@ -824,14 +915,19 @@
 #'   terms are not predictors and a `cmprsk::crr` fit with several
 #'   coefficients gets no adjective; Stata builds it from the estimate
 #'   header instead, so it differs where Stata's names the wrong model),
-#'   `table` (display-scale estimates per row and model), `N_rows`,
+#'   `table` (raw analytical display-scale estimates per row and model),
+#'   `table_role = "raw_analytical"`, and `publication_table` (eligible final
+#'   publication numerics). Primary mincount and cellnote preserve `table`
+#'   but remove affected publication numerics. `meta$regtab_raw_rows` is raw
+#'   provenance; `meta$regtab_rows` is aligned publication provenance. `N_rows`,
 #'   `N_cols`, `N_models`, `stars`, per-model statistics (`n_1`, `aic_1`, ...),
 #'   and, when written, `xlsx`, `sheet`, `markdown`, `markdown_rows`,
 #'   `markdown_cols`; and two R-only entries: `ci_method` (`"wald"` or
 #'   `"profile"`), and, when a model's variance fell back to another source
 #'   (mixed models only, with a warning), `vce_fallback`, one description
 #'   per model (`""` for none). See [as_forest_data()] for the estimates as
-#'   data.
+#'   data. Forest effects require state `est` and finite estimate/ordered
+#'   finite bounds; missing p-values alone do not exclude an effect.
 #'
 #'   `$meta$sample_accounting` carries the source ledger described in
 #'   [tt_table()], with separate fitted populations for each model or
@@ -865,7 +961,14 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
                    borderstyle = NULL, font = NULL, fontsize = NULL,
                    boldp = NULL, highlight = NULL, zebra = FALSE,
                    headershade = FALSE, headercolor = NULL, zebracolor = NULL,
-                   csv = NULL, markdown = NULL, mdappend = FALSE) {
+                   csv = NULL, markdown = NULL, mdappend = FALSE,
+                   # WP-4A formal arguments ----
+                   fitcounts = NULL, mincount = NULL, notestlabel = NULL,
+                   absentlabel = NULL, cnslabel = "(constrained)",
+                   exposurelabel = NULL, statlabels = NULL, stat_values = NULL,
+                   # WP-4B formal arguments ----
+                   reftop = FALSE, cellnote = NULL, transpose = FALSE,
+                   collabels = NULL, addcol = NULL) {
   sinks <- .tt_resolve_sinks(
     list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
          sheet = sheet, headershade = headershade),
@@ -932,10 +1035,19 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
       fits[[i]]$fits <- lapply(fits[[i]]$fits, function(f) if (inherits(f, "clogit")) .rt_clogit_env(f) else f)
     }
   }
-  for (i in seq_along(fits)) .rt_check_model(fits[[i]], i, unpacked)
+  failed <- vapply(fits, .rt_failed, TRUE)
+  if (any(failed)) {
+    if (all(failed)) .fc_abort("An all-failed table has no fitted model to define its geometry.")
+    if (is.null(fitcounts) && is.null(mincount)) .fc_abort("Failed placeholders require the explicit count/mincount workflow.")
+    for (i in which(failed)) tt_failed_model(fits[[i]]$reason, fits[[i]]$model_id)
+  }
+  for (i in which(!failed)) .rt_check_model(fits[[i]], i, unpacked)
   sample_accounting <- lapply(seq_along(fits), function(i) {
     .tt_sample_model_population(fits[[i]], "fit", model = i)
   })
+  counts <- .fc_prepare(fits, fitcounts, mincount)
+  fits <- counts$fits
+  fitcounts <- counts$records
   fits <- .rt_fg_tag(fits, finegray)
   # Attach each fit's fit-time model frame where it kept none (coxph,
   # survreg, model = FALSE), verified against the fit, so that nothing below
@@ -971,6 +1083,7 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
   ex <- .rt_expand_vce(if (vce_missing) NULL else vce, cluster, length(fits), vce_missing)
   vdf <- .rt_expand_vce_df(vce_df, ex$vce)
   for (i in seq_along(fits)) {
+    if (failed[i]) next
     if (!is.character(ex$vce[[i]])) {
       fits[[i]] <- .rt_user_vce(fits[[i]], ex$vce[[i]], vdf[[i]], i)
       ex$vce[[i]] <- "user"
@@ -978,6 +1091,7 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
   }
   cluster_spec <- ex$cluster
   for (i in seq_along(fits)) {
+    if (failed[i]) next
     if (inherits(fits[[i]], "geeglm")) fits[[i]] <- .rt_gee_tag(fits[[i]], gee_as, i)
     fit_i <- fits[[i]]
     ex$cluster[i] <- list(tryCatch({
@@ -1002,10 +1116,14 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
 
   # regtab.ado:82-95: the three constrained-row labels must differ.
   for (a in c("refcat", "omitlabel", "emptylabel")) .check_string(get(a), a)
+  empty_given <- !missing(emptylabel)
+  if (!is.null(mincount) && !empty_given) emptylabel <- "\u2013"
   if (refcat == omitlabel || refcat == emptylabel || omitlabel == emptylabel) {
     cli::cli_abort("{.arg refcat}, {.arg omitlabel}, and {.arg emptylabel} must differ from each other.",
                    call = NULL)
   }
+  count_options <- .rt_count_options(mincount, notestlabel, absentlabel, cnslabel,
+    refcat, omitlabel, emptylabel, TRUE)
   sheet <- .check_sheet(sheet)
   # Stata 2.5.1 regtab.ado:167-181, :329-331, :464-470.
   numeric_format <- .tt_resolve_numeric_format(cformat, digits,
@@ -1071,6 +1189,13 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
   if (!is.character(xsymbol) || length(xsymbol) != 1L || is.na(xsymbol)) {
     cli::cli_abort("{.arg xsymbol} must be a single string.", call = NULL)
   }
+  # WP-4A argument validation ----
+  stats_spec <- .rt_parse_rich_stats(if (cdisc && is.null(stats)) "n" else stats,
+    statlabels, stat_values, exposurelabel, length(fits))
+  # WP-4B argument validation ----
+  layout_options <- .rt_layout_options(reftop, cellnote, transpose, collabels, addcol,
+                                       addrow, dimnonsig, highlight, boldp)
+  if (transpose) compact <- TRUE
   style <- tt_resolve_style(font = font, fontsize = fontsize, borderstyle = borderstyle,
                             headershade = headershade, zebra = zebra, headercolor = headercolor,
                             zebracolor = zebracolor, boldp = boldp, highlight = highlight,
@@ -1084,7 +1209,9 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
     if (is.null(cformat) && digits == 2L) digits <- 4L
     if (is.null(stats)) stats <- "n"
   }
-  infos <- lapply(fits, tt_model_info)
+  infos <- vector("list", M)
+  for (m in which(!failed)) infos[[m]] <- tt_model_info(fits[[m]])
+  for (m in which(failed)) infos[[m]] <- .rt_failed_info(fits[[m]], infos[[which(!failed)[1L]]])
   for (m in seq_len(M)) infos[[m]]$model_label <- labels[m]
   # dimnonsig needs each model's null (a data frame with an unknown effect
   # scale has none; review P0-2 of group t2a).
@@ -1107,14 +1234,21 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
             pdp = pdp, highpdp = highpdp, dimnonsig = dimnonsig, stars = stars,
             starslevels = starslevels, starslevels_given = starslevels_given,
             starstext = if (starslevels_given) stata_fmt(starslevels, "%18.0g") else c("0.05", "0.01", "0.001"),
-            stats = .rt_parse_stats(stats), stat_fun = .rt_parse_stat_fun(stat_fun),
-            addrow = .rt_parse_addrow(addrow),
+            # WP-4A option transport ----
+            fitcounts = fitcounts, mincount = count_options$mincount,
+            fitcount_identity = counts$identity,
+            notestlabel = count_options$notestlabel, absentlabel = count_options$absentlabel,
+            cnslabel = count_options$cnslabel, stats_spec = stats_spec,
+            stats = stats_spec$want, stat_fun = .rt_parse_stat_fun(stat_fun),
+            addrow = .rt_added_spec(addrow),
             compact = compact, nopvalue = nopvalue,
             # Phase 5 row options: cutpoint labels (5a), random effects (5b).
             cutlabels = .rt_parse_cutlabels(cutlabels), noreeffects = noreeffects, relabel = relabel,
             models = labels, title = title %||% "",
             footnote = footnote %||% "", style = style, labelwidth = labelwidth, sheet = sheet,
             sample_accounting = sample_accounting)
+  # WP-4B option transport ----
+  o[names(layout_options)] <- layout_options
   tt <- tt_regtab_build(fits, infos, o)
   if (any(vapply(fits, inherits, TRUE, "tt_mi"))) {
     tt$meta$mi_sample_identity <- lapply(fits, function(f) {
@@ -1416,7 +1550,7 @@ as_forest_data <- function(x) {
   }
   r <- x$meta$regtab_rows
   fm <- x$meta$frame
-  keep <- r$status %in% c("est", "base")
+  keep <- r$status %in% c("base", "ref") | (r$status == "est" & is.finite(r$estimate) & is.finite(r$conf.low) & is.finite(r$conf.high) & r$conf.low <= r$conf.high)
   r <- r[keep, , drop = FALSE]
   r <- r[order(r$row, r$model), , drop = FALSE]
   # Every column is built at the length of `r`, so a table with no
@@ -1435,7 +1569,7 @@ as_forest_data <- function(x) {
     # effecttab's eplotframe() names a blank model "Model k"
     # (effecttab.ado:1167-1169); regtab's labels are never blank.
     model_label = as.character((x$meta$forest_model_label %||% fm$model_label)[r$model]),
-    rowtype = as.character(ifelse(r$status == "base", "reference", "effect")),
+    rowtype = as.character(ifelse(r$status %in% c("base", "ref"), "reference", "effect")),
     section = rep("", nrow(r)),
     source_row = as.integer(r$row),
     stringsAsFactors = FALSE

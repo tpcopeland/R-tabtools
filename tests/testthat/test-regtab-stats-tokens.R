@@ -158,7 +158,7 @@ test_that("5.17: unknown tokens warn with the 2.1.12 list; tokens are case-insen
   expect_length(w, 2L)
   expect_true(all(grepl("AdjR2", w, fixed = TRUE)))
   expect_identical(regtab(f, stats = "f RMSE")$body, regtab(f, stats = c("F", "rmse"))$body)
-  expect_error(regtab(f, stats = 1), "character vector of tokens")
+  expect_error(regtab(f, stats = 1), class = "tabtools_error_statspec")
 })
 
 test_that("5.17: stat_fun adds R-only rows below Stata's", {
@@ -184,9 +184,13 @@ test_that("5.17: stat_fun adds R-only rows below Stata's", {
 
 test_that("5.17: a data frame's glance F shows for Stata's linear commands only (C4 review F9)", {
   df <- data.frame(term = c("x", "(Intercept)"), estimate = c(0.5, 1), std.error = c(0.1, 0.2))
+  attr(df, "effect_scale") <- "Coef."
+  attr(df, "conf.level") <- .95
+  attr(df, "inference_reference") <- "normal"
   mk <- function(cmd) {
     x <- df
     attr(x, "stata_cmd") <- cmd
+    attr(x, "effect_scale") <- if (identical(cmd, "logit")) "OR" else "Coef."
     if (identical(cmd, "logit")) attr(x, "se_scale") <- "link"
     attr(x, "glance") <- list(nobs = 100, F = 12.3456, rmse = 2.5, nevent = 40, nimp = 5, fmi = 0.12345)
     x

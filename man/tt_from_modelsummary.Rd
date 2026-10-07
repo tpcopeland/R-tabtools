@@ -4,7 +4,14 @@
 \alias{tt_from_modelsummary}
 \title{Use a modelsummary model list in regtab}
 \usage{
-tt_from_modelsummary(x, exponentiate, effect_scale = NULL, se_scale = NULL)
+tt_from_modelsummary(
+  x,
+  exponentiate,
+  effect_scale = NULL,
+  se_scale = NULL,
+  conf.level = NULL,
+  inference_reference = NULL
+)
 }
 \arguments{
 \item{x}{A \code{modelsummary_list}, or a list of them (one data frame each).}
@@ -18,6 +25,13 @@ named ratio.}
 
 \item{se_scale}{Only for a \code{tidy} that is already exponentiated:
 \code{"link"} or \code{"estimate"}.}
+
+\item{conf.level}{Confidence level of supplied intervals, when the backend
+does not record it. Backend metadata is retained when omitted.}
+
+\item{inference_reference}{Explicit \code{"normal"} declaration when derived
+inference has no row degrees of freedom. Backend metadata is retained
+when omitted; regtab refuses missing evidence.}
 }
 \value{
 A data frame for \code{\link[=regtab]{regtab()}}, or a list of them.
@@ -56,7 +70,8 @@ if (requireNamespace(pkg, quietly = TRUE)) {
   msum <- getExportedValue(pkg, "modelsummary")
   fit <- glm(am ~ wt, family = binomial, data = mtcars)
   ms <- msum(fit, output = "modelsummary_list")
-  regtab(tt_from_modelsummary(ms, exponentiate = TRUE, effect_scale = "OR"))
+  regtab(tt_from_modelsummary(ms, exponentiate = TRUE, effect_scale = "OR",
+                             conf.level = .95, inference_reference = "normal"))
 }
 }
 \seealso{

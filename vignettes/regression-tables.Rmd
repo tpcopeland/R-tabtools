@@ -561,6 +561,8 @@ regtab(svy_cox)
 
 ```{r svycoxph-tidy, eval = has("survey"), results = "hide"}
 svy_df <- broom.helpers::tidy_plus_plus(svy_cox, exponentiate = TRUE)
+attr(svy_df, "effect_scale") <- "HR"
+attr(svy_df, "conf.level") <- .95
 ```
 
 ```{r svycoxph-df, eval = has("survey")}
@@ -569,9 +571,8 @@ regtab(cox, svy_df, models = c("coxph, unweighted", "svycoxph"))
 
 The data frame joined the fitted model's rows because `tidy_plus_plus()`
 records the variable, its levels and the reference level, and regtab keys
-them the same way (`2.sex`). `tidy_plus_plus()` also records that it
-exponentiated the estimates, which sets the header (`HR`) and the null
-value.
+them the same way (`2.sex`). The explicit `effect_scale = "HR"` declaration sets the header and null
+value; a backend exponentiation hint does not declare the input scale.
 
 regtab takes a data frame's numbers as they are and never transforms them.
 Two things it cannot know, and will not guess:
@@ -579,12 +580,9 @@ Two things it cannot know, and will not guess:
 - **The effect scale.** Whether `estimate` holds ratios or coefficients
   sets the header, the null value (1 or 0) for derived p-values and for
   `dimnonsig`, and whether the intercept is dropped. It is read from
-  `attr(x, "effect_scale")` (`"OR"`, `"HR"`, `"RR"`, `"Coef."`, ...), else
-  from `attr(x, "stata_cmd")`, else from broom.helpers' record of
-  exponentiating. Output of `broom::tidy(exponentiate = TRUE)` with no
-  declared scale is refused: its `statistic` column shows that the
-  estimates were exponentiated, and taking them as coefficients would test
-  them against 0.
+  the required `attr(x, "effect_scale")` (`"OR"`, `"HR"`, `"RR"`,
+  `"Coef."`, ...). Command names and backend exponentiation hints do not
+  declare the scale. Every custom frame needs this attribute.
 - **The scale of `std.error`.** When a ratio row has no interval (or the
   data frame has no p-values), regtab derives them from `std.error`. For
   broom, `std.error` is the standard error of log(estimate); for the
@@ -600,6 +598,7 @@ attr(hr, "effect_scale") <- "HR"
 regtab(hr)
 
 attr(hr, "se_scale") <- "link"
+attr(hr, "inference_reference") <- "normal"
 regtab(hr)
 ```
 
@@ -607,7 +606,9 @@ Declaring the wrong scale gives wrong intervals (here `"estimate"` would
 put the interval at the hazard ratio plus or minus 1.96 times the standard
 error of its logarithm), which is why regtab asks rather than guesses.
 Supplied `conf.low`/`conf.high` and `p.value` columns are shown as they
-are; note that `tidy_plus_plus()` computes a `glm`'s intervals by profile
+are. Supplied bounds require an explicit `conf.level` attribute or column.
+Derived statistics require row `df`/`df.error` or an explicit
+`inference_reference = "normal"` attribute; note that `tidy_plus_plus()` computes a `glm`'s intervals by profile
 likelihood (from `confint()`), so a data frame from a `glm` can differ from
 regtab's Wald interval for the same fit in the last digit. `?regtab`,
 section "Data-frame input", lists every column and attribute.

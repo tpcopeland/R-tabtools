@@ -1,0 +1,28 @@
+
+. if "`id'" == "FC001" regtab, stats(obs events people exposure) exposurelabel("Person days") csv("`out'/`id'.csv") markdown("`out'/`id'.md") xlsx("`out'/regtab.xlsx") sheet(`id')
+
+. if "`id'" == "FC002" regtab, mincount(7) keepintercept csv("`out'/`id'.csv") markdown("`out'/`id'.md") xlsx("`out'/regtab.xlsx") sheet(`id')
+  +-------------------------------------------------+
+  |                 Model                           |
+  |                 Coef.          95% CI   p-value |
+  |         g                                       |
+  |         1           –                           |
+  |         2   Reference                           |
+  |         3        1.62   (-1.18, 4.42)      0.23 |
+  |         x        1.03    (0.38, 1.68)     0.005 |
+  |       g#x                                       |
+  |     1.g#x           –                           |
+  |     2.g#x   Reference                           |
+  |     3.g#x       -0.11   (-1.04, 0.81)      0.79 |
+  | Intercept        5.43    (3.45, 7.41)    <0.001 |
+  +-------------------------------------------------+
+
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-4ab/native-capture-v1/FC002.md
+Exported 13 rows × 5 cols to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-4ab/native-capture-v1/regtab.xlsx, sheet FC002
+
+. if "`id'" == "FC003" regtab, stats(e(ev, mincell(5) maskwith(a)) e(ev|total, mincell(7)) e(a, maskwith(b)) e(b) e(index) text("Column" "m1" "m2" "m3" "m4" "m5" "m6" "m7" "m8" "m9" "m10" "m11" "m12")) csv("`out'/`id'.csv") markdown("`out'/`id'.md") xlsx(
+> "`out'/regtab.xlsx") sheet(`id')
+
+. mata: golden_dump_r("`out'/`id'_stored.csv", "`id'")
+
+. log close fitcount_native

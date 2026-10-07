@@ -28,7 +28,7 @@ ct_model <- function(outcome, shift = 0, levels = c("None", "Low", "High"), ref 
   attr(d, "effect_scale") <- scale
   attr(d, "outcome_id") <- outcome
   attr(d, "model_id") <- paste("cox", outcome, label)
-  if (!is.null(level)) attr(d, "conf.level") <- level
+  attr(d, "conf.level") <- if (is.null(level)) .95 else level
   d
 }
 

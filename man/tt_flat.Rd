@@ -46,6 +46,13 @@ becomes \code{ref}, missing model terms become \code{absent}, and other analytic
 states are retained. Heading, statistic and added-text rows have empty
 state strings and are identified by \verb{_rowtype}; statistic keys retain
 \verb{stat:<item>}. No states are inferred from displayed text.
+A transposed regression table refuses keyed output with
+\code{tabtools_error_regtab_orientation}. Unkeyed output is a plain data frame
+with joined term/statistic labels and separately labeled source frame
+attributes; it does not implement the row-term keyed schema.
+\code{publication_overrides} preserves row/model-aligned literal cell notes
+and their origin through selection and composition; these never supply
+numerical inference.
 Group headings flagged by a stacked source have \verb{_rowtype = "header"}.
 Analytical states are \code{est}, \code{ref}, \code{omit}, \code{notest}, \code{absent}, \code{empty},
 \code{constrained} or \code{masked}; empty strings are reserved for structural rows.

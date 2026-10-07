@@ -100,7 +100,7 @@ tt_model_info <- function(fit, ...) UseMethod("tt_model_info")
   paste(trimws(deparse(cl, width.cutoff = 500L)), collapse = " ")
 }
 
-# Dependent variable, lowercased like Stata's collected `depvar`
+# Case-preserved dependent variable identity; Stata's collected `depvar`
 # (`regtab.ado:455`). For a Surv() response Stata's depvar is `_t` for every
 # st model, which cannot identify an outcome; R uses the event variable,
 # which is what Phase 7 needs to join rate tables to models.
@@ -127,10 +127,12 @@ tt_model_info <- function(fit, ...) UseMethod("tt_model_info")
       lhs <- lhs[[length(lhs)]]
     } else {
       arg <- function(a) if (a %in% names(m)) m[[a]] else NULL
-      lhs <- arg("event") %||% arg("time2") %||% arg("time") %||% lhs
+      type <- arg("type")
+      interval <- is.character(type) && type %in% c("interval", "interval2")
+      if (!interval) lhs <- arg("event") %||% arg("time2") %||% arg("time") %||% lhs
     }
   }
-  tolower(paste(deparse(lhs, width.cutoff = 500L), collapse = ""))
+  paste(deparse(lhs, width.cutoff = 500L), collapse = "")
 }
 
 #' @export
@@ -262,7 +264,19 @@ tt_model_info.survreg <- function(fit, ...) {
       "i" = "Supported: {.val {c(.rt_sr_logtime, 'gaussian')}}."
     ), call = NULL)
   }
-  .mi_ratio(fit, "streg", "TR", intercept_terms = icpt, ancillary_terms = anc)
+  response <- fit$y
+  if (is.null(response)) {
+    frame <- fit$model %||% fit$tt_frame
+    if (is.data.frame(frame)) response <- stats::model.response(frame)
+  }
+  type <- attr(response, "type", exact = TRUE)
+  interval <- isTRUE(type %in% c("interval", "interval2"))
+  info <- .mi_ratio(fit, if (interval) "stintreg" else "streg", "TR", intercept_terms = icpt, ancillary_terms = anc)
+  info$distribution <- fit$dist
+  info$metric <- "log_time"
+  info$response_type <- type %||% NA_character_
+  info$provenance <- if (interval) "fitted_interval_censored_AFT" else "fitted_AFT"
+  info
 }
 
 # mlogit: RRR per non-base outcome equation (`regtab.ado:544-550`).

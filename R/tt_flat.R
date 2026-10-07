@@ -50,6 +50,7 @@
   nr <- nrow(rows)
   id <- .tt_flat_id()
   states <- matrix("", nr, n_models)
+  override_origin <- override_text <- matrix("", nr, n_models)
   types <- .tt_flat_row_types(rows)
   structural <- types %in% c("cat_header", "stat", "addrow", "header")
   for (m in seq_len(n_models)) {
@@ -59,10 +60,15 @@
     s[s == "base"] <- "ref"
     s[s == "cns"] <- "constrained"
     states[seq_len(n), m] <- s
+    for (field in intersect(c("override_origin", "override_text"), names(cells[[m]]))) {
+      value <- as.character(cells[[m]][[field]]); value[is.na(value)] <- ""
+      if (field == "override_origin") override_origin[seq_len(n), m] <- value else override_text[seq_len(n), m] <- value
+    }
   }
   states[structural, ] <- ""
   list(block_id = id, row_keys = rows$key, row_types = types,
        row_blocks = rep(id, nr), states = states,
+       publication_overrides = list(origin = override_origin, text = override_text),
        source_blocks = matrix(id, nr, n_models), composite = FALSE)
 }
 
@@ -75,6 +81,7 @@
       any(!nzchar(f$row_blocks)) || !is.character(keys) || length(keys) != nr || anyNA(keys) ||
       !identical(f$row_keys, keys) || !identical(f$row_types, types)) bad()
   .tt_flat_check_cells(f$states, f$row_types, f$source_blocks, nr, nm)
+  .tt_flat_overrides_check(f$publication_overrides, f$states)
   if (any(!nzchar(keys) & types != "header")) bad()
   invisible(f)
 }
@@ -107,6 +114,13 @@
 #'   states are retained. Heading, statistic and added-text rows have empty
 #'   state strings and are identified by `_rowtype`; statistic keys retain
 #'   `stat:<item>`. No states are inferred from displayed text.
+#'   A transposed regression table refuses keyed output with
+#'   `tabtools_error_regtab_orientation`. Unkeyed output is a plain data frame
+#'   with joined term/statistic labels and separately labeled source frame
+#'   attributes; it does not implement the row-term keyed schema.
+#'   `publication_overrides` preserves row/model-aligned literal cell notes
+#'   and their origin through selection and composition; these never supply
+#'   numerical inference.
 #'   Group headings flagged by a stacked source have `_rowtype = "header"`.
 #'   Analytical states are `est`, `ref`, `omit`, `notest`, `absent`, `empty`,
 #'   `constrained` or `masked`; empty strings are reserved for structural rows.
@@ -155,6 +169,21 @@ tt_flat <- function(x, keyed = TRUE) {
     cli::cli_abort("{.fn tt_flat} requires a regression or effect table.",
                    class = "tabtools_error_flat", call = NULL)
   }
+  if (identical(x$meta$regtab_orientation, "transpose")) {
+    if (keyed) cli::cli_abort("Keyed flat output cannot represent a transposed regression table.", class = "tabtools_error_regtab_orientation", call = NULL)
+    out <- x$body
+    labels <- .md_header(x, escape = FALSE)
+    labels[1L] <- "rowlabel"
+    names(out) <- make.unique(labels)
+    attr(out, "regtab_orientation") <- "transpose"
+    attr(out, "regtab_frame") <- x$meta$frame
+    attr(out, "header") <- x$header
+    attr(out, "command") <- x$command
+    attr(out, "frame") <- x$meta$frame
+    attr(out, "sample_accounting") <- x$meta[["sample_accounting", exact = TRUE]]
+    attr(out, "composition_export") <- TRUE
+    return(out)
+  }
   nm <- max(c(0L, x$cols$model), na.rm = TRUE)
   f <- x$meta$flat
   types <- .tt_flat_row_types(x$rows, x$meta$stack_group_rows %||% integer())
@@ -187,6 +216,7 @@ tt_flat <- function(x, keyed = TRUE) {
   attr(out, "column_model") <- column_model
   attr(out, "source_blocks") <- f$source_blocks
   attr(out, "row_types") <- types
+  attr(out, "publication_overrides") <- f$publication_overrides
   attr(out, "model_states") <- f$states
   attr(out, "row_blocks") <- f$row_blocks
   attr(out, "sample_accounting") <- x$meta$sample_accounting
@@ -235,6 +265,7 @@ tt_flat <- function(x, keyed = TRUE) {
   types <- attr(x, "row_types", exact = TRUE)
   states <- attr(x, "model_states", exact = TRUE)
   .tt_flat_check_cells(states, types, sources, nrow(x), length(mn))
+  .tt_flat_overrides_check(attr(x, "publication_overrides", exact = TRUE), states)
   blocks <- attr(x, "row_blocks", exact = TRUE)
   if (!is.character(blocks) || length(blocks) != nrow(x) || anyNA(blocks) || any(!nzchar(blocks))) {
     bad("Flat row-block metadata is missing or invalid.")
@@ -306,6 +337,8 @@ tt_flat <- function(x, keyed = TRUE) {
   })
   attr(out, "source_blocks") <- attr(x, "source_blocks", exact = TRUE)[row_idx, , drop = FALSE]
   attr(out, "row_types") <- attr(x, "row_types", exact = TRUE)[row_idx]
+  overrides <- attr(x, "publication_overrides", exact = TRUE)
+  if (!is.null(overrides)) attr(out, "publication_overrides") <- lapply(overrides, function(v) v[row_idx, , drop = FALSE])
   attr(out, "model_states") <- attr(x, "model_states", exact = TRUE)[row_idx, , drop = FALSE]
   attr(out, "row_blocks") <- attr(x, "row_blocks", exact = TRUE)[row_idx]
   class(out) <- c("tt_flat", "data.frame")
@@ -319,7 +352,7 @@ tt_flat <- function(x, keyed = TRUE) {
 .tt_flat_merge_metadata <- function(tabs, keys, rows, headings, original_keys) {
   if (any(vapply(tabs, function(t) is.null(t$meta$flat), TRUE))) return(NULL)
   id <- .tt_flat_id()
-  states <- sources <- NULL
+  states <- sources <- override_origin <- override_text <- NULL
   row_blocks <- rep("", length(keys))
   for (k in seq_along(tabs)) {
     t <- tabs[[k]]
@@ -331,6 +364,9 @@ tt_flat <- function(x, keyed = TRUE) {
     s <- f$states[at, , drop = FALSE]
     s[is.na(s)] <- "absent"
     states <- cbind(states, s)
+    overrides <- .tt_flat_overrides(f)
+    v <- lapply(overrides, function(v) { v <- v[at, , drop = FALSE]; v[is.na(v)] <- ""; v })
+    override_origin <- cbind(override_origin, v$origin); override_text <- cbind(override_text, v$text)
     origin <- f$source_blocks[at, , drop = FALSE]
     present <- !is.na(origin) & nzchar(origin)
     origin[present] <- paste0(id, "/", k, "/", origin[present])
@@ -344,13 +380,14 @@ tt_flat <- function(x, keyed = TRUE) {
   states[structural, ] <- ""
   list(block_id = id, row_keys = rows$key, row_types = types,
        row_blocks = row_blocks, states = states,
+       publication_overrides = list(origin = override_origin, text = override_text),
        source_blocks = sources, composite = TRUE)
 }
 
 .tt_flat_stack_metadata <- function(tabs, groups) {
   if (any(vapply(tabs, function(t) is.null(t$meta$flat), TRUE))) return(NULL)
   id <- .tt_flat_id()
-  states <- sources <- NULL
+  states <- sources <- override_origin <- override_text <- NULL
   row_blocks <- character()
   row_types <- character()
   for (k in seq_along(tabs)) {
@@ -360,6 +397,7 @@ tt_flat <- function(x, keyed = TRUE) {
     types <- .tt_flat_row_types(t$rows, t$meta$stack_group_rows %||% integer())
     .tt_flat_metadata_check(f, nrow(t$body), nm, t$rows$key, types)
     s <- f$states
+    overrides <- .tt_flat_overrides(f)
     origin <- f$source_blocks
     present <- nzchar(origin)
     origin[present] <- paste0(id, "/", k, "/", origin[present])
@@ -369,11 +407,13 @@ tt_flat <- function(x, keyed = TRUE) {
     } else character()
     if (!is.null(groups)) {
       s <- rbind(rep("", nm), s)
+      overrides <- lapply(overrides, function(v) rbind(rep("", nm), v))
       origin <- rbind(rep("", nm), origin)
       blocks <- c(paste0(id, "/", k, "/heading"), blocks)
       types <- c("header", types)
     }
     states <- rbind(states, s)
+    override_origin <- rbind(override_origin, overrides$origin); override_text <- rbind(override_text, overrides$text)
     sources <- rbind(sources, origin)
     row_blocks <- c(row_blocks, blocks)
     row_types <- c(row_types, types)
@@ -383,5 +423,26 @@ tt_flat <- function(x, keyed = TRUE) {
   }), use.names = FALSE)
   list(block_id = id, row_keys = row_keys, row_types = row_types,
        row_blocks = row_blocks, states = states,
+       publication_overrides = list(origin = override_origin, text = override_text),
        source_blocks = sources, composite = TRUE)
+}
+
+# Optional, row/model-aligned publication overrides travel with the canonical
+# state arrays. They are provenance only and never supply numerical inference.
+.tt_flat_overrides <- function(f) {
+  f$publication_overrides %||% list(origin = matrix("", nrow(f$states), ncol(f$states)),
+                                  text = matrix("", nrow(f$states), ncol(f$states)))
+}
+
+.tt_flat_overrides_check <- function(x, states) {
+  if (is.null(x)) return(invisible(NULL))
+  valid <- is.list(x) && identical(names(x), c("origin", "text")) &&
+    all(vapply(x, function(v) is.matrix(v) && is.character(v) &&
+                identical(dim(v), dim(states)) && !anyNA(v), TRUE))
+  if (!valid || any(!x$origin %in% c("", "cellnote")) ||
+      any(nzchar(x$origin) & states != "masked" & states != "") || any(!nzchar(x$origin) & nzchar(x$text))) {
+    cli::cli_abort("Flat publication override metadata is invalid or misaligned.",
+                   class = "tabtools_error_flat", call = NULL)
+  }
+  invisible(NULL)
 }

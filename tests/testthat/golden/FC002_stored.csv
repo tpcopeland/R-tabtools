@@ -1,0 +1,22 @@
+name,kind,row,col,value
+_golden_id,meta,,,FC002
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,10
+N_absent,scalar,,,0
+N_masked,scalar,,,2
+ci_level,scalar,,,95
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,13
+sheet,macro,,,FC002
+xlsx,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-4ab/native-capture-v1/regtab.xlsx
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-4ab/native-capture-v1/FC002.md
+methods,macro,,,"Coefficients with 95% confidence intervals from multivariable linear regression. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+coef_label,macro,,,Coef.
+table,matrix,__3,c1,1.619047619047622
+table,matrix,x,c1,1.02857142857143
+table,matrix,3_g_x,c1,-.1142857142857155
+table,matrix,Intercept,c1,5.4285714285714262

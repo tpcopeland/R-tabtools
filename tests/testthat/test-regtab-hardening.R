@@ -1,3 +1,15 @@
+# Explicit declarations for these known coefficient fixtures; no production
+# scale or inference guessing is exercised by this helper.
+h1_declared <- function(x, scale, level = .95) {
+  attr(x, "effect_scale") <- scale
+  attr(x, "conf.level") <- level
+  attr(x, "inference_reference") <- "normal"
+  if ("reference_row" %in% names(x)) {
+    x$status <- ifelse(x$reference_row %in% TRUE, "ref", ifelse(is.na(x$estimate), "omit", "est"))
+  }
+  x
+}
+
 # Milestone H group t2a: regtab hardening (tasks H1, H9, H11, H18). Each
 # block names its task and the external-review finding it closes
 # (POTENTIAL_ISSUES_2026-09-26.md).
@@ -25,7 +37,7 @@ expect_forest_shape <- function(f, n) {
 }
 
 test_that("H9: an all-omitted table gives a zero-row forest frame with every column and attribute", {
-  t <- regtab(data.frame(term = "x", estimate = NA_real_))
+  t <- regtab(h1_declared(data.frame(term = "x", estimate = NA_real_), "Coef."))
   expect_identical(t$body[[2]], "Omitted")
   f <- as_forest_data(t)
   expect_forest_shape(f, 0L)
@@ -43,6 +55,9 @@ test_that("H9: an all-omitted table gives a zero-row forest frame with every col
 
 test_that("H9: keep/drop leaving no eligible row, and two models, give zero rows", {
   d <- data.frame(term = c("x", "y"), estimate = c(NA, 0.5), std.error = c(NA, 0.1))
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   t <- regtab(d, drop = "y")
   expect_identical(t$body[[1]], "x")
   expect_forest_shape(as_forest_data(t), 0L)
@@ -150,6 +165,9 @@ h1_cells <- function(tt, row = 1L, m = 1L) {
 test_that("H1 (F01): a ratio at exactly its null has p = 1, and dimnonsig agrees, on both SE scales", {
   for (sc in c("link", "estimate")) {
     d <- data.frame(term = "x", estimate = 1, std.error = 0.1)
+    attr(d, "effect_scale") <- "Coef."
+    attr(d, "conf.level") <- .95
+    attr(d, "inference_reference") <- "normal"
     attr(d, "effect_scale") <- "OR"
     attr(d, "se_scale") <- sc
     tt <- regtab(d, dimnonsig = TRUE)
@@ -160,7 +178,12 @@ test_that("H1 (F01): a ratio at exactly its null has p = 1, and dimnonsig agrees
   # The same through stata_cmd (null 1 from the command word), and an HR
   # just off its null: p and the interval tell the same story.
   d <- data.frame(term = "x", estimate = 1.1, std.error = 0.1)
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   attr(d, "stata_cmd") <- "stcox"
+  attr(d, "effect_scale") <- "HR"
+  attr(d, "inference_reference") <- "normal"
   attr(d, "se_scale") <- "estimate"
   tt <- regtab(d, dimnonsig = TRUE)
   expect_identical(tt$body[[3]], "(0.90, 1.30)")
@@ -170,6 +193,9 @@ test_that("H1 (F01): a ratio at exactly its null has p = 1, and dimnonsig agrees
 
 test_that("H1 (H-D5): the two declared SE scales give their own Wald statistics", {
   d <- data.frame(term = c("a", "b"), estimate = c(2, 0.5), std.error = c(0.3, 0.2))
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   attr(d, "effect_scale") <- "IRR"
   q <- qnorm(0.975)
   attr(d, "se_scale") <- "link"
@@ -187,6 +213,9 @@ test_that("H1 (H-D5): the two declared SE scales give their own Wald statistics"
   # declared se_scale there contradicts the estimates and is refused, never
   # ignored (review P0-1 of group t2a).
   e <- data.frame(term = "a", estimate = 2, std.error = 0.5)
+  attr(e, "effect_scale") <- "Coef."
+  attr(e, "conf.level") <- .95
+  attr(e, "inference_reference") <- "normal"
   base <- h1_cells(regtab(e))
   expect_equal(base$p.value, 2 * pnorm(-4), tolerance = 1e-12)
   attr(e, "se_scale") <- "link"
@@ -196,7 +225,12 @@ test_that("H1 (H-D5): the two declared SE scales give their own Wald statistics"
 test_that("H1 (H-D5): a ratio row needing a derived statistic is refused without se_scale, naming the rows", {
   d <- data.frame(term = c("a", "b", "c"), estimate = c(2, 0.5, 1.2), std.error = c(0.3, 0.2, 0.1),
                   conf.low = c(1.1, NA, NA), conf.high = c(3.6, NA, NA), p.value = c(0.03, NA, NA))
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   attr(d, "stata_cmd") <- "logit"
+  attr(d, "effect_scale") <- "OR"
+  attr(d, "inference_reference") <- "normal"
   err <- tryCatch(regtab(d), error = function(e) conditionMessage(e))
   expect_match(err, "ratio scale (OR)", fixed = TRUE)
   expect_match(err, "\"b\" and \"c\"", fixed = TRUE)
@@ -204,19 +238,34 @@ test_that("H1 (H-D5): a ratio row needing a derived statistic is refused without
   expect_match(err, "se_scale", fixed = TRUE)
   # Fully supplied rows need nothing: no refusal, numbers kept.
   full <- data.frame(term = "a", estimate = 2, std.error = 0.3, conf.low = 1.1, conf.high = 3.6, p.value = 0.02)
+  attr(full, "effect_scale") <- "Coef."
+  attr(full, "conf.level") <- .95
+  attr(full, "inference_reference") <- "normal"
   attr(full, "stata_cmd") <- "logit"
+  attr(full, "effect_scale") <- "OR"
+  attr(full, "inference_reference") <- "normal"
   expect_identical(regtab(full)$body[[3]], "(1.10, 3.60)")
   # Ancillary rows of a ratio model are on their own scale: no refusal.
   anc <- data.frame(term = c("x", "/lnalpha"), estimate = c(1.5, -0.7), std.error = c(NA, 0.2),
                     conf.low = c(1.2, NA), conf.high = c(1.9, NA), p.value = c(0.01, NA))
+  attr(anc, "effect_scale") <- "Coef."
+  attr(anc, "conf.level") <- .95
+  attr(anc, "inference_reference") <- "normal"
   anc$p.value <- NULL
   attr(anc, "stata_cmd") <- "nbreg"
+  attr(anc, "effect_scale") <- "IRR"
+  attr(anc, "inference_reference") <- "normal"
   tt <- regtab(anc, keepintercept = TRUE)
   expect_identical(tt$body[[1]], c("x", "/lnalpha"))
   expect_identical(tt$body[[3]][2], sprintf("(%.2f, %.2f)", -0.7 - qnorm(0.975) * 0.2, -0.7 + qnorm(0.975) * 0.2))
   # A ratio estimate must be positive (raw coefficients under an OR header).
   neg <- data.frame(term = "a", estimate = -0.4, conf.low = -0.9, conf.high = 0.1, p.value = 0.1)
+  attr(neg, "effect_scale") <- "Coef."
+  attr(neg, "conf.level") <- .95
+  attr(neg, "inference_reference") <- "normal"
   attr(neg, "stata_cmd") <- "logit"
+  attr(neg, "effect_scale") <- "OR"
+  attr(neg, "inference_reference") <- "normal"
   expect_error(regtab(neg), "OR estimates that are not positive", fixed = TRUE)
 })
 
@@ -234,8 +283,11 @@ test_that("H1 (F01): tidy_plus_plus(exponentiate = TRUE) without CI/p columns ne
     w
   }
   tp <- broom.helpers::tidy_plus_plus(fit, tidy_fun = tf, exponentiate = TRUE)
+  tp <- h1_declared(tp, "OR", level = .95)
   tp <- as.data.frame(tp)[, setdiff(names(tp), c("conf.low", "conf.high", "p.value", "statistic"))]
   attr(tp, "stata_cmd") <- "logit"
+  attr(tp, "effect_scale") <- "OR"
+  attr(tp, "inference_reference") <- "normal"
   expect_error(regtab(tp), "se_scale", fixed = TRUE)
   attr(tp, "se_scale") <- "link"
   a <- regtab(fit)
@@ -253,6 +305,9 @@ test_that("H1 (F01): tidy_plus_plus(exponentiate = TRUE) without CI/p columns ne
 test_that("H1 (F02): the malformed-schema matrix is refused, each with a message naming the problem", {
   ok <- data.frame(term = c("a", "b"), estimate = c(0.5, 1), std.error = c(0.1, 0.2),
                    conf.low = c(0.3, 0.6), conf.high = c(0.7, 1.4), p.value = c(0.01, 0.2))
+  attr(ok, "effect_scale") <- "Coef."
+  attr(ok, "conf.level") <- .95
+  attr(ok, "inference_reference") <- "normal"
   expect_s3_class(regtab(ok), "tt_table")
   mod <- function(...) {
     x <- ok
@@ -295,6 +350,9 @@ test_that("H1 (F02): the malformed-schema matrix is refused, each with a message
   sc <- data.frame(term = c("f1", "f2", "f3"), variable = "f", var_type = "categorical", label = c("a", "b", "c"),
                    reference_row = c(FALSE, FALSE, TRUE), contrasts_type = "sum", estimate = c(-0.2, 0.2, 0.04),
                    std.error = 0.1)
+  attr(sc, "effect_scale") <- "Coef."
+  attr(sc, "conf.level") <- .95
+  attr(sc, "inference_reference") <- "normal"
   expect_error(regtab(sc), "\"sum\" contrasts", fixed = TRUE)
   bad_attr <- ok
   attr(bad_attr, "se_scale") <- "log"
@@ -313,21 +371,32 @@ test_that("H1 (F02): the malformed-schema matrix is refused, each with a message
   # a missing term, a factor term column.
   edge <- data.frame(term = factor(c("a", "b")), estimate = c(0.5, 1), std.error = c(0.1, NA),
                      conf.low = c(0.3, NA), conf.high = c(Inf, NA), p.value = NA, df = c(Inf, NA))
+  attr(edge, "effect_scale") <- "Coef."
+  attr(edge, "conf.level") <- .95
+  attr(edge, "inference_reference") <- "normal"
   tt <- regtab(edge)
   expect_identical(tt$body[[3]], c("", ""))
   expect_identical(tt$body[[4]], c("", ""))
   hdr <- data.frame(term = c(NA, "fa", "fb"), variable = "f", var_type = c(NA, "categorical", "categorical"),
                     label = c("f", "a", "b"), header_row = c(TRUE, FALSE, FALSE), reference_row = c(NA, TRUE, FALSE),
                     estimate = c(NA, 0, 0.4), std.error = c(NA, NA, 0.2))
+  attr(hdr, "effect_scale") <- "Coef."
+  attr(hdr, "conf.level") <- .95
+  attr(hdr, "inference_reference") <- "normal"
   expect_identical(regtab(hdr)$body[[1]], c("f", "  a", "  b"))
 })
 
 test_that("H1: supplied p-values and intervals are never touched", {
   d <- data.frame(term = c("a", "b"), estimate = c(2, 0.8), std.error = c(0.3, 0.5),
                   conf.low = c(1.2, 0.2), conf.high = c(3.1, 1.9), p.value = c(0.004, 0.61), df = c(4, 4))
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   for (sc in list(NULL, "link", "estimate")) {
     x <- d
     attr(x, "stata_cmd") <- "poisson"
+    attr(x, "effect_scale") <- "IRR"
+    attr(x, "inference_reference") <- "normal"
     attr(x, "se_scale") <- sc
     got <- h1_cells(regtab(x), 1:2)
     expect_identical(got$conf.low, c(1.2, 0.2))
@@ -338,6 +407,9 @@ test_that("H1: supplied p-values and intervals are never touched", {
   # no bounds gets a derived interval.
   m <- data.frame(term = c("a", "b"), estimate = c(2, 0.8), std.error = c(0.3, 0.5), p.value = c(0.01, NA),
                   conf.low = c(1.5, NA), conf.high = c(2.5, NA))
+  attr(m, "effect_scale") <- "Coef."
+  attr(m, "conf.level") <- .95
+  attr(m, "inference_reference") <- "normal"
   got <- h1_cells(regtab(m), 1:2)
   expect_identical(got$p.value, c(0.01, NA))
   expect_identical(got$conf.low[1], 1.5)
@@ -346,6 +418,9 @@ test_that("H1: supplied p-values and intervals are never touched", {
 
 test_that("H1 (user item (c)): a df or df.error column gives t intervals and p-values", {
   d <- data.frame(term = "x", estimate = 2, std.error = 1, df = 3)
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   tt <- regtab(d)
   expect_identical(tt$body[[3]], "(-1.18, 5.18)")
   expect_identical(tt$body[[4]], "0.14")
@@ -357,11 +432,17 @@ test_that("H1 (user item (c)): a df or df.error column gives t intervals and p-v
   expect_identical(h1_cells(regtab(d)), got)
   # Per-row df; NA or Inf is the normal distribution; level honoured.
   e <- data.frame(term = c("a", "b", "c"), estimate = c(1, 1, 1), std.error = c(0.4, 0.4, 0.4), df = c(10, NA, Inf))
+  attr(e, "effect_scale") <- "Coef."
+  attr(e, "conf.level") <- .95
+  attr(e, "inference_reference") <- "normal"
   got <- h1_cells(regtab(e, level = 0.9), 1:3)
   expect_equal(got$conf.high, 1 + 0.4 * c(qt(0.95, 10), qnorm(0.95), qnorm(0.95)), tolerance = 1e-12)
   expect_equal(got$p.value, 2 * c(pt(-2.5, 10), pnorm(-2.5), pnorm(-2.5)), tolerance = 1e-12)
   # With a ratio and se_scale = "link": t on the log scale.
   r <- data.frame(term = "x", estimate = 1.5, std.error = 0.2, df = 12)
+  attr(r, "effect_scale") <- "Coef."
+  attr(r, "conf.level") <- .95
+  attr(r, "inference_reference") <- "normal"
   attr(r, "effect_scale") <- "HR"
   attr(r, "se_scale") <- "link"
   got <- h1_cells(regtab(r))
@@ -371,11 +452,17 @@ test_that("H1 (user item (c)): a df or df.error column gives t intervals and p-v
   f <- lm(mpg ~ wt + hp, mtcars)
   s <- summary(f)$coefficients
   td <- data.frame(term = rownames(s), estimate = s[, 1], std.error = s[, 2], df.error = f$df.residual)
+  attr(td, "effect_scale") <- "Coef."
+  attr(td, "conf.level") <- .95
+  attr(td, "inference_reference") <- "normal"
   expect_identical(regtab(td)$body, regtab(f)$body)
 })
 
 test_that("H1 (F32): a level that conflicts with supplied intervals is refused; vce must be \"stata\"", {
   d <- data.frame(term = "x", estimate = 2, conf.low = 1, conf.high = 3, p.value = 0.04)
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   err <- tryCatch(regtab(d, level = 0.90), error = function(e) conditionMessage(e))
   expect_match(err, "supplies 95% confidence intervals", fixed = TRUE)
   expect_match(err, "asks for 90%", fixed = TRUE)
@@ -398,8 +485,13 @@ test_that("H1 (F32): a level that conflicts with supplied intervals is refused; 
   d$conf.level <- 90
   expect_identical(regtab(d, level = 0.9)$stored$ci_level, 90)
   d$conf.level <- NULL
+  expect_error(regtab(d), class = "tabtools_error_regtab_metadata")
+  attr(d, "conf.level") <- .95
   # Only derived intervals: any level (they are computed at it).
   e <- data.frame(term = "x", estimate = 2, std.error = 0.5)
+  attr(e, "effect_scale") <- "Coef."
+  attr(e, "conf.level") <- .95
+  attr(e, "inference_reference") <- "normal"
   expect_identical(regtab(e, level = 0.9)$body[[3]], sprintf("(%.2f, %.2f)", 2 - qnorm(0.95) * 0.5, 2 + qnorm(0.95) * 0.5))
   # The conflict is named per model beside a fitted model.
   expect_error(regtab(lm(mpg ~ wt, mtcars), d, level = 0.9), "Model 2 (a data frame) supplies 95%", fixed = TRUE)
@@ -420,7 +512,10 @@ test_that("H1 (user item (b)): regtab(fit, tidy_plus_plus(fit)) shares the facto
                   g = factor(sample(c("0", "1", "2"), 250, TRUE)))
   fit <- glm(y ~ treat + age + g, binomial, d)
   tp <- broom.helpers::tidy_plus_plus(fit, exponentiate = TRUE)
+  tp <- h1_declared(tp, "OR", level = .95)
   attr(tp, "stata_cmd") <- "logit"
+  attr(tp, "effect_scale") <- "OR"
+  attr(tp, "inference_reference") <- "normal"
   tt <- regtab(fit, tp)
   r <- tt$meta$regtab_rows
   keys <- unique(r$key)
@@ -442,7 +537,10 @@ test_that("H1 (user item (b)): regtab(fit, tidy_plus_plus(fit)) shares the facto
   expect_message(regtab(tp, keep = "2.treat"), "level positions", fixed = TRUE)
   # tidy_plus_plus() records its conf.level: a 90% frame needs level = 0.9.
   tp90 <- broom.helpers::tidy_plus_plus(fit, exponentiate = TRUE, conf.level = 0.9)
+  tp90 <- h1_declared(tp90, "OR", level = .9)
   attr(tp90, "stata_cmd") <- "logit"
+  attr(tp90, "effect_scale") <- "OR"
+  attr(tp90, "inference_reference") <- "normal"
   expect_error(regtab(fit, tp90, level = 0.95), "Model 2 (a data frame) supplies 90% confidence intervals", fixed = TRUE)
   expect_identical(regtab(fit, tp90, level = 0.9)$stored$ci_level, 90)
   expect_identical(regtab(fit, tp90)$stored$ci_level, 90)
@@ -450,18 +548,23 @@ test_that("H1 (user item (b)): regtab(fit, tidy_plus_plus(fit)) shares the facto
   # not a guess: the scale must still be declared, H-D5).
   bare <- tp[, c("term", "variable", "var_type", "label", "reference_row", "estimate", "std.error")]
   attr(bare, "stata_cmd") <- "logit"
+  attr(bare, "effect_scale") <- "OR"
+  attr(bare, "inference_reference") <- "normal"
   attr(bare, "exponentiate") <- TRUE
   expect_error(regtab(bare), "whose std.error stays on the log scale", fixed = TRUE)
   # A logical predictor is 0/1 in both.
   d$old <- d$age > 50
   fl <- glm(y ~ old + age, binomial, d)
   tl <- broom.helpers::tidy_plus_plus(fl, exponentiate = TRUE)
+  tl <- h1_declared(tl, "OR", level = .95)
   attr(tl, "stata_cmd") <- "logit"
+  attr(tl, "effect_scale") <- "OR"
+  attr(tl, "inference_reference") <- "normal"
   rl <- regtab(fl, tl)$meta$regtab_rows
   expect_identical(unique(rl$key), c("old", "0.old", "1.old", "age"))
   expect_identical(rl$status[rl$key == "1.old"], c("est", "est"))
   # Without exponentiate (log-odds, Coef.): the rows are shared all the same.
-  tt2 <- regtab(fit, broom.helpers::tidy_plus_plus(fit))
+  tt2 <- regtab(fit, h1_declared(broom.helpers::tidy_plus_plus(fit), "Coef."))
   expect_identical(sum(tt2$body[[1]] == "  Placebo"), 1L)
 })
 
@@ -469,6 +572,9 @@ test_that("H1: a key column overrides the derived keys; no reference row keeps t
   d <- data.frame(term = c("armB", "armC", "age"), variable = c("arm", "arm", "age"),
                   var_type = c("categorical", "categorical", "continuous"), label = c("B", "C", "Age"),
                   estimate = c(0.5, 0.7, 0.02), std.error = c(0.2, 0.2, 0.01))
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   # No reference row: the base's position is unknown, so the terms stay keys.
   r <- regtab(d)$meta$regtab_rows
   expect_identical(r$key, c("arm", "armB", "armC", "age"))
@@ -487,9 +593,15 @@ test_that("H1: a key column overrides the derived keys; no reference row keeps t
   # reference row.
   n <- data.frame(term = c("g1", "g2"), variable = "g", var_type = "categorical", label = c("1", "2"),
                   estimate = c(0.1, 0.2), std.error = 0.1)
+  attr(n, "effect_scale") <- "Coef."
+  attr(n, "conf.level") <- .95
+  attr(n, "inference_reference") <- "normal"
   expect_identical(regtab(n)$meta$regtab_rows$key, c("g", "1.g", "2.g"))
   # Repeated derived keys are refused (two variables in one block).
   dup <- data.frame(term = c("a", "b"), key = c("x", "x"), estimate = 1:2)
+  attr(dup, "effect_scale") <- "Coef."
+  attr(dup, "conf.level") <- .95
+  attr(dup, "inference_reference") <- "normal"
   expect_error(regtab(dup), "repeats a row key", fixed = TRUE)
 })
 
@@ -500,7 +612,12 @@ test_that("H1: multi-equation data frames key their levels per equation", {
                   reference_row = rep(c(TRUE, FALSE, NA), 2), estimate = c(1, 1.4, 1.02, 1, 0.8, 0.99),
                   conf.low = c(NA, 1.1, 1.0, NA, 0.6, 0.97), conf.high = c(NA, 1.8, 1.04, NA, 1.1, 1.01),
                   p.value = c(NA, 0.01, 0.04, NA, 0.2, 0.3))
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   attr(d, "stata_cmd") <- "mlogit"
+  attr(d, "effect_scale") <- "RRR"
+  attr(d, "inference_reference") <- "normal"
   r <- regtab(d)$meta$regtab_rows
   expect_identical(r$key, c("B::1.sex", "B::2.sex", "B::age", "C::1.sex", "C::2.sex", "C::age"))
   expect_identical(regtab(d)$body[[1]], c("B: F", "B: M", "B: age", "C: F", "C: M", "C: age"))
@@ -638,10 +755,16 @@ test_that("H11: a coef/cdisc relabel never renames the model; mixed kinds and sc
                   var_type = c("intercept", "continuous", "categorical", "categorical"),
                   estimate = c(0.1, 1.2, 0.8, 1.1), conf.low = c(0.05, 1, 0.6, 0.9),
                   conf.high = c(0.2, 1.4, 1.1, 1.3), p.value = c(0.01, 0.02, 0.2, 0.3))
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   attr(d, "stata_cmd") <- "logit"
+  attr(d, "effect_scale") <- "OR"
+  attr(d, "inference_reference") <- "normal"
   expect_identical(regtab(d)$stored$methods, "Odds ratios with 95% confidence intervals from multivariable logistic regression.")
   expect_identical(regtab(d[1:2, ])$stored$methods, "Odds ratios with 95% confidence intervals from univariable logistic regression.")
   attr(d, "stata_cmd") <- NULL
+  attr(d, "effect_scale") <- "Coef."
   expect_identical(regtab(d)$stored$methods, "Coefficients with 95% confidence intervals from multivariable regression.")
 })
 
@@ -721,8 +844,8 @@ test_that("B02: interactions with a factor coded by a contrasts<- matrix map to 
       # The Reference on the base level (native; fvgen shows no base rows).
       st <- status_of(tt)
       if (mode == "native") {
-        expect_identical(st[[paste0(sp$base, ".g")]], "base")
-        expect_identical(st[[paste0(sp$base, ".g#c.x")]], "base")
+        expect_identical(st[[paste0(sp$base, ".g")]], "ref")
+        expect_identical(st[[paste0(sp$base, ".g#c.x")]], "ref")
       } else {
         expect_false(any(c(paste0(sp$base, ".g"), paste0(sp$base, ".g#c.x")) %in% names(st)))
       }
@@ -737,9 +860,9 @@ test_that("B02: interactions with a factor coded by a contrasts<- matrix map to 
       }
       st <- status_of(tt)
       if (mode == "native") {
-        expect_identical(st[[paste0(sp$base, ".g")]], "base")
-        expect_identical(unname(st[paste0(1:3, ".g#1.h")]), rep("base", 3))
-        expect_identical(st[[paste0(sp$base, ".g#2.h")]], "base")
+        expect_identical(st[[paste0(sp$base, ".g")]], "ref")
+        expect_identical(unname(st[paste0(1:3, ".g#1.h")]), rep("ref", 3))
+        expect_identical(st[[paste0(sp$base, ".g#2.h")]], "ref")
       } else {
         expect_false(paste0(sp$base, ".g#2.h") %in% names(st))
       }
@@ -812,6 +935,7 @@ test_that("R02: main-effect rows of a contrasts<- factor sit on the level its co
   f <- lm(y ~ g + x, cases[[1]]$d)
   fr <- tabtools:::.rt_frame(f)
   tp <- as.data.frame(broom.helpers::tidy_plus_plus(f, add_reference_rows = TRUE))
+  tp <- h1_declared(tp, "Coef.", level = .95)
   rows <- tp[tp$variable %in% "g", ]
   wald <- data.frame(term = c("(Intercept)", "x"))
   expect_error(tabtools:::.rt_contrast_rows("g", rows, wald, fr$mf, fr$mm), "cannot be matched")
@@ -870,6 +994,7 @@ test_that("review P0-3/P1-1: joined keys, data frames, and what is left to refus
   # A data frame from the relevelled fit joins the same way.
   skip_if_not_installed("broom.helpers")
   tp <- broom.helpers::tidy_plus_plus(f3)
+  tp <- h1_declared(tp, "Coef.", level = .95)
   tt <- regtab(f1, tp)
   b <- tt$body
   i <- match(c("poor", "avg"), trimws(b[[1]]))
@@ -894,55 +1019,30 @@ test_that("review P0-3/P1-1: joined keys, data frames, and what is left to refus
 # Review of group t2a, P0-1/P0-2: the ratio scale of a data frame without
 # stata_cmd, and effect scales outside the known lists
 
-test_that("review P0-1: exponentiated broom output without stata_cmd is a ratio, never Coef. (the F01 repro)", {
+test_that("P.6: broom declarations are required before statistical scale checks", {
   skip_if_not_installed("broom.helpers")
-  fit <- glm(am ~ wt, binomial, mtcars)
-  truth <- regtab(fit)$body
-  # The F01 repro as a user writes it: no stata_cmd, no effect_scale.
-  tp <- broom.helpers::tidy_plus_plus(fit, exponentiate = TRUE)
-  tp <- tp[, setdiff(names(tp), c("conf.low", "conf.high", "p.value"))]
-  err <- tryCatch(regtab(tp), error = function(e) conditionMessage(e))
-  expect_match(err, "ratio scale (OR)", fixed = TRUE)
-  expect_match(err, "se_scale", fixed = TRUE)
-  expect_false(grepl("-2.80", err, fixed = TRUE))
-  # Declared: the fitted model's cells, under the OR header broom recorded.
-  attr(tp, "se_scale") <- "link"
-  tt <- regtab(tp)
-  expect_identical(tt$body, truth)
-  expect_identical(tt$stored$coef_label, "OR")
-  # Full tidy_plus_plus output (its own CI and p): OR, null 1, intercept dropped.
-  full <- broom.helpers::tidy_plus_plus(glm(am ~ qsec, binomial, mtcars), exponentiate = TRUE, intercept = TRUE)
-  tq <- regtab(full, dimnonsig = TRUE)
-  expect_identical(tq$stored$coef_label, "OR")
-  expect_identical(tq$body[[1]], "qsec")
-  expect_true(tq$rows$dim)
-})
-
-test_that("review P0-1: broom::tidy(exponentiate = TRUE) (no attribute) is caught by its statistic column", {
   skip_if_not_installed("broom")
   fit <- glm(am ~ wt, binomial, mtcars)
-  tidy <- getExportedValue("broom", "tidy")
-  bt <- as.data.frame(tidy(fit, exponentiate = TRUE))
-  expect_error(regtab(bt), "looks exponentiated", fixed = TRUE)
-  bq <- as.data.frame(tidy(glm(am ~ qsec, binomial, mtcars), exponentiate = TRUE, conf.int = TRUE))
-  expect_error(regtab(bq, dimnonsig = TRUE), "looks exponentiated", fixed = TRUE)
-  # Declared, it is right; a declared link scale that the statistic
-  # contradicts is refused.
-  attr(bt, "effect_scale") <- "OR"
-  attr(bt, "se_scale") <- "link"
-  expect_identical(regtab(bt, keep = "wt")$body[[3]], regtab(fit)$body[[3]])
-  lin <- as.data.frame(tidy(lm(mpg ~ wt, mtcars)))
-  lin$estimate <- abs(lin$estimate)
-  lin$statistic <- lin$estimate / lin$std.error
-  attr(lin, "effect_scale") <- "RR"
-  attr(lin, "se_scale") <- "link"
-  expect_error(regtab(lin), "statistic column is not log(estimate) / std.error", fixed = TRUE)
-  # Not exponentiated: plain coefficients pass (statistic = estimate / se).
-  expect_identical(regtab(as.data.frame(tidy(lm(mpg ~ wt, mtcars))))$stored$coef_label, "Coef.")
+  tp <- broom.helpers::tidy_plus_plus(fit, exponentiate = TRUE)
+  expect_error(regtab(tp), class = "tabtools_error_regtab_metadata")
+  tp <- h1_declared(tp, "OR")
+  expect_identical(regtab(tp)$stored$coef_label, "OR")
+  bare <- as.data.frame(broom::tidy(fit, exponentiate = TRUE))
+  expect_error(regtab(bare), class = "tabtools_error_regtab_metadata")
+  bare <- h1_declared(bare, "Coef.")
+  expect_error(regtab(bare), "looks exponentiated", fixed = TRUE)
+  bare <- h1_declared(bare, "OR")
+  attr(bare, "se_scale") <- "link"
+  expect_identical(regtab(bare, keep = "wt")$body[[3]], regtab(fit)$body[[3]])
+  plain <- h1_declared(as.data.frame(broom::tidy(lm(mpg ~ wt, mtcars))), "Coef.")
+  expect_identical(regtab(plain)$stored$coef_label, "Coef.")
 })
 
 test_that("review P0-2: an effect scale outside the lists never falls back to null 0", {
   d <- data.frame(term = "x", estimate = 1, std.error = 0.1)
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   attr(d, "effect_scale") <- "RR"
   attr(d, "se_scale") <- "link"
   tt <- regtab(d, dimnonsig = TRUE)
@@ -954,6 +1054,9 @@ test_that("review P0-2: an effect scale outside the lists never falls back to nu
   }
   # Unknown label: refused when the null is needed, unless null_value says it.
   u <- data.frame(term = "x", estimate = 1, std.error = 0.1)
+  attr(u, "effect_scale") <- "Coef."
+  attr(u, "conf.level") <- .95
+  attr(u, "inference_reference") <- "normal"
   attr(u, "effect_scale") <- "Estimate"
   expect_error(regtab(u), "whose null value regtab does not know", fixed = TRUE)
   attr(u, "null_value") <- 1
@@ -964,6 +1067,9 @@ test_that("review P0-2: an effect scale outside the lists never falls back to nu
   expect_identical(regtab(u)$body[[4]], "<0.001")
   # Fully supplied: no null needed, except by dimnonsig.
   s <- data.frame(term = "x", estimate = 1, conf.low = 0.5, conf.high = 2, p.value = 0.9)
+  attr(s, "effect_scale") <- "Coef."
+  attr(s, "conf.level") <- .95
+  attr(s, "inference_reference") <- "normal"
   attr(s, "effect_scale") <- "Estimate"
   expect_identical(regtab(s)$body[[3]], "(0.50, 2.00)")
   expect_error(regtab(s, dimnonsig = TRUE), "needs each model's null value", fixed = TRUE)
@@ -1017,6 +1123,9 @@ test_that("review P3-2 (M32): a data frame's interaction variables count as thei
   d <- data.frame(term = c("gB", "age", "gB:age"), variable = c("g", "age", "g:age"),
                   var_type = c("categorical", "continuous", "interaction"),
                   label = c("B", "age", "B * age"), estimate = c(0.5, 0.2, 0.1), std.error = c(0.2, 0.1, 0.05))
+  attr(d, "effect_scale") <- "Coef."
+  attr(d, "conf.level") <- .95
+  attr(d, "inference_reference") <- "normal"
   # g, age and g:age are two variables, not three.
   expect_identical(tabtools:::.rt_n_predictors(d), 2L)
   expect_match(regtab(d)$stored$methods, "from multivariable regression\\.$")
@@ -1050,6 +1159,7 @@ test_that("review P2-3: a data frame's interaction rows share the fitted model's
   d <- data.frame(y = rnorm(90), g = factor(rep(c("A", "B", "C"), 30)), h = factor(rep(c("u", "v"), 45)), age = rnorm(90))
   f <- lm(y ~ g * age, d)
   tp <- broom.helpers::tidy_plus_plus(f)
+  tp <- h1_declared(tp, "Coef.", level = .95)
   k <- regtab(tp)$meta$regtab_rows$key
   expect_true(all(c("2.g#c.age", "3.g#c.age") %in% k))
   for (m in c("fvgen", "native")) {
@@ -1062,6 +1172,7 @@ test_that("review P2-3: a data frame's interaction rows share the fitted model's
   # A part that is no row of the data frame (h without a main effect):
   # the term stays the key.
   tq <- broom.helpers::tidy_plus_plus(lm(y ~ g + g:h, d))
+  tq <- h1_declared(tq, "Coef.", level = .95)
   expect_true("gA:hv" %in% regtab(tq)$meta$regtab_rows$key)
 })
 
@@ -1072,7 +1183,12 @@ test_that("review P2-3: a data frame's interaction rows share the fitted model's
 test_that("review P1-2: a covariate named p, alpha, lnsigma or cut1 in a data frame stays a covariate", {
   for (nm in c("p", "alpha", "lnalpha", "ln_p", "1/p", "lnsigma", "cut1", "sigma")) {
     d <- data.frame(term = c(nm, "x"), estimate = c(2, 2), std.error = c(0.3, 0.3))
+    attr(d, "effect_scale") <- "Coef."
+    attr(d, "conf.level") <- .95
+    attr(d, "inference_reference") <- "normal"
     attr(d, "stata_cmd") <- "logit"
+    attr(d, "effect_scale") <- "OR"
+    attr(d, "inference_reference") <- "normal"
     attr(d, "se_scale") <- "link"
     tt <- regtab(d)
     expect_identical(tt$body[[1]], c(nm, "x"), label = nm)
@@ -1089,7 +1205,14 @@ test_that("review P1-2: ancillary rows come from structure: equations, /terms, v
   # value is fine (no "TR estimates that are not positive").
   s <- data.frame(equation = c("_t", "lnsigma"), term = c("age", "_cons"), estimate = c(1.02, 0.2),
                   std.error = c(0.01, 0.05))
+  attr(s, "effect_scale") <- "Coef."
+  attr(s, "conf.level") <- .95
+  attr(s, "inference_reference") <- "normal"
   attr(s, "stata_cmd") <- "streg"
+  attr(s, "effect_scale") <- "TR"
+  attr(s, "distribution") <- "lognormal"
+  attr(s, "metric") <- "log_time"
+  attr(s, "inference_reference") <- "normal"
   attr(s, "se_scale") <- "link"
   tt <- regtab(s, keepintercept = TRUE)
   expect_identical(tt$body[[1]], c(" t: age", "Scale: Intercept"))
@@ -1102,7 +1225,12 @@ test_that("review P1-2: ancillary rows come from structure: equations, /terms, v
   a <- data.frame(term = c("x", "/sigma", "lnalpha", "p"), estimate = c(1.5, 0.7, -0.4, 2),
                   std.error = c(0.1, 0.05, 0.1, 0.3), var_type = c("continuous", NA, "ancillary", NA),
                   role = c(NA, NA, NA, "ancillary"))
+  attr(a, "effect_scale") <- "Coef."
+  attr(a, "conf.level") <- .95
+  attr(a, "inference_reference") <- "normal"
   attr(a, "stata_cmd") <- "nbreg"
+  attr(a, "effect_scale") <- "IRR"
+  attr(a, "inference_reference") <- "normal"
   attr(a, "se_scale") <- "link"
   expect_identical(regtab(a)$body[[1]], "x")
   k <- regtab(a, keepintercept = TRUE)$meta$regtab_rows$key
@@ -1118,7 +1246,14 @@ test_that("review P1-2: data-frame ancillary rows join a fitted model's /-equati
   f <- survival::survreg(survival::Surv(time, status) ~ age + sex, lung, dist = "lognormal")
   x <- data.frame(term = c("age", "sex", "lnsigma"), estimate = c(1.01, 1.5, 0.1), std.error = c(0.01, 0.1, 0.05),
                   var_type = c("continuous", "continuous", "ancillary"))
+  attr(x, "effect_scale") <- "Coef."
+  attr(x, "conf.level") <- .95
+  attr(x, "inference_reference") <- "normal"
   attr(x, "stata_cmd") <- "streg"
+  attr(x, "effect_scale") <- "TR"
+  attr(x, "distribution") <- "lognormal"
+  attr(x, "metric") <- "log_time"
+  attr(x, "inference_reference") <- "normal"
   attr(x, "se_scale") <- "link"
   tt <- regtab(f, x, keepintercept = TRUE)
   r <- tt$meta$regtab_rows
@@ -1131,6 +1266,7 @@ test_that("review P1-2: data-frame ancillary rows join a fitted model's /-equati
   skip_if_not_installed("MASS")
   p <- MASS::polr(factor(gear) ~ mpg + wt, mtcars, Hess = TRUE)
   tq <- broom.helpers::tidy_plus_plus(p, intercept = TRUE)
+  tq <- h1_declared(tq, "Coef.", level = .95)
   r2 <- regtab(p, tq, keepintercept = TRUE)$meta$regtab_rows
   cut <- r2[r2$key %in% c("/::cut1", "/::cut2"), ]
   expect_identical(cut$status, rep("est", 4))
@@ -1138,12 +1274,14 @@ test_that("review P1-2: data-frame ancillary rows join a fitted model's /-equati
   expect_identical(regtab(tq, nointercept = TRUE)$body[[1]], c("mpg", "wt"))
   # Exponentiated by broom, thresholds included: no derived statistics.
   te <- broom.helpers::tidy_plus_plus(p, intercept = TRUE, exponentiate = TRUE)
+  te <- h1_declared(te, "OR", level = .95)
   te <- te[, setdiff(names(te), c("conf.low", "conf.high", "p.value"))]
   attr(te, "se_scale") <- "link"
   expect_error(regtab(te, keepintercept = TRUE), "cutpoints and ancillary parameters included", fixed = TRUE)
   # survreg's Log(scale), typed as an intercept by broom.helpers: ancillary.
   s <- survival::survreg(survival::Surv(time, status) ~ age, lung)
   ts <- broom.helpers::tidy_plus_plus(s, intercept = TRUE)
+  ts <- h1_declared(ts, "Coef.", level = .95)
   rs <- regtab(ts, keepintercept = TRUE)$meta$regtab_rows
   expect_true("/::Log(scale)" %in% rs$key)
   expect_identical(rs$key[rs$label == "Intercept"], "_cons")

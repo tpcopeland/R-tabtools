@@ -47,6 +47,9 @@ run <- c(
   crossval_puttab_flat.R = "puttab keyed flat round trips, model spans and explicit diagnostic differences against native Stata 2.5.1",
   crossval_session_sinks.R = "session destinations, successful-path Markdown lifecycle and explicit-sheet gating against pinned native Stata 2.5.1",
   crossval_table1_primary.R = "Table1 T38–T44 primary/strict ESS, typed modes, exact selectors and protected replacement divergence against authenticated native Stata 2.5.1",
+  crossval_regtab_placement.R = "installed regression placement, publication overrides and actual native RL001–RL004 artifacts",
+  test_regtab_placement.R = "model placement, supplied covariance and final publication transport",
+  crossval_regtab_fitcount.R = "installed frozen counts/mincount/rich statistics against literal controls and authenticated held FC001–FC003 Stata 2.5.1 artifacts",
   crossval_smd_balance.R = "table1_tc() smdtype population/maxpair/pair against cobalt and twang",
   demo_parity.R = "the R demo (qa/demo/demo_tabtools.R) against the Stata demo, sheet by sheet (Milestone D)",
   test_demo_source.R = "complete native demo source/storage/schema/RDS integrity, strict staging CLI and authentic manifest routes",
@@ -81,8 +84,9 @@ interaction_files <- c("test_interaction_matrix_descriptive.R",
                        "test_interaction_matrix_likelihood_mixed.R",
                        "test_interaction_matrix_survival_survey_gee.R",
                        "test_interaction_matrix_composition.R",
-                       "test_interaction_matrix_independent.R")
-crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R", "crossval_table1_primary.R")
+                       "test_interaction_matrix_independent.R",
+                       "test_regtab_placement.R")
+crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R", "crossval_table1_primary.R", "crossval_regtab_fitcount.R", "crossval_regtab_placement.R")
 testthat_files <- c(adversarial_files, sample_files, interaction_files, crossval_files, "test_demo_source.R", "test_demo_aipw.R")
 LANES <- list(
   quick = c(adversarial_files, sample_files),

@@ -121,6 +121,7 @@
     glm = .rt_methods_glm(fam, link),
     stcox = , cox = "Cox proportional hazards regression",
     stcrreg = , finegray = "Fine-Gray competing-risks regression",
+    stintreg = "interval-censored accelerated failure-time regression",
     streg = if (identical(info$effect_scale, "HR")) "parametric proportional hazards survival regression" else
       "accelerated failure-time survival regression",
     intreg = "interval regression",

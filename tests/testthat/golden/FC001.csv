@@ -1,0 +1,8 @@
+,Model,,
+,Coef.,95% CI,p-value
+x,1.03,"(0.30, 1.76)",0.017
+Intercept,0.07,"(-2.77, 2.90)",0.95
+Observations,6,,
+Events,4,,
+People,4,,
+Person days,13,,

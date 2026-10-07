@@ -1,0 +1,49 @@
+
+. if "`id'" == "FC001" regtab, stats(obs events people exposure) exposurelabel("Person days") csv("`out'/`id'.csv") markdown("`out'/`id'.md") xlsx("`out'/regtab.xlsx") sheet(`id')
+
+. if "`id'" == "FC002" regtab, mincount(7) keepintercept csv("`out'/`id'.csv") markdown("`out'/`id'.md") xlsx("`out'/regtab.xlsx") sheet(`id')
+
+. if "`id'" == "FC003" regtab, stats(e(ev, mincell(5) maskwith(a)) e(ev|total, mincell(7)) e(a, maskwith(b)) e(b) e(index) text("Column" "m1" "m2" "m3" "m4" "m5" "m6" "m7" "m8" "m9" "m10" "m11" "m12")) csv("`out'/`id'.csv") markdown("`out'/`id'.md") xlsx(
+> "`out'/regtab.xlsx") sheet(`id')
+(regtab: model 2 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 3 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 4 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 5 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 6 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 7 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 8 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 9 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 10 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 11 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+(regtab: model 12 repeats model 1: the same command line and estimates; a collect get e() right after a fit that failed collects the previous model again)
+  +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+> ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |              Model 1                             Model 2                             Model 3                             Model 4                             Model 5                             Model 6                             Model 7               
+>               Model 8                             Model 9                             Model 10                             Model 11                             Model 12                           |
+  |                Coef.          95% CI   p-value     Coef.          95% CI   p-value     Coef.          95% CI   p-value     Coef.          95% CI   p-value     Coef.          95% CI   p-value     Coef.          95% CI   p-value     Coef.          95% C
+> I   p-value     Coef.          95% CI   p-value     Coef.          95% CI   p-value      Coef.          95% CI   p-value      Coef.          95% CI   p-value      Coef.          95% CI   p-value |
+  |          x      1.03    (0.30, 1.76)     0.017      1.03    (0.30, 1.76)     0.017      1.03    (0.30, 1.76)     0.017      1.03    (0.30, 1.76)     0.017      1.03    (0.30, 1.76)     0.017      1.03    (0.30, 1.76)     0.017      1.03    (0.30, 1.76
+> )     0.017      1.03    (0.30, 1.76)     0.017      1.03    (0.30, 1.76)     0.017       1.03    (0.30, 1.76)     0.017       1.03    (0.30, 1.76)     0.017       1.03    (0.30, 1.76)     0.017 |
+  |  Intercept      0.07   (-2.77, 2.90)      0.95      0.07   (-2.77, 2.90)      0.95      0.07   (-2.77, 2.90)      0.95      0.07   (-2.77, 2.90)      0.95      0.07   (-2.77, 2.90)      0.95      0.07   (-2.77, 2.90)      0.95      0.07   (-2.77, 2.90
+> )      0.95      0.07   (-2.77, 2.90)      0.95      0.07   (-2.77, 2.90)      0.95       0.07   (-2.77, 2.90)      0.95       0.07   (-2.77, 2.90)      0.95       0.07   (-2.77, 2.90)      0.95 |
+  |         ev        <7                                  <7                                  <7                                  <7                                  <7                                  <7                                  <7               
+>                    <7                                  <7                                   <7                                   <7                                   <7                           |
+  | ev (total)   <7 (40)                             <7 (40)                             <7 (40)                             <7 (40)                             <7 (40)                             <7 (40)                             <7 (40)               
+>               <7 (40)                             <7 (40)                              <7 (40)                              <7 (40)                              <7 (40)                           |
+  |          a         –                                   –                                   –                                   –                                   –                                   –                                   –               
+>                     –                                   –                                    –                                    –                                    –                           |
+  |          b         –                                   –                                   –                                   –                                   –                                   –                                   –               
+>                     –                                   –                                    –                                    –                                    –                           |
+  |      index         1                                   2                                   3                                   4                                   5                                   6                                   7               
+>                     8                                   9                                   10                                   11                                   12                           |
+  |     Column        m1                                  m2                                  m3                                  m4                                  m5                                  m6                                  m7               
+>                    m8                                  m9                                  m10                                  m11                                  m12                           |
+  +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+> ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-4ab/native-capture-v1/FC003.md
+Exported 11 rows × 38 cols to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-4ab/native-capture-v1/regtab.xlsx, sheet FC003
+
+. mata: golden_dump_r("`out'/`id'_stored.csv", "`id'")
+
+. log close fitcount_native

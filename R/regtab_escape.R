@@ -27,8 +27,9 @@
 #'   neither bound gets a Wald interval from `std.error`, and, when the
 #'   data frame has no `p.value` column at all, a Wald p-value (a supplied
 #'   `p.value` column is kept as it is, missing entries included). These
-#'   use Student's t with the row's `df` (or `df.error`) when given, else
-#'   the normal distribution;
+#'   require Student's t `df`/`df.error` or explicit
+#'   `attr(x, "inference_reference") = "normal"` (`df = Inf` also declares
+#'   normal inference). Missing row degrees of freedom need the normal declaration;
 #' * the scale of `std.error`: on a ratio scale (OR, HR, IRR, RRR, SHR, TR)
 #'   a derived interval or p-value needs `attr(x, "se_scale")`: `"link"`
 #'   when `std.error` is the standard error of log(`estimate`), as
@@ -44,17 +45,17 @@
 #'   `exp(b)` or its spelled-out name, has null 1, and a difference label,
 #'   `Coef.`, `Beta`, `RD`, `MD`, ..., null 0; any other label needs
 #'   `attr(x, "null_value")`, 0 or 1, whenever the null is used by a
-#'   derived statistic or `dimnonsig`), else `attr(x, "stata_cmd")`, else
-#'   broom.helpers' own record that it exponentiated the estimates
-#'   (`attr(x, "exponentiate")`, with its `coefficients_label`, e.g. `OR`,
-#'   as the header), else `Coef.`. A broom `statistic` column that shows
+#'   derived statistic or `dimnonsig`). This attribute is REQUIRED, including
+#'   explicit `Coef.`. Command, exponentiate and header labels never declare
+#'   the values' scale. Existing callers must add this explicit metadata. A broom `statistic` column that shows
 #'   the estimates were exponentiated (log(estimate) / std.error, as
 #'   `broom::tidy(exponentiate = TRUE)` returns it) on a frame taken as
 #'   coefficients is refused, and so is a declared `se_scale = "link"` it
 #'   contradicts, or any `se_scale` on a frame without ratio rows;
 #' * the confidence level of supplied intervals: `attr(x, "conf.level")`
 #'   (which [broom.helpers::tidy_plus_plus()] sets) or a constant
-#'   `conf.level` column (a proportion or a percentage), else 95%. With
+#'   `conf.level` column (a proportion or a percentage), REQUIRED when bounds
+#'   are supplied. With
 #'   `level` left at its default, regtab uses that level (the data frames
 #'   must agree); an explicit `level` that differs is refused: regtab
 #'   cannot recompute supplied intervals. `vce` must be `"stata"` for a
@@ -79,6 +80,19 @@
 #'   follow `nointercept`/`keepintercept` with the intercept, and are keyed
 #'   in Stata's `/` equation (`/::sigma`), so they join a fitted model's
 #'   ancillary rows of the same name;
+#' * explicit analytical `status` may be `est`, `ref`, `omit`, `notest`,
+#'   `absent`, `empty` or `constrained`. Non-estimated states cannot carry CI/p
+#'   inference. Zero standard errors require explicit non-estimated status;
+#'   they never imply a reference or fixed value. A constrained row requires
+#'   exact numeric `constraint_value` and nonempty `constraint_source` columns;
+#' * custom `streg`, `stintreg` and `mestreg` declarations require
+#'   `distribution` (`weibull`, `exponential`, `gompertz`, `lognormal`,
+#'   `loglogistic`, `generalized_gamma`) and `metric` (`log_time`,
+#'   `log_hazard`) attributes. Gompertz requires hazard; lognormal,
+#'   loglogistic and generalized gamma require time. A TR/HR display scale
+#'   must agree with time/hazard. Values and bounds are already on their
+#'   declared display scale and are never exponentiated again. This escape
+#'   hatch does not add native fitted-object support for arbitrary estimators;
 #' * optional description columns: `label`, `var_label`, `variable`,
 #'   `var_type` (`"intercept"`, `"continuous"`, `"categorical"`,
 #'   `"dichotomous"`, `"interaction"`, `"cutpoint"`, `"ancillary"`),
@@ -167,19 +181,16 @@ NULL
 
 #' The effect scale and null value of a data frame
 #'
-#' In order: `attr(x, "effect_scale")` (with `attr(x, "null_value")` for a
-#' label outside the known lists); `attr(x, "stata_cmd")`; broom.helpers'
-#' own record that it exponentiated the estimates (`attr(x,
-#' "exponentiate")`, with its `coefficients_label` as the header, e.g.
-#' "OR", "IRR", "HR", "exp(Beta)"): exponentiated estimates are ratios,
-#' null 1. Otherwise coefficients (`Coef.`, null 0), unless a broom
-#' `statistic` column shows the estimates were exponentiated
-#' (`.rt_df_statistic_check()`). Review P0-1/P0-2 of group t2a.
+#' Required: `attr(x, "effect_scale")`, with `attr(x, "null_value")`
+#' for a label outside the known lists. Command names and backend
+#' exponentiation hints never declare the numbers' scale.
 #' @return list(scale, null (1, 0 or NA when unknown), noint, cmd, source).
 #' @keywords internal
 #' @noRd
 .rt_df_scale <- function(x) {
   cmd <- attr(x, "stata_cmd", exact = TRUE) %||% "unknown"
+  if (!.rt_literal_scalar(cmd)) cli::cli_abort("stata_cmd must be one string.", class = "tabtools_error_regtab_metadata", call = NULL)
+  cmd <- tolower(trimws(cmd))
   cs <- .mi_cmd_scale(cmd)
   es <- attr(x, "effect_scale", exact = TRUE)
   nv <- attr(x, "null_value", exact = TRUE)
@@ -201,18 +212,10 @@ NULL
     # A ratio scale (null 1) is eligible for the automatic nointercept, as
     # a fitted ratio-scale model is (pre-release review P2-3).
     return(list(scale = es, null = null, noint = cs$noint || isTRUE(null == 1), cmd = cmd,
-                source = "effect_scale"))
+                source = "effect_scale", survival = .rt_custom_survival(x, cmd, es)))
   }
-  if (!identical(cmd, "unknown")) {
-    return(list(scale = cs$scale, null = if (cs$scale %in% .rt_ratio_scales) 1 else 0, noint = cs$noint,
-                cmd = cmd, source = "stata_cmd"))
-  }
-  if (isTRUE(attr(x, "exponentiate", exact = TRUE))) {
-    lab <- attr(x, "coefficients_label", exact = TRUE)
-    lab <- if (is.character(lab) && length(lab) == 1L && !is.na(lab) && nzchar(lab)) lab else "exp(b)"
-    return(list(scale = lab, null = 1, noint = TRUE, cmd = cmd, source = "exponentiate"))
-  }
-  list(scale = "Coef.", null = if (is.null(nv)) 0 else nv, noint = FALSE, cmd = cmd, source = "default")
+  cli::cli_abort("Custom data frames require an explicit effect_scale attribute, including 'Coef.'; command or exponentiate attributes do not declare the input scale.",
+                 class = "tabtools_error_regtab_metadata", call = NULL)
 }
 
 #' Cross-check a broom `statistic` column against the declared scale
@@ -268,6 +271,7 @@ tt_model_info.data.frame <- function(fit, ...) {
   info$class <- class(fit)[1]
   info$model_id <- attr(fit, "model_id", exact = TRUE) %||% NA_character_
   info$outcome_id <- attr(fit, "outcome_id", exact = TRUE) %||% NA_character_
+  info[names(sc$survival)] <- sc$survival
   info
 }
 
@@ -370,9 +374,11 @@ tt_vce_types.data.frame <- function(fit) "stata"
     nf <- is.nan(v) | (nm %in% c("std.error", "p.value") & !is.na(v) & !is.finite(v))
     if (any(nf)) bad(paste0("has non-finite {.field ", nm, "} values ({.val {(.rt_df_which(term, nf))}})."))
   }
+  states <- .rt_custom_state_check(x, b)
   se <- num("std.error")
-  if (any(se <= 0, na.rm = TRUE)) {
-    bad("has a {.field std.error} that is not positive ({.val {(.rt_df_which(term, !is.na(se) & se <= 0))}}).",
+  badse <- !is.na(se) & (se < 0 | (se == 0 & !states %in% c("notest", "constrained", "ref", "omit", "absent", "empty")))
+  if (any(badse)) {
+    bad("has a {.field std.error} that is not positive ({.val {(.rt_df_which(term, badse))}}).",
         "i" = "Leave it missing ({.code NA}) for a coefficient without a standard error.")
   }
   lo <- num("conf.low")
@@ -422,7 +428,9 @@ tt_vce_types.data.frame <- function(fit) "stata"
     bad("has an {.code se_scale} attribute that is not {.val link} or {.val estimate}.")
   }
   .rt_glance_check(attr(x, "glance", exact = TRUE), where)
-  .rt_df_declared_level(x, where)
+  declared <- .rt_df_declared_level(x, where)
+  if (any(!is.na(lo)) && is.null(declared)) cli::cli_abort("Supplied custom-frame intervals require an explicit conf.level attribute or column.", class = "tabtools_error_regtab_metadata", call = NULL)
+  .rt_df_scale(x)
   invisible(TRUE)
 }
 
@@ -508,7 +516,8 @@ tt_vce_types.data.frame <- function(fit) "stata"
   b <- .rt_df_body(x)
   if (!"conf.low" %in% names(b) || !any(!is.na(b$conf.low))) return(invisible(TRUE))
   declared <- .rt_df_declared_level(x, paste0("Model ", i, " (a data frame)"))
-  have <- declared %||% 0.95
+  if (is.null(declared)) cli::cli_abort("Supplied custom-frame intervals require explicit conf.level metadata.", class = "tabtools_error_regtab_metadata", call = NULL)
+  have <- declared
   if (abs(have - level) > 1e-9) {
     pct <- function(v) paste0(.rt_pct_text(v), "%")
     cli::cli_abort(c(
@@ -619,10 +628,11 @@ tt_regtab_rows.data.frame <- function(fit, info, level = 0.95, ...) {
   lab <- as.character(.rt_col(x, "label", NA_character_))
   vlab <- as.character(.rt_col(x, "var_label", NA_character_))
   ukey <- as.character(.rt_col(x, "key", NA_character_))
-  ref <- .rt_col(x, "reference_row", FALSE) %in% TRUE
+  explicit_status <- if ("status" %in% names(x)) x$status else NULL
+  ref <- .rt_col(x, "reference_row", FALSE) %in% TRUE | .rt_col(x, "status", "") %in% "ref"
   eqcol <- intersect(c("equation", "y.level", "component"), names(x))[1]
   is_level <- vtype %in% c("categorical", "dichotomous")
-  status <- ifelse(ref, "base", ifelse(is.na(est), "omit", "est"))
+  status <- if (!is.null(explicit_status)) explicit_status else ifelse(ref, "ref", ifelse(is.na(est), "omit", "est"))
   cont_label <- ifelse(!is.na(vlab) & nzchar(vlab), vlab, ifelse(!is.na(lab) & nzchar(lab), lab, term))
   lev_label <- ifelse(!is.na(lab) & nzchar(lab), lab, term)
   eq <- if (is.na(eqcol)) rep("", n) else as.character(x[[eqcol]])
@@ -670,6 +680,7 @@ tt_regtab_rows.data.frame <- function(fit, info, level = 0.95, ...) {
   has_p_col <- "p.value" %in% names(x)
   need_ci <- est_row & is.na(lo) & is.na(hi) & !is.na(se)
   need_p <- est_row & is.na(p) & !is.na(se) & !has_p_col
+  .rt_custom_inference_check(fit, x, need_ci | need_p)
   se_scale <- attr(fit, "se_scale", exact = TRUE)
   # broom.helpers' exponentiate = TRUE also exponentiates thresholds and
   # ancillary parameters, whose std.error stays on their own scale: no
@@ -766,8 +777,8 @@ tt_regtab_rows.data.frame <- function(fit, info, level = 0.95, ...) {
   positional <- setdiff(unique(positional), variable[given & is_level])
 
   row <- function(k, block, kind, label, i, sub) {
-    if (status[i] == "est") {
-      .rt_row(k, block, kind, label, "est", term = term[i], estimate = est[i],
+    if (status[i] %in% c("est", "notest", "constrained")) {
+      .rt_row(k, block, kind, label, status[i], term = term[i], estimate = est[i],
               conf.low = lo[i], conf.high = hi[i], p.value = p[i], sub = sub, ancillary = anc[i],
               role = rrole[i])
     } else {
@@ -806,6 +817,15 @@ tt_regtab_rows.data.frame <- function(fit, info, level = 0.95, ...) {
                      "x" = "Repeated: {.val {unique(res$key[duplicated(res$key)])}}.",
                      "i" = "Keys come from {.field key}, else a level's code and {.field variable}, else {.field term}; give each equation's rows an {.field equation} column."),
          call = NULL)
+  }
+  res$constraint_value <- NA_real_
+  res$constraint_source <- ""
+  for (i in seq_len(nrow(res))) {
+    matchrow <- which(term == res$term[i])
+    if (length(matchrow) > 1L) matchrow <- matchrow[eq[matchrow] == sub("::.*$", "", res$key[i])]
+    if (length(matchrow) != 1L) next
+    if ("constraint_value" %in% names(x)) res$constraint_value[i] <- x$constraint_value[matchrow]
+    if ("constraint_source" %in% names(x)) res$constraint_source[i] <- x$constraint_source[matchrow]
   }
   attr(res, "positional") <- positional
   res

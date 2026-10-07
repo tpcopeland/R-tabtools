@@ -22,6 +22,8 @@ golden_tidy <- function(id) {
   x$var_type <- ifelse(x$term == "_cons", "intercept", "continuous")
   x$var_label[!nzchar(x$var_label)] <- NA_character_
   attr(x, "stata_cmd") <- switch(id, R25t = "churdle")
+  attr(x, "effect_scale") <- "Coef."
+  attr(x, "conf.level") <- .95
   attr(x, "glance") <- list(nobs = st$N[1], logLik = st$ll[1], df = st$rank[1],
                             pseudo.r.squared = st$r2_p[1])
   x
