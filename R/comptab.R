@@ -1429,7 +1429,8 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
                 model_id = out_model_id, outcome_id = rate_ids, effect_scale = rep("HR", outcomes),
                 outcome_label = rate_display)
   stored <- list(N_rows = nb + 3L, N_outcomes = outcomes, N_sections = n_sections, N_modelrows = n_sel,
-                 N_modelframes = n_frames, ci_level = ci_level, rateframe = rate_label,
+                 N_modelframes = n_frames, N_models_per_outcome = 1L, N_modelonly = 0L,
+                 ci_level = ci_level, rateframe = rate_label,
                  modelframes = paste(model_names, collapse = " "), effect = effect)
   forest <- .ct_forest_rates(rs, srcs, secs, sec_rows, ref_rows, rowmap, picks, model_map, outcomes,
                              rate_display, frame, rate_label, model_names)
