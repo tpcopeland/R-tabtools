@@ -49,6 +49,19 @@ golden_drop_stratetab_export <- function(want, id) {
   if (length(hit)) want[-hit] else want
 }
 
+# Inventoried S01-S08 explicitly disable masking. Native threshold/no-time
+# counters remain in the full stored comparison; the richer P.4 R list is a
+# separately asserted public contract, not a replacement native oracle.
+golden_assert_stratetab_mask_contract <- function(tt, id) {
+  native <- golden_read_stored(id)
+  threshold <- native$value[native$name == "smallcells" & native$kind == "scalar"]
+  testthat::expect_identical(threshold, "0", label = paste(id, "authentic disabled-mask threshold"))
+  testthat::expect_identical(tt$stored$smallcells,
+    list(threshold = 0L, mode = "primary", n_masked = 0L, n_linked = 0L),
+    label = paste(id, "complete canonical P.4 mask metadata"))
+  invisible(tt)
+}
+
 run_golden_stratetab_scenario <- function(id) {
   sc <- golden_scenario(id)
   if (!golden_scenario_live(id, sc$phase)) testthat::skip(paste("Phase", sc$phase))
@@ -64,27 +77,29 @@ run_golden_stratetab_scenario <- function(id) {
   expect_cells_match(tt, id)
 
   # Console: R's listing is the printed table.
-  want <- golden_drop_stratetab_export(golden_read_lines(golden_path(paste0(id, "_console.txt"))), id)
-  why <- golden_compare_console(utils::capture.output(print(tt)), want)
+  want <- golden_drop_stratetab_export(golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt"))), id)
+  parts <- golden_publication_console(utils::capture.output(print(tt)), want, id)
+  why <- golden_compare_console(parts$got, parts$want)
   golden_expect_none(why, paste("console", id))
 
   # Stored results, file paths aside (R's are temporary); the Markdown
   # counts come from the Markdown file the call wrote.
   stored <- golden_read_stored(id)
   fields <- setdiff(unique(stored$name[stored$kind != "meta"]), c("xlsx", "csv", "markdown"))
+  golden_assert_stratetab_mask_contract(tt, id)
   expect_stored_match(tt, id, fields = fields)
 
   # The workbook the call wrote, and the renderer alone from the table.
-  want_book <- golden_path("stratetab.xlsx")
+  want_book <- golden_book(id)
   golden_expect_none(golden_compare_styles(paste0(sinks, ".xlsx"), id, want_book, id,
-                                           got_width_offset = golden_r_width_offset),
+                                           got_width_offset = golden_r_width_offset, publication_id = id),
                      paste("styles", id))
   again <- file.path(out, "again.xlsx")
   tabtools::tt_write_xlsx(tt, again, sheet = id)
-  golden_expect_none(golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset),
+  golden_expect_none(golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset, publication_id = id),
                      paste("re-rendered", id))
-  expect_sink_match(paste0(sinks, ".csv"), id, "csv")
-  expect_sink_match(paste0(sinks, ".md"), id, "md")
+  expect_sink_match(paste0(sinks, ".csv"), id, "csv", tt = tt)
+  expect_sink_match(paste0(sinks, ".md"), id, "md", tt = tt)
 
   # The frame characteristics a composite reads (stratetab.ado:729-750),
   # against what Stata's r() says about the same table; a rate-ratio table

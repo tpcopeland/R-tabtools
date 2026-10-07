@@ -1,0 +1,2 @@
+Markdown exported to P02.md
+puttab: wrote 10 data rows x 4 cols (frame source) to sheet P02 in P02.xlsx

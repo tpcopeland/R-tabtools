@@ -38,19 +38,25 @@ golden_fn_constant <- function(expr) {
 }
 
 golden_fn_user <- function(sc) {
-  calls <- list()
-  walk <- function(expr) {
-    if (!is.call(expr) && !is.expression(expr)) return(invisible(NULL))
-    if (is.call(expr) && identical(as.character(expr[[1L]])[1L], sc$command)) {
-      calls[[length(calls) + 1L]] <<- expr
-      return(invisible(NULL))
-    }
-    for (part in as.list(expr)[if (is.call(expr)) -1L else TRUE]) walk(part)
-    invisible(NULL)
+  expressions <- as.list(parse(text = sc$r_call))
+  # Only the statically returned expression supplies the outer table's
+  # annotation. Earlier append/replacement setup calls cannot overwrite it.
+  # There is no traversal into argument ASTs (including missing subscripts).
+  final_call <- function(expr) {
+    if (!is.call(expr)) stop("Footnote oracle requires an identifiable final scenario command.", call. = FALSE)
+    head <- expr[[1L]]
+    name <- if (is.symbol(head)) as.character(head) else if (is.call(head) &&
+      as.character(head[[1L]]) %in% c("::", ":::")) as.character(head[[3L]]) else ""
+    if (identical(name, sc$command)) return(expr)
+    if (name == "{") return(final_call(expr[[length(expr)]]))
+    if (name %in% c("<-", "=")) return(final_call(expr[[3L]]))
+    if (name %in% c("suppressMessages", "suppressWarnings", "invisible", "print",
+                    "withCallingHandlers", "local")) return(final_call(expr[[2L]]))
+    stop("Footnote oracle requires an identifiable final scenario command.", call. = FALSE)
   }
-  walk(parse(text = sc$r_call))
-  if (length(calls) != 1L) stop("Footnote oracle requires one identifiable scenario command.", call. = FALSE)
-  args <- as.list(calls[[1L]])[-1L]
+  if (!length(expressions)) stop("Footnote oracle requires a scenario command.", call. = FALSE)
+  command <- final_call(expressions[[length(expressions)]])
+  args <- as.list(command)[-1L]
   named <- names(args)
   selected <- args[named %in% c("footnote", if (sc$command == "stacktab") "note")]
   if (length(selected) > 1L) stop("Footnote oracle found conflicting annotation inputs.", call. = FALSE)
@@ -142,7 +148,7 @@ golden_assert_native_footnote_tail <- function(actual, contract, sink) {
   invisible(contract)
 }
 
-golden_assert_footnote_styles <- function(cells, rows, columns, fontsize, font) {
+golden_assert_footnote_styles <- function(cells, rows, columns, fontsize, font, halign = "left") {
   anchors <- cells[cells$row %in% rows & cells$col == min(columns), , drop = FALSE]
   anchors <- anchors[order(anchors$row), , drop = FALSE]
   testthat::expect_identical(as.integer(anchors$row), as.integer(rows))
@@ -150,7 +156,7 @@ golden_assert_footnote_styles <- function(cells, rows, columns, fontsize, font) 
   testthat::expect_identical(anchors$size, rep(max(fontsize - 2, 6), length(rows)))
   testthat::expect_identical(anchors$font, rep(font, length(rows)))
   testthat::expect_true(all(anchors$wrap))
-  testthat::expect_true(all(anchors$halign == "left"))
+  testthat::expect_identical(anchors$halign, rep(halign, length(rows)))
   testthat::expect_true(all(anchors$valign == "center"))
   for (border in c("border_top", "border_bottom", "border_left", "border_right")) {
     testthat::expect_true(all(is.na(anchors[[border]]) | !nzchar(anchors[[border]])))

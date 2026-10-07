@@ -1,0 +1,7 @@
+Three outcomes at 90% confidence,,,,,,,,,
+Exposure,Stroke,,,Myocardial infarction,,,Any event,,
+Exposure,Events,Person-Years (PY),"Per 1,000 PY (90% CI)",Events,Person-Years (PY),"Per 1,000 PY (90% CI)",Events,Person-Years (PY),"Per 1,000 PY (90% CI)"
+Dose tertile,,,,,,,,,
+   Low,12.0,"1,523.46","7.88 (4.90, 12.66)",5.0,"1,523.46","3.28 (1.57, 6.85)",44.0,"1,523.46","28.88 (22.54, 37.01)"
+   Medium,31.0,"2,210.12","14.03 (10.44, 18.85)",18.0,"2,210.12","8.14 (5.53, 12.00)",61.0,"2,210.12","27.60 (22.36, 34.07)"
+   High,7.0,899.50,"7.78 (4.18, 14.49)",3.0,899.50,"3.34 (1.29, 8.62)",29.0,899.50,"32.24 (23.75, 43.76)"

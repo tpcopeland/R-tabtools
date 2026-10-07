@@ -28,8 +28,9 @@ run_golden_comptab_scenario <- function(id) {
 
   # Console: R's listing is the printed table (the comparator drops Stata's
   # "Markdown exported to" and "Exported ... rows" lines).
-  why <- golden_compare_console(utils::capture.output(print(tt)),
-                                golden_read_lines(golden_path(paste0(id, "_console.txt"))))
+  parts <- golden_publication_console(utils::capture.output(print(tt)),
+                                      golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt"))), id)
+  why <- golden_compare_console(parts$got, parts$want)
   golden_expect_none(why, paste("console", id))
 
   # Stored results, file paths aside (R's are temporary). rateframe and
@@ -43,19 +44,19 @@ run_golden_comptab_scenario <- function(id) {
   # The workbook the call wrote, and the renderer alone from the table.
   want_book <- golden_path(paste0(sc$command, ".xlsx"))
   golden_expect_none(golden_compare_styles(paste0(sinks, ".xlsx"), id, want_book, id,
-                                           got_width_offset = golden_r_width_offset),
+                                           got_width_offset = golden_r_width_offset, publication_id = id),
                      paste("styles", id))
   again <- file.path(out, "again.xlsx")
   tabtools::tt_write_xlsx(tt, again, sheet = id)
-  golden_expect_none(golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset),
+  golden_expect_none(golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset, publication_id = id),
                      paste("re-rendered", id))
   for (sh in golden_comptab_source_sheets[[id]]) {
     golden_expect_none(golden_compare_styles(paste0(sinks, ".xlsx"), sh, want_book, sh,
                                              got_width_offset = golden_r_width_offset),
                        paste("source sheet", sh))
   }
-  expect_sink_match(paste0(sinks, ".csv"), id, "csv")
-  expect_sink_match(paste0(sinks, ".md"), id, "md")
+  expect_sink_match(paste0(sinks, ".csv"), id, "csv", tt = tt)
+  expect_sink_match(paste0(sinks, ".md"), id, "md", tt = tt)
 
   # The frame characteristics of Stata's frame() (comptab.ado:1485-1496,
   # :2800-2808).

@@ -25,11 +25,16 @@ local({
         # R25q: the known glm.nb iteration-limit warning (a boundary MLE; the
         # golden regtab test reports it).
         tt <- if (id == "R25q") suppressWarnings(interop_tt(id)) else interop_tt(id)
-        if (golden_scenario(id)$command == "table1_tc") tt <- golden_strip_smd_note(tt)
+        if (golden_scenario(id)$command == "table1_tc") tt <- golden_strip_smd_note(tt, id = id)
         expect_ft_matches_golden(id, tt)
         expect_gt_matches_golden(id, tt)
         # Task 6.5: tt_as_gtsummary() keeps every cell's text.
-        if (requireNamespace("gtsummary", quietly = TRUE)) expect_gts_keeps_cells(tt)
+        if (requireNamespace("gtsummary", quietly = TRUE)) {
+          expect_gts_keeps_cells(tt)
+          gts <- tabtools::tt_as_gtsummary(tt)
+          golden_assert_footnote_tail(as.character(gts$table_styling$source_note$source_note),
+                                      golden_publication_contract(id), "presentation")
+        }
       })
     })
   }

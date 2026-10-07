@@ -117,10 +117,11 @@ run_golden_effecttab_scenario <- function(id, r_call = NULL, mode = NULL) {
   expect_identical(printed, character())
   expect_s3_class(tt, "tt_table")
   expect_identical(tt$command, "effecttab")
-  want_cells <- golden_read_cells(id)
+  parts <- golden_publication_cells(tt, id)
+  want_cells <- parts$want
   if (mode == "structure") {
     # The label column differs by design (EO6); everything else by skeleton.
-    got <- golden_as_cells(tt)
+    got <- parts$got
     expect_identical(dim(got), dim(want_cells))
     if (identical(dim(got), dim(want_cells))) {
       mm <- golden_compare_cells(got[, -1, drop = FALSE], want_cells[, -1, drop = FALSE], mode = "structure")
@@ -135,7 +136,9 @@ run_golden_effecttab_scenario <- function(id, r_call = NULL, mode = NULL) {
 
   # Console: R's listing is the printed table.
   want <- golden_drop_effecttab_export(golden_read_lines(golden_path(paste0(id, "_console.txt"))), id)
-  got <- utils::capture.output(print(tt))
+  console_parts <- golden_publication_console(utils::capture.output(print(tt)), want, id)
+  got <- console_parts$got
+  want <- console_parts$want
   if (mode != "exact") {
     got <- golden_console_skeleton(got)
     want <- golden_console_skeleton(want)
@@ -177,15 +180,15 @@ run_golden_effecttab_scenario <- function(id, r_call = NULL, mode = NULL) {
 
   # The workbook the call wrote, and the renderer alone from the table.
   want_book <- golden_path("effecttab.xlsx")
-  why <- golden_compare_styles(paste0(sinks, ".xlsx"), id, want_book, id, got_width_offset = golden_r_width_offset)
+  why <- golden_compare_styles(paste0(sinks, ".xlsx"), id, want_book, id, got_width_offset = golden_r_width_offset, publication_id = id)
   golden_expect_none(golden_effect_style_filter(why, mode), paste("styles", id))
   again <- file.path(out, "again.xlsx")
   tabtools::tt_write_xlsx(tt, again, sheet = id)
-  why <- golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset)
+  why <- golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset, publication_id = id)
   golden_expect_none(golden_effect_style_filter(why, mode), paste("re-rendered", id))
   if (mode == "exact") {
-    expect_sink_match(paste0(sinks, ".csv"), id, "csv")
-    expect_sink_match(paste0(sinks, ".md"), id, "md")
+    expect_sink_match(paste0(sinks, ".csv"), id, "csv", tt = tt)
+    expect_sink_match(paste0(sinks, ".md"), id, "md", tt = tt)
   }
 
   # The frame characteristics a composite reads (effecttab.ado:1436-1453).

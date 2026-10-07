@@ -1,0 +1,17 @@
+name,kind,row,col,value
+_golden_id,meta,,,P02
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,10
+n_spans,scalar,,,0
+n_panels,scalar,,,0
+n_datarows,scalar,,,10
+n_cols,scalar,,,4
+n_rows,scalar,,,12
+markdown,macro,,,P02.md
+csv,macro,,,P02.csv
+file,macro,,,P02.xlsx
+sheet,macro,,,P02
+source,macro,,,frame

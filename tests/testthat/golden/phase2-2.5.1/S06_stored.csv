@@ -1,0 +1,25 @@
+name,kind,row,col,value
+_golden_id,meta,,,S06
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
+_golden_stata_version,meta,,,17
+N_nopt,scalar,,,0
+smallcells,scalar,,,0
+ci_level,scalar,,,95
+N_outcomes,scalar,,,1
+N_exposures,scalar,,,2
+N_rows,scalar,,,9
+markdown_cols,scalar,,,5
+markdown_rows,scalar,,,6
+sheet,macro,,,S06
+xlsx,macro,,,stratetab.xlsx
+methods,macro,,,Incidence rates and confidence intervals were formatted at the 95% level; rate-ratio intervals use an independent-rate log-normal approximation at the same level.
+outcome_ids,macro,,,Outcome 1
+markdown,macro,,,S06.md
+csv,macro,,,S06.csv
+ratios,matrix,A,Outcome_1,.83333254346263519
+ratios,matrix,B,Outcome_1,1.234154320987654
+rates,matrix,e1_A,Outcome_1,63301500
+rates,matrix,e1_B,Outcome_1,64800000
+rates,matrix,e2_A,Outcome_1,52751200
+rates,matrix,e2_B,Outcome_1,79973200

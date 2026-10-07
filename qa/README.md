@@ -4,6 +4,67 @@ This directory is `.Rbuildignore`d. It holds the QA runner and benchmarks
 (below) and the Stata parity harness. The goldens the harness writes live in
 `tests/testthat/golden/`, so tests and CI never need Stata.
 
+## Transitional Phase 2 golden baselines
+
+The default golden directory retains authentic Stata tabtools 2.1.14 / fvgen
+1.2.5 output. Until WP-3G promotes the full 2.5.1 baseline, the golden readers
+route P01-P15, K01-K09, S01-S08, W15 and W17-W22 to
+`tests/testthat/golden/phase2-2.5.1/`. These 39 scenarios cover WP-2C's boxed
+puttab borders (including every K workbook's setup sheets) and WP-2E's rate
+precision, formatting and counters. Other scenarios and input datasets keep
+the legacy baseline.
+
+The selected artifacts are byte-for-byte copies from native inventory commit
+`c215afdb788f88363c8d5289d7d13e3a31cfbe38` (Stata tabtools 2.5.1 / fvgen
+1.2.7). `ROUTES.csv` records the scope and rationale; `ARTIFACTS.csv` records
+each source path, source commit and MD5. Shared workbooks are copied whole,
+with routing selected by scenario, and K comparisons retain all setup sheets.
+The harness asserts each scenario's versions and copied artifact hashes,
+then uses the existing strict cell, console, sink and style comparators.
+P02/P09 remain source-only in both baseline directories.
+
+The complete inventory branch stays unmerged until WP-3G. The transitional
+router and versioned copies must be removed when that full baseline lands.
+R's automatic footnote paragraphs across all sinks are a deliberate publication
+contract; they require separate independent literal footer assertions before
+strict comparisons of authentic native table content and styles. Routing alone
+does not establish this stronger R contract.
+
+`helper-golden-footnotes.R` adapts only declared footer regions: R paragraphs
+come from literal scenario inputs, authenticated native automatic notes and
+reference constants. It asserts complete R/native text, counts and boundaries
+for cells, console, CSV, Markdown and workbooks, including every footer cell's
+style, merges and explicit heights. All remaining native cells, body styles,
+console lines and sink bytes still use the original comparators and tolerances.
+Fault-injection tests add earlier/interleaved/trailing paragraphs and alter
+footer/spacer styling or body content. Converter and hand-built renderer checks
+use the same independent paragraph contract. The separately asserted legacy
+SMD note/header translation remains until WP-3G.
+
+The standard T/R/E/C/S workbook layouts serialize only each merged note's
+anchor in R. The authentic native workbook also serializes blank children
+with its default Calibri 11 format, General number format and no visible
+styling. The bridge checks the complete native and R address sets separately,
+proves every omitted native child has that exact default format inside the
+same footer merge, and retains exact anchor, merge and height assertions.
+This is lossless Excel serialization equivalence: the anchor supplies the
+merged cell's displayed text and style. Added, removed, duplicated or styled
+children still fail. P/K/W layouts retain their explicit footer cells and
+exact native styles; stacktab's authentic note alignment is `general`.
+The legacy S14 small-cell fixture likewise keeps its inline native note,
+while independent user and authenticated automatic literals declare R's two
+paragraphs; both complete footer regions and CSV bytes are asserted before
+the original table and console comparisons.
+
+Native `r(smallcells)` is a scalar threshold; R's canonical P.4 metadata is a
+list. Stored comparison projects only that threshold for native scalar fields,
+and the stratetab runner separately asserts the complete canonical metadata.
+The original list remains intact, and every other native stored field remains
+compared. Wttab's independently declared extra R paragraph rows are asserted
+against native body geometry before a comparison copy projects `n_rows` back
+to the authentic one-footer native count; the returned table and all other
+stored fields retain their truthful R values.
+
 ## How to run
 
 ```sh
