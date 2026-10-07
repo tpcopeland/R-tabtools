@@ -199,6 +199,10 @@
   tables): the test is shown as not computed, with a footnote, a
   `tabtools_warning_crosstab_inference` warning and
   `stored$test_available = FALSE`. No chi-squared approximation is substituted.
+* `survtab()` and `wttab()`, which have no small-cell suppression, now warn
+  (`tabtools_warning_smallcells_unsupported`, once per call) when a session
+  `smallcells` threshold is active instead of silently printing unmasked
+  counts.
 
 # tabtools 0.1.1
 

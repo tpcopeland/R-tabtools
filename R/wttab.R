@@ -272,6 +272,9 @@
 #' destinations opt out. A requested sheet without a workbook gives
 #' `tabtools_warning_sheet_without_workbook` before output; `options(warn = 2)`
 #' interrupts the call. See [tabtools_options()] for append/history behavior.
+#' wttab has no small-cell suppression: with a session `smallcells` threshold
+#' its group N is printed unmasked, with a
+#' `tabtools_warning_smallcells_unsupported` warning.
 #'
 #' @export
 wttab <- function(x, weights = NULL, by = NULL, period = NULL, trunc = NULL, data = NULL,
@@ -355,6 +358,7 @@ wttab <- function(x, weights = NULL, by = NULL, period = NULL, trunc = NULL, dat
   tt$meta$wttab <- list(layout = layout, source = inp$source, digits = digits, trunc_by = trunc_by)
   tt$meta$sample_accounting <- .tt_sample_bind(c(list(inp$sample), res$samples))
 
+  .tt_warn_unmasked_counts("wttab", "group counts (N)")
   # Sinks in puttab's order: CSV, Markdown, then the workbook.
   if (!is.null(csv)) {
     tt_write_csv(tt, csv)

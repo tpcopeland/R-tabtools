@@ -179,3 +179,15 @@
   if (inherited[["masktext"]]) message("tabtools: using session masktext ", values$masktext)
   list(values = values, given = original_given, inherited = inherited, keys = keys, mask = mask_result)
 }
+
+# Commands without small-cell support that print counts never inherit the
+# session threshold; say so once per call rather than publish silently.
+.tt_warn_unmasked_counts <- function(command, what) {
+  k <- getOption("tabtools.smallcells")
+  if (is.null(k) || !is.numeric(k) || length(k) != 1L || is.na(k) || k == 0) return(invisible(FALSE))
+  cli::cli_warn(c(
+    "{.fn {command}} has no small-cell suppression: the session {.arg smallcells} threshold ({k}) is not applied to its {what}.",
+    "i" = "Review the printed counts before release, or clear the session threshold with {.code tabtools_options(smallcells = NULL)}."
+  ), class = "tabtools_warning_smallcells_unsupported", call = NULL)
+  invisible(TRUE)
+}

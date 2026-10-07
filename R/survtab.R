@@ -74,6 +74,11 @@
 #'   group-count-minus-one degrees of freedom. Only no included failures gives
 #'   missing grouped test results and the exact diagnostic body row.
 #'
+#'   survtab has no small-cell suppression. When a session threshold is set
+#'   with [tabtools_options()] `smallcells`, its group N, event and at-risk
+#'   counts are still printed unmasked, with one
+#'   `tabtools_warning_smallcells_unsupported` warning per call.
+#'
 #' @return A `tt_table` with command survtab, invisible after export. `stored$table`
 #'   is the requested-time probability matrix, excluding other summaries.
 #'   Native per-group scalar families and original identities are retained;
@@ -152,6 +157,7 @@ survtab <- function(data, time, event, times, by = NULL, entry = NULL, id = NULL
   tt <- .sv_publication(prepared, curves, queries, medians, restricted, contrast, logrank,
     times, rmst, median, riskset, reverse, difference, events, timeunit, level,
     addrow, numeric_format, pdp, highpdp, title, footnote, style, sheet %||% "Survival")
+  .tt_warn_unmasked_counts("survtab", "group, event and at-risk counts")
   .sv_export(tt, xlsx, csv, markdown, sheet %||% "Survival", mdappend, open)
 }
 

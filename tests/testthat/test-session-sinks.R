@@ -332,3 +332,20 @@ test_that("Table 1 keeps legacy invalid-threshold errors and session reuse after
     expect_identical(suppressMessages(table1_tc(data, vars = c(x = "bin"), by = "g"))$stored$smallcells$threshold, 3L)
   }
 })
+
+test_that("review 2026-10-07 B3: commands without small-cell support warn once under a session threshold", {
+  withr::local_options(list(tabtools.workbook = NULL, tabtools.markdown = NULL, tabtools.smallcells = 5L))
+  d <- data.frame(t = 1:8, e = c(1, 1, 1, 0, 1, 0, 1, 0), g = rep(1:2, 4), w = seq(0.5, 2, length.out = 8))
+  warnings <- list()
+  x <- withCallingHandlers(
+    survtab(d, time = "t", event = "e", times = c(2, 6), by = "g", riskset = TRUE, events = TRUE),
+    warning = function(w) { warnings[[length(warnings) + 1L]] <<- w; invokeRestart("muffleWarning") })
+  expect_length(warnings, 1L)
+  expect_s3_class(warnings[[1L]], "tabtools_warning_smallcells_unsupported")
+  expect_match(conditionMessage(warnings[[1L]]), "threshold (5)", fixed = TRUE)
+  expect_identical(x$command, "survtab")
+  expect_warning(wttab(d, weights = "w", by = "g"), class = "tabtools_warning_smallcells_unsupported")
+  withr::local_options(list(tabtools.smallcells = NULL))
+  expect_no_warning(survtab(d, time = "t", event = "e", times = 2))
+  expect_no_warning(wttab(d, weights = "w"))
+})

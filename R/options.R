@@ -70,6 +70,8 @@
 #' @param smallcells Session-only integer threshold of at least 3, or NULL to
 #'   clear it. Commands with existing small-cell support inherit it when omitted;
 #'   explicit NULL/0 disables it for one call without changing the session.
+#'   [survtab()] and [wttab()], which print counts but have no small-cell
+#'   support, warn (`tabtools_warning_smallcells_unsupported`) instead.
 #' @param smallcells_mode Session-only `"strict"` or `"primary"` Table 1 mode,
 #'   or NULL to clear it. An omitted Table 1 threshold inherits this mode;
 #'   an explicit active threshold defaults strict unless mode is also explicit.
