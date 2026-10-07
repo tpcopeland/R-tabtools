@@ -62,6 +62,8 @@ test_that("composed effect tables keep every model's unsafe scale provenance", {
                            conf.high = 1.1, p.value = 0.2),
                  effect = "HR", models = "death", level = 95)
   a$rows$key <- paste0("row", seq_len(nrow(a$body)))
+  expect_error(tt_merge(a, a), class = "tabtools_error_flat")
+  a$meta$flat$row_keys <- a$rows$key
   a$meta$frame$effect_additive <- FALSE
   a$meta$frame$effect_log_scale <- "ratio"
   b <- a

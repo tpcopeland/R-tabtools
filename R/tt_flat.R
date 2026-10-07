@@ -363,7 +363,10 @@ tt_flat <- function(x, keyed = TRUE) {
     origin <- f$source_blocks
     present <- nzchar(origin)
     origin[present] <- paste0(id, "/", k, "/", origin[present])
-    blocks <- paste0(id, "/", k, "/", f$row_blocks)
+    # paste0() otherwise invents one prefix for a zero-length source.
+    blocks <- if (length(f$row_blocks)) {
+      paste0(id, "/", k, "/", f$row_blocks)
+    } else character()
     if (!is.null(groups)) {
       s <- rbind(rep("", nm), s)
       origin <- rbind(rep("", nm), origin)
