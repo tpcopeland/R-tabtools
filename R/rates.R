@@ -176,6 +176,10 @@ tt_rates <- function(data, time = NULL, event = NULL, by = NULL, strata = NULL, 
   d <- as.numeric(!is.na(ev) & ev != 0)
   w <- if (is.null(fweight)) rep(1, nrow(data)) else .rate_fweight(data, fweight)
   groups <- c(strata, by)
+  if (any(!vapply(data[groups], function(x) is.atomic(x) && is.null(dim(x)), TRUE))) {
+    cli::cli_abort("Grouping columns must be atomic vectors.",
+                   class = "tabtools_error_rate_group", call = NULL)
+  }
 
   # st sample: stset keeps records with non-missing time after entry
   # (_st == 0 otherwise); strate then marks out missing weights, time, and
@@ -441,9 +445,9 @@ tt_rates_from_strate <- function(data, by = NULL, per = 1, level = NULL) {
 }
 
 .rate_ci <- function(out, D, Y, level, allow_zero = FALSE) {
-  if (allow_zero && any(D > 0 & Y == 0)) {
+  if (any(D > 0 & Y == 0, na.rm = TRUE)) {
     cli::cli_abort("The rate totals have events without person-time.",
-                   class = "tabtools_error_rate_no_time", call = NULL)
+                   class = c("tabtools_error_rate_no_time", "tabtools_error_rate_totals"), call = NULL)
   }
   if (any(!is.finite(D)) || any(!is.finite(Y) | Y < 0 | (!allow_zero & Y == 0))) {
     cli::cli_abort(c("Rate totals must contain finite event counts and positive, finite person-time.",

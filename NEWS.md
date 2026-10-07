@@ -1,5 +1,12 @@
 # tabtools (development version)
 
+* Retained missing character/factor groups in computed rates now have explicit
+  category labels; computed event/no-time errors use a consistent class.
+* Verify copied export bytes before success/history, and retain original files
+  when a staged copy reports success with incomplete contents.
+* Limit Table 1 header replacement protection to its actual denominator
+  dependencies; style effecttab added rows as added rows.
+
 * Table 1 and `desctab()` add primary-only printed-count masking,
   `nosmallcells`, literal mask text and native-consistent session mode
   precedence. Strict suppression remains the default. Canonical typed mask

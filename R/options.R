@@ -42,7 +42,11 @@
 #' retain replace-by-default behavior. Successful explicit writes to the active
 #' session path also count. Previously written paths remain remembered across
 #' destination changes, repeated setting, and clearing, so A/B/A keeps A's
-#' content on the next inherited write. Failed writes do not advance history.
+#' content on the next inherited write. A failed sink write does not advance
+#' its history. Builders write sinks in sequence: an earlier successful sink
+#' remains written and remembered if a later sink fails. Block-mode [stacktab()]
+#' instead stages all sinks and commits them together, restoring their prior
+#' contents if a commit fails.
 #'
 #' @param ... Not used; any unnamed or unknown argument is an error. Query a
 #'   default with `tabtools_options()$digits`.

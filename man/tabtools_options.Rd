@@ -103,7 +103,11 @@ successful writes append. Explicit \code{mdappend} wins. Explicit Markdown paths
 retain replace-by-default behavior. Successful explicit writes to the active
 session path also count. Previously written paths remain remembered across
 destination changes, repeated setting, and clearing, so A/B/A keeps A's
-content on the next inherited write. Failed writes do not advance history.
+content on the next inherited write. A failed sink write does not advance
+its history. Builders write sinks in sequence: an earlier successful sink
+remains written and remembered if a later sink fails. Block-mode \code{\link[=stacktab]{stacktab()}}
+instead stages all sinks and commits them together, restoring their prior
+contents if a commit fails.
 }
 \examples{
 tabtools_options()

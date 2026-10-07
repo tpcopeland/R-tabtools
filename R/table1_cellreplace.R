@@ -86,7 +86,7 @@
   if (body_row == 0L) {
     sample <- if (crude) tt$meta$crude_sample_codes else tt$meta$sample_codes
     header_linked <- if (crude) tt$meta$crude_header_linked else tt$meta$header_linked
-    return(sample[k] > 0L || isTRUE(header_linked))
+    return(sample[k] > 0L || isTRUE(header_linked[k]))
   }
   if (length(codes) != nrow(tt$body) || length(linked) != nrow(tt$body) ||
       length(codes[[body_row]]) < k || length(linked[[body_row]]) < k) {
