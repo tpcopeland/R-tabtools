@@ -83,12 +83,17 @@ test_that("the xlsx SMD column stays at Stata's fixed 8 (desctab.ado:2203-2204)"
 test_that("automatic notes join a paragraph footnote as paragraphs; unspaced stays (BUG-5)", {
   d <- data.frame(arm = factor(rep(c("A", "B", "C"), each = 10)), rare = c(rep(0, 28), 1, 1))
   f <- function(fn) table1_tc(d, by = "arm", vars = c(rare = "cat"), smd = TRUE, smallcells = 5, footnote = fn)$footnote
+  small <- paste0("Counts below 5 are shown as <5; complementary cells are shown as \u22655",
+                  " to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.")
+  smd <- "SMD compares A vs B only (the first two of 3 groups)."
   x <- f("Note 1 \\ Note 2")
-  expect_match(x, "^Note 1 \\\\ Note 2 \\\\ Counts", perl = TRUE)
-  expect_match(x, " \\\\ SMD compares A vs B only", perl = TRUE)
+  x_paragraphs <- c("Note 1", "Note 2", small, smd)
+  expect_identical(x, paste(x_paragraphs, collapse = " \\ "))
+  expect_identical(strsplit(x, " \\ ", fixed = TRUE)[[1L]], x_paragraphs)
   y <- f("Note 1\\Note 2")
-  expect_match(y, "^Note 1\\\\Note 2 Counts", perl = TRUE)
-  expect_match(y, "[.] SMD compares", perl = TRUE)
+  y_paragraphs <- c("Note 1\\Note 2", small, smd)
+  expect_identical(y, paste(y_paragraphs, collapse = " \\ "))
+  expect_identical(strsplit(y, " \\ ", fixed = TRUE)[[1L]], y_paragraphs)
 })
 
 test_that("the SMD header and note reach every sink", {
