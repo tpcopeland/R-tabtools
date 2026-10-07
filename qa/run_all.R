@@ -42,6 +42,7 @@ run <- c(
   bench_fisher.R = "Fisher exact test wall-clock bounds (workspace escalation, simulated fallback)",
   bench_fweight.R = "fweight tests: time (5 s) and memory (100 MB) bounds up to a total frequency of 5e7",
   validation_wttab.R = "wttab() on real ipw::ipwpoint()/ipwtm() objects and against WeightIt's own summaries",
+  crossval_regtab_formats.R = "raw regtab/effecttab full numeric formats against pinned native Stata 2.5.1 string()",
   crossval_puttab_layout.R = "puttab/stacktab frames cells, borders, panels, formats and sinks against native Stata 2.5.1",
   crossval_smd_balance.R = "table1_tc() smdtype population/maxpair/pair against cobalt and twang",
   demo_parity.R = "the R demo (qa/demo/demo_tabtools.R) against the Stata demo, sheet by sheet (Milestone D)",
@@ -76,7 +77,7 @@ interaction_files <- c("test_interaction_matrix_descriptive.R",
                        "test_interaction_matrix_survival_survey_gee.R",
                        "test_interaction_matrix_composition.R",
                        "test_interaction_matrix_independent.R")
-crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R")
+crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R")
 testthat_files <- c(adversarial_files, sample_files, interaction_files, crossval_files)
 LANES <- list(
   quick = c(adversarial_files, sample_files),

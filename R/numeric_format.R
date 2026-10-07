@@ -10,7 +10,7 @@
   }
   if (!is.character(sep) || length(sep) != 1L || is.na(sep)) {
     cli::cli_abort("{.arg {sep_arg}} must be one literal string.",
-                   class = "tabtools_error_format_separator", call = NULL)
+                   class = c("tabtools_error_format_separator", "tabtools_error_sep"), call = NULL)
   }
   if (!nzchar(sep)) sep <- ", "
   decimal_comma <- FALSE
@@ -23,7 +23,7 @@
     decimal_comma <- grepl("^%-?0?[0-9]+,", cformat)
     normalized <- sub(",", ".", cformat, fixed = TRUE)
     tryCatch(.parse_stata_fmt(normalized), error = function(e) {
-      cli::cli_abort("{.arg cformat} must be a supported numeric Stata format (%w.df, %w.dg, or their c suffix).",
+      cli::cli_abort("{.arg cformat} must be a supported numeric Stata format (%w.df, %w.dg, %w.de, or f/g with a c suffix).",
                      class = "tabtools_error_format", parent = e, call = NULL)
     })
     if (decimal_comma && grepl(",", sep, fixed = TRUE)) {

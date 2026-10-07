@@ -712,6 +712,16 @@
 #'   and so on instead of Stata's raw `var(_cons)` names.
 #' @param digits Decimal places for estimates and confidence limits (0-6;
 #'   default 2 or the `tabtools_options(digits =)` value).
+#' @param cformat Full numeric Stata format for estimates and both interval
+#'   limits, e.g. `"%12.0fc"` or `"%9.3g"`. Supported formats are fixed
+#'   (`f`), general (`g`), or exponential (`e`); `f` and `g` optionally take
+#'   thousands separators (`c`).
+#'   Explicit `digits`, including `NULL`, conflicts with `cformat` and raises
+#'   `tabtools_error_format_conflict`. Decimal-comma formats require a `sep`
+#'   without commas (`tabtools_error_format_separator`). General formats with
+#'   13 or more significant digits can differ from Stata's native rounding.
+#' @param cilabel,plabel Literal confidence-interval and p-value headers;
+#'   `NULL` keeps the calculated CI header and `"p-value"`.
 #' @param level Confidence level, a proportion (`0.90`) or a percentage (`90`),
 #'   from 10% to 99.99% as Stata's `level()`.
 #' @param ci_method `"wald"` (default; matches Stata) or `"profile"`
@@ -831,7 +841,8 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
                    title = NULL, footnote = NULL,
                    nointercept = NULL, keepintercept = FALSE,
                    noreeffects = FALSE, stats = NULL, stat_fun = NULL, relabel = FALSE,
-                   digits = NULL, level = 0.95, ci_method = c("wald", "profile"),
+                   digits = NULL, cformat = NULL, cilabel = NULL, plabel = NULL,
+                   level = 0.95, ci_method = c("wald", "profile"),
                    keep = NULL, drop = NULL, labelmatch = FALSE,
                    dimnonsig = FALSE, factorlabel = TRUE,
                    refcat = "Reference", omitlabel = "Omitted",
@@ -978,9 +989,13 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
                    call = NULL)
   }
   sheet <- .check_sheet(sheet)
-  # regtab.ado:100-104: digits resolves from the persistent default, then 2.
-  if (is.null(digits)) digits <- getOption("tabtools.digits") %||% 2
-  digits <- .check_int_range(digits, "digits", 0, 6)
+  # Stata 2.5.1 regtab.ado:167-181, :329-331, :464-470.
+  numeric_format <- .tt_resolve_numeric_format(cformat, digits,
+                                               digits_given = !missing(digits),
+                                               sep = sep, max_digits = 6L)
+  digits <- numeric_format$digits
+  sep <- numeric_format$sep
+  for (a in c("cilabel", "plabel")) .tt_check_text_arg(get(a), a)
   pdp <- .check_dp(pdp, "pdp")
   highpdp <- .check_dp(highpdp, "highpdp")
   # Stata's level() accepts 10 to 99.99 (pre-release review P3-8: 1.5 was
@@ -1030,12 +1045,6 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
     cli::cli_abort("{.arg starslevels} requires exactly 3 values (e.g. {.code c(0.05, 0.01, 0.001)}).",
                    call = NULL)
   }
-  # sep is data (Stata _tt_sep_parse: only empty means the default), so " " is
-  # a valid separator and is not trimmed.
-  if (!is.character(sep) || length(sep) != 1L || is.na(sep)) {
-    cli::cli_abort("{.arg sep} must be a single string.", class = "tabtools_error_sep", call = NULL)
-  }
-  if (!nzchar(sep)) sep <- ", "
   if (!is.numeric(labelwidth) || length(labelwidth) != 1L || is.na(labelwidth)) {
     cli::cli_abort("{.arg labelwidth} must be a number.", call = NULL)
   }
@@ -1055,7 +1064,7 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
   # CDISC (regtab.ado:305-309): digits 2 becomes 4, the header "Estimate",
   # and stats default to n.
   if (cdisc) {
-    if (digits == 2L) digits <- 4L
+    if (is.null(cformat) && digits == 2L) digits <- 4L
     if (is.null(stats)) stats <- "n"
   }
   infos <- lapply(fits, tt_model_info)
@@ -1077,6 +1086,7 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
             interactions = interactions, xsymbol = xsymbol,
             vsref = vsref, keep = keep, drop = drop, labelmatch = labelmatch, refcat = refcat,
             omitlabel = omitlabel, emptylabel = emptylabel, digits = digits, sep = sep,
+            numeric_format = numeric_format, cilabel = cilabel, plabel = plabel,
             pdp = pdp, highpdp = highpdp, dimnonsig = dimnonsig, stars = stars,
             starslevels = starslevels, starslevels_given = starslevels_given,
             starstext = if (starslevels_given) stata_fmt(starslevels, "%18.0g") else c("0.05", "0.01", "0.001"),

@@ -19,6 +19,9 @@ regtab(
   stat_fun = NULL,
   relabel = FALSE,
   digits = NULL,
+  cformat = NULL,
+  cilabel = NULL,
+  plabel = NULL,
   level = 0.95,
   ci_method = c("wald", "profile"),
   keep = NULL,
@@ -129,6 +132,18 @@ and so on instead of Stata's raw \verb{var(_cons)} names.}
 
 \item{digits}{Decimal places for estimates and confidence limits (0-6;
 default 2 or the \code{tabtools_options(digits =)} value).}
+
+\item{cformat}{Full numeric Stata format for estimates and both interval
+limits, e.g. \code{"\%12.0fc"} or \code{"\%9.3g"}. Supported formats are fixed
+(\code{f}), general (\code{g}), or exponential (\code{e}); \code{f} and \code{g} optionally take
+thousands separators (\code{c}).
+Explicit \code{digits}, including \code{NULL}, conflicts with \code{cformat} and raises
+\code{tabtools_error_format_conflict}. Decimal-comma formats require a \code{sep}
+without commas (\code{tabtools_error_format_separator}). General formats with
+13 or more significant digits can differ from Stata's native rounding.}
+
+\item{cilabel, plabel}{Literal confidence-interval and p-value headers;
+\code{NULL} keeps the calculated CI header and \code{"p-value"}.}
 
 \item{level}{Confidence level, a proportion (\code{0.90}) or a percentage (\code{90}),
 from 10\% to 99.99\% as Stata's \code{level()}.}

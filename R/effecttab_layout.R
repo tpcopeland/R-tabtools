@@ -536,11 +536,15 @@ tt_effecttab_build <- function(mrows, o) {
     c <- u$cells[[m]]
     is_est <- c$status %in% "est"
     e <- rep("", nr)
-    e[is_est] <- .et_est_text(c$estimate[is_est], d, from_matrix)
+    e[is_est] <- if (is.null(o$numeric_format$cformat)) {
+      .et_est_text(c$estimate[is_est], d, from_matrix)
+    } else .rt_est_text(c$estimate[is_est], d, o$numeric_format)
     con <- c$status %in% names(refs)
     e[con] <- unname(refs[c$status[con]])
     ci <- rep("", nr)
-    ci[is_est] <- .et_ci_text(c$conf.low[is_est], c$conf.high[is_est], d, o$sep, from_matrix)
+    ci[is_est] <- if (is.null(o$numeric_format$cformat)) {
+      .et_ci_text(c$conf.low[is_est], c$conf.high[is_est], d, o$sep, from_matrix)
+    } else .rt_ci_text(c$conf.low[is_est], c$conf.high[is_est], d, o$sep, o$numeric_format)
     p <- rep("", nr)
     pv <- .et_p_value(c$p.value, from_matrix)
     p[is_est] <- format_p(pv[is_est], o$pdp, o$highpdp)
@@ -611,6 +615,7 @@ tt_effecttab_build <- function(mrows, o) {
                      console_width = NA_integer_, stringsAsFactors = FALSE)
   rows <- data.frame(type = type, indent = nchar(labels) - nchar(sub("^ +", "", labels)),
                      block = seq_len(nb), addrow = addrow,
+                     key = c(u$rows$key, vapply(o$addrow, function(r) paste0("addrow:", r$label), "")),
                      var = c(u$rows$variable, rep(NA_character_, nb - nr)),
                      level = c(u$rows$level, rep(NA_character_, nb - nr)), stringsAsFactors = FALSE)
   rows$p <- apply(pvals, 1L, function(p) if (all(is.na(p))) NA_real_ else min(p, na.rm = TRUE))
@@ -643,6 +648,7 @@ tt_effecttab_build <- function(mrows, o) {
                frame = frame,
                sample_accounting = o$sample_accounting,
                forest_model_label = ifelse(nzchar(o$models), o$models, paste("Model", seq_len(M))))
+  meta$flat <- .tt_flat_metadata(u$cells, rows, M)
   tt_table(body, list(list(text = h1), list(text = h2)), rows = rows, cols = cols,
            title = o$title, footnote = o$footnote, style = o$style, stored = stored,
            command = "effecttab", meta = meta)

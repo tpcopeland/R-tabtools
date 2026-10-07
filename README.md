@@ -89,6 +89,7 @@ remotes::install_github("tpcopeland/R-tabtools")
 | `tt_write_xlsx()`, `tt_write_csv()`, `tt_write_markdown()` | Write a table to a file |
 | `flextable::as_flextable()`, `tt_as_gt()`, `tt_as_gtsummary()`, `tt_as_tinytable()` | Convert a table for Word, HTML, Quarto and LaTeX |
 | `as_forest_data()`, `as.data.frame()` | The numbers behind a table, for forest plots; the table as text cells |
+| `tt_flat()` | Editable regression and effect body rows with raw keys, model states and preserved headers |
 | `tt_vcov()`, `tt_vce_types()`, `tt_ci_methods()` | The variance and interval methods `regtab()` uses, for use elsewhere |
 | `tt_from_modelsummary()` | Table a modelsummary model list with `regtab()` |
 | `tabtools_options()` | Default font, border style, digits and colours |
@@ -110,6 +111,22 @@ t2
 ```
 
 `tt_write_xlsx(t2, "tables.xlsx", sheet = "Table 2")` writes a table later; several tables go to one workbook as separate sheets.
+
+Regression and effect tables accept `cformat = "%12.0fc"` for estimates and
+both confidence limits, or fixed, general and exponential formats such as
+`"%9.3f"`, `"%9.3g"` and `"%9.2e"`. An explicitly supplied `digits` conflicts
+with `cformat`. Decimal-comma formats such as `"%9,2f"` require a comma-free
+separator, for example `sep = " to "`. General formats with 13 or more
+significant digits can differ from Stata's native rounding in the last digits.
+`regtab(cilabel = "Confidence interval", plabel = "P")` changes the headers
+in every output.
+
+`tt_flat(t2)` returns the rendered body with statistic column names, raw
+`_term` keys, `_order`, `_rowtype` and one `_state_<model-index>` column per
+model. `tt_flat(t2, keyed = FALSE)` omits the technical columns. Model names
+and full headers are attributes; row and column selections preserve them.
+Compositions retain source block identities so repeated terms in stacked
+tables remain distinct.
 
 ### 2. Word, HTML, Quarto
 

@@ -1,5 +1,21 @@
 # tabtools (development version)
 
+* `regtab()` and `effecttab()` accept full numeric `cformat` formats for
+  estimates and both confidence limits, including exponential formats.
+  Explicit `digits` conflicts with `cformat`; decimal-comma formats require
+  a comma-free interval separator. Separators remain literal. `regtab()` adds
+  literal CI and p-value header overrides, `cilabel` and `plabel`.
+* `tt_flat()` exports editable regression and effect body records with
+  statistic column labels, model headers, raw row keys and model states.
+  Row and column selections preserve metadata, and composed tables retain
+  distinct source block identities, including repeated source tables.
+  Canonical analytical states, structural headings, source provenance and
+  numeric header spans are validated even after technical columns are removed;
+  composition refuses source metadata whose row keys are no longer aligned.
+* Invalid formatter inputs such as `integer(0)` raise `tabtools_error_fmt`.
+  General formats with 13 or more significant digits retain the documented
+  native rounding difference from Stata.
+
 * Footnotes accept character paragraph vectors or Stata's spaced-backslash
   separator. Console, CSV, Markdown, Excel and presentation converters show
   separate paragraphs, including automatic notes and significance legends;
