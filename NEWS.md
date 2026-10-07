@@ -1,5 +1,18 @@
 # tabtools (development version)
 
+* Table 1 and `desctab()` add primary-only printed-count masking,
+  `nosmallcells`, literal mask text and native-consistent session mode
+  precedence. Strict suppression remains the default. Canonical typed mask
+  metadata records thresholds/mode/display-cell counts alongside native
+  active-mask compatibility fields.
+* Structured `cellreplace` records select exact final row labels and headers,
+  or value-column positions excluding the label. Protected cells and withheld
+  components refuse replacement; all publication sinks share the final text.
+  Replacements invalidate affected numeric/inference/ledger companions while
+  retaining permitted unmasked/primary analytical aggregates separately.
+  Active strict masking creates no raw backup. The three known native slashN
+  disclosure cases remain conditional on a Stata fix.
+
 * `tabtools_options()` adds session workbook/Markdown destinations, puttab/frame
   header shading, and supported masking defaults. Explicit NULL clears one key;
   omitted keys remain unchanged. Session keys are excluded from persistence.

@@ -88,6 +88,45 @@
 #' 2^53 for small-cell certification to preserve single-count changes;
 #' larger frequency-weighted blocks are refused with `smallcells`.
 #'
+#' `smallcells_mode = "primary"` masks only positive printed counts below the
+#' threshold, including printed missing counts, group/total Ns and slash
+#' denominators. Zeros stay visible. Other percentages, tests and SMDs stay as
+#' computed; no complementary protection against reconstruction is promised.
+#' A continuous summary whose contributing N is not printed stays visible.
+#' Weighted effective sample size linked to a masked sample N is still withheld
+#' and counts as a linked display mask, including in primary mode.
+#' Primary mode retains analytical aggregates in `stored$raw$table` and
+#' `stored$raw$sample_accounting`; publication ledger attachments are redacted.
+#' These raw aggregates are for analysis, not sharing as a protected table.
+#' Active strict masking never creates a raw backup, even if no cells are small.
+#'
+#' **Publication replacements.** `cellreplace` takes structured R records,
+#' rather than Stata's command-language string. Row labels and column headers
+#' match exactly and case-sensitively after trimming leading/trailing spaces;
+#' ambiguous or missing matches are errors. Numeric column 1 means the first
+#' value column, excluding the row-label column; character `"1"` means that
+#' exact header. The final printed order, including Total/crude/weighted and
+#' statistical columns, determines positions. The descriptor/N row and ESS
+#' row can also be selected by their printed row labels. Every record is
+#' checked before any replacement or output; repeated targets apply in order,
+#' last text wins. Empty text and quotes, dollar signs, backticks and
+#' backslashes are literal cell content.
+#'
+#' Protected cells and withheld linked percentages/denominators cannot be
+#' replaced (`tabtools_error_cellreplace_protected`), including a visible count
+#' whose percentage was withheld under strict masking. This is a safety
+#' difference from native Stata's unchecked replacement. Replacement never
+#' interprets numeric-looking text as an estimate. Direct p/SMD replacements
+#' invalidate the corresponding numeric row/stored value; replacing a variable's
+#' group/Total, test or statistic cell invalidates that variable's publication
+#' p/SMD companions, including a category child's analytical parent. Other
+#' variables' inference remains intact. Replaced summaries invalidate the
+#' affected variable/pass/scope publication ledger; replacing a descriptor N
+#' invalidates only its `reported_n`, and replacing a published ESS only its
+#' `effective_n`. Permitted unmasked/primary analytical aggregates remain under
+#' `stored$raw`; active strict suppression has no such backup. Table 1 does not
+#' support [as_forest_data()], including after replacement.
+#'
 #' @param data A data frame.
 #' @param vars Variables to summarise; `NULL` (the default) uses every column
 #'   of `data`, including the `by`, `wt` and `fweight` columns, as Stata's
@@ -182,8 +221,29 @@
 #' @param pdp,highpdp Decimal places for p < 0.10 and p >= 0.10.
 #' @param missingsummary Add a missing-data row per variable.
 #' @param smallcells Optional integer >= 3 activating small-cell suppression.
+#'   Omitted values inherit session defaults; explicit NULL or 0 disables them.
 #'   Not available with percent-only cells (`percent`, or `wt` without `wtn`
 #'   or `percent_n`).
+#' @param smallcells_mode `"strict"` (default) or `"primary"`, matched exactly.
+#'   An explicit active threshold defaults strict regardless of session mode;
+#'   an omitted threshold inherits session threshold and mode. An explicit mode
+#'   wins; explicit NULL uses strict. Disabled masking reports strict unless
+#'   the call explicitly selects a mode. Invalid modes raise
+#'   `tabtools_error_smallcells_mode`.
+#' @param nosmallcells Ignore the session small-cell threshold for this call.
+#'   Must be a nonmissing logical scalar (`tabtools_error_smallcells`).
+#'   Cannot accompany an explicit non-NULL `smallcells`, including zero
+#'   (`tabtools_error_smallcells_conflict`).
+#' @param masktext One literal masking string, including empty text, or NULL.
+#'   Explicit text overrides session text; explicit NULL uses command-default
+#'   markers. Explicit non-NULL text requires an active threshold
+#'   (`tabtools_error_smallcells_masktext`).
+#' @param cellreplace NULL, an empty list, or a list of records, each with
+#'   exactly the unique named fields `row`, `column`, and `text`. Row/text are
+#'   nonmissing character scalars; column is a character header or positive
+#'   integer value-column position. Invalid records/selectors raise
+#'   `tabtools_error_cellreplace`/`tabtools_error_cellreplace_selector`;
+#'   an unavailable companion mapping raises `tabtools_error_cellreplace_companion`.
 #' @param wtcompare Show crude and weighted columns side by side (requires
 #'   `wt` and `by`).
 #' @param wtn Show effective counts, `(sum w_cell / sum w_group) * N_group`,
@@ -285,11 +345,18 @@
 #'     SMD column compares (when there is one; it is also in the footnote);
 #'   * for the files written: `xlsx`, `sheet`, `markdown`, `markdown_rows`,
 #'     `markdown_cols`;
-#'   * with `smallcells`: `smallcells`, `N_primary_suppressed`,
+#'   * `smallcells`: a list with integer `threshold` (0 disabled), character
+#'     `mode` (strict/primary), integer `n_masked` (primary/complementary display
+#'     cells) and `n_linked` (derived display cells). With active masking,
+#'     native-compatible `smallcells_mode` is `full`/`primary`, with `N_primary_suppressed`,
 #'     `N_secondary_suppressed`, `N_derived_suppressed`, and `suppression`,
 #'     a matrix over every table row (both header rows included) by group
 #'     column and `pvalue`/`test`/`statistic`/`smd_str`, coded 0 visible,
 #'     1 primary, 2 complementary, 3 derived.
+#'   * with replacement: integer `n_cellreplace`, counting entries. Unmasked
+#'     replacements and primary masking may retain `raw$table` and
+#'     `raw$sample_accounting` as explicitly analytical aggregates; neither is
+#'     used by publication exports, converter metadata or forest extraction.
 #'
 #'   `$meta$sample_accounting` carries the source ledger described in
 #'   [tt_table()]; unavailable record counts remain explicit.
@@ -350,6 +417,8 @@
 #'
 #' # desctab() is the same command
 #' desctab(d, by = "arm", vars = c("age", "sex"))
+#' table1_tc(d, by = "arm", vars = c(age = "contn"),
+#'           cellreplace = list(list(row = "Age (years)", column = 1L, text = "Not reported")))
 #' @order 1
 #' @section Session destinations:
 #' An explicitly supplied non-NULL `sheet` enables inherited workbook and
@@ -382,18 +451,26 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
                       highlight = NULL, zebra = FALSE, headershade = FALSE,
                       headercolor = NULL, zebracolor = NULL,
                       csv = NULL, markdown = NULL, mdappend = FALSE,
-                      test_args = NULL, dots = FALSE, excel = NULL, nosmdhighlight = FALSE) {
+                      test_args = NULL, dots = FALSE, excel = NULL, nosmdhighlight = FALSE,
+                      smallcells_mode = "strict", nosmallcells = FALSE, masktext = NULL,
+                      cellreplace = NULL) {
+  replacements <- .t1_cellreplace_check(cellreplace)
   sinks <- .tt_resolve_sinks(
     list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
-         sheet = sheet, headershade = headershade, excel = excel, smallcells = smallcells),
+         sheet = sheet, headershade = headershade, excel = excel, smallcells = smallcells,
+         smallcells_mode = smallcells_mode, nosmallcells = nosmallcells, masktext = masktext),
     list(xlsx = !missing(xlsx), markdown = !missing(markdown),
          mdappend = !missing(mdappend), sheet = !missing(sheet),
-         headershade = !missing(headershade), excel = !missing(excel), smallcells = !missing(smallcells)),
+         headershade = !missing(headershade), excel = !missing(excel), smallcells = !missing(smallcells),
+         smallcells_mode = !missing(smallcells_mode), nosmallcells = !missing(nosmallcells),
+         masktext = !missing(masktext)),
     policy = "sheet", mask = "table1")
   xlsx <- sinks$values$xlsx
   markdown <- sinks$values$markdown
   mdappend <- sinks$values$mdappend
   smallcells <- sinks$values$smallcells
+  smallcells_mode <- sinks$mask$mode
+  masktext <- sinks$mask$text
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Table 1"
@@ -607,13 +684,14 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
             extraspace = extraspace, percent = percent, percent_n = percent_n, slashN = slashN,
             catrowperc = catrowperc, pdp = pdp, highpdp = highpdp,
             missingsummary = missingsummary, test_args = test_args, smallcells = smallcells,
+            smallcells_mode = smallcells_mode, masktext = masktext,
             # _desctab_collect.ado (2.1.17): shared group/total Ns cannot be withheld
             # per variable once the table has two or more variables.
             sc_nvars = length(specs),
             sc_names = vapply(specs, function(x) as.character(x$name), ""),
             sc_labels = vapply(specs, function(x) as.character(x$label), ""))
   # desctab.ado:132-138: the small-cell note joins any user footnote.
-  sc_note <- if (!is.null(smallcells)) tt_sc_footnote(smallcells) else NULL
+  sc_note <- if (!is.null(smallcells)) .t1_sc_note(smallcells, smallcells_mode, masktext) else NULL
   if (!is.null(sc_note) && !grepl(sc_note, footnote %||% "", fixed = TRUE)) {
     footnote <- .t1_join_note(footnote, sc_note)
   }
@@ -632,16 +710,26 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
     if (!is.null(smd_note)) tt$stored$smdnote <- smd_note
   }
   tt$meta$sample_accounting <- .t1_sample_accounting(sample_input, specs, gp, o, wtcompare)
+  # P.7 raw aggregates are explicit analytical provenance, never publication
+  # companions. Active strict masking creates no raw backup, even with 0 masks.
+  if ((!is.null(smallcells) && smallcells_mode == "primary") ||
+      (is.null(smallcells) && length(replacements))) {
+    tt$stored$raw <- list(table = tt$stored$table, sample_accounting = tt$meta$sample_accounting)
+  }
   if (!is.null(smallcells)) tt <- .t1_sc_mask_ledger(tt, gp, length(specs))
   if (!is.null(smallcells)) {
     sc <- .t1_sc_stored(tt, gp, by, smallcells, total = total != "none" && gp$G > 1L,
-                        wtcompare = wtcompare)
+                        wtcompare = wtcompare, mode = smallcells_mode)
     tt$stored[names(sc)] <- sc
     # The small-cell explanation is already a public footnote paragraph.
+  } else {
+    tt$stored$smallcells <- list(threshold = 0L, mode = smallcells_mode, n_masked = 0L, n_linked = 0L)
   }
+  tt <- .t1_cellreplace(tt, replacements, gp)
   tt <- .t1_console_widths(tt, gp, by, wtcompare)
   tt$meta[c("row_codes", "sample_codes", "derived_rows", "crude_codes", "crude_cols",
-            "weighted_cols", "crude_sample_codes")] <- NULL
+            "weighted_cols", "crude_sample_codes", "linked_cells", "crude_linked_cells",
+            "header_linked", "crude_header_linked", "cellreplace_spec")] <- NULL
 
   written <- FALSE
   if (has_xlsx) {

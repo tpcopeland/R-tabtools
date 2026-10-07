@@ -582,7 +582,8 @@ tt_sc_block_cat <- function(level_counts, nonmiss, sample_n, binary = FALSE,
     colexact = rep(1, g), colsensitive = rep(1, g),
     grandexact = tot, grandsensitive = tot,
     n_levels = nl, missrow = missrow, negrow = negrow,
-    total = total, slash_den = slash_den, nonmiss = nonmiss
+    total = total, slash_den = slash_den, nonmiss = nonmiss,
+    print_missing = missingsummary
   )
 }
 
@@ -602,10 +603,11 @@ tt_sc_block_cat <- function(level_counts, nonmiss, sample_n, binary = FALSE,
 #'   are withheld), `n_primary`, `n_secondary`, and the raw engine result.
 #' @keywords internal
 #' @noRd
-tt_sc_variable <- function(block, smallcells, fixedmargins = FALSE, variable = NULL) {
+tt_sc_variable <- function(block, smallcells, fixedmargins = FALSE, variable = NULL,
+                           primary = FALSE) {
   k <- .sc_check_threshold(smallcells)
   res <- tryCatch(
-    tt_smallcells(block$counts, k, block$exact, block$sensitive,
+    if (primary) .t1_sc_primary(block, k) else tt_smallcells(block$counts, k, block$exact, block$sensitive,
                   block$rowexact, block$rowsensitive, block$colexact,
                   block$colsensitive, block$grandexact, block$grandsensitive,
                   fixedmargins = fixedmargins),
@@ -628,8 +630,8 @@ tt_sc_variable <- function(block, smallcells, fixedmargins = FALSE, variable = N
   missing <- if (mr > 0L) with_total(res$mask[mr, , drop = FALSE], res$rowmask[mr])[1, ] else rep(0, g + tot)
   den <- rep(0, g + tot)
   if (block$type != "cont") {
-    if (mr > 0L && isTRUE(block$slash_den)) den[missing > 0] <- 3
-    if (block$type == "bin" && isTRUE(block$slash_den)) {
+    if (!primary && mr > 0L && isTRUE(block$slash_den)) den[missing > 0] <- 3
+    if (!primary && block$type == "bin" && isTRUE(block$slash_den)) {
       neg <- with_total(res$mask[block$negrow, , drop = FALSE], res$rowmask[block$negrow])[1, ]
       den[neg > 0] <- 3
     }
@@ -642,7 +644,7 @@ tt_sc_variable <- function(block, smallcells, fixedmargins = FALSE, variable = N
   list(
     cells = cells, missing = missing, denominator = den,
     sample = c(res$colmask, if (tot) res$totalmask),
-    derived = res$n_primary > 0,
+    derived = !primary && res$n_primary > 0,
     n_primary = res$n_primary, n_secondary = res$n_secondary,
     engine = res
   )

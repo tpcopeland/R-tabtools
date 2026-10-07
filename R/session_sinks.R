@@ -119,11 +119,12 @@
       values$smallcells_mode <- if (supplied("smallcells")) "strict" else
         getOption("tabtools.smallcells_mode") %||% "strict"
     }
-    if (mask == "rates" && !supplied("masktext")) {
+    if (!supplied("masktext")) {
       values["masktext"] <- list(getOption("tabtools.masktext"))
       inherited[["masktext"]] <- !is.null(values$masktext)
     }
-    if (mask == "table1" && is.numeric(values$smallcells) &&
+    if (mask == "table1" && is.numeric(values$smallcells) && !is.complex(values$smallcells) &&
+        is.null(dim(values$smallcells)) &&
         length(values$smallcells) == 1L && !is.na(values$smallcells) && values$smallcells == 0) {
       values["smallcells"] <- list(NULL)
     }
@@ -134,14 +135,15 @@
                                     original$nosmallcells, original$masktext,
                                     supplied("masktext"), resolved = values)
     if (isTRUE(original$nosmallcells)) inherited[["smallcells"]] <- FALSE
-  } else if (mask == "table1" && !is.null(values$smallcells)) {
-    value <- values$smallcells
-    # Preserve Table 1's existing public message and generic error class.
-    if (!is.numeric(value) || length(value) != 1L || !is.finite(value) ||
-        value != round(value) || value < 3 || value > .Machine$integer.max) {
-      cli::cli_abort("{.arg smallcells} must be an integer greater than or equal to 3.", call = NULL)
+  } else if (mask == "table1") {
+    mask_result <- .t1_resolve_mask(original, original_given, values)
+    values["smallcells"] <- list(mask_result$threshold)
+    values$smallcells_mode <- mask_result$mode
+    values["masktext"] <- list(mask_result$text)
+    if (is.null(mask_result$threshold)) {
+      inherited[["smallcells"]] <- FALSE
+      inherited[["masktext"]] <- FALSE
     }
-    values$smallcells <- as.integer(value)
   }
   if (policy != "writer" && supplied("sheet") && !is.null(values$sheet)) .check_sheet(values$sheet)
   if (policy != "writer" && supplied("sheet") && !is.null(values$sheet) && is.null(values$xlsx)) {

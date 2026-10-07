@@ -58,12 +58,41 @@ the original table and console comparisons.
 
 Native `r(smallcells)` is a scalar threshold; R's canonical P.4 metadata is a
 list. Stored comparison projects only that threshold for native scalar fields,
-and the stratetab runner separately asserts the complete canonical metadata.
+and the stratetab and Table1 runners separately assert the complete canonical metadata.
 The original list remains intact, and every other native stored field remains
 compared. Wttab's independently declared extra R paragraph rows are asserted
 against native body geometry before a comparison copy projects `n_rows` back
 to the authentic one-footer native count; the returned table and all other
 stored fields retain their truthful R values.
+
+WP-3F's `crossval_table1_primary.R` runs isolated native cases T38–T44
+declared in `qa/data/table1_primary_cases.csv`. It authenticates the immutable
+`712044f83ce6dd7bb4ca4237f3f6ffbc8aea5129` Stata tabtools 2.5.1 tree's
+73 ado files (a conservative complete helper closure), manifest and help before
+prerequisite checks and after execution. Every program resolves to and is
+explicitly loaded from that tree. Changed helpers and shadow adopath programs
+must fail. The supervised native run uses owned `STATATMP`, checks all case
+start/end and final completion markers and Stata errors, and never writes
+existing goldens. T38–T44 remain owned by Table1; TC identifiers remain tabcell's.
+
+The exact ten-row ESS control uses age 1–10, groups Small (rows 1–2) and
+Large (3–10), weights 1 except row 2 weight 3. Primary protects two displayed
+Ns plus the linked Weighted Small ESS (1.6); ordinary inference stays intact.
+Strict and unweighted contrasts assert native matrices, counters, mode and
+analytical SMD, with matrix columns matched by case-preserved identities rather
+than the different frame order. Numeric value-column and quoted numeric header
+selectors, repeated entries, descriptor N eligibility and native selector errors
+are independent controls. Native unsafe replacement of protected ESS succeeds;
+R intentionally refuses that target under default/custom/empty markers.
+Publication raw fields never enter the compared grid or exported ledger.
+
+The fast fixture `tests/testthat/fixtures/table1_primary_native/T25_stored.csv`
+is an exact copy from held inventory commit `c215afdb788f88363c8d5289d7d13e3a31cfbe38`;
+its `ARTIFACTS.csv` records source path, SHA256 and independently asserted MD5.
+Its entire native stored contract, including mandatory active `smallcells_mode=full`,
+is compared before WP-3G. The existing scalar threshold projection is reused
+unchanged; separate typed-tuple/mode/count mutations must fail. WP-3G must retain
+and account for these new native cases and authentic fixture provenance.
 
 ## How to run
 
@@ -138,6 +167,7 @@ comparisons. Timings and evidence are in the interaction plan above.
 | `crossval_puttab_layout.R` | yes, crossval/core/full | Native pinned Stata 2.5.1 puttab thin/medium/academic borders and explicit rules, panel header/zebra precedence, inline noheader panels, spanning headers, integer/imported numeric formats, and stacktab frame panels. Six scenarios compare actual workbook cells/styles/merges/widths/heights, CSV and Markdown bytes, and stored row/panel/span counts. Set `TABTOOLS_STATA_DIR` to the pinned export; missing configuration/oracle is incomplete, never PASS. |
 | `crossval_puttab_flat.R` | yes, crossval/core/full | Eleven genuine native Stata 2.5.1 `regtab, frame(flat keys)` consumer scenarios: four border styles, CI/reverse projection, explicit common keys, panels, selected-input keys, no model span, and equal-name distinct selector calls. Immutable original and edited native inputs retain actual variable names, labels and per-column states; R retains per-original-model states. Complete CSV/Markdown bytes and workbook cells/styles/merges/widths/heights compare without body masks against an explicit-vars R publication peer; the stronger R default diagnostic paragraphs and counters are asserted separately in all artifacts. Installed help renders the contract. Set `TABTOOLS_STATA_DIR` to the pinned export; missing configuration/oracle is incomplete. No producer-estimate parity claim. |
 | `crossval_session_sinks.R` | yes, crossval/core/full | Pinned Stata 2.5.1 actual Markdown files verify first replacement, subsequent append, repeated setting, A/B/A, clear/re-set, explicit replacement and ordinary explicit-sheet gating. Five literal title sequences and full Markdown snapshots compare; installed workbook contents/help verify R's deliberate unrelated-sheet preservation. Missing `TABTOOLS_STATA_DIR` or native oracle is incomplete. |
+| `crossval_table1_primary.R` | yes, crossval/core/full | Authenticated Stata 2.5.1 T38–T44: exact primary/strict/unmasked weighted ESS and unweighted contrasts, full grids, analytical SMD, native modes/counters and suppression column identities; value-column versus numeric header selectors, descriptor N, repeated entries, native refusals and R's stronger protected-ESS refusal. Immutable full helper hashes and shadow-adopath negative controls. |
 | `crossval_smd_balance.R` | yes | `table1_tc(smd = TRUE)` balance statistics against independent implementations. `smdtype = "population"` (McCaffrey et al. 2013 eq. 5) against cobalt 4.6.3 (`pairwise = FALSE, s.d.denom = "all"`), unweighted and under `wt`, and against twang 2.6.2 `mnps()` ATE eq. 5 values, unweighted and with twang's own weights. `"maxpair"` against cobalt (`pairwise = TRUE, s.d.denom = "pooled"`, unweighted; cobalt keeps the unweighted SD under weights, so weighted maxpair is checked through the two-group identity maxpair = \|pair\|), and categorical maxpair against a base-R Yang-Dalton oracle. `"pair"` and `smdpair` against cobalt on the two compared arms. Also: fweight equals the record-expanded data for every type, and `wtcompare` with `smdtype`. cobalt's `Min.Diff`/`Max.Diff` are signed extremes, so the comparison takes the larger absolute value. The categorical fixture puts the largest imbalance on the first and then the last level, so a dropped level cannot hide. A direct Stata 2.5.1 matrix (set `TABTOOLS_STATA_DIR` to its ado directory) checks population/maxpair with unweighted, importance-weighted (`wt`) and frequency-weighted data for continuous, log-continuous, binary and categorical rows. Each row kind also has a case with no values in one group, while the other rows retain finite SMDs: 30 calls, 120 numeric cells plus exact type/note metadata. Stata logs and inputs are cleaned from a unique scratch directory. Missing Stata/source configuration is reported as incomplete by the existing runner. |
 | `demo_parity.R` | yes | The R demo (`qa/demo/demo_tabtools.R`) against the Stata demo: runs `tests/testthat/test-demo-parity.R` (every ported sheet, the console log and its Markdown, the Markdown report; `golden/demo/manifest.csv`). Fails on a skip too. `--update` regenerates the Stata side (see the parity harness below). |
 | `test_adversarial_descriptive.R` | yes | Observed and weighted denominators, covariate-specific missingness, lognormal exclusions, frequency expansion, row percentages, retained-sample weight cutpoints and ESS across extreme scales. |
@@ -173,7 +203,7 @@ Fit guards use stored diagnostics rather than treating every warning as failure.
 | `adversarial` | The `test_adversarial_*.R` files listed above. |
 | `sample` | The `test_sample_accounting_*.R` files listed above. |
 | `interaction` | The `test_interaction_matrix_*.R` files listed above. |
-| `crossval` | `crossval_smd_balance.R`, `crossval_puttab_layout.R`, `crossval_regtab_formats.R`, `crossval_puttab_flat.R`, `crossval_session_sinks.R`. |
+| `crossval` | `crossval_smd_balance.R`, `crossval_puttab_layout.R`, `crossval_regtab_formats.R`, `crossval_puttab_flat.R`, `crossval_session_sinks.R`, `crossval_table1_primary.R`. |
 | `quick` | `adversarial` plus `sample`. |
 | `core` | `quick` plus `interaction`, `crossval`, `check_examples.R` and `validation_wttab.R`. |
 | `full` (default) | `core` plus `bench_fisher.R`, `bench_fweight.R` and `demo_parity.R`. |
@@ -262,7 +292,7 @@ styling, validation and provenance through composition.
 
 | Export | Fast lane (`tests/testthat/`) | QA lane |
 |---|---|---|
-| `table1_tc()`, `desctab()` | `test-golden-table1.R` (every table1 golden); `test-table1-*.R` (engine, weights, fweight tests, validation, review fixes, H7/H10/H17 in `test-table1-hardening.R`); `test-smallcells-*.R`; `test-classifier-units.R`, `test-golden-classifier.R` (automatic typing); `test-writers-hardening.R` (H8 targets); `test-codex-audit.R` (D1 weight scale, D5 typing); `test-table1-smdtype.R` (`smdtype`, `smdpair`, pair header and footnote); `test-adversarial-descriptive.R`; `test-sample-accounting-descriptive.R` | `check_examples.R`, `bench_fisher.R`, `bench_fweight.R`, `test_adversarial_descriptive.R`, `test_sample_accounting_descriptive.R`, `crossval_smd_balance.R` (`smdtype`, `smdpair`) |
+| `table1_tc()`, `desctab()` | `test-golden-table1.R` (every table1 golden); `test-table1-*.R` (engine, weights, fweight tests, validation, review fixes, H7/H10/H17 in `test-table1-hardening.R`); `test-smallcells-*.R`; `test-classifier-units.R`, `test-golden-classifier.R` (automatic typing); `test-writers-hardening.R` (H8 targets); `test-codex-audit.R` (D1 weight scale, D5 typing); `test-table1-smdtype.R` (`smdtype`, `smdpair`, pair header and footnote); `test-adversarial-descriptive.R`; `test-sample-accounting-descriptive.R` | `check_examples.R`, `bench_fisher.R`, `bench_fweight.R`, `test_adversarial_descriptive.R`, `test_sample_accounting_descriptive.R`, `crossval_smd_balance.R` (`smdtype`, `smdpair`), `crossval_table1_primary.R` (T38–T44 masks, ESS, replacement selectors) |
 | `regtab()` | `test-golden-regtab.R` (every regtab golden); `test-regtab-*.R`; `test-stubs.R` (the model allow-list); `test-model-zoo.R`; `test-writers-hardening.R` (H8); `test-codex-audit.R` (R1, R2 GEE; R4 outcome identity); `test-adversarial-regression.R`; `test-sample-accounting-models.R`; `test-regtab-formats-v251.R` (full formats, labels, file sinks); `test-tt-flat-v251.R` (source states and keys) | `check_examples.R`, `test_adversarial_regression.R`, `test_sample_accounting_models.R`, `crossval_regtab_formats.R` |
 | `tt_vcov()`, `tt_vce_types()`, `tt_ci_methods()` | `test-regtab-vce.R`, `test-regtab-5w-review.R`, `test-regtab-generics.R`, `test-regtab-gee.R`, `test-regtab-h19-gee-scale.R`, `test-codex-audit.R` (R1, R2, R3); `test-adversarial-regression.R` | `check_examples.R`, `test_adversarial_regression.R` |
 | `tt_mi()` | `test-regtab-mi.R` (MI01-MI08, mice integration), `test-regtab-stats-tokens.R` (`mi_m`, `fmi`), `test-codex-audit.R` (R3: `tt_vcov()` refuses what `regtab()` refuses); `test-adversarial-regression.R`, `test-adversarial-mi-identity.R`; `test-sample-accounting-models.R` | `check_examples.R`, `test_adversarial_regression.R`, `test_adversarial_mi_identity.R`, `test_sample_accounting_models.R` |

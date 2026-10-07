@@ -191,7 +191,7 @@ test_that("pipeline: sinks share one redacted source; r(table) carries .d", {
   tt <- table1_tc(sc_pipeline_data("sc2x2"), by = "group", vars = "category cat", total = "after",
                   test = TRUE, statistic = TRUE, smd = TRUE, smallcells = 5, title = "Synthetic small cells",
                   xlsx = xlsx, csv = csv, markdown = md)
-  expect_identical(tt$stored$smallcells, 5)
+  expect_identical(tt$stored$smallcells$threshold, 5L)
   expect_identical(c(tt$stored$N_primary_suppressed, tt$stored$N_secondary_suppressed), c(2L, 2L))
   expect_gte(tt$stored$N_derived_suppressed, 2L)
   expect_true(all(c(1, 2, 3) %in% tt$stored$suppression))
@@ -211,7 +211,8 @@ test_that("pipeline: sinks share one redacted source; r(table) carries .d", {
   expect_false(any(grepl("2 (20", cells, fixed = TRUE) | grepl("4 (40", cells, fixed = TRUE), na.rm = TRUE))
   # Without smallcells() the same call shows the raw counts and no markers.
   plain <- table1_tc(sc_pipeline_data("sc2x2"), by = "group", vars = "category cat", total = "after")
-  expect_null(plain$stored$smallcells)
+  expect_identical(plain$stored$smallcells,
+                   list(threshold = 0L, mode = "strict", n_masked = 0L, n_linked = 0L))
   expect_false(any(sc_markers(sc_body(plain))))
   expect_identical(sum(grepl("^2 ", sc_body(plain))), 1L)
   expect_identical(sum(grepl("^4 ", sc_body(plain))), 1L)
@@ -239,5 +240,5 @@ test_that("pipeline: smallcells(2) is refused and repeated calls are stable", {
   b <- table1_tc(d, by = "group", vars = "category cat", total = "after", smallcells = 5)
   expect_identical(a, b)
   expect_identical(d, d0)
-  expect_identical(a$stored$smallcells, 5)
+  expect_identical(a$stored$smallcells$threshold, 5L)
 })

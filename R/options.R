@@ -66,12 +66,13 @@
 #' @param smallcells Session-only integer threshold of at least 3, or NULL to
 #'   clear it. Commands with existing small-cell support inherit it when omitted;
 #'   explicit NULL/0 disables it for one call without changing the session.
-#' @param smallcells_mode Session-only `"strict"` or `"primary"` mode transport,
-#'   or NULL to clear it. Currently [table1_tc()] retains strict protection and
-#'   [stratetab()] primary-only publication masking; setting this key does not
-#'   change either command's supported masking behavior.
-#' @param masktext Session-only literal replacement text for existing [stratetab()]
-#'   masks, or NULL to clear it. An explicit command argument wins.
+#' @param smallcells_mode Session-only `"strict"` or `"primary"` Table 1 mode,
+#'   or NULL to clear it. An omitted Table 1 threshold inherits this mode;
+#'   an explicit active threshold defaults strict unless mode is also explicit.
+#'   Disabled Table 1 masking reports strict unless the call selects a mode.
+#'   [stratetab()] retains primary-only publication masking.
+#' @param masktext Session-only literal replacement text for [table1_tc()] and
+#'   [stratetab()] masks, or NULL to clear it. An explicit command argument wins.
 #' @param persist Also write the current formatting defaults to
 #'   `tools::R_user_dir("tabtools", "config")`, reloaded when the package
 #'   loads (Stata's `permanent`). The file is written first: if it cannot

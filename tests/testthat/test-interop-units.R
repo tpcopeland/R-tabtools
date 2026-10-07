@@ -42,13 +42,27 @@ test_that("table1_tc: descriptor merged over both header rows, indents kept", {
 })
 
 test_that("desctab() is table1_tc()", {
+  directory <- ss_local()
+  withr::local_dir(directory)
   d <- interop_small()
   a <- table1_tc(d, by = "arm", vars = c(age = "contn", sex = "cat"), smd = TRUE, nopvalue = TRUE)
   b <- desctab(d, by = "arm", vars = c(age = "contn", sex = "cat"), smd = TRUE, nopvalue = TRUE)
   expect_identical(a, b)
   # Positional arguments and the sheet-without-xlsx rule pass through too.
   expect_identical(desctab(d, c("age", "sex"), "arm"), table1_tc(d, c("age", "sex"), "arm"))
-  expect_error(desctab(d, vars = "age", sheet = "S"), "sheet")
+  # P.5: a requested sheet without a workbook warns before output.
+  settings_before <- tabtools_options()
+  state_before <- as.list(tabtools:::.tt_sink_state, all.names = TRUE)
+  files_before <- list.files(directory, all.files = TRUE, no.. = TRUE)
+  expect_warning(warned <- desctab(d, vars = "age", sheet = "S"),
+                 "^`sheet` ignored; no `xlsx` and no session workbook\\.$",
+                 class = "tabtools_warning_sheet_without_workbook")
+  expect_s3_class(warned, "tt_table")
+  expect_identical(as.data.frame(warned), as.data.frame(table1_tc(d, vars = "age")))
+  expect_false(any(c("xlsx", "sheet", "markdown") %in% names(warned$stored)))
+  expect_identical(tabtools_options(), settings_before)
+  expect_identical(as.list(tabtools:::.tt_sink_state, all.names = TRUE), state_before)
+  expect_identical(list.files(directory, all.files = TRUE, no.. = TRUE), files_before)
 })
 
 test_that("regtab: model block merges and italic reference cells", {

@@ -91,6 +91,10 @@
 .t1_count_cell <- function(cnt, den_slash, perc, o) {
   nstr <- stata_fmt(cnt, o$nformat)
   if (o$slashN) nstr <- paste0(nstr, "/", stata_fmt(den_slash, o$nformat))
+  .t1_count_display(nstr, perc, o)
+}
+
+.t1_count_display <- function(nstr, perc, o) {
   if (!o$percent_n && !o$percent) {
     cola <- nstr
     colb <- paste0("(", perc, ")")
@@ -355,7 +359,8 @@
   simulated <- character()
   blocks <- list()
   varlist <- character()
-  for (spec in specs) {
+  for (si in seq_along(specs)) {
+    spec <- specs[[si]]
     type <- spec$type
     varlist <- c(varlist, spec$name)
     x <- spec$x
@@ -380,6 +385,7 @@
     for (i in seq_along(rows)) {
       rows[[i]]$var <- spec$name
       rows[[i]]$vtype <- type
+      rows[[i]]$spec <- si
       # Stata's factor_sep, for builders that do not set it (the weighted
       # ones): the bare label on a categorical block, else the row label.
       if (is.null(rows[[i]]$key)) rows[[i]]$key <- if (type %in% c("cat", "cate")) spec$label else rows[[1]]$label
@@ -415,7 +421,7 @@
                                       ")"), "0")
         extra[[length(extra) + 1L]] <- list(label = "   Missing", cells = cells, type = "missing_summary",
                                             N = rep(NA_real_, K), has_stats = FALSE, key = r$key,
-                                            var = r$var, vtype = r$vtype)
+                                            var = r$var, vtype = r$vtype, spec = r$spec)
       }
       blocks[[bi]] <- c(blocks[[bi]], extra)
     }
@@ -478,6 +484,7 @@
       p = if (isTRUE(r$has_stats) && !is.null(r$p)) r$p else NA_real_,
       smd = if (isTRUE(r$has_stats) && !is.null(r$smd)) abs(r$smd) else NA_real_,
       key = r$key %||% r$label, var = r$var %||% NA_character_, vtype = r$vtype %||% NA_character_,
+      spec = r$spec %||% NA_integer_,
       stringsAsFactors = FALSE)
   }
   # Stata's N row (descriptor in its label cell) is header row 2; the body
@@ -519,6 +526,7 @@
   stored$types <- paste(vapply(specs, function(s) s$type, ""), collapse = " ")
 
   meta <- list(sheet = sheet, extraspace = isTRUE(o$extraspace))
+  meta$cellreplace_spec <- as.integer(rows$spec)
   # Phase 3: the row records, for small-cell finishing (.t1_finish_pass()).
   if (!is.null(o$wx)) meta$blocks <- blocks
   # desctab.ado (tabtools 2.4.0): the console omits the footnote, so the

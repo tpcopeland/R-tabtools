@@ -46,6 +46,7 @@ run <- c(
   crossval_puttab_layout.R = "puttab/stacktab frames cells, borders, panels, formats and sinks against native Stata 2.5.1",
   crossval_puttab_flat.R = "puttab keyed flat round trips, model spans and explicit diagnostic differences against native Stata 2.5.1",
   crossval_session_sinks.R = "session destinations, successful-path Markdown lifecycle and explicit-sheet gating against pinned native Stata 2.5.1",
+  crossval_table1_primary.R = "Table1 T38–T44 primary/strict ESS, typed modes, exact selectors and protected replacement divergence against authenticated native Stata 2.5.1",
   crossval_smd_balance.R = "table1_tc() smdtype population/maxpair/pair against cobalt and twang",
   demo_parity.R = "the R demo (qa/demo/demo_tabtools.R) against the Stata demo, sheet by sheet (Milestone D)",
   test_adversarial_descriptive.R = "missing values, sparse groups, weight filtering and observed denominators",
@@ -79,7 +80,7 @@ interaction_files <- c("test_interaction_matrix_descriptive.R",
                        "test_interaction_matrix_survival_survey_gee.R",
                        "test_interaction_matrix_composition.R",
                        "test_interaction_matrix_independent.R")
-crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R")
+crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R", "crossval_table1_primary.R")
 testthat_files <- c(adversarial_files, sample_files, interaction_files, crossval_files)
 LANES <- list(
   quick = c(adversarial_files, sample_files),
