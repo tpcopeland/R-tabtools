@@ -8,3 +8,4 @@ tests/testthat/golden/** -text
 tests/testthat/fixtures/** -text
 qa/data/** -text
 qa/demo/data/** -text
+qa/stata/** -text
