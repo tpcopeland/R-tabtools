@@ -177,6 +177,15 @@
   continuous, binary and categorical rows, with importance and frequency
   weights and groups with no values, directly against Stata 2.5.1.
 
+* `regtab()` validates `tt_fitcount()` records against the fits as supplied,
+  before its clogit and lmerTest adaptations, so clogit count statistics and
+  `mincount` work. Frozen fit evidence no longer carries environments
+  embedded in stored calls.
+* `tt_fitcount()` supports lme4 `lmerMod`/`glmerMod` and lmerTest fits,
+  counted from their retained fitting frame against an explicit `data`.
+* `regtab(reftop = TRUE)` on a native interaction block with several base
+  cells is still refused (as in Stata 2.5.1), now with an accurate message.
+
 # tabtools 0.1.1
 
 Bug fixes from the 2026-10-06 audits, plus the Table 1 SMD work that follows

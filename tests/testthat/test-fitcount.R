@@ -198,3 +198,48 @@ test_that("count inputs are per-record vectors before positive-weight subsetting
   logical_source <- d; logical_source$ev <- d$ev > 0
   expect_identical(tt_fitcount(unweighted, "ev", "id", "time", data = logical_source)$counts[["events"]], 3)
 })
+
+test_that("review 2026-10-07 A4: lme4 and lmerTest fits are counted from their retained frame", {
+  skip_if_not_installed("lme4")
+  d <- lme4::sleepstudy
+  d$ev <- as.integer(d$Reaction > 300)
+  m <- lme4::lmer(Reaction ~ Days + (1 | Subject), d)
+  record <- tt_fitcount(m, events = "ev", data = d, terms = TRUE)
+  expect_identical(record$counts[c("obs", "events")], c(obs = 180, events = sum(d$ev)))
+  tt <- regtab(m, fitcounts = record, stats = c("n", "events"))
+  expect_identical(tt$body[[2]][tt$body[[1]] == "Events"], as.character(sum(d$ev)))
+  # Without data the event column is not retained: a clear refusal.
+  expect_error(tt_fitcount(m, events = "ev"), "supply the original fitting `data`",
+    class = "tabtools_error_fitcount")
+  # A declared source must agree with the fitting frame.
+  bad <- d
+  bad$Days[1] <- bad$Days[1] + 1
+  expect_error(tt_fitcount(m, events = "ev", data = bad), "fitting frame field `Days`",
+    class = "tabtools_error_fitcount")
+  g <- suppressMessages(lme4::glmer(ev ~ Days + (1 | Subject), d, family = stats::binomial))
+  gr <- tt_fitcount(g, events = "ev", data = d, terms = TRUE)
+  expect_equal(gr$counts[["events"]], sum(d$ev))
+  skip_if_not_installed("lmerTest")
+  mt <- lmerTest::lmer(Reaction ~ Days + (1 | Subject), d)
+  rt <- tt_fitcount(mt, events = "ev", data = d)
+  expect_identical(rt$identity$class, class(mt))
+  tl <- suppressMessages(regtab(mt, fitcounts = rt, stats = c("n", "events")))
+  expect_identical(tl$body[[2]][tl$body[[1]] == "Events"], as.character(sum(d$ev)))
+  # A record of the lmerMod cast does not authenticate the lmerTest fit.
+  expect_error(suppressMessages(regtab(mt, fitcounts = record)), class = "tabtools_error_fitcount")
+})
+
+test_that("review 2026-10-07 A1: frozen evidence drops environments embedded in calls", {
+  e1 <- new.env()
+  e2 <- new.env()
+  f1 <- y ~ x
+  environment(f1) <- e1
+  f2 <- f1
+  environment(f2) <- e2
+  c1 <- call("coxph", formula = f1, data = quote(d[, 1]))
+  c2 <- call("coxph", formula = f2, data = quote(d[, 1]))
+  expect_false(identical(c1, c2))
+  expect_identical(.fc_freeze(c1), .fc_freeze(c2))
+  # Empty arguments and symbols survive.
+  expect_identical(.fc_freeze(c1)$data, quote(d[, 1]))
+})

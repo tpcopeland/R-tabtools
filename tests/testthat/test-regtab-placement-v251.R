@@ -192,3 +192,17 @@ test_that("transposed plain frames do not claim keyed-flat metadata and publish 
   expect_identical(unname(as.matrix(published$body)), unname(as.matrix(x$body)))
   expect_error(tt_flat(x), class = "tabtools_error_regtab_orientation")
 })
+
+test_that("review 2026-10-07 A3: reftop names the native interaction refusal accurately", {
+  d <- mtcars
+  d$cyl <- factor(d$cyl)
+  d$am <- factor(d$am)
+  expect_error(regtab(lm(mpg ~ cyl * am, d), reftop = TRUE, interactions = "native"),
+    "reftop is not supported for cyl#am: a native interaction block has several base cells",
+    class = "tabtools_error_regtab_layout")
+  # Differing references across models keep their own message.
+  a <- lm(mpg ~ cyl, d)
+  b <- lm(mpg ~ cyl, d, contrasts = list(cyl = contr.treatment(3, base = 2)))
+  expect_error(regtab(a, b, reftop = TRUE), "models use different reference levels of cyl",
+    class = "tabtools_error_regtab_layout")
+})

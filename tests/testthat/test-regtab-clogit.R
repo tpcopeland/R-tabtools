@@ -87,3 +87,30 @@ test_that("stack review: clogit accepts a user-supplied variance", {
   expect_identical(regtab(f, vce = stats::vcov(f))$body, regtab(f)$body)
   expect_identical(regtab(f, vce = 4 * stats::vcov(f))$footnote, "Standard errors: user-supplied.")
 })
+
+test_that("review 2026-10-07 A1: clogit fit counts authenticate the supplied fit", {
+  skip_if_not_installed("survival")
+  d <- datasets::infert
+  d$sp <- factor(d$spontaneous)
+  f <- local({
+    coxph <- survival::coxph
+    Surv <- survival::Surv
+    survival::clogit(case ~ sp + induced + survival::strata(stratum), data = d)
+  })
+  record <- tt_fitcount(f, events = "case", people = "stratum", data = d, terms = TRUE)
+  tt <- regtab(f, fitcounts = record, stats = c("n", "people"), statlabels = c(people = "Groups"))
+  last <- nrow(tt$body)
+  expect_identical(tt$body[[1]][(last - 1L):last], c("Observations", "Groups"))
+  expect_identical(tt$body[[2]][(last - 1L):last], c("248", "83"))
+  # 2.sp has 24 events: masked at mincount 30; 1.sp (31) is kept.
+  tm <- regtab(f, fitcounts = record, mincount = 30)
+  r <- tm$meta$regtab_rows
+  expect_identical(r$status[match(c("0.sp", "1.sp", "2.sp"), r$key)], c("ref", "est", "masked"))
+  # The shimmed formula environment is regtab's own; a different fit still fails.
+  g <- local({
+    coxph <- survival::coxph
+    Surv <- survival::Surv
+    survival::clogit(case ~ sp + survival::strata(stratum), data = d)
+  })
+  expect_error(regtab(g, fitcounts = record), class = "tabtools_error_fitcount")
+})

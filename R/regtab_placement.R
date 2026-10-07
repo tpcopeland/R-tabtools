@@ -138,7 +138,15 @@
   order <- seq_len(nrow(u$rows))
   for (b in unique(block[nzchar(parent)])) {
     ix <- which(block == b & nzchar(parent))
-    bases <- ix[Reduce(`|`, lapply(u$cells, function(c) c$status[ix] %in% c("base", "ref")))]
+    is_base <- lapply(u$cells, function(c) c$status[ix] %in% c("base", "ref"))
+    bases <- ix[Reduce(`|`, is_base)]
+    # A native interaction block has a base cell per omitted level
+    # combination, so one model alone can hold several (Stata 2.5.1 refuses
+    # this too); only otherwise do several bases mean differing references.
+    if (any(vapply(is_base, sum, 0L) > 1L)) {
+      .rt_layout_abort(paste0("reftop is not supported for ", parent[ix[1L]],
+        ": a native interaction block has several base cells, so no single reference row can move to the top."))
+    }
     if (length(bases) > 1L) .rt_layout_abort(paste0("reftop: models use different reference levels of ", parent[ix[1L]], "."))
     if (length(bases)) order[ix] <- c(bases, setdiff(ix, bases))
   }

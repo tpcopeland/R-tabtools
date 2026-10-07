@@ -15,6 +15,12 @@
 #' Invalid count inputs, ambiguous sample/capability evidence and stale records
 #' signal `tabtools_error_fitcount`. Frozen formula environments are not a
 #' historical-source claim; field availability and source origin are explicit.
+#'
+#' lme4 `lmerMod`/`glmerMod` fits (and lmerTest fits, counted as the
+#' `lmerMod` that [regtab()] shows) are counted from the fitting frame they
+#' retain; they keep no source data, so the event, people and exposure columns
+#' come from an explicit `data`, which must agree with that frame. Survey
+#' designs, multiply imputed models and [regtab_uv()] stacks are refused.
 #' @param fit A supported fitted model, with unambiguous accepted row identities.
 #' @param events Exact column name containing nonnegative integer event counts.
 #' @param people Optional exact column name of nonmissing person identifiers.
@@ -36,6 +42,12 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
   if (inherits(fit, c("tt_mi", "tt_uv")) || is.data.frame(fit)) {
     .fc_abort("Fit counts require one fitted model with an estimation sample.")
   }
+  # The record authenticates the fit as supplied; an lmerTest fit is then
+  # counted as the lmerMod regtab() shows (the cast keeps frame and data).
+  original <- if (inherits(fit, "lmerModLmerTest")) .fc_evidence(fit) else NULL
+  if (!is.null(original)) {
+    fit <- tryCatch(methods::as(fit, "lmerMod"), error = function(e) .fc_abort("The lmerTest fit could not be converted to lmerMod.", e))
+  }
   .rt_check_model(fit, 1L)
   if (!is.logical(terms) || length(terms) != 1L || is.na(terms)) .fc_abort("`terms` must be TRUE or FALSE.")
   for (nm in c("events", "people", "exposure")) {
@@ -48,7 +60,7 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
   if (inherits(fit, c("svyglm", "svrepglm"))) {
     .fc_abort("Survey fit counts require unambiguous analysis-population evidence; survey capture is unsupported.")
   }
-  original <- .fc_evidence(fit)
+  if (is.null(original)) original <- .fc_evidence(fit)
   retained <- .fc_retained_frame(fit)
   src <- data
   origin <- "caller_declared"
@@ -83,11 +95,21 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
       if (!identical(.fc_freeze(source[[nm]]), .fc_freeze(held[[nm]]))) .fc_abort(paste0("Declared source disagrees with retained field `", nm, "`."))
     }
   }
-  mf <- if (is.null(data) && !is.null(retained)) retained else
+  # An S4 fit (lme4 merMod) keeps its fitting frame in an immutable slot and
+  # cannot be re-evaluated with `$<-`: the retained frame is the fitting
+  # frame, and a declared source must agree with it value for value below.
+  mf <- if (!is.null(retained) && (is.null(data) || isS4(fit))) retained else
     tryCatch(.rt_align_frame(.rt_eval_frame(fit, src), rn), error = function(e) {
       .fc_abort("The declared source cannot supply the fitting model frame.", e)
     })
   if (!is.data.frame(mf) || !identical(rownames(mf), rn)) .fc_abort("Declared frame row identities disagree with the fit.")
+  if (isS4(fit) && !is.null(data)) {
+    for (nm in intersect(names(retained), names(source))) {
+      if (!identical(.fc_plain_values(source[[nm]]), .fc_plain_values(retained[[nm]]))) {
+        .fc_abort(paste0("Declared source disagrees with the fitting frame field `", nm, "`."))
+      }
+    }
+  }
   if (!is.null(retained)) {
     # Rebuilt survival frames can lose fit-retained Stata label/code metadata.
     # Restore from the declared, value-checked source, then compare exactly;
@@ -135,7 +157,10 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
   if (!any(take)) .fc_abort("The estimation sample is empty.")
   get_input <- function(name) {
     if (is.null(name)) return(NULL)
-    if (!name %in% names(source)) .fc_abort(paste0("Required count column `", name, "` is unavailable."))
+    if (!name %in% names(source)) {
+      .fc_abort(paste0("Required count column `", name, "` is unavailable",
+                       if (identical(origin, "retained_fit")) " in the data the fit retained; supply the original fitting `data`." else "."))
+    }
     value <- source[[name]]
     # Check the column before subsetting: [take] would flatten a matrix
     # and silently count more than one value per accepted record.
@@ -197,6 +222,14 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
   out
 }
 
+# Values without metadata attributes, for comparing a declared source column
+# with a model-frame column that may have dropped its labels.
+.fc_plain_values <- function(x) {
+  if (is.factor(x)) return(as.character(x))
+  if (is.matrix(x) || !is.atomic(x)) return(.fc_freeze(x))
+  as.vector(x)
+}
+
 .fc_abort <- function(message, parent = NULL) {
   cli::cli_abort(message, class = "tabtools_error_fitcount", parent = parent, call = NULL)
 }
@@ -217,6 +250,13 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
     x <- lapply(x, .fc_freeze)
   } else if (is.pairlist(x)) {
     x <- as.pairlist(lapply(x, .fc_freeze))
+  } else if (is.call(x)) {
+    # Calls can embed evaluated objects carrying environments (clogit puts
+    # its formula into the stored coxph call); symbols, including the empty
+    # argument, are left as they are.
+    for (i in seq_along(x)) {
+      if (!is.symbol(x[[i]]) && !is.null(x[[i]])) x[[i]] <- .fc_freeze(x[[i]])
+    }
   }
   if (!is.null(at)) {
     at <- lapply(at, function(a) if (is.environment(a)) baseenv() else .fc_freeze(a))
@@ -265,7 +305,10 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
   invisible(TRUE)
 }
 
-.fc_prepare <- function(fits, records, mincount) {
+# `supplied` holds the fits as the caller passed them (before regtab's
+# lmerTest cast and clogit environment shim); records are validated against
+# those, then their frozen frames are restored onto the prepared `fits`.
+.fc_prepare <- function(fits, records, mincount, supplied = fits) {
   M <- length(fits)
   if (inherits(records, "tt_fitcount") && M == 1L) records <- list(records)
   if (is.null(records)) records <- rep(list(NULL), M)
@@ -279,7 +322,7 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
     if (is.null(records[[m]])) {
       if (!is.null(mincount)) .fc_abort(paste0("Model ", m, " requires fit counts with `terms = TRUE` for mincount."))
     } else {
-      .fc_validate(records[[m]], fits[[m]])
+      .fc_validate(records[[m]], supplied[[m]])
       if (!is.null(mincount) && !nrow(records[[m]]$states)) .fc_abort("`mincount` requires fit counts captured with `terms = TRUE`.")
       fits[[m]] <- .fc_restore(fits[[m]], records[[m]]$snapshot$frame, records[[m]]$snapshot$source)
     }

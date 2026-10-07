@@ -1033,6 +1033,10 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
   if (!is.null(nointercept) && (!is.logical(nointercept) || length(nointercept) != 1L || is.na(nointercept))) {
     cli::cli_abort("{.arg nointercept} must be TRUE, FALSE, or NULL.", call = NULL)
   }
+  # Fit-count records authenticate the fit the caller captured, so they are
+  # checked against the fits as supplied, before the lmerTest cast and the
+  # clogit formula-environment shim below rewrite them.
+  supplied_fits <- fits
   # (Assigned only when cast: `fits[[i]] <- NULL` would delete an element.)
   for (i in seq_along(fits)) if (inherits(fits[[i]], "lmerModLmerTest")) fits[[i]] <- .rt_cast_lmertest(fits[[i]], i)
   for (i in seq_along(fits)) if (inherits(fits[[i]], "clogit")) fits[[i]] <- .rt_clogit_env(fits[[i]])
@@ -1052,7 +1056,7 @@ regtab <- function(..., models = NULL, coef = NULL, sep = ", ",
   sample_accounting <- lapply(seq_along(fits), function(i) {
     .tt_sample_model_population(fits[[i]], "fit", model = i)
   })
-  counts <- .fc_prepare(fits, fitcounts, mincount)
+  counts <- .fc_prepare(fits, fitcounts, mincount, supplied = supplied_fits)
   fits <- counts$fits
   fitcounts <- counts$records
   fits <- .rt_fg_tag(fits, finegray)
