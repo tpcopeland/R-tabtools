@@ -47,7 +47,7 @@ test_that("5.18: per-model user variances, with Stata's beside them; the footnot
   tv <- regtab(f, f2, vce = list(stats::vcov(f), "robust"), models = c("A", "B"), vce_note = TRUE)
   expect_identical(tv$footnote, "Standard errors, A: user-supplied; B: robust.")
   fn <- regtab(f, vce = stats::vcov(f), footnote = "Source: mtcars")$footnote
-  expect_identical(fn, "Source: mtcars. Standard errors: user-supplied.")
+  expect_identical(fn, "Source: mtcars \\ Standard errors: user-supplied.")
 })
 
 test_that("5.18: invalid matrices, classes and combinations are refused", {

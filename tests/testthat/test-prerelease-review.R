@@ -176,7 +176,7 @@ test_that("vce_note: one '<model>: <variance>' clause per model", {
                                            vce_note = TRUE))$footnote,
                    "Standard errors, IPTW, robust: robust.")
   expect_identical(regtab(g, vce = "robust", vce_note = TRUE, footnote = "Weighted")$footnote,
-                   "Weighted. Standard errors: robust.")
+                   "Weighted \\ Standard errors: robust.")
 })
 
 test_that("weighted Efron coxph: the note and the blank statistics only on tied failure times", {
