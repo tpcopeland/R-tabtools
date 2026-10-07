@@ -73,8 +73,10 @@ test_that("session options query, individual clearing and validation are atomic"
                    markdown = md, headershade = TRUE, smallcells = 3,
                    smallcells_mode = "primary", masktext = "")
   query <- tabtools_options()
-  expect_identical(query$workbook, tabtools:::.tt_path_key(book))
-  expect_identical(query$markdown, tabtools:::.tt_path_key(md))
+  # The session keeps the absolute spelling (case and link names kept, e.g.
+  # macOS /var -> /private/var); identity comparison uses .tt_path_key().
+  expect_identical(query$workbook, tabtools:::.tt_absolute_sink_path(book))
+  expect_identical(query$markdown, tabtools:::.tt_absolute_sink_path(md))
   expect_identical(query$smallcells, 3L)
   expect_identical(query$masktext, "")
   before <- tabtools_options()
@@ -97,8 +99,8 @@ test_that("session options query, individual clearing and validation are atomic"
   withr::local_dir(directory)
   tabtools_options(workbook = "./book.xlsx", markdown = "./report.md")
   withr::local_dir(dirname(directory))
-  expect_identical(tabtools_options()$workbook, tabtools:::.tt_path_key(book))
-  expect_identical(tabtools_options()$markdown, tabtools:::.tt_path_key(md))
+  expect_identical(tabtools_options()$workbook, tabtools:::.tt_absolute_sink_path(book))
+  expect_identical(tabtools_options()$markdown, tabtools:::.tt_absolute_sink_path(md))
 })
 
 test_that("persist saves only formatting and rejects explicit session changes", {

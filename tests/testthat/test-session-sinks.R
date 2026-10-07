@@ -225,7 +225,8 @@ test_that("stacktab staging and rollback never mark original paths before commit
   tabtools_options(markdown = md)
   copy <- tabtools:::.tt_file_copy
   local_mocked_bindings(.tt_file_copy = function(from, to, overwrite = FALSE) {
-    if (identical(to, md) && identical(basename(from), "out.md")) {
+    if (identical(tabtools:::.tt_path_key(to), tabtools:::.tt_path_key(md)) &&
+        identical(basename(from), "out.md")) {
       writeLines("PARTIAL COMMIT", to)
       return(FALSE)
     }
