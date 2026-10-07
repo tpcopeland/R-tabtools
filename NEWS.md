@@ -1,5 +1,23 @@
 # tabtools (development version)
 
+* `outtab()` adds binary outcome counts and ordered crude/adjusted ratios,
+  separately verified sample populations, per-fit diagnostics and primary
+  publication masks that preserve raw analytical returns.
+
+* `ratetab()` adds separate grouping sections, common multi-outcome samples,
+  recurrent event counts, exact/log Poisson and saturated clustered intervals,
+  frequency replication, primary masks, all publication sinks, and raw
+  analytical saving with preserved grouping labels and collision mapping.
+  Zero-event exact upper limits apply under every method. Cluster correction
+  uses the full fitted sample; a single event-contributing cluster can retain
+  an interval when other clusters contribute exposure.
+
+* `tabcell()` formats seven scalar/vector cell forms with aligned source,
+  inference, state and masking provenance. Exact binomial/Poisson limits and
+  log-rate intervals follow the pinned native rules. Protected leaf inputs
+  and reconstructive interval companions are redacted. Cell columns publish
+  through `puttab()` and retain selected-row provenance in parent tables.
+
 * Retained missing character/factor groups in computed rates now have explicit
   category labels; computed event/no-time errors use a consistent class.
 * Verify copied export bytes before success/history, and retain original files

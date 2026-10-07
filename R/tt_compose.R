@@ -56,6 +56,7 @@
 #' @export
 tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   tabs <- .tt_compose_args(list(...), "tt_merge")
+  .tt_check_unkeyed_compose(tabs)
   if (is.null(spanners) && !is.null(names(tabs)) && all(nzchar(names(tabs)))) spanners <- names(tabs)
   if (!is.null(spanners) && (!is.character(spanners) || length(spanners) != length(tabs) || anyNA(spanners))) {
     cli::cli_abort("{.arg spanners} must be one label per table ({length(tabs)}).", call = NULL)
@@ -208,6 +209,7 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   meta$pvals <- pv
   meta$regtab_rows <- NULL
   meta$flat <- .tt_flat_merge_metadata(tabs, keys, rows, head_pos, orig_keys)
+  meta$cell_provenance <- .tc_merge_metadata(tabs, keys)
   meta$stack_group_rows <- if (length(head_pos)) head_pos
   meta$stars_notes <- unique(unlist(lapply(tabs, .tt_stars_note), use.names = FALSE))
   meta$xlsx_footnote <- .tt_compose_xlsx_footnote(tabs, footnote)
@@ -263,6 +265,7 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
 #' @export
 tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   tabs <- .tt_compose_args(list(...), "tt_stack")
+  .tt_check_unkeyed_compose(tabs)
   if (is.null(groups) && !is.null(names(tabs)) && all(nzchar(names(tabs)))) groups <- names(tabs)
   if (!is.null(groups) && (!is.character(groups) || length(groups) != length(tabs) || anyNA(groups))) {
     cli::cli_abort("{.arg groups} must be one label per table ({length(tabs)}).", call = NULL)
@@ -327,6 +330,7 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   meta$pvals <- pv
   meta$regtab_rows <- NULL
   meta$flat <- .tt_flat_stack_metadata(tabs, groups)
+  meta$cell_provenance <- .tc_stack_metadata(tabs, groups)
   meta$stack_group_rows <- if (length(head_rows)) head_rows
   meta$stars_notes <- unique(unlist(lapply(tabs, .tt_stars_note), use.names = FALSE))
   meta$xlsx_footnote <- .tt_compose_xlsx_footnote(tabs, footnote)
@@ -382,7 +386,8 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   if (length(tabs) < 2L) cli::cli_abort("{.fn {fn}} needs two or more tables.", call = NULL)
   for (k in seq_along(tabs)) {
     if (!inherits(tabs[[k]], "tt_table")) {
-      cli::cli_abort("Argument {k} of {.fn {fn}} is not a {.cls tt_table}.", call = NULL)
+      cli::cli_abort("Argument {k} of {.fn {fn}} is not a {.cls tt_table}.",
+        class = "tabtools_error_composition", call = NULL)
     }
     validate_tt_table(tabs[[k]])
   }
@@ -507,4 +512,13 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
     }, if (field == "effect_additive") NA else "")
   }
   out
+}
+
+.tt_check_unkeyed_compose <- function(tabs) {
+  if (any(vapply(tabs, function(x) inherits(x, "tt_table") &&
+      x$command %in% c("ratetab", "outtab", "crosstab", "corrtab", "survtab"), TRUE))) {
+    cli::cli_abort("Unkeyed summary tables have no fitted-model composition identities; publish their plain frames with puttab or stacktab.",
+      class = "tabtools_error_composition", call = NULL)
+  }
+  invisible(NULL)
 }

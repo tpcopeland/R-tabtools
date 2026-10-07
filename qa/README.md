@@ -4,6 +4,17 @@ This directory is `.Rbuildignore`d. It holds the QA runner and benchmarks
 (below) and the Stata parity harness. The goldens the harness writes live in
 `tests/testthat/golden/`, so tests and CI never need Stata.
 
+## Leaf, saved-rate and binary-outcome QA
+
+`crossval_tabcell.R` compares exact binomial/Poisson tails with independent
+stats oracles and installed S3, scale and protected-companion contracts.
+`test_ratetab.R` covers installed rate grouping, cluster variance, masks and
+all sinks; `crossval_ratetab.R` authenticates and compares RT001–RT012 actual
+native cases. `crossval_outtab.R` checks OT001–OT009 actual native grids,
+full sample identities, callback retention and modified-Poisson/logit ratios.
+These scripts are registered in the curated cross-validation/full lanes;
+native execution is local and retains the pinned source closure.
+
 ## Transitional Phase 2 golden baselines
 
 The default golden directory retains authentic Stata tabtools 2.1.14 / fvgen
@@ -414,3 +425,5 @@ demo <- new.env()                 # its objects stay out of your workspace
 demo$out_dir <- "tabtools_demo"   # optional; the default is a folder in tempdir()
 source("qa/demo/demo_tabtools.R", local = demo)
 ```
+
+The native leaf lane `crossval_tabcell_native.R` consumes a root-authenticated TC001–TC006 capture via `TABTOOLS_TABCELL_NATIVE_DIR`; its producer and exact return/sink contracts are documented in `TABCELL_NATIVE.md`. `crossval_outtab.R` consumes its authenticated nine-case capture via `TABTOOLS_OUTTAB_NATIVE_DIR`. Both fail when required accepted artifacts are absent.

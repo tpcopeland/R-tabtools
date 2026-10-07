@@ -47,6 +47,11 @@ run <- c(
   crossval_puttab_flat.R = "puttab keyed flat round trips, model spans and explicit diagnostic differences against native Stata 2.5.1",
   crossval_session_sinks.R = "session destinations, successful-path Markdown lifecycle and explicit-sheet gating against pinned native Stata 2.5.1",
   crossval_table1_primary.R = "Table1 T38–T44 primary/strict ESS, typed modes, exact selectors and protected replacement divergence against authenticated native Stata 2.5.1",
+  crossval_tabcell_native.R = "TC001–TC006 authenticated native leaf returns, generated vectors and parent sinks",
+  crossval_tabcell.R = "exact leaf intervals, independent tail and installed S3 contracts",
+  test_ratetab.R = "installed separate groups, clustered variance, masking and all rate sinks",
+  crossval_ratetab.R = "RT001–RT012 authentic Stata2.5.1 rates and numeric returns",
+  crossval_outtab.R = "OT001–OT009 authentic binary outcome grids, sample populations and ratio inference",
   crossval_smd_balance.R = "table1_tc() smdtype population/maxpair/pair against cobalt and twang",
   demo_parity.R = "the R demo (qa/demo/demo_tabtools.R) against the Stata demo, sheet by sheet (Milestone D)",
   test_adversarial_descriptive.R = "missing values, sparse groups, weight filtering and observed denominators",
@@ -80,8 +85,9 @@ interaction_files <- c("test_interaction_matrix_descriptive.R",
                        "test_interaction_matrix_survival_survey_gee.R",
                        "test_interaction_matrix_composition.R",
                        "test_interaction_matrix_independent.R")
-crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R", "crossval_table1_primary.R")
-testthat_files <- c(adversarial_files, sample_files, interaction_files, crossval_files)
+crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R", "crossval_table1_primary.R", "crossval_tabcell.R", "crossval_tabcell_native.R", "test_ratetab.R", "crossval_ratetab.R", "crossval_outtab.R")
+testthat_files <- c(adversarial_files, sample_files, interaction_files,
+                   setdiff(crossval_files, "crossval_outtab.R"))
 LANES <- list(
   quick = c(adversarial_files, sample_files),
   core = c(testthat_files, "check_examples.R", "validation_wttab.R"),

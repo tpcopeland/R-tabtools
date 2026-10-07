@@ -243,6 +243,10 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
                    hlines = NULL, vlines = NULL, boldrows = NULL, panel = NULL,
                    panelheader = NULL, panelinline = FALSE, noindent = FALSE,
                    spanheader = NULL, nformat = NULL, blockheader = FALSE) {
+  if (inherits(x, "tt_cell")) x <- as.data.frame(x)
+  if (is.data.frame(x)) {
+    for (j in seq_along(x)) if (inherits(x[[j]], "tt_cell")) .tc_validate(x[[j]])
+  }
   sinks <- .tt_resolve_sinks(
     list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
          sheet = sheet, headershade = headershade),
@@ -313,6 +317,8 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
                       sheet = sheet, source = src$source, sample = src$sample,
                       panels = src$panels, spans = spans, rules = rules)
   tt$meta$flat_source <- .puttab_flat_metadata(src)
+  tt$meta$cell_provenance <- .tc_parent_metadata(src)
+  if (!is.null(tt$meta$cell_provenance)) tt$stored$cell_provenance <- tt$meta$cell_provenance
 
   .puttab_export(tt, xlsx = xlsx, csv = csv, markdown = markdown,
                  sheet = sheet, sheet_given = sheet_given, mdappend = mdappend, open = open)
@@ -438,7 +444,8 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   # A table without a header row keeps none (review F5).
   header <- if (noheader || !length(x$header)) NULL else .md_header(x, escape = FALSE)
   list(header = header, body = body, source = "table", title = x$title, footnote = x$footnote,
-       sample = x$meta[["sample_accounting", exact = TRUE]])
+       sample = x$meta[["sample_accounting", exact = TRUE]],
+       cell_provenance = x$meta[["cell_provenance", exact = TRUE]])
 }
 
 .puttab_from_matrix <- function(x, digits, noheader, nformat = NULL) {
@@ -529,8 +536,17 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   body <- vapply(idx, function(j) .puttab_fmt_col(.puttab_subset_col(x[[j]], keep), digits, attr(x[[j]], "format.stata", exact = TRUE), nformat),
                  character(n), USE.NAMES = FALSE)
   body <- matrix(body, n)
+  leaf <- lapply(seq_along(idx), function(k) {
+    column <- x[[idx[k]]]
+    if (!inherits(column, "tt_cell")) return(NULL)
+    selected <- column[keep]
+    list(body_column = as.integer(k), source_column = use[k],
+         source_rows = which(keep), provenance = attr(selected, "provenance", exact = TRUE))
+  })
+  leaf <- Filter(Negate(is.null), leaf)
   list(header = unname(header), body = body, source = "data",
-       sample = attr(x, "sample_accounting", exact = TRUE), source_rows = which(keep))
+       sample = attr(x, "sample_accounting", exact = TRUE), source_rows = which(keep),
+       cell_provenance = if (length(leaf)) leaf else NULL)
 }
 
 .puttab_is_headerrow <- function(d) {
