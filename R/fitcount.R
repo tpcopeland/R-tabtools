@@ -253,9 +253,10 @@ tt_fitcount <- function(fit, events, people = NULL, exposure = NULL,
   } else if (is.call(x)) {
     # Calls can embed evaluated objects carrying environments (clogit puts
     # its formula into the stored coxph call); symbols, including the empty
-    # argument, are left as they are.
+    # argument, are left as they are; an embedded environment becomes NULL
+    # in place, keeping the argument positions.
     for (i in seq_along(x)) {
-      if (!is.symbol(x[[i]]) && !is.null(x[[i]])) x[[i]] <- .fc_freeze(x[[i]])
+      if (!is.symbol(x[[i]]) && !is.null(x[[i]])) x[i] <- list(.fc_freeze(x[[i]]))
     }
   }
   if (!is.null(at)) {

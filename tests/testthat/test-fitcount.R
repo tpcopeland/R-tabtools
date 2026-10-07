@@ -242,4 +242,8 @@ test_that("review 2026-10-07 A1: frozen evidence drops environments embedded in 
   expect_identical(.fc_freeze(c1), .fc_freeze(c2))
   # Empty arguments and symbols survive.
   expect_identical(.fc_freeze(c1)$data, quote(d[, 1]))
+  # An environment argument is neutralised without shifting positions.
+  c3 <- call("f", e1, quote(x))
+  expect_identical(length(.fc_freeze(c3)), 3L)
+  expect_identical(.fc_freeze(c3), .fc_freeze(call("f", e2, quote(x))))
 })
