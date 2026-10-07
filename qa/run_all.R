@@ -49,6 +49,8 @@ run <- c(
   crossval_table1_primary.R = "Table1 T38–T44 primary/strict ESS, typed modes, exact selectors and protected replacement divergence against authenticated native Stata 2.5.1",
   crossval_smd_balance.R = "table1_tc() smdtype population/maxpair/pair against cobalt and twang",
   demo_parity.R = "the R demo (qa/demo/demo_tabtools.R) against the Stata demo, sheet by sheet (Milestone D)",
+  test_demo_source.R = "complete native demo source/storage/schema/RDS integrity, strict staging CLI and authentic manifest routes",
+  test_demo_aipw.R = "demo AIPW joint estimating equations: literal covariance, independent numerical Jacobian and full-precision native cohort controls",
   test_adversarial_descriptive.R = "missing values, sparse groups, weight filtering and observed denominators",
   test_adversarial_regression.R = "complete-case models, unavailable terms and unreliable model inference",
   test_adversarial_rates_effects.R = "incomplete exposure/event data, Cox samples and unavailable effect inference",
@@ -81,7 +83,7 @@ interaction_files <- c("test_interaction_matrix_descriptive.R",
                        "test_interaction_matrix_composition.R",
                        "test_interaction_matrix_independent.R")
 crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R", "crossval_table1_primary.R")
-testthat_files <- c(adversarial_files, sample_files, interaction_files, crossval_files)
+testthat_files <- c(adversarial_files, sample_files, interaction_files, crossval_files, "test_demo_source.R", "test_demo_aipw.R")
 LANES <- list(
   quick = c(adversarial_files, sample_files),
   core = c(testthat_files, "check_examples.R", "validation_wttab.R"),

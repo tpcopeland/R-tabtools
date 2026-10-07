@@ -1,5 +1,16 @@
 # tabtools (development version)
 
+* The 272-scenario native baseline now comes directly from the authenticated
+  tabtools 2.5.1 Git objects, with complete artifact and unchanged-input
+  inventories. Named 2.1.14 publication cases retain their original bytes.
+  The native demo has separate authenticated snapshots and an actual runtime
+  catalog; fresh reconstruction and R comparison remain required before its
+  generated output is promoted.
+
+* Native demo staging now separates its source snapshots from scenario inputs,
+  records native storage metadata and full schema/data hashes, and preserves
+  authentic stage artifacts and failed-run diagnostics before scratch cleanup.
+
 * Table 1 and `desctab()` add primary-only printed-count masking,
   `nosmallcells`, literal mask text and native-consistent session mode
   precedence. Strict suppression remains the default. Canonical typed mask

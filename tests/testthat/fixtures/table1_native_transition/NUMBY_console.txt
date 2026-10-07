@@ -1,0 +1,9 @@
+  +-------------------------+
+  |           g = 1   g = 2 |
+  |-------------------------|
+  | Mean±SD   N=10    N=10  |
+  |-------------------------|
+  | x         6±3     16±3  |
+  +-------------------------+
+CSV exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-3g/native-transition-v1/outputs/NUMBY.csv
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-3g/native-transition-v1/outputs/NUMBY.md

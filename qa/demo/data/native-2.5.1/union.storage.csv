@@ -1,0 +1,9 @@
+variable,storage
+idcode,int
+year,byte
+age,byte
+grade,byte
+not_smsa,byte
+south,byte
+union,byte
+black,byte

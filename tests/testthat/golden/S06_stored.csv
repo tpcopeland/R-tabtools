@@ -1,8 +1,10 @@
 name,kind,row,col,value
 _golden_id,meta,,,S06
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
+N_nopt,scalar,,,0
+smallcells,scalar,,,0
 ci_level,scalar,,,95
 N_outcomes,scalar,,,1
 N_exposures,scalar,,,2

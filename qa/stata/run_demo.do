@@ -3,18 +3,18 @@
     Produces the Stata side of the R demo parity check (IMPLEMENTATION_PLAN.md,
     Milestone D, task D3): runs tabtools/demo/demo_tabtools.do exactly as
     shipped in a `git archive` export of Stata-Tools, then copies its
-    artefacts (13 workbooks, console_output.log/.md, demo_markdown_report.md)
+    artefacts (16 workbooks, console_output.log/.md, demo_markdown_report.md)
     to an output directory.
 
     Never run it on the ~/Stata-Tools working tree or an installed PLUS copy:
     only on an export of a released commit, e.g.
 
-        git -C ~/Stata-Tools archive 1255176d tabtools _data tc_schemes logdoc \
+        git -C ~/Stata-Tools archive 712044f8 tabtools _data tc_schemes logdoc \
             | tar -x -C <export>
 
     Usage (qa/demo_parity.R --update calls it this way):
 
-        stata-mp -b do qa/stata/run_demo.do "<export>" "<outdir>" 2.1.14
+        stata-mp -b do qa/stata/run_demo.do "<export>" "<outdir>" 2.5.1 "<runtime receipt>"
 
     The demo itself net-installs tabtools, tc_schemes and logdoc from the
     export into a temporary PLUS directory; the export's tabtools is also put
@@ -23,7 +23,7 @@
 */
 
 version 17.0
-args export outdir want_version
+args export outdir want_version runtime_path
 if `"`export'"' == "" | `"`outdir'"' == "" | "`want_version'" == "" {
     display as error "usage: do run_demo.do <export> <outdir> <tabtools version>"
     exit 198
@@ -64,7 +64,8 @@ if strpos("`r(fn)'", "`export'") != 1 {
 local demo "`export'/tabtools/demo"
 local arts demo_table1 demo_desctab demo_regtab demo_regtab_models ///
     demo_comptab demo_effecttab demo_stratetab demo_corrtab demo_crosstab ///
-    demo_survtab demo_hrcomptab demo_puttab demo_stacktab
+    demo_survtab demo_hrcomptab demo_puttab demo_stacktab ///
+    demo_ratetab demo_outtab demo_tabcell
 foreach f of local arts {
     capture erase "`demo'/`f'.xlsx"
 }
@@ -79,9 +80,17 @@ do tabtools/demo/demo_tabtools.do
 * Copy the artefacts out.
 capture mkdir "`outdir'"
 foreach f of local arts {
+    confirm file "`demo'/`f'.xlsx"
     copy "`demo'/`f'.xlsx" "`outdir'/`f'.xlsx", replace
 }
 foreach f in console_output.log console_output.md demo_markdown_report.md {
+    confirm file "`demo'/`f'"
     copy "`demo'/`f'" "`outdir'/`f'", replace
+}
+* RNG settings are scoped to do-files: record the effective generator here.
+if `"`runtime_path'"' != "" {
+    file open ttver using "`runtime_path'", write text replace
+    file write ttver "`c(stata_version)'" _n "`c(rng_current)'" _n
+    file close ttver
 }
 display as result "run_demo.do: tabtools `want_version' demo artefacts in `outdir'"

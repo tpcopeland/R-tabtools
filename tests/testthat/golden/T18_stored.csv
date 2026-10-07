@@ -1,13 +1,15 @@
 name,kind,row,col,value
 _golden_id,meta,,,T18
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
 markdown_cols,scalar,,,6
 markdown_rows,scalar,,,8
 markdown,macro,,,T18.md
 sheet,macro,,,T18
 xlsx,macro,,,table1_tc.xlsx
+smdnote,macro,,,SMD compares Primary vs Secondary only (the first two of 3 groups).
+smdtype,macro,,,pair
 varlist,macro,,,index_age female civil_status diabetes
 methods,macro,,,"Baseline characteristics were compared between groups defined by Education level. Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values were calculated using one-way ANOVA, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
 Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures."

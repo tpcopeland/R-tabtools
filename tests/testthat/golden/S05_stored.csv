@@ -1,8 +1,10 @@
 name,kind,row,col,value
 _golden_id,meta,,,S05
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
+N_nopt,scalar,,,0
+smallcells,scalar,,,0
 ci_level,scalar,,,95
 N_outcomes,scalar,,,1
 N_exposures,scalar,,,1
@@ -18,5 +20,5 @@ csv,macro,,,S05.csv
 rates,matrix,_0,Outcome_1,4.5890399999999998
 rates,matrix,_1,Outcome_1,7.4367900000000002
 rates,matrix,_2_5,Outcome_1,6.25
-rates,matrix,_10000000,Outcome_1,4.1169199999999986
+rates,matrix,_10000000,Outcome_1,4.1169199999999995
 rates,matrix,row5,Outcome_1,4.8721100000000002

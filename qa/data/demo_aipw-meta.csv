@@ -1,0 +1,2 @@
+N,converged,subcommand,outcome_model,treatment_model,vce
+15000,1,aipw,linear,logit,robust

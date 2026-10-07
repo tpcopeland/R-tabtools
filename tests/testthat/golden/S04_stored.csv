@@ -1,8 +1,10 @@
 name,kind,row,col,value
 _golden_id,meta,,,S04
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
+N_nopt,scalar,,,0
+smallcells,scalar,,,0
 ci_level,scalar,,,99
 N_outcomes,scalar,,,1
 N_exposures,scalar,,,3
@@ -18,5 +20,5 @@ csv,macro,,,S04.csv
 ratios,matrix,e2_Overall,Hip_fracture,1.048389088729796
 ratios,matrix,e3_Overall,Hip_fracture,.
 rates,matrix,e1_Overall,Hip_fracture,.076922299999999999
-rates,matrix,e2_Overall,Hip_fracture,.080644499999999994
+rates,matrix,e2_Overall,Hip_fracture,.080644500000000008
 rates,matrix,e3_Overall,Hip_fracture,0

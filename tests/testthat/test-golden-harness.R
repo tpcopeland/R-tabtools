@@ -60,8 +60,8 @@ test_that("goldens record the Stata package versions they came from", {
   ver <- setNames(v$version, v$component)
   comps <- c("desctab", "regtab", "table1_tc", "_tabtools_common", "puttab", "stacktab", "_tabtools_markdown_write",
              "stratetab", "effecttab", "comptab", "hrcomptab")
-  expect_identical(unname(ver[comps]), rep("2.1.14", length(comps)))
-  expect_identical(unname(ver["fvgen"]), "1.2.5")
+  expect_identical(unname(ver[comps]), rep("2.5.1", length(comps)))
+  expect_identical(unname(ver["fvgen"]), "1.2.7")
   expect_identical(unname(ver["rng"]), "mt64")
   for (id in golden_ids_in_build(golden_scenarios()$id)) {
     st <- golden_read_stored(id)
@@ -72,54 +72,40 @@ test_that("goldens record the Stata package versions they came from", {
   }
 })
 
-test_that("Phase 2 routes only inventoried scenarios to authentic versioned artifacts", {
-  ids <- c(sprintf("P%02d", 1:15), sprintf("K%02d", 1:9), sprintf("S%02d", 1:8),
-           "W15", sprintf("W%02d", 17:22))
-  routes <- utils::read.csv(file.path(golden_phase2_dir(), "ROUTES.csv"), colClasses = "character")
-  expect_identical(routes$id, ids)
-  expect_identical(golden_phase2_ids, ids)
-  expect_identical(routes$tabtools_version, rep("2.5.1", length(ids)))
-  expect_identical(routes$fvgen_version, rep("1.2.7", length(ids)))
-  expect_true(all(nzchar(routes$reason)))
+test_that("all 272 ordinary scenarios route to the full authenticated native baseline", {
+  expect_identical(nrow(golden_scenarios()), 272L)
   expect_error(golden_baseline("unknown"), "Unknown golden scenario")
   for (id in golden_scenarios()$id) {
-    expected <- if (id %in% ids) golden_phase2_dir() else golden_dir()
-    expect_identical(golden_baseline(id)$dir, expected, label = id)
-    expect_identical(dirname(golden_book(id)), expected, label = paste(id, "book"))
+    expect_identical(golden_baseline(id), list(dir = golden_dir(), tabtools = "2.5.1", fvgen = "1.2.7"), label = id)
+    expect_identical(dirname(golden_book(id)), golden_dir(), label = paste(id, "book"))
     for (ext in c(".csv", ".md", "_console.txt", "_stored.csv")) {
-      expect_identical(dirname(golden_artifact_path(id, paste0(id, ext))), expected,
-                       label = paste(id, ext))
+      expect_identical(dirname(golden_artifact_path(id, paste0(id, ext))), golden_dir(), label = paste(id, ext))
     }
   }
-  v <- utils::read.csv(file.path(golden_phase2_dir(), "VERSIONS.csv"), colClasses = "character")
-  ver <- setNames(v$version, v$component)
-  expect_identical(unname(ver[c("puttab", "stacktab", "stratetab")]), rep("2.5.1", 3))
-  expect_identical(unname(ver["fvgen"]), "1.2.7")
 })
 
-test_that("routed artifacts are byte-identical to the inventoried native source", {
-  a <- utils::read.csv(file.path(golden_phase2_dir(), "ARTIFACTS.csv"), colClasses = "character")
+test_that("the complete baseline is byte-identical to retained native c215 inventory", {
+  a <- utils::read.csv(golden_path("ARTIFACTS.csv"), colClasses = "character")
   expect_false(anyDuplicated(a$file) > 0L)
+  expect_identical(nrow(a), 1143L)
   expect_identical(unique(a$source_commit), "c215afdb788f88363c8d5289d7d13e3a31cfbe38")
   expect_identical(a$source_path, paste0("tests/testthat/golden/", a$file))
-  expected <- c("VERSIONS.csv", "puttab.xlsx", "stratetab.xlsx", "wttab.xlsx",
-                "P02.xlsx", "P09.xlsx", paste0(sprintf("K%02d", 1:9), ".xlsx"),
-                unlist(lapply(golden_phase2_ids, function(id) paste0(id, c(".csv", ".md", "_console.txt", "_stored.csv")))))
-  expect_setequal(a$file, expected)
+  sc <- golden_scenarios()
+  expected <- unlist(lapply(sc$id, function(id) paste0(id, c(".csv", ".md", "_console.txt", "_stored.csv"))))
+  expect_true(all(expected %in% a$file))
+  expect_true(all(vapply(sc$id, golden_book_name, "") %in% a$file))
   excluded <- grepl("^P0[29](\\.|_)", a$file)
   expect_identical(a$distribution, ifelse(excluded, "source-only", "shipped"))
   if (!golden_in_source()) {
-    expect_false(any(file.exists(file.path(golden_phase2_dir(), a$file[excluded]))),
-                 label = "versioned source-only artifacts excluded from installed build")
+    expect_false(any(file.exists(golden_path(a$file[excluded]))))
     a <- a[!excluded, , drop = FALSE]
   }
-  files <- file.path(golden_phase2_dir(), a$file)
+  files <- golden_path(a$file)
   expect_true(all(file.exists(files)))
   expect_identical(unname(tools::md5sum(files)), a$md5)
-  # A changed byte must fail the same integrity check, independent of parsing.
-  bad <- file.path(withr::local_tempdir(), "S08.csv")
-  writeBin(c(golden_bytes(golden_artifact_path("S08", "S08.csv")), charToRaw("fault")), bad)
-  expect_false(identical(unname(tools::md5sum(bad)), a$md5[a$file == "S08.csv"]))
+  bad <- file.path(withr::local_tempdir(), "T18.csv")
+  writeBin(c(golden_bytes(golden_artifact_path("T18", "T18.csv")), charToRaw("fault")), bad)
+  expect_false(identical(unname(tools::md5sum(bad)), a$md5[a$file == "T18.csv"]))
 })
 
 test_that("wrong per-case version and missing or duplicate provenance fail", {
@@ -133,6 +119,29 @@ test_that("wrong per-case version and missing or duplicate provenance fail", {
       expect_gt(length(golden_compare_provenance(st[st$name != key, ], id)), 0L)
       expect_gt(length(golden_compare_provenance(rbind(st, st[st$kind == "meta" & st$name == key, ]), id)), 0L)
     }
+  }
+})
+
+test_that("all 21 original scenario inputs remain byte-exact across the baseline flip", {
+  inputs <- utils::read.csv(golden_path("INPUTS.csv"), colClasses = "character")
+  expect_identical(nrow(inputs), 21L)
+  expect_false(anyDuplicated(inputs$file) > 0L)
+  expect_identical(unique(inputs$retained_from_r_commit), "04aea4495a6c9875a6c8b06f45b7d4c466450a01")
+  if (!golden_in_source()) inputs <- inputs[inputs$distribution == "shipped", , drop = FALSE]
+  expect_identical(unname(tools::md5sum(golden_path(inputs$file))), inputs$md5)
+})
+
+test_that("named historical fixtures preserve their explicit version and original bytes", {
+  for (name in c("table1-2.1.14", "table1-mixed-2.1.14-2.5.1")) {
+    dir <- test_path("fixtures", "backcompat", name)
+    a <- utils::read.csv(file.path(dir, "ARTIFACTS.csv"), colClasses = "character")
+    expect_identical(nrow(a), 6L)
+    expect_false(anyDuplicated(a$file) > 0L)
+    expect_identical(unique(a$retained_from_r_commit), "04aea4495a6c9875a6c8b06f45b7d4c466450a01")
+    expect_identical(unname(tools::md5sum(file.path(dir, a$file))), a$md5)
+    bad <- file.path(withr::local_tempdir(), "mutant.csv")
+    writeBin(c(golden_bytes(file.path(dir, a$file[1L])), charToRaw("fault")), bad)
+    expect_false(identical(unname(tools::md5sum(bad)), a$md5[1L]))
   }
 })
 
@@ -166,10 +175,25 @@ test_that("routed cells, console, sinks and full setup-sheet styles stay strict"
                                           got_width_offset = golden_width_offset), 0L)
     }
     for (sheet in c("Block Primary", "Block Dose")) {
-      why <- golden_compare_styles(golden_path(paste0(id, ".xlsx")), sheet, golden_book(id), sheet,
+      # After the baseline flip both lookup paths name the same book. A real
+      # copied-body-cell mutation supplies the independent negative control.
+      cells <- golden_cell_styles(golden_book(id), sheet)
+      hit <- which(cells$row >= 4L & cells$col >= 2L & nzchar(cells$value))[1L]
+      expect_false(is.na(hit))
+      cell <- cells[hit, , drop = FALSE]
+      workbook <- openxlsx2::wb_load(golden_book(id))
+      border <- function(x) if (is.na(x) || !nzchar(x)) "none" else x
+      changed_top <- if (identical(cell$border_top, "double")) "medium" else "double"
+      workbook <- openxlsx2::wb_add_border(workbook, sheet = sheet, dims = cell$address,
+        bottom_border = border(cell$border_bottom), left_border = border(cell$border_left),
+        right_border = border(cell$border_right), top_border = changed_top, update = TRUE)
+      mutant <- file.path(withr::local_tempdir(), paste0(id, "-", gsub(" ", "-", sheet), ".xlsx"))
+      openxlsx2::wb_save(workbook, mutant, overwrite = FALSE)
+      expect_identical(tidyxl::xlsx_sheet_names(mutant), sheets)
+      why <- golden_compare_styles(mutant, sheet, golden_book(id), sheet,
                                     got_width_offset = golden_width_offset)
       expect_gt(length(why), 0L)
-      expect_true(any(grepl("border_", why, fixed = TRUE)))
+      expect_true(any(grepl(paste0(cell$address, " border_top:"), why, fixed = TRUE)))
     }
   }
 })
@@ -349,25 +373,24 @@ test_that("publication worksheet adapter asserts all rows, styles, merges and he
   }
 })
 
-test_that("legacy SMD translation asserts exact source-derived note and header first", {
-  skip_if_not_installed("tidyxl")
+test_that("native current SMD headers and notes are literal and mutant-sensitive", {
   note <- "SMD compares Primary vs Secondary only (the first two of 3 groups)."
   tt <- list(meta = list(console_before = paste("Note:", note)),
              cols = data.frame(role = c("label", "group", "group", "group", "p", "smd")),
              header = list(list(text = c("", "Primary", "Secondary", "Tertiary", "p-value", "SMD (Primary vs Secondary)"))),
              footnote = note)
-  out <- golden_strip_smd_note(tt, id = "T18")
-  expect_identical(out$header[[1]]$text[6L], "SMD")
-  expect_identical(out$footnote, "")
-  expect_identical(out$meta$console_before, "Note: SMD computed for first two groups only (Primary vs Secondary)")
+  golden_assert_current_smd(tt)
+  native <- golden_read_cells("T18")
+  expect_identical(native[1L, 6L], "SMD (Primary vs Secondary)")
+  expect_identical(native[nrow(native), 1L], note)
+  expect_identical(golden_read_lines(golden_artifact_path("T18", "T18_console.txt"))[1L], paste("Note:", note))
   for (field in c("header", "footnote", "console")) {
     bad <- tt
     if (field == "header") bad$header[[1]]$text[6L] <- "SMD (Secondary vs Primary)"
     if (field == "footnote") bad$footnote <- paste0("Invented prior paragraph \\ ", note)
     if (field == "console") bad$meta$console_before <- "Note: SMD compares Primary vs Tertiary only (the first two of 3 groups)."
-    golden_expect_detected(golden_strip_smd_note(bad, id = "T18"))
+    golden_expect_detected(golden_assert_current_smd(bad))
   }
-  expect_error(golden_strip_smd_note(tt), "explicit authentic native inputs")
 })
 
 test_that("native scalar mask comparison projects only threshold and preserves P.4 metadata", {
@@ -485,11 +508,11 @@ test_that("complete native footer inventory supports exact command serialization
     expect_identical(templates$halign, if (golden_scenario(id)$command == "stacktab") "general" else "left")
   }
   # Explicit complete inventory from the reviewed native-byte snapshot.
-  expect_setequal(sparse_ids, c("T20a", "T20b", "T20c", paste0("T", 25:29),
+  expect_setequal(sparse_ids, c("T18", "T20a", "T20b", "T20c", paste0("T", 25:29),
     paste0("T30", c("d", "e", "f", "g", "h", "l", "m", "n")),
     "R08", "R25k", "R25l", "R25m", "S01", "S07", "E02", "E04", "E19", "E24", "W13",
     "C02", "C03", "C04", "C06"))
-  expect_length(footer_ids, 46L)
+  expect_length(footer_ids, 47L)
 })
 
 test_that("lossless merged footer serialization still detects every child mutation", {

@@ -1,0 +1,13 @@
+  +---------------------------------------------------+
+  |                         g = 1    g = 2    SMD     |
+  |---------------------------------------------------|
+  | Column % or Mean±SD     N=10     N=10             |
+  |---------------------------------------------------|
+  | Effective sample size   ESS=10   ESS=10           |
+  |---------------------------------------------------|
+  | x                       6±.      16±.     3.303   |
+  |---------------------------------------------------|
+  | b                       50       50       0.000   |
+  +---------------------------------------------------+
+CSV exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-3g/native-transition-v1/outputs/OVERFLOW.csv
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-3g/native-transition-v1/outputs/OVERFLOW.md

@@ -1,0 +1,10 @@
+variable,storage
+id,int
+hrt,byte
+age,double
+female,byte
+education,byte
+time,double
+edss4,byte
+edss6,byte
+relapse,byte

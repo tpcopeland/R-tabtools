@@ -1,0 +1,11 @@
+key,value
+native_source_commit,712044f83ce6dd7bb4ca4237f3f6ffbc8aea5129
+tabtools_version,2.5.1
+fvgen_version,1.2.7
+retained_inventory_r_commit,c215afdb788f88363c8d5289d7d13e3a31cfbe38
+ordinary_scenarios,272
+promoted_native_paths,309
+complete_root_artifacts,1143
+unchanged_scenario_inputs,21
+input_policy,Original bytes retained; native source generation did not redraw existing scenario inputs.
+backcompat_policy,Explicit tests/testthat/fixtures/backcompat versioned cases retain their original lineages; never ordinary baseline routes.

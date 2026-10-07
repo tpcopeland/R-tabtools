@@ -1,13 +1,14 @@
 name,kind,row,col,value
 _golden_id,meta,,,T02
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
 markdown_cols,scalar,,,4
 markdown_rows,scalar,,,22
 markdown,macro,,,T02.md
 sheet,macro,,,T02
 xlsx,macro,,,table1_tc.xlsx
+smdtype,macro,,,pair
 varlist,macro,,,index_age female education income_quintile born_abroad civil_status diabetes hypertension anxiety prior_cvd
 Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values suppressed."
 table,matrix,Age_at_cohort_entry_(years),smd,.019391478652278402

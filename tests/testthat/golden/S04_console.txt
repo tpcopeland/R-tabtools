@@ -1,7 +1,7 @@
 Markdown exported to S04.md
   +-----------------------------------------------------------------------------------------+
   |   Exposure   Hip fracture                                                               |
-  |   Exposure         Events   Person-Years (PY)   Per 100 PY (99% CI)        IRR (99% CI) |
+  |                    Events   Person-Years (PY)   Per 100 PY (99% CI)        IRR (99% CI) |
   |      Never                                                                              |
   |    Overall             40                  52        0.1 (0.1, 0.1)                Ref. |
   |     Former                                                                              |

@@ -1,2 +1,0 @@
-Markdown exported to P13.md
-puttab: wrote 3 data rows x 2 cols (data source) to sheet P13 in puttab.xlsx

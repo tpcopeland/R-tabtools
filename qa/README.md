@@ -170,6 +170,8 @@ comparisons. Timings and evidence are in the interaction plan above.
 | `crossval_table1_primary.R` | yes, crossval/core/full | Authenticated Stata 2.5.1 T38–T44: exact primary/strict/unmasked weighted ESS and unweighted contrasts, full grids, analytical SMD, native modes/counters and suppression column identities; value-column versus numeric header selectors, descriptor N, repeated entries, native refusals and R's stronger protected-ESS refusal. Immutable full helper hashes and shadow-adopath negative controls. |
 | `crossval_smd_balance.R` | yes | `table1_tc(smd = TRUE)` balance statistics against independent implementations. `smdtype = "population"` (McCaffrey et al. 2013 eq. 5) against cobalt 4.6.3 (`pairwise = FALSE, s.d.denom = "all"`), unweighted and under `wt`, and against twang 2.6.2 `mnps()` ATE eq. 5 values, unweighted and with twang's own weights. `"maxpair"` against cobalt (`pairwise = TRUE, s.d.denom = "pooled"`, unweighted; cobalt keeps the unweighted SD under weights, so weighted maxpair is checked through the two-group identity maxpair = \|pair\|), and categorical maxpair against a base-R Yang-Dalton oracle. `"pair"` and `smdpair` against cobalt on the two compared arms. Also: fweight equals the record-expanded data for every type, and `wtcompare` with `smdtype`. cobalt's `Min.Diff`/`Max.Diff` are signed extremes, so the comparison takes the larger absolute value. The categorical fixture puts the largest imbalance on the first and then the last level, so a dropped level cannot hide. A direct Stata 2.5.1 matrix (set `TABTOOLS_STATA_DIR` to its ado directory) checks population/maxpair with unweighted, importance-weighted (`wt`) and frequency-weighted data for continuous, log-continuous, binary and categorical rows. Each row kind also has a case with no values in one group, while the other rows retain finite SMDs: 30 calls, 120 numeric cells plus exact type/note metadata. Stata logs and inputs are cleaned from a unique scratch directory. Missing Stata/source configuration is reported as incomplete by the existing runner. |
 | `demo_parity.R` | yes | The R demo (`qa/demo/demo_tabtools.R`) against the Stata demo: runs `tests/testthat/test-demo-parity.R` (every ported sheet, the console log and its Markdown, the Markdown report; `golden/demo/manifest.csv`). Fails on a skip too. `--update` regenerates the Stata side (see the parity harness below). |
+| `test_demo_source.R` | yes, core/full | Native demo source guard controls: complete variable/observation order, values/missingness including literal ordinary/.a/.b on both source/schema sides and RDS attributes, R classes/native storage widths, labels, frozen schema, SHA-256 before haven reading, strict CLI/partial-update elements, new nonsymlink destinations/maker boundaries, honest runtime manifest routes, failed-run diagnostics/owned-child cleanup, and actual failed-child R-QA serialization before nonzero exit. Uses clearly synthetic fixtures; never generates native output. |
+| `test_demo_aipw.R` | yes, core/full | Extracts only the demo's AIPW function AST. Balanced literal ATE/POM/covariance controls, an independent finite-difference Jacobian over all joint effect/outcome/treatment equations, and the actual SHA-bound native demo cohort against reviewed full-precision Stata17 coefficient/covariance fixtures. No full demo or native engine is executed by this file; missing fixtures refuse rather than skip. |
 | `test_adversarial_descriptive.R` | yes | Observed and weighted denominators, covariate-specific missingness, lognormal exclusions, frequency expansion, row percentages, retained-sample weight cutpoints and ESS across extreme scales. |
 | `test_adversarial_regression.R` | yes | Complete-case fitted models, absent covariates and factor levels, rank deficiency, clustered sample alignment, failed convergence and insufficient variance samples. |
 | `test_adversarial_rates_effects.R` | yes | Weighted missing exposure/event/group values, Cox case deletion and singular terms, supplied rate populations, and extreme or unavailable effect intervals through composition. |
@@ -205,7 +207,7 @@ Fit guards use stored diagnostics rather than treating every warning as failure.
 | `interaction` | The `test_interaction_matrix_*.R` files listed above. |
 | `crossval` | `crossval_smd_balance.R`, `crossval_puttab_layout.R`, `crossval_regtab_formats.R`, `crossval_puttab_flat.R`, `crossval_session_sinks.R`, `crossval_table1_primary.R`. |
 | `quick` | `adversarial` plus `sample`. |
-| `core` | `quick` plus `interaction`, `crossval`, `check_examples.R` and `validation_wttab.R`. |
+| `core` | `quick` plus `interaction`, `crossval`, `test_demo_source.R`, `test_demo_aipw.R`, `check_examples.R` and `validation_wttab.R`. |
 | `full` (default) | `core` plus `bench_fisher.R`, `bench_fweight.R` and `demo_parity.R`. |
 | `benchmark` | `bench_fisher.R` and `bench_fweight.R` only. |
 
@@ -323,9 +325,9 @@ WP-2D coverage: `regtab()`/`effecttab()` full-format numeric text has the native
 | File | Role |
 |---|---|
 | `make_golden.R` | Entry point: `Rscript qa/make_golden.R [--update] [--only=T01,R01] [--fixtures] [--no-scenarios] [--no-classifier] [--no-fmt]`. Needs `stata-mp` on PATH and the dev checkouts `~/Stata-Tools/tabtools` and `~/Stata-Tools/fvgen`. Refuses to overwrite goldens without `--update`. `--stata-tools=DIR` takes `tabtools/` and `fvgen/` from DIR instead, e.g. a `git -C ~/Stata-Tools archive <commit> tabtools fvgen` export when the working tree carries uncommitted edits (VERSIONS.csv then records DIR's paths). |
-| `demo_parity.R --update` | Regenerates `tests/testthat/golden/demo/` (Milestone D, D6): `Rscript qa/demo_parity.R --update [--commit=1255176d] [--tabtools-version=2.1.14] [--stata-tools=DIR] [--only=FILES]`. Exports the commit with `git archive` (tabtools, _data, tc_schemes, logdoc), runs `stata/run_demo.do` on it (needs network for `webuse union`), checks the fixtures against the demo's own data, checks the manifest (every Stata sheet, console block and report table listed; every sheet it compares with a scenario golden identical to that golden), then copies the Stata workbooks the manifest compares against, the console log and Markdown, and the report, and writes `SOURCE.csv`. |
-| `stata/run_demo.do` | Runs an exported `tabtools/demo/demo_tabtools.do` with the export first on the adopath and a version guard, and copies its 13 workbooks, `console_output.log`/`.md` and `demo_markdown_report.md` out. |
-| `make_demo_data.R` | Writes `qa/demo/demo_tabtools.rds` (the demo's datasets, from the golden fixtures): `Rscript qa/make_demo_data.R`. |
+| `demo_parity.R --stage-native` / `--update` | Reviewed two-run native workflow. Stage requires `--stage-output=NEW_DIR --commit=712044f8 --tabtools-version=2.5.1 --stata-tools=GIT_REPO`; it exports committed source and saves authentic artifacts, eight source snapshots, ordered native storage metadata, frozen schema, hashes and receipt. STAGED supplies no R verdict. Update uses the same explicit pin plus `--demo-data-dir=ACCEPTED_DIR --receipt-dir=NEW_DIR`, independently reconstructs all source data and compares complete schema/values/labels/RDS before manifest checks and promotion. `--work-dir` names a canonical writable parent; only a new owned child is removed. Both durable destinations must be new, nonsymlink and outside work. `--only=FILES` still executes all guards, requires the existing exact SOURCE pin and cannot replace console artifacts. `--keep-work` is rejected. SOURCE records native acceptance/R pending; a separate execution receipt records final R QA. |
+| `stata/run_demo.do` | Runs the unmodified exported native demo with the export first on the adopath/version guard, confirms and copies all 16 workbooks, console log/Markdown and report. |
+| `make_demo_data.R` | No arguments preserve legacy source-only projection. Native projection is explicit: `--mode=native --fixtures-dir=ACCEPTED_DIR --output=qa/demo/demo_tabtools.rds`. Verifies source pins/hashes/schema before loading and preserves column classes/labels. The seven-member RDS omits hurdle until it has a consumer; all eight original snapshots remain guarded. Dataset labels/notes are outside the existing RDS projection and retained in original native files. |
 | `stata/make_fixtures.do` | Builds `tests/testthat/golden/fixtures/*.dta` (only with `--fixtures`; changing the data invalidates every golden). |
 | `stata/golden_helpers.do` | `golden_versions`, `golden_run`, and the Mata `r()` dumper used by the generated driver. |
 | `stata/make_classifier_goldens.do` | `swilk.csv`, `rng_mt64.csv`, `autotype.csv`, `subsample_ids.csv`, `detect_vartype.csv`, and the `vartype_branches.dta` fixture. |
@@ -355,6 +357,7 @@ WP-2D coverage: `regtab()`/`effecttab()` full-format numeric text has the native
 | `stata/make_stratetab_dp.do`, `stata/make_stratetab_round.do` | `strate` files written under `set dp comma`, and Stata's rounding unit, for `stratetab`. |
 | `tools/check_local.sh` | The macOS CI release job (dependencies, `R CMD check --as-cran`, the `quick` and `interaction` lanes; optionally the source-tree tests) on the local machine; the free stand-in for the macOS Actions job. |
 | `tools/qa_result.R` | The QA scripts' executed/skipped/failed bookkeeping and completion marker, and the runner's `qa_reconcile()` (CX-6). |
+| `tools/demo_data.R` | Source-only complete native demo data/storage/schema/RDS guards and staging CLI. Native snapshots are separate from the immutable 272-scenario inputs. |
 | `notes/` | Developer notes: `effecttab_scoping.md` and `interop_research/`, indexed in `notes/README.md`. |
 | `.stata-work/` | Generated drivers and Stata logs (gitignored). |
 
@@ -414,3 +417,27 @@ demo <- new.env()                 # its objects stay out of your workspace
 demo$out_dir <- "tabtools_demo"   # optional; the default is a folder in tempdir()
 source("qa/demo/demo_tabtools.R", local = demo)
 ```
+
+
+### Native 2.5.1 transition
+
+The ordinary 272 scenarios use the complete native 2.5.1 baseline from
+`c215afdb788f88363c8d5289d7d13e3a31cfbe38`. `golden/BASELINE.csv`,
+`golden/ARTIFACTS.csv` and `golden/INPUTS.csv` record its origin, every root
+artifact and all 21 unchanged scenario inputs. Historical W6/S18 publication
+cases are explicitly named under `fixtures/backcompat/table1-2.1.14`;
+the former mixed S17/RW07 files are retained under their own backcompat name.
+Current S17/RW07 fixtures require the independently reviewed native transition
+producer, `stata/make_table1_native_transition.do`, before acceptance.
+
+The eight accepted native demo snapshots under `demo/data/native-2.5.1`
+include native storage/schema and source/recipe hashes. They are separate from
+the unchanged ordinary scenario inputs. `make_demo_data.R --mode=native`
+projects the seven-member demo RDS from these authentic snapshots. The actual
+native catalog contains 102 sheets in 16 workbooks, 56 console blocks and four
+report tables; `golden/demo/manifest.csv` classifies all 162 entries. Its 103
+headings record source provenance. Catalog classification is not R execution
+acceptance. Generated demo books/logs/report and `SOURCE.csv` remain pending
+until a second independent native reconstruction passes every source/RDS guard
+and the affected R comparisons pass. The first transition must use the whole
+manifest, without `--only`.

@@ -1,2 +1,0 @@
-Markdown exported to W15.md
-wttab: wrote 12 rows x 4 cols to sheet W15 in wttab.xlsx

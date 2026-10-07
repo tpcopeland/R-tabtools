@@ -1,7 +1,7 @@
 name,kind,row,col,value
 _golden_id,meta,,,R25c
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
 markdown_cols,scalar,,,3
 markdown_rows,scalar,,,10
