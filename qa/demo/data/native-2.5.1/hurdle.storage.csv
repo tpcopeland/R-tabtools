@@ -1,0 +1,5 @@
+variable,storage
+dose_intensity,double
+participation_score,double
+positive,byte
+annual_cost,double

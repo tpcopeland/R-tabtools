@@ -25,6 +25,69 @@ golden_demo_source <- function() {
   stats::setNames(s$value, s$key)
 }
 
+# Independently bound publication literals: native desctab.ado primary note and
+# the reviewed P.7 R ESS boundary. Neither is assembled by production helpers.
+golden_demo_primary_notes <- function() list(
+  r = paste0("Counts from 1 to 4 are shown as <5 without a percentage (primary suppression only: ",
+    "no complementary cells are masked). Unmasked cells and ordinary variable tests are shown as computed; ",
+    "effective sample size linked to a masked sample count is withheld. This protects printed counts only."),
+  native = paste0("Counts from 1 to 4 are shown as <5 without a percentage (primary suppression only: ",
+    "no complementary cells are masked, and other cells, totals and tests are shown as computed). ",
+    "This protects printed counts only."))
+
+# puttab returns its resolved workbook under stored$file; other writers use xlsx.
+golden_demo_destination <- function(value, args) {
+  value$stored$xlsx %||% value$stored$file %||% args$xlsx
+}
+
+# Native source declarations supply literal user annotations; authenticated
+# native tails supply automatic notes. Production note assembly is not an oracle.
+golden_demo_publication_contract <- function(id, native_spec = NULL) {
+  manifest <- golden_demo_manifest()
+  row <- manifest[manifest$kind == "sheet" & manifest$golden == id, , drop = FALSE]
+  if (nrow(row) != 1L) stop("Unknown native demo publication: ", id, call. = FALSE)
+  spec <- if (is.null(native_spec)) golden_demo_golden(id) else native_spec
+  grid <- as.matrix(openxlsx2::read_xlsx(spec$book, sheet = spec$sheet,
+    col_names = FALSE, skip_empty_rows = FALSE, skip_empty_cols = FALSE))
+  grid[is.na(grid)] <- ""
+  styles <- golden_cell_styles(spec$book, spec$sheet)
+  user <- if (nzchar(row$user_footnote)) row$user_footnote else NULL
+  native_note <- golden_fn_paragraphs(user)
+  automatic <- list()
+  native_tail <- styles$value[match(paste0("B", max(styles$row)), styles$address)]
+  if (row$command %in% c("table1_tc", "desctab") && (startsWith(native_tail, "Counts below ") || startsWith(native_tail, "Counts from "))) {
+    text <- native_tail
+    if (identical(id, "demo/demo_table1.xlsx:Small Cells Primary Mode")) {
+      notes <- golden_demo_primary_notes()
+      if (!identical(native_tail, notes$native)) stop("Native primary footer differs from the declared full literal.", call. = FALSE)
+      text <- notes$r
+    }
+    automatic <- list(list(text = text, native = native_tail,
+      source = paste("authenticated native demo tail and reviewed P.7 publication boundary", id)))
+    native_note <- native_tail
+  }
+  call <- paste0(row$command, "(footnote = ", paste(deparse(user), collapse = ""), ")")
+  contract <- golden_footnote_contract(id, automatic = automatic,
+    native_sources = list(csv = as.vector(grid), xlsx = styles$value),
+    scenario = list(command = row$command, r_call = call, stata_call = row$native_command))
+  if (length(contract$stars)) {
+    native_note <- if (!length(native_note)) contract$stars else {
+      last <- tail(native_note, 1L)
+      join <- if (grepl("[.;:!?]$", last)) " " else "; "
+      c(head(native_note, -1L), paste0(last, join, contract$stars))
+    }
+  }
+  contract$command <- row$command
+  contract$native_footers <- list(csv = native_note, markdown = golden_fn_md(native_note),
+    console = if (length(automatic) && row$command == "table1_tc") native_note else character(), xlsx = native_note)
+  contract$native_grid <- grid
+  contract$native_styles <- styles
+  contract$native_layout <- golden_sheet_layout(spec$book, spec$sheet)
+  contract$grid_end <- nrow(grid) - length(native_note)
+  contract$sheet_end <- max(styles$row) - length(native_note)
+  contract
+}
+
 golden_demo_packages <- c("haven", "survival", "lme4", "geepack", "MASS", "nnet", "pscl",
                           "WeightIt", "marginaleffects", "tidyxl", "openxlsx2")
 
@@ -43,6 +106,16 @@ golden_demo_run <- function() {
   dir.create(out)
   tables <- new.env(parent = emptyenv())
   env <- new.env(parent = globalenv())
+  ns <- asNamespace("tabtools")
+  sink_state <- get(".tt_sink_state", ns)
+  old_sinks <- as.list(sink_state)
+  old_options <- options()
+  on.exit({
+    added <- setdiff(names(options()), names(old_options))
+    if (length(added)) options(stats::setNames(rep(list(NULL), length(added)), added))
+    options(old_options)
+    for (key in names(old_sinks)) assign(key, old_sinks[[key]], sink_state)
+  }, add = TRUE)
   for (fn in c("table1_tc", "desctab", "regtab", "puttab", "stacktab", "stratetab", "effecttab",
               "comptab", "hrcomptab")) {
     local({
@@ -51,10 +124,13 @@ golden_demo_run <- function() {
       assign(fn, function(...) {
         res <- withVisible(f(...))
         a <- list(...)
-        key <- if (!is.null(a$xlsx)) {
-          paste(basename(a$xlsx), a$sheet)
-        } else if (!is.null(a$markdown)) {
-          paste(basename(a$markdown), name)
+        destination <- golden_demo_destination(res$value, a)
+        sheet <- res$value$stored$sheet %||% a$sheet
+        markdown <- res$value$stored$markdown %||% a$markdown
+        key <- if (!is.null(destination)) {
+          paste(basename(destination), sheet)
+        } else if (!is.null(markdown)) {
+          paste(basename(markdown), name)
         }
         if (!is.null(key)) assign(key, res$value, envir = tables)
         if (res$visible) res$value else invisible(res$value)
@@ -170,6 +246,23 @@ golden_demo_md_blocks <- function(lines, side = c("stata", "r")) {
 # (forward slashes; R's temporary directory is normalised on Windows too).
 golden_demo_console_lines <- function(lines, dirs) {
   golden_demo_strip_dirs(golden_console_box(lines), dirs)
+}
+
+# C28 has a deliberate full paragraph difference. Assert every annotation on
+# both sides before removing only the boundary after the final closing box.
+golden_demo_primary_console <- function(got, want) {
+  contract <- golden_demo_publication_contract("demo/demo_table1.xlsx:Small Cells Primary Mode")
+  split <- function(lines) {
+    edge <- which(grepl("^\\s*\\+-+\\+\\s*$", lines))
+    if (length(edge) < 2L) stop("Primary demo footer requires a complete boxed listing.", call. = FALSE)
+    end <- tail(edge, 1L)
+    foot <- lines[golden_footer_rows(length(lines), end)]
+    list(body = lines[seq_len(end)], tail = foot[nzchar(trimws(foot))])
+  }
+  g <- split(got); w <- split(want)
+  golden_assert_footnote_tail(g$tail, contract, "console")
+  golden_assert_native_footnote_tail(w$tail, contract, "console")
+  list(got = g$body, want = w$body)
 }
 
 golden_demo_strip_dirs <- function(out, dirs) {

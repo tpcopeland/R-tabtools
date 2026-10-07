@@ -6,6 +6,7 @@
 # (R's tests differ by design, plan D3).
 
 p3_dir <- function() test_path("fixtures", "table1_phase3")
+p3_case_dir <- function(id) if (id %in% c("W6", "S18")) test_path("fixtures", "backcompat", "table1-2.1.14") else p3_dir()
 p3_data <- function(name) sc_pipeline_data(name)
 p3_agg <- function() as.data.frame(haven::read_dta(test_path("fixtures", "table1_qa", "agg.dta")))
 
@@ -59,6 +60,41 @@ p3_s14_publication <- function(tt, want, native_console) {
        got_console = actual$body, want_console = native$body)
 }
 
+p3_s17_publication <- function(tt, want, native_console) {
+  paragraphs <- c(paste0("Counts below 4 are shown as <4; complementary cells are shown as ≥4 to prevent exact reconstruction. ",
+    "Percentages are withheld for any variable carrying a suppressed count."),
+    "SMD compares Placebo vs Drug only (the first two of 3 groups).")
+  native_note <- paste(paragraphs, collapse = " ")
+  contract <- golden_footnote_contract("native-S17", automatic = lapply(paragraphs, function(text) list(
+    text = text, native = text, source = "pinned 2.5.1 desctab.ado:137,678,694–699; authenticated native transition S17")),
+    native_sources = list(csv = as.vector(want), console = native_console),
+    scenario = list(command = "table1_tc", r_call = "table1_tc(data)", stata_call = "table1_tc"))
+  contract$native_footers <- list(csv = native_note, console = paragraphs[1L])
+  expect_identical(native_console[1L], paste("Note:", paragraphs[2L]),
+    label = "native S17 literal SMD note before the box")
+  got <- golden_as_cells(tt)
+  end <- nrow(want) - 1L
+  gr <- golden_footer_rows(nrow(got), end)
+  wr <- golden_footer_rows(nrow(want), end)
+  golden_assert_footnote_tail(got[gr, 1L], contract, "csv")
+  golden_assert_native_footnote_tail(want[wr, 1L], contract, "csv")
+  expect_true(all(got[gr, -1L, drop = FALSE] == ""))
+  expect_true(all(want[wr, -1L, drop = FALSE] == ""))
+  split <- function(lines) {
+    lines <- golden_console_box(lines)
+    edge <- which(golden_is_rule_line(lines))
+    expect_true(length(edge) >= 2L)
+    end <- tail(edge, 1L)
+    list(body = lines[seq_len(end)], foot = lines[golden_footer_rows(length(lines), end)])
+  }
+  actual <- split(utils::capture.output(print(tt)))
+  native <- split(native_console)
+  golden_assert_footnote_tail(actual$foot[nzchar(actual$foot)], contract, "console")
+  golden_assert_native_footnote_tail(native$foot, contract, "console")
+  list(got = got[seq_len(end), , drop = FALSE], want = want[seq_len(end), , drop = FALSE],
+       got_console = actual$body, want_console = native$body)
+}
+
 # Cells, listing, and stored results (Dapa, varlist, r(table) SMDs, the
 # suppression matrix and counts) of one call against Stata's. The p token is
 # the row-wise p mask (golden_p_masked_rows()). W1 and F1 list `marker` twice
@@ -66,22 +102,24 @@ p3_s14_publication <- function(tt, want, native_console) {
 # label), which the label-text blocks now reproduce.
 p3_expect <- function(tt, id, mask = "p,test,statistic", console = TRUE) {
   expect_identical(golden_check_derived(tt), character(), label = paste(id, "derived suppression cells"))
-  want <- golden_read_cells_file(file.path(p3_dir(), paste0(id, ".csv")))
-  native_console <- golden_read_lines(file.path(p3_dir(), paste0(id, "_console.txt")))
-  tt <- golden_strip_smd_note(tt, native_grid = want, native_console = native_console)
-  publication <- if (id == "S14") p3_s14_publication(tt, want, native_console) else NULL
+  want <- golden_read_cells_file(file.path(p3_case_dir(id), paste0(id, ".csv")))
+  native_console <- golden_read_lines(file.path(p3_case_dir(id), paste0(id, "_console.txt")))
+  publication <- if (id %in% c("W6", "S18")) p3_2114_publication(tt, want, native_console, id) else if (id == "S14") p3_s14_publication(tt, want, native_console) else if (id == "S17") p3_s17_publication(tt, want, native_console) else NULL
   mm <- golden_compare_cells(if (is.null(publication)) tt else publication$got,
                              if (is.null(publication)) want else publication$want, mask,
                              p_rows = if (!is.null(publication)) head(golden_grid_p_rows(tt), nrow(publication$want)))
   expect_identical(nrow(mm), 0L, label = paste(id, "cells", paste(utils::capture.output(print(mm)), collapse = "\n")))
-  if (console) {
+  if (console && id %in% c("W6", "S18")) {
+    why <- golden_compare_cells(publication$got_console, publication$want_console, mask)
+    expect_identical(nrow(why), 0L, label = paste(id, "2.1.14 backcompat full console body"))
+  } else if (console) {
     why <- golden_compare_console(if (is.null(publication)) utils::capture.output(print(tt)) else publication$got_console,
                                   if (is.null(publication)) native_console else publication$want_console, mask)
     expect_identical(why, character(), label = paste(id, "console"))
   }
-  stored <- utils::read.csv(file.path(p3_dir(), paste0(id, "_stored.csv")), colClasses = "character",
+  stored <- utils::read.csv(file.path(p3_case_dir(id), paste0(id, "_stored.csv")), colClasses = "character",
                             na.strings = character(), encoding = "UTF-8")
-  fields <- setdiff(unique(stored$name[stored$kind != "meta"]), c("xlsx", "sheet", "csv"))
+  fields <- setdiff(unique(stored$name[stored$kind != "meta"]), c("xlsx", "sheet", "csv", "markdown", "markdown_rows", "markdown_cols"))
   expect_true(all(c("Dapa", "varlist") %in% fields), label = paste(id, "stored fixture holds r()"))
   why <- golden_compare_stored(tt$stored, stored, fields = fields, mask = "p", p_table = golden_table_p_rows(tt))
   expect_identical(why, character(), label = paste(id, "stored"))
@@ -285,9 +323,8 @@ test_that("wtcompare + smallcells with a coded group N: crude and weighted codes
   # (desctab.ado:994-1007 interleaves Cr_/Wt_ per group).
   tt <- table1_tc(p3_review_data("sg3"), by = "arm", vars = "x contn \\ k cat \\ b bin", wt = "w",
                   wtcompare = TRUE, wtn = TRUE, smallcells = 4, catrowperc = TRUE, slashN = TRUE, smd = TRUE)
-  # S17's cells, console cells and suppression map come from tabtools 2.5.1
-  # (Stata-Tools 712044f8: derivable-count protection); its SMD header and
-  # note stay in 2.1.14's form (_stored.csv meta row `_cells_from`).
+  # S17 is refreshed entirely from pinned 2.5.1 by the narrow transition
+  # producer; historical mixed presentation is retained under backcompat.
   p3_expect(tt, "S17")
   m <- tt$stored$suppression
   expect_identical(unname(m["r3", c("Cr_3", "Wt_3")]), c(0, 3))
@@ -306,7 +343,7 @@ test_that("fweight, three groups, conts: displayed p exact, stored Kruskal-Walli
                   percent_n = TRUE)
   # p3_expect compares the Kruskal-Wallis p cell exactly (row-wise p mask).
   p3_expect(tt, "S18")
-  stored <- utils::read.csv(file.path(p3_dir(), "S18_stored.csv"), colClasses = "character",
+  stored <- utils::read.csv(file.path(p3_case_dir("S18"), "S18_stored.csv"), colClasses = "character",
                             na.strings = character(), encoding = "UTF-8")
   pt <- golden_table_p_rows(tt)
   kw <- which(!is.na(attr(pt, "tol")))

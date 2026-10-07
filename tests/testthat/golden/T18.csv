@@ -1,4 +1,4 @@
- ,Primary,Secondary,Tertiary,p-value,SMD
+ ,Primary,Secondary,Tertiary,p-value,SMD (Primary vs Secondary)
 No. (Column %) or Mean±SD,"N=3,860","N=5,884","N=5,256",,
 Age at cohort entry (years),58.4±13.3,58.4±13.4,58.3±13.3,0.81,0.006
 Female sex,"2,275 (59)","3,579 (61)","3,118 (59)",0.12,0.039
@@ -8,3 +8,4 @@ Marital status,,,,0.85,0.027
    Divorced,765 (20),"1,143 (19)","1,043 (20)",,
    Widowed,597 (15),877 (15),771 (15),,
 Diabetes,"1,770 (46)","2,708 (46)","2,447 (47)",0.77,0.003
+SMD compares Primary vs Secondary only (the first two of 3 groups).,,,,,

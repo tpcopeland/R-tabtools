@@ -1,9 +1,0 @@
-Table 2. Hormone Therapy and Recurrent Events,
-Any HRT use,aHR (95% CI)
-Any HRT,"0.82 (0.69, 0.98)"
-Former smoker,"1.14 (0.97, 1.34)"
-Current smoker,"1.46 (1.21, 1.77)"
-By estrogen dose,aHR (95% CI)
-Low dose,"0.91 (0.74, 1.12)"
-High dose,"0.73 (0.58, 0.92)"
-aHR = adjusted hazard ratio; CI = confidence interval. Models adjusted for age and comorbidities.,

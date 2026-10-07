@@ -43,9 +43,15 @@ test_that("the manifest names every sheet of the R workbooks, and only those", {
   expect_true(all(manifest$status %in% c("compared", "not_ported", "not_compared")))
   expect_true(all(nzchar(manifest$reason[manifest$status != "compared"])))
   expect_true(all(nzchar(manifest$golden[manifest$kind == "sheet" & manifest$status == "compared"])))
-  # 13 Stata workbooks, 77 sheets (demo_tabtools.do header).
-  expect_identical(length(unique(sheets$artefact)), 13L)
-  expect_identical(nrow(sheets), 77L)
+  # Actual authenticated native-v2 inventory, not source declarations.
+  expect_identical(length(unique(sheets$artefact)), 16L)
+  expect_identical(nrow(sheets), 102L)
+  runtime <- utils::read.csv(golden_demo_path("runtime-inventory.csv"), colClasses = "character", na.strings = character())
+  expect_identical(nrow(runtime), 162L)
+  expect_identical(runtime[, c("kind", "artefact", "item", "stata")], manifest[, c("kind", "artefact", "item", "stata")])
+  expect_identical(as.integer(table(manifest$kind)[c("sheet", "console", "report")]), c(102L, 56L, 4L))
+  expect_identical(sheets$scenario[sheets$status == "compared"], rep("", sum(sheets$status == "compared")))
+  expect_identical(sheets$golden[sheets$status == "compared"], paste0("demo/", sheets$artefact[sheets$status == "compared"], ":", sheets$item[sheets$status == "compared"]))
 })
 
 test_that("the script's **# sections are the Stata do-file's, in order", {
@@ -56,8 +62,8 @@ test_that("the script's **# sections are the Stata do-file's, in order", {
 })
 
 test_that("the goldens come from the baseline Stata demo", {
-  expect_identical(unname(source_info["tabtools_version"]), "2.1.14")
-  expect_identical(unname(source_info["stata_tools_commit"]), "1255176d")
+  expect_identical(unname(source_info["tabtools_version"]), "2.5.1")
+  expect_identical(unname(source_info["stata_tools_commit"]), "712044f8")
   expect_identical(unname(source_info["fixture_check"]), "identical")
 })
 
@@ -70,27 +76,18 @@ for (i in seq_len(nrow(sheet_rows))) {
     row <- sheet_rows[i, ]
     test_that(paste0(row$artefact, " sheet '", row$item, "' matches ", row$golden), {
       want <- golden_demo_golden(row$golden)
-      if (nzchar(row$scenario)) {
-        want$book <- golden_book(row$scenario)
-      } else if (row$golden %in% c("K01.xlsx:Block Primary", "K01.xlsx:Block Dose")) {
-        # Routing context only: setup sheets have no composite publication ID.
-        want$book <- golden_book("K01")
-      }
       got <- file.path(run$out_dir, row$artefact)
       tt <- run$tables[[paste(row$artefact, row$item)]]
       expect_s3_class(tt, "tt_table")
       p_rows <- if (!is.null(tt$rows$vtype)) golden_p_masked_rows(tt)
       why <- golden_compare_styles(got, row$item, want$book, want$sheet, mask = row$mask,
                                    got_width_offset = golden_r_width_offset, p_rows = p_rows,
-                                   publication_id = if (nzchar(row$scenario)) row$scenario else NULL)
+                                   publication_id = row$golden)
       # effecttab's tolerance scenario compares its body values in the
       # cells (golden_effect_style_filter(), as run_golden_effecttab_scenario()).
       if (identical(tt$command, "effecttab")) why <- golden_effect_style_filter(why, row$mode)
       golden_expect_none(why, paste("styles", row$artefact, row$item))
-      if (nzchar(row$scenario)) {
-        # The scenario's own cell golden, in its mode and with its mask.
-        expect_cells_match(tt, row$scenario, mask = row$mask, mode = row$mode)
-      }
+
     })
   })
 }
@@ -129,10 +126,16 @@ local({
         skip_if(length(sb) != nrow(console_rows) || k > length(rb), "console blocks do not pair up")
         got <- golden_demo_console_lines(rb[[k]]$lines, r_dirs)
         want <- golden_demo_console_lines(sb[[i]]$lines, stata_dirs)
+        got_md <- sub("\\s+$", "", golden_demo_console_lines(rmd[[k]]$lines, r_dirs))
+        want_md <- sub("\\s+$", "", golden_demo_console_lines(smd[[i]]$lines, stata_dirs))
+        if (identical(row$item, "C28")) {
+          console_body <- golden_demo_primary_console(got, want)
+          markdown_body <- golden_demo_primary_console(got_md, want_md)
+          got <- console_body$got; want <- console_body$want
+          got_md <- markdown_body$got; want_md <- markdown_body$want
+        }
         golden_expect_none(golden_compare_console(got, want, row$mask), paste("console", row$item))
-        golden_expect_none(golden_demo_md_compare(rmd[[k]]$lines, smd[[i]]$lines, row$mask,
-                                                  r_dirs, stata_dirs),
-                           paste("console md", row$item))
+        golden_expect_none(golden_compare_console(got_md, want_md, row$mask), paste("console md", row$item))
       })
     })
   }

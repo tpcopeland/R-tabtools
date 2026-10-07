@@ -1,52 +1,13 @@
-#  demo_tabtools.R - the R twin of Stata tabtools' demo/demo_tabtools.do
-#
-#  Every section of the Stata demo appears here under the same `**#`
-#  heading, in the same order, and each R block is preceded by the Stata
-#  command it mirrors, so a Stata user can point at a section of the do-file
-#  and find the R for it. Every sheet of a ported command (61 of the Stata
-#  demo's 77) matches the Stata demo's sheet, checked cell by cell by
-#  tests/testthat/test-demo-parity.R against the Stata 2.1.14 demo output.
-#
-#  The demo lives in the source repository only (qa/demo/, not in the
-#  package build): its datasets include Stata's own example data (sysuse
-#  auto, webuse union), which the package does not redistribute. It needs
-#  tabtools installed and a clone of the repository.
-#
-#  Usage, from the root of the clone (run it in its own environment, so its
-#  objects do not replace yours; out_dir is optional, default a folder in
-#  tempdir()):
-#    demo <- new.env()
-#    demo$out_dir <- "~/tabtools_demo"
-#    source("qa/demo/demo_tabtools.R", local = demo)
-#  From another directory, also set demo$demo_data_file to the path of
-#  qa/demo/demo_tabtools.rds. The demo clears the session's
-#  tabtools_options() while it runs and restores them at the end
-#  (persisted defaults are not touched).
-#
-#  Produces, in out_dir:
-#    console_output.log        the console sections (Stata: log using ...)
-#    console_output.md         the same as Markdown
-#    demo_markdown_report.md   Markdown tables appended into one report
-#    demo_table1.xlsx          14 sheets   table1_tc, styles, small cells
-#    demo_desctab.xlsx          9 sheets   desctab (= table1_tc) examples
-#    demo_regtab.xlsx          13 sheets   regtab core and styling variants
-#    demo_regtab_models.xlsx    7 sheets   regtab model families (of Stata's 10)
-#    demo_comptab.xlsx          5 sheets   comptab composites and their regtab sources
-#    demo_effecttab.xlsx        4 sheets   effecttab ATE and margins
-#    demo_stratetab.xlsx        1 sheet    stratetab rates
-#    demo_hrcomptab.xlsx        1 sheet    hrcomptab composite
-#    demo_puttab.xlsx           3 sheets   puttab data sources
-#    demo_stacktab.xlsx         4 sheets   puttab blocks + stacktab
-#
-#  Not in the R port (sections kept as commented stubs naming the Stata
-#  command): corrtab, crosstab and survtab (out of scope); the Panel RE (xtreg, re), Quantile (qreg) and
-#  Cragg hurdle (churdle) models; the forest plots of demo_tabtools_eplot.do.
-#
-#  Needs the Suggested packages haven, survival, lme4, geepack, MASS, nnet,
-#  pscl, WeightIt and marginaleffects.
+# R twin of the authenticated Stata tabtools 2.5.1 demo, pin712044f8.
+# All103 source headings appear in order. The actual runtime manifest records
+# 102 native sheets in16 books,56 console commands and4 report tables.
+# Implemented examples compare against their own native demo artifacts;
+# pending WP-4–7 cases retain concrete owners and emit no invented sheets.
+# Source-only datasets come from the accepted eight native snapshots. Run this
+# script in a private environment with optional out_dir/demo_data_file values.
 
+local({
 # **# Setup ----
-
 library(tabtools)
 missing_pkgs <- Filter(function(pkg) !requireNamespace(pkg, quietly = TRUE),
                        c("haven", "survival", "lme4", "geepack", "MASS", "nnet", "pscl",
@@ -59,12 +20,12 @@ if (length(missing_pkgs)) {
 # Stata writes into tabtools/demo; R writes into out_dir, set in the
 # environment the script runs in (only there: an out_dir elsewhere on the
 # search path is not used).
-out_dir <- get0("out_dir", envir = environment(), inherits = FALSE,
+out_dir <- get0("out_dir", envir = environment(), inherits = TRUE,
                 ifnotfound = file.path(tempdir(), "tabtools_demo"))
 # The demo's datasets (qa/make_demo_data.R): demo_data_file, set in the
 # environment the script runs in as out_dir is, else qa/demo/demo_tabtools.rds
 # relative to the working directory (the root of the repository).
-demo_data_file <- get0("demo_data_file", envir = environment(), inherits = FALSE,
+demo_data_file <- get0("demo_data_file", envir = environment(), inherits = TRUE,
                        ifnotfound = file.path("qa", "demo", "demo_tabtools.rds"))
 if (!file.exists(demo_data_file)) {
   stop("demo_tabtools.R needs its datasets, qa/demo/demo_tabtools.rds: run it from the root of ",
@@ -89,6 +50,10 @@ console_md         <- file.path(out_dir, "console_output.md")
 # The demo runs with no session defaults, as the Stata demo does; the
 # session's tabtools_options() come back at the end.
 user_tabtools_options <- tabtools_options()
+on.exit({
+  tabtools_options(clear = TRUE)
+  if (length(user_tabtools_options)) do.call(tabtools_options, user_tabtools_options)
+}, add = TRUE)
 tabtools_options(clear = TRUE)
 
 # Erase prior demo artifacts before regenerating the full documentation set.
@@ -366,6 +331,40 @@ console(table1_tc(sc_binary, by = "group", vars = c(rare_ae = "bin"),
 #            total(after) smallcells(5)
 console(desctab(sc_binary, by = "group", vars = c(rare_ae = "bin"),
                 total = "after", smallcells = 5))
+
+# **# Console: smallcells(#, primary) and cellreplace() ----
+# Native 2/8/6/4 counts; no source RNG is redrawn.
+console(table1_tc(sc_complement, by = "group", vars = c(category = "cat"),
+                  total = "after", smallcells = 5, smallcells_mode = "primary"))
+console(table1_tc(analysis, by = "treated", vars = c(education = "cat", civil_status = "cat"),
+                  cellreplace = list(list(row = "Widowed", column = "SNRI", text = "Not reported"))))
+
+# **# Console: tabtools session settings ----
+# The native query publishes Stata globals; R publishes named options.
+# Semantics are checked here and inherited workbook publication below.
+console(tabtools_options(smallcells = 5, smallcells_mode = "primary"))
+console(tabtools_options())
+stopifnot(identical(tabtools_options()$smallcells, 5L),
+          identical(tabtools_options()$smallcells_mode, "primary"))
+console(tabtools_options(smallcells = NULL, smallcells_mode = NULL))
+stopifnot(is.null(tabtools_options()$smallcells), is.null(tabtools_options()$smallcells_mode))
+
+# **# Console: tabcell single cells ----
+# WP-5A: single-cell command family pending.
+
+# **# Console: ratetab incidence rates ----
+# WP-5B: saved-rate command family pending.
+
+# **# Console: outtab binary outcomes by exposure ----
+# WP-5C: multi-outcome command family pending.
+
+# **# Console: regtab 2.3 layout options ----
+layout_crude <- glm(cv_event ~ treated, family = binomial, data = analysis)
+layout_adjusted <- glm(cv_event ~ treated + index_age + female + education + diabetes + hypertension,
+                       family = binomial, data = analysis)
+console(regtab(layout_crude, layout_adjusted, cformat = "%5.3f", sep = " to ",
+               nointercept = TRUE, models = c("Crude", "Adjusted")))
+# WP-4B: transpose/cellnote; WP-4A: fit-time counts/mincount await implementation.
 
 # **# Console: puttab + stacktab export pipeline ----
 # Emit two styled estimate blocks with puttab, then assemble them into one
@@ -1141,23 +1140,66 @@ effecttab(list(ipw), data = analysis, xlsx = xlsx_effecttab, sheet = "ATE",
 #       footnote("IPW = inverse probability weighting. AIPW = augmented IPW (doubly robust).")
 # R: augmented IPW in base R. teffects aipw's defaults: a linear outcome
 # model per treatment arm, the logistic propensity model above, and the
-# efficient influence function for the standard errors. effecttab() takes
+# joint estimating-equation sandwich for the standard errors. effecttab() takes
 # the two estimates as a data frame with Stata's equation and term keys.
 aipw_estimate <- function(data) {
-  ps <- fitted(glm(treated ~ index_age + female + education + diabetes + hypertension + anxiety,
-                   family = binomial, data = data))
+  tm <- glm(treated ~ index_age + female + education + diabetes + hypertension + anxiety,
+            family = binomial, data = data, na.action = na.fail)
+  ps <- fitted(tm)
   outcome <- cv_event ~ index_age + female + education + diabetes + hypertension + anxiety
-  mu1 <- predict(lm(outcome, data = data[data$treated == 1, ]), newdata = data)
-  mu0 <- predict(lm(outcome, data = data[data$treated == 0, ]), newdata = data)
-  a <- data$treated
-  y <- data$cv_event
+  om1 <- lm(outcome, data = data[data$treated == 1, ], na.action = na.fail)
+  om0 <- lm(outcome, data = data[data$treated == 0, ], na.action = na.fail)
+  mu1 <- predict(om1, newdata = data)
+  mu0 <- predict(om0, newdata = data)
+  a <- as.numeric(data$treated)
+  y <- as.numeric(data$cv_event)
+  X <- model.matrix(tm)
+  n <- nrow(X)
+  if (!tm$converged || length(y) != n || !all(a %in% c(0, 1)) ||
+      !all(is.finite(c(y, ps, mu0, mu1, X))) || any(ps <= 0 | ps >= 1) ||
+      !identical(colnames(X), names(coef(om0))) ||
+      !identical(colnames(X), names(coef(om1))) ||
+      anyNA(c(coef(tm), coef(om0), coef(om1)))) {
+    stop("The AIPW demo requires complete data, both treatment arms, full-rank common designs and interior converged propensity scores.")
+  }
   if1 <- mu1 + a * (y - mu1) / ps
   if0 <- mu0 + (1 - a) * (y - mu0) / (1 - ps)
-  se <- function(x) sqrt(mean((x - mean(x))^2) / length(x))
+  # Stata teffects aipw manual pp.16-18,23: standard AIPW stacks
+  # POM0, POM1, arm-specific linear OM scores and logit TM scores.
+  # The linear score has no sigma parameter; its constant scale cancels.
+  k <- ncol(X)
+  b0 <- seq_len(k) + 2L
+  b1 <- b0 + k
+  gamma <- b1 + k
+  parameter_names <- c("POM0", "POM1", paste0("OM0:", colnames(X)),
+                       paste0("OM1:", colnames(X)), paste0("TM:", colnames(X)))
+  U <- cbind(if0 - mean(if0), if1 - mean(if1),
+             X * ((1 - a) * (y - mu0)), X * (a * (y - mu1)), X * (a - ps))
+  colnames(U) <- parameter_names
+  # A is mean dU/dtheta, not its inverse. The POM/nuisance blocks
+  # are nonzero in finite samples and must not be dropped as in a plug-in IF.
+  A <- matrix(0, ncol(U), ncol(U), dimnames = list(parameter_names, parameter_names))
+  A[1, 1] <- A[2, 2] <- -1
+  A[1, b0] <- colMeans(X * (1 - (1 - a) / (1 - ps)))
+  A[2, b1] <- colMeans(X * (1 - a / ps))
+  A[1, gamma] <- colMeans(X * ((1 - a) * (y - mu0) * ps / (1 - ps)))
+  A[2, gamma] <- colMeans(X * (-a * (y - mu1) * (1 - ps) / ps))
+  A[b0, b0] <- -crossprod(X, X * (1 - a)) / n
+  A[b1, b1] <- -crossprod(X, X * a) / n
+  A[gamma, gamma] <- -crossprod(X, X * (ps * (1 - ps))) / n
+  inverse <- solve(A)
+  V <- inverse %*% crossprod(U) %*% t(inverse) / n^2
+  # Transform POM0/POM1 to the unchanged output order ATE/POM0.
+  contrast <- matrix(c(-1, 1, 1, 0), 2L, byrow = TRUE)
+  effects_vcov <- contrast %*% V[1:2, 1:2, drop = FALSE] %*% t(contrast)
+  dimnames(effects_vcov) <- list(c("r1vs0.treated", "0.treated"), c("r1vs0.treated", "0.treated"))
   out <- data.frame(equation = c("ATE", "POmean"), term = c("r1vs0.treated", "0.treated"),
                     estimate = c(mean(if1 - if0), mean(if0)),
-                    std.error = c(se(if1 - if0), se(if0)))
+                    std.error = unname(sqrt(diag(effects_vcov))))
   attr(out, "tt_estimator") <- "aipw"
+  attr(out, "vcov") <- effects_vcov
+  attr(out, "aipw_ee") <- list(theta = setNames(c(mean(if0), mean(if1), coef(om0), coef(om1), coef(tm)), parameter_names),
+                               jacobian = A, vcov = V, N = n)
   out
 }
 aipw <- aipw_estimate(te_data)
@@ -1679,6 +1721,7 @@ stopifnot(m[1, 1] == "Price and repair record by origin", m[2, 3] == "Domestic",
 # The three small tables of the console section (sc_primary, sc_complement,
 # sc_binary). Stata asserts r(N_primary_suppressed) and
 # r(N_secondary_suppressed); R stores them in the table's $stored.
+
 # **## Primary suppression only ----
 # Stata:
 #   table1_tc category, by(group) vars(category cat) total(after) ///
@@ -1775,6 +1818,103 @@ for (book in c(xlsx_table1, xlsx_desctab)) {
             count_cells(book, "Small Cells Binary", "<5") >= 2)
 }
 
+# **# Sheets: regtab 2.3 options -- cformat, flat frame + reftop, transpose, cellnote, fit counts ----
+regtab(layout_adjusted, xlsx = xlsx_regtab, sheet = "Regtab cformat", nointercept = TRUE,
+       cformat = "%5.3f", sep = " to ", title = "Table 2b. CV Events (Three Decimals, 'to' Intervals)")
+# WP-4B: native reftop/transpose/cellnote; WP-4A: fit counts/mincount pending.
+
+# **# Sheet: effecttab cformat() ----
+effecttab(list(ipw), data = analysis, xlsx = xlsx_effecttab, sheet = "ATE cformat",
+          effect = "ATE", method = "ipw", cformat = "%6.4f",
+          tlabels = c("0" = "SSRI", "1" = "SNRI"),
+          title = "Table 6b. Average Treatment Effect, Four Decimals")
+
+# **# Sheets: comptab cformat(), cisep(), and a flat frame ----
+# WP-5D: native rate/model composites and flat output pending.
+
+# **# Sheets: ratetab -- rates from stset data, then rates + models with comptab ----
+# WP-5B / WP-5D: saved rates and rate/model composites pending.
+
+# **# Sheets: outtab -- binary outcomes by exposure ----
+# WP-5C: outcome grid/panels pending.
+
+# **# Sheet: tabcell columns, written to a tabtools session workbook ----
+# WP-5A: tabcell generation pending; session publication is exercised by Spans.
+
+# **# Sheets: puttab 2.2/2.3 layout options -- hlines/boldrows, panels, spans ----
+layout_data <- data.frame(group = c("Domestic", "Foreign", "Repair", "Good (4-5)", "Poor (1-3)"),
+                          n = c("52", "22", "N", "29", "40"), price = c("6,072", "6,385", "Price", "6,013", "6,118"))
+puttab(layout_data, xlsx = xlsx_puttab, sheet = "Stacked Tables", hlines = c(3, 4), boldrows = 3,
+       title = "Table P4. Two Tables Stacked in One Source")
+panel_data <- data.frame(row = c("Under 55", "55 and over", "Repleted"),
+                         c1 = c("12", "9", "40"), c2 = c("310", "280", "18"),
+                         blk = haven::labelled(c(1, 1, 2), c("A. Relapses" = 1, "B. New MRI activity" = 2)),
+                         h0 = "", h1 = c("Relapses", "Relapses", "Scans"), h2 = c("Person-years", "Person-years", "Percent"))
+puttab(panel_data, vars = c("row", "c1", "c2"), xlsx = xlsx_puttab, sheet = "Panels", noheader = TRUE,
+       panel = "blk", panelheader = c("h0", "h1", "h2"), title = "Table P5. Panels with Their Own Headers",
+       footnote = "Counts are crude. \\ Ratios are adjusted.")
+attr(panel_data$row, "label") <- "Age group"
+attr(panel_data$c1, "label") <- "Events"
+attr(panel_data$c2, "label") <- "Exposure"
+# The successful returned sink is recorded by QA; no second export occurs.
+tabtools_options(workbook = xlsx_puttab)
+puttab(panel_data, vars = c("row", "c1", "c2"), sheet = "Spans", varlabels = TRUE,
+       spanheader = list(list(text = "Counts", first = 2L, last = 3L)), title = "Table P6. A Spanning Header")
+tabtools_options(workbook = NULL)
+
+# **# Sheet: stacktab frames() -- stack table1_tc frames as panels ----
+frame_all <- table1_tc(analysis, by = "treated", vars = c(index_age = "contn %5.1f", female = "bin", education = "cat"))
+frame_old <- table1_tc(analysis[analysis$index_age >= 65, ], by = "treated",
+                       vars = c(index_age = "contn %5.1f", female = "bin", education = "cat"))
+# Native desctab.ado:1001 labels the stub "Factor "; its frame keeps the
+# descriptor/N row as data. Expose those publication rows without recomputing
+# the analysis or using the TT-to-puttab header-collapse convenience path.
+native_table1_frame <- function(tt, source_data = analysis) {
+  stopifnot(identical(tt$command, "table1_tc"), length(tt$header) == 2L)
+  body <- as.matrix(tt$body)
+  # Stata's if keeps variable labels. R row subsetting loses custom label
+  # attributes on plain numeric/factor columns; restore only raw-name variable
+  # rows by their source identity, preserving levels and publication overrides.
+  if (!is.null(source_data) && is.data.frame(tt$rows) &&
+      all(c("type", "var") %in% names(tt$rows))) {
+    for (r in which(tt$rows$type %in% c("var", "cat_header"))) {
+      variable <- tt$rows$var[r]
+      if (is.na(variable) || !variable %in% names(source_data) ||
+          !identical(unname(body[r, 1L]), variable)) next
+      label <- attr(source_data[[variable]], "label", exact = TRUE)
+      if (is.character(label) && length(label) == 1L && !is.na(label) && nzchar(label)) {
+        body[r, 1L] <- label
+      }
+    }
+  }
+  data <- as.data.frame(rbind(tt$header[[2L]]$text, body),
+                        stringsAsFactors = FALSE)
+  labels <- tt$header[[1L]]$text
+  labels[1L] <- "Factor "
+  names(data) <- paste0("c", seq_len(ncol(data)))
+  for (j in seq_along(data)) attr(data[[j]], "label") <- labels[j]
+  attr(data, "sample_accounting") <- tt$meta$sample_accounting
+  data
+}
+stacktab(frames = list(all = list(data = native_table1_frame(frame_all), label = "All patients"),
+                       old = list(data = native_table1_frame(frame_old), label = "Aged 65 and over")),
+         xlsx = xlsx_stacktab, sheet = "Frames",
+         title = "Table 1. Baseline Characteristics, All Patients and Aged 65+")
+
+# **# Sheets: table1_tc/desctab/crosstab smallcells(#, primary) and cellreplace() ----
+primary_demo <- table1_tc(sc_complement, by = "group", vars = c(category = "cat"), total = "after",
+                            smallcells = 5, smallcells_mode = "primary",
+                            title = "Small-cell suppression: primary mode", xlsx = xlsx_table1, sheet = "Small Cells Primary Mode")
+stopifnot(identical(primary_demo$stored$smallcells$n_masked, 2L), identical(primary_demo$stored$smallcells$n_linked, 0L))
+# WP-6A owns desctab/crosstab primary-mode adapters; no deferred sheet is emitted.
+replace_demo <- table1_tc(analysis, by = "treated", vars = c(education = "cat", civil_status = "cat"),
+                           cellreplace = list(list(row = "Widowed", column = "SNRI", text = "Not reported")),
+                           title = "Table 1. cellreplace() Overwrites One Cell", xlsx = xlsx_table1, sheet = "Cell Replace")
+stopifnot(identical(replace_demo$stored$n_cellreplace, 1L))
+
+# **# Verify 2.3 workbook content ----
+# Future WP-4A/4B/5A/5B/5C/5D/6A checks remain pending; implemented examples above assert their actual returns.
+
 # **# Convert console output to markdown ----
 # Stata: logdoc using "`console_log'", output("`console_md'") format(md) replace quiet
 # R: console() wrote console_output.md alongside the log.
@@ -1791,3 +1931,5 @@ for (f in c(console_log, console_md, markdown_report, xlsx_table1, xlsx_desctab,
 # The session's own tabtools_options(), cleared at the start.
 tabtools_options(clear = TRUE)
 if (length(user_tabtools_options)) do.call(tabtools_options, user_tabtools_options)
+
+})

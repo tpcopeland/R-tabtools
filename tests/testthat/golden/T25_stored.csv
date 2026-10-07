@@ -1,7 +1,7 @@
 name,kind,row,col,value
 _golden_id,meta,,,T25
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
 markdown_cols,scalar,,,4
 markdown_rows,scalar,,,3
@@ -12,6 +12,7 @@ smallcells,scalar,,,5
 markdown,macro,,,T25.md
 sheet,macro,,,T25
 xlsx,macro,,,table1_tc.xlsx
+smallcells_mode,macro,,,full
 varlist,macro,,,category
 methods,macro,,,"Baseline characteristics were compared between groups defined by Study group. Data are presented as No. (%). P-values were calculated using Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
 Dapa,macro,,,Data are presented as No. (%).

@@ -1,254 +1,241 @@
 #!/usr/bin/env Rscript
-# qa/demo_parity.R - the R demo against the Stata demo (IMPLEMENTATION_PLAN.md
-# Milestone D: D3 check, D6 regeneration).
-#
-#   Rscript qa/demo_parity.R            run tests/testthat/test-demo-parity.R
-#                                       (exit 1 on any failure or skip; ends
-#                                       with the QA-RESULT marker)
-#   Rscript qa/demo_parity.R --update [--commit=1255176d]
-#                            [--tabtools-version=2.1.14] [--stata-tools=DIR]
-#                            [--only=FILES] [--keep-work]
-#
-# --update regenerates the Stata side, then runs the check. It needs
-# stata-mp on PATH and network access (the demo runs `webuse union`):
-#   1. `git archive <commit> tabtools _data tc_schemes logdoc` of DIR
-#      (default ~/Stata-Tools) into a scratch directory: never the working
-#      tree or an installed copy;
-#   2. qa/stata/run_demo.do runs the exported demo_tabtools.do (the version
-#      guard refuses any tabtools but --tabtools-version) and copies its
-#      artefacts out;
-#   3. rebuilds the demo's datasets from the exported do-file (the dataset
-#      build and the mixed, zip, hurdle and hrcomptab draws) and checks that the golden
-#      fixtures (and so qa/demo/demo_tabtools.rds, qa/make_demo_data.R)
-#      hold them exactly;
-#   4. checks that qa/demo/demo_tabtools.R has the do-file's **#
-#      sections in order, and tests/testthat/golden/demo/manifest.csv
-#      against the artefacts:
-#      every Stata sheet, console block and report table listed, in order;
-#      every ported sheet whose golden is a scenario golden (table1_tc.xlsx,
-#      regtab.xlsx, ...) identical to the Stata demo sheet, so no demo sheet
-#      is stored twice;
-#   5. copies into tests/testthat/golden/demo/ the Stata workbooks the
-#      manifest compares against (golden "demo/<book>:<sheet>"),
-#      console_output.log, console_output.md and demo_markdown_report.md
-#      and writes SOURCE.csv (--only=FILES: just those workbooks or the
-#      report, comma-separated, from the release SOURCE.csv names; SOURCE.csv
-#      is kept).
-# When the golden baseline moves, regenerate the scenario goldens first
-# (qa/make_golden.R), then run this with the new --commit and
-# --tabtools-version, and update the version the test expects.
+# Native workflow is two runs: reviewed --stage-native --stage-output=NEW_DIR,
+# then --update --demo-data-dir=ACCEPTED_DIR --receipt-dir=NEW_DIR, each with
+# explicit --commit=712044f8 --tabtools-version=2.5.1 and a Git --stata-tools.
+# STAGED, native-accepted/R-pending and final R PASS are separate receipts.
 
-args <- commandArgs(trailingOnly = TRUE)
-`%||%` <- function(x, y) if (is.null(x)) y else x
-opt <- function(name) {
-  hit <- grep(paste0("^--", name, "="), args, value = TRUE)
-  if (length(hit)) sub(paste0("^--", name, "="), "", hit[1]) else NULL
-}
-file_arg <- sub("^--file=", "", commandArgs(FALSE)[startsWith(commandArgs(FALSE), "--file=")])
-root <- if (length(file_arg)) dirname(dirname(normalizePath(file_arg[1]))) else normalizePath(getwd())
-if (!file.exists(file.path(root, "DESCRIPTION")) ||
-    !identical(unname(read.dcf(file.path(root, "DESCRIPTION"), "Package")[1, 1]), "tabtools")) {
-  stop("cannot find the tabtools package root", call. = FALSE)
-}
-setwd(root)
-tests <- file.path(root, "tests", "testthat")
-gdemo <- file.path(tests, "golden", "demo")
-
-# The package: the installed copy qa/run_all.R points at, else the source.
-lib <- Sys.getenv("TABTOOLS_QA_LIB")
-if (nzchar(lib)) {
-  suppressPackageStartupMessages(library(tabtools, lib.loc = lib))
-} else {
-  pkgload::load_all(root, quiet = TRUE, export_all = FALSE)
+demo_copy_tree <- function(from, to) {
+  if (!dir.create(to)) demo_abort("Cannot create copy destination: ", to)
+  files <- list.files(from, all.files = TRUE, no.. = TRUE, full.names = TRUE)
+  if (length(files) && !all(file.copy(files, to, recursive = TRUE, copy.date = TRUE))) demo_abort("Cannot preserve complete native stage.")
 }
 
-if ("--update" %in% args) {
-  if (!nzchar(Sys.which("stata-mp"))) stop("stata-mp not found on PATH", call. = FALSE)
-  commit <- opt("commit") %||% "1255176d"
-  version <- opt("tabtools-version") %||% "2.1.14"
-  stata_tools <- normalizePath(opt("stata-tools") %||% "~/Stata-Tools", mustWork = TRUE)
-  only <- opt("only")
-  only <- if (is.null(only)) NULL else strsplit(only, ",", fixed = TRUE)[[1]]
-  if (!is.null(only)) {
-    # A partial update keeps SOURCE.csv, so it must come from the same
-    # release, and cannot replace the console log (whose paths SOURCE.csv
-    # records).
-    old_src <- utils::read.csv(file.path(gdemo, "SOURCE.csv"), colClasses = "character")
-    old_src <- stats::setNames(old_src$value, old_src$key)
-    if (!identical(unname(old_src[c("stata_tools_commit", "tabtools_version")]), c(commit, version))) {
-      stop("--only needs the commit and version of golden/demo/SOURCE.csv; run a full --update", call. = FALSE)
-    }
-    if (any(c("console_output.log", "console_output.md") %in% only)) {
-      stop("--only cannot replace the console log; run a full --update", call. = FALSE)
-    }
+demo_runtime_inventory <- function(out, helper) {
+  rows <- new.env(parent = emptyenv())
+  rows$value <- list()
+  add <- function(kind, artefact, item, stata = "") rows$value[[length(rows$value) + 1L]] <- data.frame(kind = kind, artefact = artefact, item = item, stata = stata, stringsAsFactors = FALSE)
+  books <- list.files(out, pattern = "\\.xlsx$")
+  expected <- paste0(c("demo_table1", "demo_desctab", "demo_regtab", "demo_regtab_models", "demo_comptab", "demo_effecttab", "demo_stratetab", "demo_corrtab", "demo_crosstab", "demo_survtab", "demo_hrcomptab", "demo_puttab", "demo_stacktab", "demo_ratetab", "demo_outtab", "demo_tabcell"), ".xlsx")
+  if (!identical(sort(books), sort(expected))) demo_abort("Native workbook inventory is incomplete or unexpected.")
+  for (book in books) for (sheet in tidyxl::xlsx_sheet_names(file.path(out, book))) add("sheet", book, sheet)
+  log <- readLines(file.path(out, "console_output.log"), encoding = "UTF-8", warn = FALSE)
+  console <- helper$golden_demo_log_blocks(log, "stata")
+  md <- helper$golden_demo_md_blocks(readLines(file.path(out, "console_output.md"), encoding = "UTF-8", warn = FALSE), "stata")
+  keys <- vapply(console, `[[`, "", "key")
+  if (!length(keys) || !identical(keys, vapply(md, `[[`, "", "key"))) demo_abort("Native console log/Markdown identities differ or are empty.")
+  for (i in seq_along(keys)) add("console", "console_output.log", sprintf("C%02d", i), keys[i])
+  report <- helper$golden_demo_report_tables(readLines(file.path(out, "demo_markdown_report.md"), encoding = "UTF-8", warn = FALSE))
+  if (!length(report)) demo_abort("Native Markdown report has no tables.")
+  for (head in names(report)) add("report", "demo_markdown_report.md", head)
+  do.call(rbind, rows$value)
+}
+
+demo_check_manifest <- function(manifest, inventory) {
+  required <- c("kind", "artefact", "item", "status", "reason", "golden", "scenario", "mask", "mode", "stata", "r")
+  if (!all(required %in% names(manifest)) || any(!manifest$status %in% c("compared", "not_compared", "not_ported")) || any(!nzchar(manifest$reason[manifest$status != "compared"]))) demo_abort("Demo manifest classification/reasons are incomplete.")
+  for (kind in c("sheet", "console", "report")) {
+    got <- inventory[inventory$kind == kind, , drop = FALSE]
+    want <- manifest[manifest$kind == kind, , drop = FALSE]
+    if (kind == "sheet") {
+      if (!identical(sort(unique(got$artefact)), sort(unique(want$artefact)))) demo_abort("Manifest/native workbook sets differ.")
+      for (book in unique(got$artefact)) if (!identical(got$item[got$artefact == book], want$item[want$artefact == book])) demo_abort("Manifest/native sheet order differs: ", book)
+      compared <- want[want$status == "compared", , drop = FALSE]
+      if (!identical(compared$golden, paste0("demo/", compared$artefact, ":", compared$item)) || any(nzchar(compared$scenario))) demo_abort("Compared sheets require authentic demo books and empty scenario routes.")
+    } else if (kind == "console") {
+      if (!identical(got$stata, want$stata)) demo_abort("Manifest/native console keys differ.")
+    } else if (!identical(got$item, want$item)) demo_abort("Manifest/native report headings differ.")
   }
-  # A fixed name, not tempfile()'s random suffix: C28/C29 print this
-  # directory, so a fixed-length path keeps where the log wraps their lines
-  # the same from one --update to the next (task C7; logdoc up to 1.1.7
-  # rendered such a wrap differently depending on the text at the cut).
-  work <- file.path(tempdir(), "tabtools-demo-stata")
-  unlink(work, recursive = TRUE)
+  invisible(TRUE)
+}
+
+demo_update_selection <- function(only, source, commit, version, files) {
+  if (is.null(only)) return(files)
+  if (grepl("(^,|,$|,,)", only)) demo_abort("Empty --only artifact element.")
+  chosen <- strsplit(only, ",", fixed = TRUE)[[1L]]
+  if (!identical(unname(source[c("stata_tools_commit", "tabtools_version")]), c(commit, version))) demo_abort("--only requires the same accepted SOURCE pin; use full --update.")
+  if (any(c("console_output.log", "console_output.md") %in% chosen)) demo_abort("--only cannot replace console artifacts.")
+  if (!length(chosen) || any(!nzchar(chosen)) || anyDuplicated(chosen) || any(!chosen %in% files)) demo_abort("Unknown or duplicate --only artifact.")
+  chosen
+}
+
+demo_read_runtime <- function(path, expected = NULL) {
+  runtime <- readLines(path, warn = FALSE)
+  if (length(runtime) != 2L || !nzchar(runtime[1L]) || !identical(runtime[2L], "mt64")) demo_abort("Native RNG/runtime receipt differs.")
+  if (!is.null(expected) && !identical(runtime, expected)) demo_abort("Native demo/extraction runtime receipts differ.")
+  runtime
+}
+
+demo_native_generate <- function(root, opt, work) {
+  if (!nzchar(Sys.which("stata-mp"))) demo_abort("stata-mp not found on PATH.")
+  git_repo <- demo_canonical_dir(if (is.null(opt[["stata-tools"]])) path.expand("~/Stata-Tools") else opt[["stata-tools"]])
+  commit <- opt[["commit"]]
+  resolved <- system2("git", c("-C", shQuote(git_repo), "rev-parse", shQuote(paste0(commit, "^{commit}"))), stdout = TRUE, stderr = TRUE)
+  if (!is.null(attr(resolved, "status")) || !identical(resolved, demo_native_commit)) demo_abort("Stata-Tools commit does not resolve to the pinned native source.")
+  archive <- file.path(work, "native.tar")
+  status <- system2("git", c("-C", shQuote(git_repo), "archive", shQuote(commit), "tabtools", "_data", "tc_schemes", "logdoc"), stdout = archive, stderr = file.path(work, "archive.log"))
+  if (status != 0L) demo_abort("Native git archive failed.")
   export <- file.path(work, "export")
   out <- file.path(work, "out")
-  dir.create(export, recursive = TRUE)
-  if (!("--keep-work" %in% args)) on.exit(unlink(work, recursive = TRUE), add = TRUE)
-  message("Stata-Tools ", commit, " -> ", export)
-  st <- system(sprintf("git -C %s archive %s tabtools _data tc_schemes logdoc | tar -x -C %s",
-                       shQuote(stata_tools), shQuote(commit), shQuote(export)))
-  if (st != 0L) stop("git archive failed", call. = FALSE)
-
-  run_stata <- function(lines, name) {
+  data_dir <- file.path(work, "data")
+  dir.create(export)
+  dir.create(out)
+  dir.create(data_dir)
+  utils::untar(archive, exdir = export)
+  demo_file <- file.path(export, "tabtools", "demo", "demo_tabtools.do")
+  if (!identical(demo_sha256(demo_file), demo_native_source_hash)) demo_abort("Exported demo source hash differs from pinned catalog.")
+  demo_lines <- readLines(demo_file, warn = FALSE)
+  run_stata <- function(lines, name, sentinel) {
     do <- file.path(work, paste0(name, ".do"))
-    writeLines(lines, do)
-    old <- setwd(work)
-    on.exit(setwd(old))
-    st <- system2("stata-mp", c("-b", "do", shQuote(do)))
+    writeLines(lines, do, useBytes = TRUE)
+    previous <- setwd(work)
+    on.exit(setwd(previous), add = TRUE)
+    status <- system2("stata-mp", c("-b", "do", shQuote(do)))
     log <- file.path(work, paste0(name, ".log"))
     txt <- if (file.exists(log)) readLines(log, warn = FALSE) else character()
-    if (st != 0L || any(grepl("^r\\([0-9]+\\);$", txt))) stop(name, " failed; see ", log, call. = FALSE)
+    if (status != 0L || any(grepl("^r\\([0-9]+\\);$", txt)) || !any(trimws(txt) == sentinel)) demo_abort(name, " failed or did not emit its successful sentinel.")
     txt
   }
-
-  # 2. The demo.
-  message("Stata: demo_tabtools.do (tabtools ", version, ")")
-  run_stata(c(sprintf('do "%s" "%s" "%s" %s', file.path(root, "qa", "stata", "run_demo.do"), export, out, version),
-              sprintf('file open fh using "%s", write text replace', file.path(work, "stata_version.txt")),
-              'file write fh "`c(stata_version)\'" _n',
-              "file close fh"), "demo")
-  stata_version <- readLines(file.path(work, "stata_version.txt"))
-
-  # 3. The demo's datasets against the golden fixtures.
-  demo <- readLines(file.path(export, "tabtools", "demo", "demo_tabtools.do"), warn = FALSE)
-  section <- function(head, stop_at) {
-    i <- which(sub("\\s+$", "", demo) == head)
-    if (length(i) != 1L) stop("section not found in demo_tabtools.do: ", head, call. = FALSE)
-    j <- i + which(grepl(stop_at, demo[-seq_len(i)]))[1]
-    x <- demo[(i + 1L):(j - 1L)]
-    x[x != "preserve"]
-  }
-  data_dir <- file.path(work, "data")
-  dir.create(data_dir)
-  save <- function(name) sprintf('save "%s", replace', file.path(data_dir, paste0(name, ".dta")))
-  message("Stata: the demo's datasets")
-  run_stata(c("version 17.0", "clear all", "set rng mt64", "set more off",
-              gsub("`repo_root'", export, section("**# Build analysis dataset", "^tempfile analysis"), fixed = TRUE),
-              save("cohort"),
-              section("**# Sheet 15: Mixed Model -- Random effects with relabel + ICC", "^collect clear"), save("mixed_bp"),
-              section("**# Sheet 31: ZIP ZINB -- Zero-inflated count models", "^collect clear"), save("zip"),
-              section("**# Sheet 32: Hurdle -- Cragg hurdle model", "^collect clear"), save("hurdle"),
-              # Sheet 46: the dose data continue the binary data's random-number stream.
-              section("* Binary HRT model frame: one non-reference row", "^collect clear"), save("hrt_bin"),
-              section("* Dose category model frame: three non-reference rows after header + reference",
-                      "^collect clear"), save("hrt_dose"),
-              "webuse union, clear", save("union")), "demo_data")
-  for (nm in c("cohort", "mixed_bp", "zip", "hurdle", "hrt_bin", "hrt_dose", "union")) {
-    a <- haven::read_dta(file.path(data_dir, paste0(nm, ".dta")))
-    b <- haven::read_dta(file.path(tests, "golden", "fixtures", paste0(nm, ".dta")))
-    common <- intersect(names(a), names(b))
-    same <- nrow(a) == nrow(b) && all(vapply(common, function(v) {
-      identical(as.vector(a[[v]]), as.vector(b[[v]])) &&
-        identical(attr(a[[v]], "label"), attr(b[[v]], "label")) &&
-        identical(attr(a[[v]], "labels"), attr(b[[v]], "labels"))
-    }, TRUE))
-    if (!same) stop("fixture ", nm, ".dta differs from the Stata demo's data: rebuild the fixtures ",
-                    "(qa/make_golden.R --fixtures) and qa/make_demo_data.R", call. = FALSE)
-    message("  ", nm, ": ", length(common), " variables identical to the fixture")
-  }
-  rds <- readRDS(file.path(root, "qa", "demo", "demo_tabtools.rds"))
-  for (nm in names(rds)) {
-    b <- as.data.frame(haven::read_dta(file.path(tests, "golden", "fixtures", paste0(nm, ".dta"))))
-    if (!identical(rds[[nm]], b[names(rds[[nm]])])) {
-      stop("qa/demo/demo_tabtools.rds is out of date: run qa/make_demo_data.R", call. = FALSE)
-    }
-  }
-
-  # The R script's sections: the do-file's **# headings, in order.
-  heads_do <- sub("\\s+$", "", grep("^\\*\\*#", demo, value = TRUE))
-  script <- readLines(file.path(root, "qa", "demo", "demo_tabtools.R"), warn = FALSE)
-  heads_r <- sub(" ----$", "", sub("^# ", "", grep("^# \\*\\*#", script, value = TRUE)))
-  if (!identical(heads_r, heads_do)) {
-    stop("qa/demo/demo_tabtools.R's **# sections differ from demo_tabtools.do's: ",
-         paste(setdiff(union(heads_do, heads_r), intersect(heads_do, heads_r)), collapse = "; "), call. = FALSE)
-  }
-  message("  ", length(heads_r), " **# sections, as in demo_tabtools.do")
-  # Kept with the goldens, so test-demo-parity.R checks the script's
-  # headings without Stata (Milestone D review).
-  con <- file(file.path(gdemo, "sections.txt"), "wb")
-  writeLines(enc2utf8(heads_do), con, sep = "\n", useBytes = TRUE)
-  close(con)
-
-  # 4. The manifest against the artefacts.
-  old <- setwd(tests)
-  suppressMessages(invisible(utils::capture.output(testthat::source_test_helpers(".", env = environment()))))
-  setwd(old)
-  manifest <- utils::read.csv(file.path(gdemo, "manifest.csv"), stringsAsFactors = FALSE,
-                              na.strings = character(), colClasses = "character")
-  problems <- character()
-  sheets <- manifest[manifest$kind == "sheet", , drop = FALSE]
-  books <- sort(list.files(out, pattern = "\\.xlsx$"))
-  if (!identical(books, sort(unique(sheets$artefact)))) problems <- c(problems, "the manifest's workbooks differ from the demo's")
-  for (b in books) {
-    got <- tidyxl::xlsx_sheet_names(file.path(out, b))
-    if (!identical(got, sheets$item[sheets$artefact == b])) {
-      problems <- c(problems, sprintf("%s: sheets [%s], the manifest lists [%s]", b, paste(got, collapse = ", "),
-                                      paste(sheets$item[sheets$artefact == b], collapse = ", ")))
-    }
-  }
-  keys <- vapply(golden_demo_log_blocks(readLines(file.path(out, "console_output.log"), encoding = "UTF-8"), "stata"),
-                 `[[`, "", "key")
-  if (!identical(keys, manifest$stata[manifest$kind == "console"])) problems <- c(problems, "console blocks differ from the manifest")
-  heads <- names(golden_demo_report_tables(readLines(file.path(out, "demo_markdown_report.md"), encoding = "UTF-8")))
-  if (!identical(heads, manifest$item[manifest$kind == "report"])) problems <- c(problems, "report tables differ from the manifest")
-  demo_books <- character()
-  for (i in which(sheets$status == "compared")) {
-    g <- golden_demo_golden(sheets$golden[i])
-    if (startsWith(sheets$golden[i], "demo/")) {
-      demo_books <- c(demo_books, sheets$artefact[i])
-      next
-    }
-    why <- golden_compare_styles(file.path(out, sheets$artefact[i]), sheets$item[i], g$book, g$sheet,
-                                 got_width_offset = golden_width_offset, width_tol = 0)
-    if (length(why)) {
-      problems <- c(problems, sprintf("%s '%s' is no longer identical to %s (%s): point its golden at demo/%s",
-                                      sheets$artefact[i], sheets$item[i], sheets$golden[i], why[1], sheets$artefact[i]))
-    }
-  }
-  if (length(problems)) stop(paste(c("manifest check failed:", problems), collapse = "\n  "), call. = FALSE)
-
-  # 5. Copy and record.
-  files <- c(unique(demo_books), "console_output.log", "console_output.md", "demo_markdown_report.md")
-  if (!is.null(only)) files <- intersect(files, only)
-  dir.create(gdemo, showWarnings = FALSE)
-  for (f in files) {
-    file.copy(file.path(out, f), file.path(gdemo, f), overwrite = TRUE)
-    message("  golden/demo/", f)
-  }
-  if (is.null(only)) {
-    # demo_dir: where this run's Stata wrote, as its console log names it.
-    src <- data.frame(key = c("stata_tools_commit", "tabtools_version", "stata_version", "generated", "demo_dir",
-                              "fixture_check"),
-                      value = c(commit, version, stata_version, format(Sys.Date()),
-                                file.path(export, "tabtools", "demo"), "identical"))
-    utils::write.csv(src, file.path(gdemo, "SOURCE.csv"), row.names = FALSE)
-    message("wrote golden/demo/SOURCE.csv")
-  }
+  runtime_path <- file.path(work, "runtime.txt")
+  run_stata(sprintf('do "%s" "%s" "%s" %s "%s"', file.path(root, "qa", "stata", "run_demo.do"), export, out, opt[["tabtools-version"]], runtime_path), "demo", "RESULT: demo_tabtools tests=1 pass=1 fail=0")
+  runtime <- demo_read_runtime(runtime_path)
+  plan <- demo_native_plan(demo_lines, export)
+  extraction_runtime <- file.path(work, "extraction-runtime.txt")
+  extraction_lines <- gsub("@@DATA@@", data_dir, plan$lines, fixed = TRUE)
+  extraction_lines <- append(extraction_lines, c(
+    sprintf('file open ttver using "%s", write text replace', extraction_runtime),
+    'file write ttver "`c(stata_version)\'" _n "`c(rng_current)\'" _n', 'file close ttver'), after = length(extraction_lines) - 1L)
+  run_stata(extraction_lines, "demo_data", "RESULT: demo_data tests=8 pass=8 fail=0")
+  demo_read_runtime(extraction_runtime, expected = runtime)
+  if (!file.copy(file.path(work, "demo_data.do"), file.path(data_dir, "extraction.do"))) demo_abort("Cannot preserve extraction recipe.")
+  info <- c(stata_tools_commit = commit, stata_tools_full_commit = resolved, tabtools_version = "2.5.1", stata_version = runtime[1L], rng = runtime[2L], generated = format(Sys.time(), tz = "UTC", usetz = TRUE), demo_source_sha256 = demo_native_source_hash, demo_dir = file.path(export, "tabtools", "demo"), native_adopath = file.path(export, "tabtools"), source_status = "native_staged")
+  demo_write_source(data_dir, info)
+  helper <- new.env(parent = globalenv())
+  sys.source(file.path(root, "tests", "testthat", "helper-golden-demo.R"), envir = helper)
+  inventory <- demo_runtime_inventory(out, helper)
+  heads <- sub("\\s+$", "", grep("^\\*\\*#", demo_lines, value = TRUE))
+  if (length(heads) != 103L) demo_abort("Pinned native heading count differs.")
+  writeLines(heads, file.path(work, "sections.txt"), useBytes = TRUE)
+  utils::write.csv(inventory, file.path(work, "runtime-inventory.csv"), row.names = FALSE)
+  if (!file.copy(demo_file, file.path(work, "native-demo.do"))) demo_abort("Cannot preserve pinned native demo source.")
+  list(data_dir = data_dir, out = out, info = info, inventory = inventory, heads = heads)
 }
 
-# The check.
-Sys.setenv(NOT_CRAN = "true")
-source(file.path(root, "qa", "tools", "qa_result.R"))
-rep <- qa_testthat_reporter()
-res <- testthat::test_file(file.path(tests, "test-demo-parity.R"), reporter = rep,
-                           load_package = "none", stop_on_failure = FALSE)
-df <- as.data.frame(res)
-bad <- sum(df$failed) + sum(df$error)
-warned <- sum(df$warning)
-skipped <- sum(df$skipped)
-cat("\ndemo parity:", nrow(df), "tests,", bad, "expectations failed or errored,", warned, "warnings,",
-    skipped, "skipped,", length(rep$stray), "outside a test block\n")
-# The completion marker qa/run_all.R reconciles (Codex audit CX-6): one
-# comparison per test block, which fails on a warning too (codex audit
-# F10); a skipped block makes the run INCOMPLETE.
-qa_record_testthat(df, rep$stray, "test-demo-parity.R")
-st <- qa_done("demo_parity.R")
-if (!identical(st, "PASS")) quit(save = "no", status = 1L)
+demo_save_execution <- function(work, destination, status, info = character()) {
+  if (demo_path_exists(destination) || !dir.create(destination)) demo_abort("Execution destination appeared or cannot be created.")
+  for (dir in c("data", "out")) if (dir.exists(file.path(work, dir))) demo_copy_tree(file.path(work, dir), file.path(destination, dir))
+  files <- list.files(work, pattern = "\\.(log|do|txt|csv)$", full.names = TRUE)
+  if (length(files) && !all(file.copy(files, destination))) demo_abort("Cannot save complete execution diagnostics.")
+  paths <- list.files(destination, recursive = TRUE, full.names = TRUE, all.files = TRUE, no.. = TRUE)
+  utils::write.csv(data.frame(file = substring(paths, nchar(destination) + 2L), sha256 = demo_sha256(paths)), file.path(destination, "ARTIFACTS.csv"), row.names = FALSE)
+  receipt <- c(status = status, info)
+  utils::write.csv(data.frame(key = names(receipt), value = unname(receipt)), file.path(destination, "EXECUTION.csv"), row.names = FALSE)
+  invisible(destination)
+}
+
+demo_native_workflow <- function(root, opt) {
+  parent <- demo_canonical_dir(if (is.null(opt[["work-dir"]])) tempdir() else opt[["work-dir"]])
+  dest <- demo_new_destination(if (isTRUE(opt[["stage-native"]])) opt[["stage-output"]] else opt[["receipt-dir"]], parent)
+  # df -Pk reports available KiB. Refuse large copies without 1 GiB free.
+  space <- system2("df", c("-Pk", shQuote(parent)), stdout = TRUE)
+  available <- suppressWarnings(as.numeric(strsplit(trimws(tail(space, 1L)), "[[:space:]]+")[[1L]][4L]))
+  if (!is.finite(available) || available < 1024^2) demo_abort("At least 1 GiB free space is required.")
+  work <- tempfile("tabtools-demo-stata-", tmpdir = parent)
+  if (!dir.create(work)) demo_abort("Cannot create owned work directory.")
+  on.exit(try(unlink(work, recursive = TRUE), silent = TRUE), add = TRUE)
+  tryCatch({
+    generated <- demo_native_generate(root, opt, work)
+    if (isTRUE(opt[["stage-native"]])) {
+      demo_save_execution(work, dest, "STAGED", generated$info)
+      message("STAGED: authentic output/source retained at ", dest, "; R parity not run.")
+      return(invisible(list(status = "STAGED", destination = dest)))
+    }
+    accepted <- opt[["demo-data-dir"]]
+    pinned <- demo_read_data(accepted)
+    fresh <- demo_read_data(generated$data_dir)
+    demo_compare_source(fresh, pinned, readRDS(file.path(accepted, "SCHEMA.rds")))
+    demo_compare_rds(readRDS(file.path(root, "qa", "demo", "demo_tabtools.rds")), demo_rds_projection(pinned, "native"))
+    script <- readLines(file.path(root, "qa", "demo", "demo_tabtools.R"), warn = FALSE)
+    heads_r <- sub(" ----$", "", sub("^# ", "", grep("^# \\*\\*#", script, value = TRUE)))
+    if (!identical(heads_r, generated$heads)) demo_abort("R/native ordered headings differ.")
+    gdir <- file.path(root, "tests", "testthat", "golden", "demo")
+    manifest <- utils::read.csv(file.path(gdir, "manifest.csv"), colClasses = "character", na.strings = character())
+    demo_check_manifest(manifest, generated$inventory)
+    only <- opt[["only"]]
+    previous_source <- character()
+    if (!is.null(only)) {
+      previous <- utils::read.csv(file.path(gdir, "SOURCE.csv"), colClasses = "character")
+      previous_source <- stats::setNames(previous$value, previous$key)
+    }
+    files <- demo_update_selection(only, previous_source, opt[["commit"]], opt[["tabtools-version"]], list.files(generated$out))
+    demo_save_execution(work, dest, "NATIVE_ACCEPTED_R_QA_PENDING", c(generated$info, fixture_check = "identical", demo_data_dir = normalizePath(accepted), accepted_source_sha256 = demo_sha256(file.path(accepted, "SOURCE.csv")), accepted_schema_sha256 = demo_sha256(file.path(accepted, "SCHEMA.rds"))))
+    if (!all(file.copy(file.path(generated$out, files), file.path(gdir, files), overwrite = TRUE))) demo_abort("Native promotion failed; R parity is pending.")
+    if (is.null(only)) {
+      if (!file.copy(file.path(work, "sections.txt"), file.path(gdir, "sections.txt"), overwrite = TRUE)) demo_abort("Heading promotion failed.")
+      src <- c(generated$info, fixture_check = "identical", fixture_scope = "complete native demo snapshots/storage/schema/values/labels/RDS", demo_data_dir = "qa/demo/data/native-2.5.1", accepted_source_sha256 = demo_sha256(file.path(accepted, "SOURCE.csv")), accepted_schema_sha256 = demo_sha256(file.path(accepted, "SCHEMA.rds")), r_qa_status = "pending")
+      utils::write.csv(data.frame(key = names(src), value = unname(src)), file.path(gdir, "SOURCE.csv"), row.names = FALSE)
+    }
+    invisible(list(status = "NATIVE_ACCEPTED_R_QA_PENDING", destination = dest))
+  }, error = function(error) {
+    failure <- tempfile(paste0(basename(dest), "-failure-"), tmpdir = dirname(dest))
+    tryCatch({
+      demo_save_execution(work, failure, "FAILED", c(error = conditionMessage(error)))
+      message("FAILED diagnostics: ", failure)
+    }, error = function(save_error) message("Could not preserve diagnostics: ", conditionMessage(save_error)))
+    stop(error)
+  })
+}
+
+demo_finish_r_qa <- function(df, stray, qa, receipt_dir = NULL) {
+  qa$qa_record_testthat(df, stray, "test-demo-parity.R")
+  executed <- qa$qa_state$executed
+  skipped <- length(qa$qa_state$skipped)
+  failed <- length(qa$qa_state$failed)
+  status <- qa$qa_status(executed, skipped, failed)
+  if (!is.null(receipt_dir)) {
+    saveRDS(df, file.path(receipt_dir, "R-QA-RESULTS.rds"), version = 3)
+    saveRDS(stray, file.path(receipt_dir, "R-QA-STRAY.rds"), version = 3)
+    utils::write.csv(data.frame(key = c("r_qa_status", "executed", "skipped", "failed"), value = c(status, executed, skipped, failed)), file.path(receipt_dir, "R-QA.csv"), row.names = FALSE)
+  }
+  # Generic qa_done() quits on FAIL. Keep its same status/count contract locally
+  # so failed results are durable before this CLI's final nonzero process exit.
+  cat(sprintf("QA-RESULT script=demo_parity.R status=%s executed=%d skipped=%d failed=%d\n", status, executed, skipped, failed))
+  list(status = status, results = df, stray = stray)
+}
+
+demo_check_r <- function(root, data_dir, receipt_dir = NULL) {
+  previous <- setwd(root)
+  on.exit(setwd(previous), add = TRUE)
+  old_cran <- Sys.getenv("NOT_CRAN", unset = NA_character_)
+  Sys.setenv(NOT_CRAN = "true")
+  on.exit(if (is.na(old_cran)) Sys.unsetenv("NOT_CRAN") else Sys.setenv(NOT_CRAN = old_cran), add = TRUE)
+  accepted <- demo_read_data(data_dir)
+  demo_compare_rds(readRDS(file.path(root, "qa", "demo", "demo_tabtools.rds")), demo_rds_projection(accepted, "native"))
+  lib <- Sys.getenv("TABTOOLS_QA_LIB")
+  if (nzchar(lib)) suppressPackageStartupMessages(library(tabtools, lib.loc = lib)) else pkgload::load_all(root, quiet = TRUE, export_all = FALSE)
+  source(file.path(root, "qa", "tools", "qa_result.R"), local = environment())
+  rep <- qa_testthat_reporter()
+  res <- testthat::test_file(file.path(root, "tests", "testthat", "test-demo-parity.R"), reporter = rep, load_package = "none", stop_on_failure = FALSE)
+  df <- as.data.frame(res)
+  result <- demo_finish_r_qa(df, rep$stray, environment(), receipt_dir)
+  manifest <- utils::read.csv(file.path(root, "tests", "testthat", "golden", "demo", "manifest.csv"), colClasses = "character", na.strings = character())
+  print(as.data.frame(table(kind = manifest$kind, status = manifest$status)))
+  result
+}
+
+demo_parity_main <- function(args, root) {
+  # Helpers share only this script's environment, never the package namespace.
+  source(file.path(root, "qa", "tools", "demo_data.R"), local = environment(demo_parity_main))
+  opt <- demo_options(args)
+  if (!identical(unname(read.dcf(file.path(root, "DESCRIPTION"), "Package")[1L, 1L]), "tabtools")) demo_abort("Cannot find tabtools package root.")
+  if (isTRUE(opt[["stage-native"]])) return(demo_native_workflow(root, opt))
+  native <- if (isTRUE(opt[["update"]])) demo_native_workflow(root, opt) else NULL
+  data_dir <- if (is.null(opt[["demo-data-dir"]])) file.path(root, "qa", "demo", "data", "native-2.5.1") else opt[["demo-data-dir"]]
+  demo_check_r(root, data_dir, if (is.null(native)) NULL else native$destination)
+}
+
+if (sys.nframe() == 0L) {
+  file_arg <- sub("^--file=", "", commandArgs(FALSE)[startsWith(commandArgs(FALSE), "--file=")])
+  root <- if (length(file_arg)) dirname(dirname(normalizePath(file_arg[1L]))) else normalizePath(getwd())
+  result <- demo_parity_main(commandArgs(trailingOnly = TRUE), root)
+  if (!result$status %in% c("PASS", "STAGED")) quit(save = "no", status = 1L)
+}

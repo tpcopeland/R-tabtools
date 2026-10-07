@@ -1,11 +1,13 @@
 name,kind,row,col,value
 _golden_id,meta,,,C09
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
 markdown_cols,scalar,,,6
 markdown_rows,scalar,,,9
 ci_level,scalar,,,90
+N_modelonly,scalar,,,0
+N_models_per_outcome,scalar,,,1
 N_modelframes,scalar,,,2
 N_modelrows,scalar,,,4
 N_sections,scalar,,,2

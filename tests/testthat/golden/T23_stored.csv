@@ -1,13 +1,14 @@
 name,kind,row,col,value
 _golden_id,meta,,,T23
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
 markdown_cols,scalar,,,6
 markdown_rows,scalar,,,9
 markdown,macro,,,T23.md
 sheet,macro,,,T23
 xlsx,macro,,,table1_tc.xlsx
+smdtype,macro,,,pair
 varlist,macro,,,index_age female education diabetes hypertension
 Dapa,macro,,,"Crude and weighted data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values suppressed. SMD reflects weighted comparison."
 table,matrix,Age_at_cohort_entry_(years),smd,.0000377679126828
