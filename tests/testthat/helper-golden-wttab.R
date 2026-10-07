@@ -39,6 +39,23 @@ golden_expect_numbers <- function(got, want, what, tol = 1e-12) {
   testthat::expect_true(all(rel <= tol), label = sprintf("%s within %g (max %g)", what, tol, max(c(0, rel))))
 }
 
+# Deliberate R automatic paragraphs add publication rows, not analytical rows.
+# Assert the exact count from immutable native body geometry + declared R
+# paragraphs, then project a comparison copy to the native one-footer count.
+golden_wttab_publication_projection <- function(tt, id) {
+  contract <- golden_publication_contract(id)
+  native <- golden_read_stored(id)
+  n_native <- native$value[native$name == "n_rows" & native$kind == "scalar"]
+  testthat::expect_identical(n_native, as.character(nrow(contract$native_grid)),
+                             label = paste(id, "native publication geometry and count"))
+  expected <- contract$grid_end + length(contract$paragraphs)
+  testthat::expect_identical(tt$stored$n_rows, expected,
+                             label = paste(id, "exact independently expected R publication rows"))
+  copy <- tt
+  copy$stored$n_rows <- nrow(contract$native_grid)
+  copy
+}
+
 run_golden_wttab_scenario <- function(id) {
   sc <- golden_scenario(id)
   if (!golden_scenario_live(id, sc$phase)) testthat::skip(paste("Phase", sc$phase))
@@ -58,18 +75,20 @@ run_golden_wttab_scenario <- function(id) {
   expect_s3_class(tt, "tt_table")
   expect_identical(tt$command, "wttab")
   expect_cells_match(tt, id)
+  golden_assert_listing_footer(tt, id)
 
   # Console: the messages, with R's temporary paths as Stata named them.
   own <- paste0(sinks, ".xlsx")
   got <- gsub(own, "wttab.xlsx", c(printed, msgs), fixed = TRUE)
   got <- gsub(paste0(gsub("\\", "/", out, fixed = TRUE), "/"), "", got, fixed = TRUE)
-  want <- golden_read_lines(golden_path(paste0(id, "_console.txt")))
+  want <- golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt")))
   expect_identical(got, want)
 
   # Stored results: puttab's counts and the sheet, then the numbers.
   stored <- golden_read_stored(id)
   fields <- setdiff(unique(stored$name[stored$kind != "meta"]), c("file", "csv", "markdown", "W", "trunc"))
-  expect_stored_match(tt, id, fields = fields)
+  projected <- golden_wttab_publication_projection(tt, id)
+  expect_stored_match(projected, id, fields = fields)
   golden_expect_numbers(unname(tt$stored$W), unname(golden_stored_matrix(stored, "W")), paste(id, "W"))
   tr <- golden_stored_matrix(stored, "trunc")
   if (is.null(tr)) {
@@ -85,15 +104,15 @@ run_golden_wttab_scenario <- function(id) {
   }
 
   # Workbook: the sheet the call wrote, and a re-render of the table.
-  want_book <- golden_path("wttab.xlsx")
-  golden_expect_none(golden_compare_styles(own, id, want_book, id, got_width_offset = golden_r_width_offset),
+  want_book <- golden_book(id)
+  golden_expect_none(golden_compare_styles(own, id, want_book, id, got_width_offset = golden_r_width_offset, publication_id = id),
                      paste("styles", id))
   again <- file.path(out, "again.xlsx")
   tabtools::tt_write_xlsx(tt, again, sheet = id)
-  golden_expect_none(golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset),
+  golden_expect_none(golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset, publication_id = id),
                      paste("re-rendered", id))
 
-  expect_sink_match(paste0(sinks, ".csv"), id, "csv")
-  expect_sink_match(paste0(sinks, ".md"), id, "md")
+  expect_sink_match(paste0(sinks, ".csv"), id, "csv", tt = tt)
+  expect_sink_match(paste0(sinks, ".md"), id, "md", tt = tt)
   invisible(tt)
 }

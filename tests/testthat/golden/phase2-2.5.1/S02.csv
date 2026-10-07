@@ -1,0 +1,10 @@
+"Incidence rates per 1,000 person-years",,,,,,
+Exposure,Cardiovascular event,,,Rare event,,
+Exposure,Events,Person-Years (PY),"Per 1,000 PY (95% CI)",Events,Person-Years (PY),"Per 1,000 PY (95% CI)"
+Treatment group,,,,,,
+   SSRI,"3,100","86,192","36.0 (34.7, 37.3)",235,"86,192","2.7 (2.4, 3.1)"
+   SNRI,"2,149","57,741","37.2 (35.7, 38.8)",163,"57,741","2.8 (2.4, 3.3)"
+Smoking status,,,,,,
+   Never,"2,909","78,175","37.2 (35.9, 38.6)",222,"78,175","2.8 (2.5, 3.2)"
+   Former,"1,070","29,529","36.2 (34.1, 38.5)",80,"29,529","2.7 (2.2, 3.4)"
+   Current,786,"22,679","34.7 (32.3, 37.2)",45,"22,679","2.0 (1.5, 2.7)"

@@ -9,20 +9,74 @@ p3_dir <- function() test_path("fixtures", "table1_phase3")
 p3_data <- function(name) sc_pipeline_data(name)
 p3_agg <- function() as.data.frame(haven::read_dta(test_path("fixtures", "table1_qa", "agg.dta")))
 
+# S14 explicitly supplies the user literal (make_table1_phase3.do:322).
+# Its automatic literal is authenticated in the unchanged 2.1.14 CSV and
+# console fixture; the deliberate R contract publishes two paragraphs.
+p3_s14_paragraphs <- c("Source: synthetic.", paste0(
+  "Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction. ",
+  "Percentages are withheld for any variable carrying a suppressed count."))
+
+p3_s14_publication <- function(tt, want, native_console) {
+  native_note <- paste(p3_s14_paragraphs, collapse = " ")
+  contract <- golden_footnote_contract("fixture-S14", automatic = list(list(
+    text = p3_s14_paragraphs[2L], native = p3_s14_paragraphs[2L],
+    source = "authentic table1_phase3/S14.csv and S14_console.txt; make_table1_phase3.do:322")),
+    native_sources = list(csv = as.vector(want), console = native_console),
+    native_footers = list(csv = native_note, console = p3_s14_paragraphs[2L]),
+    scenario = list(command = "table1_tc", r_call = 'table1_tc(data, footnote = "Source: synthetic.")',
+                    stata_call = "table1_tc category, smallcells(5)"))
+  got <- golden_as_cells(tt)
+  end <- nrow(want) - 1L
+  gr <- golden_footer_rows(nrow(got), end)
+  wr <- golden_footer_rows(nrow(want), end)
+  golden_assert_footnote_tail(got[gr, 1L], contract, "csv")
+  golden_assert_native_footnote_tail(want[wr, 1L], contract, "csv")
+  expect_true(all(got[gr, -1L, drop = FALSE] == ""))
+  expect_true(all(want[wr, -1L, drop = FALSE] == ""))
+  expect_identical(ncol(got), ncol(want))
+  # Check real writer bytes, not only the flattened table's parsed cells.
+  out <- withr::local_tempdir()
+  actual_csv <- file.path(out, "S14.csv")
+  tt_write_csv(tt, actual_csv)
+  for (entry in list(list(path = actual_csv, paragraphs = contract$paragraphs),
+                     list(path = file.path(p3_dir(), "S14.csv"), paragraphs = native_note))) {
+    expect_identical(golden_footer_bytes(entry$path, end),
+                     golden_csv_expected_bytes(golden_footer_csv_records(entry$paragraphs, ncol(want))))
+  }
+  split <- function(lines) {
+    edge <- which(grepl("^\\s*\\+-+\\+\\s*$", lines))
+    if (length(edge) < 2L) stop("S14 publication needs a complete boxed listing.", call. = FALSE)
+    end <- tail(edge, 1L)
+    list(body = lines[seq_len(end)], foot = lines[golden_footer_rows(length(lines), end)])
+  }
+  actual <- split(utils::capture.output(print(tt)))
+  native <- split(golden_console_box(native_console))
+  golden_assert_footnote_tail(actual$foot[nzchar(actual$foot)], contract, "console")
+  golden_assert_native_footnote_tail(native$foot, contract, "console")
+  expect_identical(actual$foot, as.vector(rbind(contract$paragraphs, "")),
+                   label = "S14 complete R console paragraph spacing")
+  list(got = got[seq_len(end), , drop = FALSE], want = want[seq_len(end), , drop = FALSE],
+       got_console = actual$body, want_console = native$body)
+}
+
 # Cells, listing, and stored results (Dapa, varlist, r(table) SMDs, the
 # suppression matrix and counts) of one call against Stata's. The p token is
 # the row-wise p mask (golden_p_masked_rows()). W1 and F1 list `marker` twice
 # in a row; Stata's sepby(factor_sep) draws no rule between the two (same
 # label), which the label-text blocks now reproduce.
 p3_expect <- function(tt, id, mask = "p,test,statistic", console = TRUE) {
-  tt <- golden_strip_smd_note(tt)
   expect_identical(golden_check_derived(tt), character(), label = paste(id, "derived suppression cells"))
   want <- golden_read_cells_file(file.path(p3_dir(), paste0(id, ".csv")))
-  mm <- golden_compare_cells(tt, want, mask)
+  native_console <- golden_read_lines(file.path(p3_dir(), paste0(id, "_console.txt")))
+  tt <- golden_strip_smd_note(tt, native_grid = want, native_console = native_console)
+  publication <- if (id == "S14") p3_s14_publication(tt, want, native_console) else NULL
+  mm <- golden_compare_cells(if (is.null(publication)) tt else publication$got,
+                             if (is.null(publication)) want else publication$want, mask,
+                             p_rows = if (!is.null(publication)) head(golden_grid_p_rows(tt), nrow(publication$want)))
   expect_identical(nrow(mm), 0L, label = paste(id, "cells", paste(utils::capture.output(print(mm)), collapse = "\n")))
   if (console) {
-    why <- golden_compare_console(utils::capture.output(print(tt)),
-                                  golden_read_lines(file.path(p3_dir(), paste0(id, "_console.txt"))), mask)
+    why <- golden_compare_console(if (is.null(publication)) utils::capture.output(print(tt)) else publication$got_console,
+                                  if (is.null(publication)) native_console else publication$want_console, mask)
     expect_identical(why, character(), label = paste(id, "console"))
   }
   stored <- utils::read.csv(file.path(p3_dir(), paste0(id, "_stored.csv")), colClasses = "character",
@@ -178,7 +232,38 @@ test_that("smallcells with extraspace and a user footnote", {
   tt <- table1_tc(p3_data("sc2x2"), by = "group", vars = "category cat", extraspace = TRUE, test = TRUE,
                   smd = TRUE, smallcells = 5, footnote = "Source: synthetic.")
   p3_expect(tt, "S14")
-  expect_identical(tt$footnote, paste("Source: synthetic.", tabtools:::tt_sc_footnote(5)))
+  expect_identical(tt$footnote, paste(p3_s14_paragraphs, collapse = " \\ "))
+})
+
+test_that("S14 complete native and R publication regions reject changed or extra notes", {
+  skip_if_not_installed("haven")
+  tt <- table1_tc(p3_data("sc2x2"), by = "group", vars = "category cat", extraspace = TRUE, test = TRUE,
+                  smd = TRUE, smallcells = 5, footnote = "Source: synthetic.")
+  want <- golden_read_cells_file(file.path(p3_dir(), "S14.csv"))
+  native_console <- golden_read_lines(file.path(p3_dir(), "S14_console.txt"))
+  parts <- p3_s14_publication(tt, want, native_console)
+  expect_identical(nrow(golden_compare_cells(parts$got, parts$want, "p,test,statistic",
+    p_rows = head(golden_grid_p_rows(tt), nrow(parts$want)))), 0L)
+  expect_identical(golden_compare_console(parts$got_console, parts$want_console, "p,test,statistic"), character())
+  for (paragraphs in list(rev(p3_s14_paragraphs), p3_s14_paragraphs[-1L],
+                          c("invented earlier note", p3_s14_paragraphs),
+                          c(p3_s14_paragraphs, p3_s14_paragraphs[2L]))) {
+    bad <- tt
+    bad$footnote <- paste(paragraphs, collapse = " \\ ")
+    golden_expect_detected(p3_s14_publication(bad, want, native_console))
+  }
+  bad_native <- want
+  bad_native[nrow(want), 1L] <- "changed native footer"
+  golden_expect_detected(p3_s14_publication(tt, bad_native, native_console))
+  last_box <- tail(which(grepl("^\\s*\\+-+\\+\\s*$", native_console)), 1L)
+  extra_native <- append(native_console, "invented earlier native note", after = last_box)
+  golden_expect_detected(p3_s14_publication(tt, want, extra_native))
+  # A body edit survives publication decomposition and the original mask.
+  bad_body <- want
+  bad_body[3L, 1L] <- "changed category label"
+  parts <- p3_s14_publication(tt, bad_body, native_console)
+  expect_gt(nrow(golden_compare_cells(parts$got, parts$want, "p,test,statistic",
+    p_rows = head(golden_grid_p_rows(tt), nrow(parts$want)))), 0L)
 })
 
 test_that("smallcells binary: slashN denominators, missingsummary, total(before), percent_n", {

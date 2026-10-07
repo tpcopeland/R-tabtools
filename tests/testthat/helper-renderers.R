@@ -5,19 +5,20 @@
 golden_tt <- function(id, style = NULL, rows = NULL, cols = NULL, meta = list()) {
   sc <- golden_scenario(id)
   g <- golden_read_cells(id)
-  md <- golden_read_lines(golden_path(paste0(id, ".md")))
+  md <- golden_read_lines(golden_artifact_path(id, paste0(id, ".md")))
   has_title <- length(md) && startsWith(md[1], "### ")
   has_foot <- length(md) >= 2L && grepl("^\\*.*\\*$", md[length(md)]) && md[length(md) - 1L] == ""
   title <- if (has_title) g[1, 1] else NULL
-  foot <- if (has_foot) g[nrow(g), 1] else NULL
+  contract <- golden_publication_contract(id)
+  foot <- paste(contract$paragraphs, collapse = " \\ ")
   if (has_title) g <- g[-1, , drop = FALSE]
   if (has_foot) g <- g[-nrow(g), , drop = FALSE]
   header <- list(g[1, ], g[2, ])
   body <- g[-(1:2), , drop = FALSE]
-  con <- golden_console_box(golden_read_lines(golden_path(paste0(id, "_console.txt"))))
+  con <- golden_console_box(golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt"))))
   edge <- which(grepl("^  \\+-+\\+$", con))
   notes <- if (length(edge) >= 2L) con[-seq_len(edge[2])] else character()
-  notes <- notes[nzchar(notes)]
+  notes <- setdiff(notes[nzchar(notes)], contract$native_footers$console)
   pre <- if (length(edge)) con[seq_len(edge[1] - 1L)] else character()
   pre <- golden_strip_chatter(pre)
   if (length(pre) && sc$command == "table1_tc") meta$console_before <- pre
@@ -35,7 +36,7 @@ golden_strip_chatter <- function(lines) {
 }
 
 golden_console_expected <- function(id) {
-  con <- golden_read_lines(golden_path(paste0(id, "_console.txt")))
+  con <- golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt")))
   edge <- which(grepl("^  \\+-+\\+$", con))
   if (golden_scenario(id)$command == "table1_tc" && length(edge) && edge[1] > 1L) {
     pre <- golden_strip_chatter(con[seq_len(edge[1] - 1L)])
@@ -134,16 +135,7 @@ golden_tt_full <- function(id) {
     }
     rows$dim <- dim
   }
-  if (golden_flag(call, "stars")) {
-    # User starslevels() pass through a Stata numlist and print as ".1";
-    # the defaults are literal strings with the leading zero.
-    sl <- if (grepl("starslevels\\(", call)) {
-      tabtools:::stata_fmt(as.numeric(strsplit(sub("^.*starslevels\\(([^)]*)\\).*$", "\\1", call), " +")[[1]]), "%9.0g")
-    } else c("0.05", "0.01", "0.001")
-    note <- sprintf("* p<%s, ** p<%s, *** p<%s", sl[1], sl[2], sl[3])
-    fn <- trimws(base$footnote)
-    meta$xlsx_footnote <- if (!nzchar(fn)) note else if (grepl("[.;:!?]$", fn)) paste(fn, note) else paste0(fn, "; ", note)
-  }
+  meta$xlsx_footnote <- base$footnote
   tabtools::tt_table(b, lapply(base$header, function(h) h$text), rows = rows, cols = base$cols,
                      title = base$title, footnote = base$footnote, style = style,
                      command = "regtab", meta = meta)

@@ -1,0 +1,8 @@
+Exposure,Hip fracture,,,
+Exposure,Events,Person-Years (PY),Per 100 PY (99% CI),IRR (99% CI)
+Never,,,,
+   Overall,40,52,"0.1 (0.1, 0.1)",Ref.
+Former,,,,
+   Overall,25,31,"0.1 (0.0, 0.1)","1.05 (0.54, 2.02)"
+Current,,,,
+   Overall,0,18,0.0 (–),–

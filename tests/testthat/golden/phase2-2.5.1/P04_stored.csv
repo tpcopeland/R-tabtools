@@ -1,0 +1,17 @@
+name,kind,row,col,value
+_golden_id,meta,,,P04
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,3
+n_spans,scalar,,,0
+n_panels,scalar,,,0
+n_datarows,scalar,,,3
+n_cols,scalar,,,4
+n_rows,scalar,,,4
+markdown,macro,,,P04.md
+csv,macro,,,P04.csv
+file,macro,,,puttab.xlsx
+sheet,macro,,,P04
+source,macro,,,matrix

@@ -85,13 +85,14 @@ run_golden_export_scenario <- function(id) {
   expect_s3_class(tt, "tt_table")
   expect_identical(tt$command, sc$command)
   expect_cells_match(tt, id)
+  golden_assert_listing_footer(tt, id)
 
   # Console: the paths R wrote to, as Stata named them.
   own <- paste0(sinks, ".xlsx")
   stata_book <- golden_book_name(id)
   got <- gsub(own, stata_book, c(printed, msgs), fixed = TRUE)
   got <- gsub(paste0(gsub("\\", "/", out, fixed = TRUE), "/"), "", got, fixed = TRUE)
-  want <- golden_read_lines(golden_path(paste0(id, "_console.txt")))
+  want <- golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt")))
   # R has no frames: a data frame is the source for both Stata's varlist
   # and frame(), and r(source) is "data" (?puttab, "Differences from
   # Stata").
@@ -117,19 +118,20 @@ run_golden_export_scenario <- function(id) {
   # sheet; stacktab: its composite and the source blocks R's setup wrote).
   if (sc$command == "puttab") {
     want_book <- golden_book(id)
-    golden_expect_none(golden_compare_styles(own, id, want_book, id, got_width_offset = golden_r_width_offset),
+    golden_expect_none(golden_compare_styles(own, id, want_book, id, got_width_offset = golden_r_width_offset, publication_id = id),
                        paste("styles", id))
     # The renderer alone, from the returned table.
     again <- file.path(out, "again.xlsx")
     tabtools::tt_write_xlsx(tt, again, sheet = id)
-    golden_expect_none(golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset),
+    golden_expect_none(golden_compare_styles(again, id, want_book, id, got_width_offset = golden_r_width_offset, publication_id = id),
                        paste("re-rendered", id))
   } else {
-    want_book <- golden_path(paste0(id, ".xlsx"))
+    want_book <- golden_book(id)
     sheets <- tidyxl::xlsx_sheet_names(want_book)
     expect_setequal(tidyxl::xlsx_sheet_names(own), sheets)
     for (s in sheets) {
-      golden_expect_none(golden_compare_styles(own, s, want_book, s, got_width_offset = golden_r_width_offset),
+      golden_expect_none(golden_compare_styles(own, s, want_book, s, got_width_offset = golden_r_width_offset,
+                                               publication_id = if (s == id) id else NULL),
                          paste("styles", id, "sheet", s))
     }
     if (identical(tt$stored$append_start, 2L)) {
@@ -137,13 +139,13 @@ run_golden_export_scenario <- function(id) {
       again <- file.path(out, "again.xlsx")
       tabtools::tt_write_xlsx(tt, again, sheet = tt$stored$sheet)
       golden_expect_none(golden_compare_styles(again, tt$stored$sheet, want_book, tt$stored$sheet,
-                                               got_width_offset = golden_r_width_offset),
+                                               got_width_offset = golden_r_width_offset, publication_id = id),
                          paste("re-rendered", id))
     }
   }
 
-  expect_sink_match(paste0(sinks, ".csv"), id, "csv")
-  expect_sink_match(paste0(sinks, ".md"), id, "md")
+  expect_sink_match(paste0(sinks, ".csv"), id, "csv", tt = tt)
+  expect_sink_match(paste0(sinks, ".md"), id, "md", tt = tt)
   invisible(tt)
 }
 
@@ -190,7 +192,7 @@ expect_export_converters_match <- function(id, tt) {
     sheet <- id
     start <- 2L
   } else {
-    xlsx <- golden_path(paste0(id, ".xlsx"))
+    xlsx <- golden_book(id)
     sheet <- tt$stored$sheet
     start <- tt$stored$append_start
   }
@@ -218,10 +220,17 @@ expect_export_converters_match <- function(id, tt) {
   if (nzchar(tt$title)) expect_identical(ft$caption$value$txt, tt$title)
   foot <- flextable::information_data_chunk(ft)
   foot <- foot[foot$.part == "footer" & foot$.col_id == "c1", ]
-  if (nzchar(tt$footnote)) expect_identical(paste(foot$txt, collapse = ""), tt$footnote)
+  contract <- golden_publication_contract(id)
+  values <- vapply(split(foot$txt, foot$.row_id), function(x) interop_nbsp(paste(x, collapse = "")), "")
+  golden_assert_footnote_tail(unname(values), contract, "presentation")
+  if (length(contract$paragraphs)) {
+    expect_true(all(foot$italic))
+    expect_true(all(foot$font.size == max(tt$style$fontsize - 2, 6)))
+  }
 
   # gt: body cells as the workbook has them; column labels from the header row.
   gt_tab <- tabtools::tt_as_gt(tt)
+  golden_assert_footnote_tail(as.character(unlist(gt_tab[["_source_notes"]], use.names = FALSE)), contract, "presentation")
   gb <- interop_gt_body(gt_tab)
   wb <- want[want$part == "body", ]
   gb <- gb[match(paste(wb$i, wb$j), paste(gb$i, gb$j)), ]

@@ -36,7 +36,7 @@ test_that("every scenario has all five goldens", {
   sc <- golden_scenarios()
   sc <- sc[sc$id %in% golden_ids_in_build(sc$id), , drop = FALSE]
   for (ext in c(".csv", ".md", "_stored.csv", "_console.txt")) {
-    f <- golden_path(paste0(sc$id, ext))
+    f <- vapply(sc$id, function(id) golden_artifact_path(id, paste0(id, ext)), "")
     expect_true(all(file.exists(f)), label = paste("missing", ext, paste(basename(f[!file.exists(f)]), collapse = " ")))
   }
   own <- vapply(sc$id, function(id) golden_book_name(id) == paste0(id, ".xlsx"), TRUE)
@@ -67,7 +67,491 @@ test_that("goldens record the Stata package versions they came from", {
     st <- golden_read_stored(id)
     meta <- setNames(st$value[st$kind == "meta"], st$name[st$kind == "meta"])
     expect_identical(unname(meta[c("_golden_id", "_golden_tabtools_version", "_golden_fvgen_version")]),
-                     c(id, "2.1.14", "1.2.5"))
+                     c(id, golden_baseline(id)$tabtools, golden_baseline(id)$fvgen))
+    expect_identical(golden_compare_provenance(st, id), character())
+  }
+})
+
+test_that("Phase 2 routes only inventoried scenarios to authentic versioned artifacts", {
+  ids <- c(sprintf("P%02d", 1:15), sprintf("K%02d", 1:9), sprintf("S%02d", 1:8),
+           "W15", sprintf("W%02d", 17:22))
+  routes <- utils::read.csv(file.path(golden_phase2_dir(), "ROUTES.csv"), colClasses = "character")
+  expect_identical(routes$id, ids)
+  expect_identical(golden_phase2_ids, ids)
+  expect_identical(routes$tabtools_version, rep("2.5.1", length(ids)))
+  expect_identical(routes$fvgen_version, rep("1.2.7", length(ids)))
+  expect_true(all(nzchar(routes$reason)))
+  expect_error(golden_baseline("unknown"), "Unknown golden scenario")
+  for (id in golden_scenarios()$id) {
+    expected <- if (id %in% ids) golden_phase2_dir() else golden_dir()
+    expect_identical(golden_baseline(id)$dir, expected, label = id)
+    expect_identical(dirname(golden_book(id)), expected, label = paste(id, "book"))
+    for (ext in c(".csv", ".md", "_console.txt", "_stored.csv")) {
+      expect_identical(dirname(golden_artifact_path(id, paste0(id, ext))), expected,
+                       label = paste(id, ext))
+    }
+  }
+  v <- utils::read.csv(file.path(golden_phase2_dir(), "VERSIONS.csv"), colClasses = "character")
+  ver <- setNames(v$version, v$component)
+  expect_identical(unname(ver[c("puttab", "stacktab", "stratetab")]), rep("2.5.1", 3))
+  expect_identical(unname(ver["fvgen"]), "1.2.7")
+})
+
+test_that("routed artifacts are byte-identical to the inventoried native source", {
+  a <- utils::read.csv(file.path(golden_phase2_dir(), "ARTIFACTS.csv"), colClasses = "character")
+  expect_false(anyDuplicated(a$file) > 0L)
+  expect_identical(unique(a$source_commit), "c215afdb788f88363c8d5289d7d13e3a31cfbe38")
+  expect_identical(a$source_path, paste0("tests/testthat/golden/", a$file))
+  expected <- c("VERSIONS.csv", "puttab.xlsx", "stratetab.xlsx", "wttab.xlsx",
+                "P02.xlsx", "P09.xlsx", paste0(sprintf("K%02d", 1:9), ".xlsx"),
+                unlist(lapply(golden_phase2_ids, function(id) paste0(id, c(".csv", ".md", "_console.txt", "_stored.csv")))))
+  expect_setequal(a$file, expected)
+  excluded <- grepl("^P0[29](\\.|_)", a$file)
+  expect_identical(a$distribution, ifelse(excluded, "source-only", "shipped"))
+  if (!golden_in_source()) {
+    expect_false(any(file.exists(file.path(golden_phase2_dir(), a$file[excluded]))),
+                 label = "versioned source-only artifacts excluded from installed build")
+    a <- a[!excluded, , drop = FALSE]
+  }
+  files <- file.path(golden_phase2_dir(), a$file)
+  expect_true(all(file.exists(files)))
+  expect_identical(unname(tools::md5sum(files)), a$md5)
+  # A changed byte must fail the same integrity check, independent of parsing.
+  bad <- file.path(withr::local_tempdir(), "S08.csv")
+  writeBin(c(golden_bytes(golden_artifact_path("S08", "S08.csv")), charToRaw("fault")), bad)
+  expect_false(identical(unname(tools::md5sum(bad)), a$md5[a$file == "S08.csv"]))
+})
+
+test_that("wrong per-case version and missing or duplicate provenance fail", {
+  for (id in c("S08", "P01", "K01", "W15", "W16", "T01")) {
+    st <- golden_read_stored(id)
+    expect_identical(golden_compare_provenance(st, id), character())
+    for (key in c("_golden_id", "_golden_tabtools_version", "_golden_fvgen_version")) {
+      bad <- st
+      bad$value[bad$kind == "meta" & bad$name == key] <- "fault"
+      expect_gt(length(golden_compare_provenance(bad, id)), 0L, label = paste(id, key))
+      expect_gt(length(golden_compare_provenance(st[st$name != key, ], id)), 0L)
+      expect_gt(length(golden_compare_provenance(rbind(st, st[st$kind == "meta" & st$name == key, ]), id)), 0L)
+    }
+  }
+})
+
+test_that("routed cells, console, sinks and full setup-sheet styles stay strict", {
+  skip_if_not_installed("tidyxl")
+  for (id in c("P01", "S08", "W15")) {
+    w <- golden_read_cells(id)
+    expect_identical(nrow(golden_compare_cells(w, w)), 0L)
+    bad <- w
+    bad[nrow(w), ncol(w)] <- paste0(w[nrow(w), ncol(w)], "fault")
+    expect_gt(nrow(golden_compare_cells(bad, w)), 0L)
+    console <- golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt")))
+    expect_length(golden_compare_console(console, console), 0L)
+    expect_gt(length(golden_compare_console(c(console, "fault"), console)), 0L)
+    for (ext in c("csv", "md")) {
+      want <- golden_artifact_path(id, paste0(id, ".", ext))
+      expect_length(golden_compare_sink(want, want), 0L)
+      bad <- file.path(withr::local_tempdir(), paste0(id, ".", ext))
+      lines <- golden_read_lines(want)
+      lines[1] <- paste0("fault", lines[1])
+      golden_write_lf(lines, bad)
+      expect_gt(length(golden_compare_sink(bad, want)), 0L)
+    }
+  }
+  for (id in sprintf("K%02d", 1:9)) {
+    sheets <- tidyxl::xlsx_sheet_names(golden_book(id))
+    expect_setequal(sheets, tidyxl::xlsx_sheet_names(golden_path(paste0(id, ".xlsx"))))
+    expect_true(all(c("Block Primary", "Block Dose") %in% sheets))
+    for (sheet in sheets) {
+      expect_length(golden_compare_styles(golden_book(id), sheet, golden_book(id), sheet,
+                                          got_width_offset = golden_width_offset), 0L)
+    }
+    for (sheet in c("Block Primary", "Block Dose")) {
+      why <- golden_compare_styles(golden_path(paste0(id, ".xlsx")), sheet, golden_book(id), sheet,
+                                    got_width_offset = golden_width_offset)
+      expect_gt(length(why), 0L)
+      expect_true(any(grepl("border_", why, fixed = TRUE)))
+    }
+  }
+})
+
+# These are synthetic inputs to the publication adapter, not Stata-generated
+# artifacts. Immutable native prefixes and independent literal R paragraphs
+# expose footer-routing failures without calling any production note helper.
+test_that("publication contracts independently declare native and R paragraph differences", {
+  skip_if_not_installed("tidyxl")
+  cases <- list(
+    R08 = c("Estimates from a single model.", "* p<.1, ** p<.05, *** p<.01"),
+    R25m = c("Custom rows appended below model estimates.", "* p<0.05, ** p<0.01, *** p<0.001"),
+    W16 = c("ESS = effective sample size, (sum of w)^2 / (sum of w^2); ESS (%) = 100 x ESS / N.",
+            paste0("Truncated l/u: weights below the l-th or above the u-th percentile of all weights",
+                   " set to that percentile; Truncated (n) counts the weights changed.")),
+    P13 = "tiny note"
+  )
+  for (id in names(cases)) {
+    contract <- golden_publication_contract(id)
+    expect_identical(contract$paragraphs, cases[[id]], label = id)
+    expect_identical(length(contract$native_footers$csv), 1L)
+    expect_identical(length(contract$native_footers$xlsx), 1L)
+    expect_identical(contract$native_footers$console, character())
+    expect_identical(contract$grid_end, nrow(golden_read_cells(id)) - 1L)
+    expect_identical(contract$sheet_end, max(golden_cell_styles(golden_book(id), id)$row) - 1L)
+  }
+  expect_identical(golden_publication_contract("R08")$native_footers$csv, cases$R08[1])
+  expect_identical(golden_publication_contract("R08")$native_footers$xlsx, paste(cases$R08, collapse = " "))
+  expect_identical(golden_publication_contract("W16")$native_footers$csv, paste(cases$W16, collapse = " "))
+  expect_identical(golden_publication_contract("P01")$paragraphs, character())
+})
+
+test_that("complete publication cell regions reject added, omitted and misplaced paragraphs", {
+  skip_if_not_installed("tidyxl")
+  id <- "R08"
+  paragraphs <- c("Estimates from a single model.", "* p<.1, ** p<.05, *** p<.01")
+  native <- golden_read_cells(id)
+  prefix <- native[-nrow(native), , drop = FALSE]
+  make <- function(x) rbind(prefix, cbind(x, matrix("", length(x), ncol(prefix) - 1L)))
+  parts <- golden_publication_cells(make(paragraphs), id)
+  expect_identical(parts$got, prefix)
+  expect_identical(parts$want, prefix)
+  faults <- list(c("Invented before", paragraphs), c(paragraphs[1], "Invented between", paragraphs[2]),
+                 c(paragraphs, "Invented after"), paragraphs[-1], rev(paragraphs), c("Altered", paragraphs[2]))
+  for (bad in faults) golden_expect_detected(golden_publication_cells(make(bad), id))
+  bad <- make(paragraphs)
+  bad[nrow(bad), ncol(bad)] <- "Leaked into trailing footer cell"
+  golden_expect_detected(golden_publication_cells(bad, id))
+  bad <- make(paragraphs)
+  bad[3, 2] <- paste0(bad[3, 2], "body fault")
+  parts <- golden_publication_cells(bad, id)
+  expect_gt(nrow(golden_compare_cells(parts$got, parts$want)), 0L)
+})
+
+test_that("publication console boundary rejects earlier invented notes and keeps body edits", {
+  skip_if_not_installed("tidyxl")
+  id <- "R08"
+  paragraphs <- c("Estimates from a single model.", "* p<.1, ** p<.05, *** p<.01")
+  native <- golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt")))
+  box <- golden_console_box(native)
+  end <- tail(which(grepl("^\\s*\\+-+\\+\\s*$", box)), 1L)
+  prefix <- box[seq_len(end)]
+  make <- function(x) c(prefix, as.vector(rbind(x, "")))
+  parts <- golden_publication_console(make(paragraphs), native, id)
+  expect_length(golden_compare_console(parts$got, parts$want), 0L)
+  for (bad in list(c("Invented before", paragraphs), c(paragraphs[1], "Invented between", paragraphs[2]),
+                   c(paragraphs, "Invented after"), paragraphs[-1], rev(paragraphs))) {
+    golden_expect_detected(golden_publication_console(make(bad), native, id))
+  }
+  bad <- make(paragraphs)
+  bad[3] <- paste0(bad[3], "body fault")
+  parts <- golden_publication_console(bad, native, id)
+  expect_gt(length(golden_compare_console(parts$got, parts$want)), 0L)
+})
+
+test_that("publication sink adapters reject complete-region and line-ending faults", {
+  skip_if_not_installed("tidyxl")
+  id <- "R08"
+  paragraphs <- c("Estimates from a single model.", "* p<.1, ** p<.05, *** p<.01")
+  out <- withr::local_tempdir()
+  for (ext in c("csv", "md")) {
+    native <- golden_read_lines(golden_artifact_path(id, paste0(id, ".", ext)))
+    end <- length(native) - if (ext == "csv") 1L else 2L
+    prefix <- native[seq_len(end)]
+    make <- function(x) {
+      foot <- if (ext == "csv") golden_footer_csv_records(x, ncol(golden_read_cells(id))) else {
+        if (length(x)) as.vector(rbind("", golden_fn_md(x))) else character()
+      }
+      path <- file.path(out, paste0("actual.", ext))
+      golden_write_lf(c(prefix, foot), path)
+      path
+    }
+    expect_length(golden_publication_sink(make(paragraphs), id, ext, ""), 0L)
+    for (bad in list(c("Invented before", paragraphs), c(paragraphs[1], "Invented between", paragraphs[2]),
+                     c(paragraphs, "Invented after"), paragraphs[-1], rev(paragraphs))) {
+      golden_expect_detected(golden_publication_sink(make(bad), id, ext, ""))
+    }
+    path <- make(paragraphs)
+    lines <- golden_read_lines(path)
+    lines[1] <- paste0("body fault", lines[1])
+    golden_write_lf(lines, path)
+    expect_gt(length(golden_publication_sink(path, id, ext, "")), 0L)
+    path <- make(paragraphs)
+    bytes <- golden_bytes(path)
+    writeBin(bytes[-length(bytes)], path)
+    golden_expect_detected(golden_publication_sink(path, id, ext, ""))
+  }
+})
+
+test_that("publication worksheet adapter asserts all rows, styles, merges and heights", {
+  skip_if_not_installed("tidyxl")
+  id <- "W16"
+  paragraphs <- c("ESS = effective sample size, (sum of w)^2 / (sum of w^2); ESS (%) = 100 x ESS / N.",
+                  paste0("Truncated l/u: weights below the l-th or above the u-th percentile of all weights",
+                         " set to that percentile; Truncated (n) counts the weights changed."))
+  w <- golden_cell_styles(golden_book(id), id)
+  wl <- golden_sheet_layout(golden_book(id), id)
+  end <- max(w$row) - 1L
+  note <- w[w$row == end + 1L, , drop = FALSE]
+  g <- w[w$row <= end, , drop = FALSE]
+  gl <- wl
+  source_merge <- wl$merges[grepl(paste0("B", end + 1L, ":"), wl$merges, fixed = TRUE)]
+  gl$merges <- setdiff(wl$merges, source_merge)
+  source_height <- wl$heights[wl$heights$row == end + 1L, , drop = FALSE]
+  gl$heights <- wl$heights[wl$heights$row <= end, , drop = FALSE]
+  for (i in seq_along(paragraphs)) {
+    row <- end + i
+    current <- note
+    current$row <- row
+    current$address <- paste0(golden_col_letters(current$col), row)
+    current$value[current$col == 2L] <- paragraphs[i]
+    g <- rbind(g, current)
+    gl$merges <- sort(c(gl$merges, gsub("[0-9]+", as.character(row), source_merge)))
+    if (nrow(source_height)) gl$heights <- rbind(gl$heights, data.frame(row = row, height = source_height$height))
+  }
+  parts <- golden_publication_styles(g, w, gl, wl, id)
+  expect_identical(parts$g$value, parts$w$value)
+  expect_identical(parts$gl, parts$wl)
+  bad <- g
+  bad$value[bad$row == end + 1L & bad$col == 2L] <- "Invented before expected final paragraph"
+  golden_expect_detected(golden_publication_styles(bad, w, gl, wl, id))
+  for (attr in c("font", "wrap", "border_top", "fill")) {
+    bad <- g
+    k <- which(bad$row == end + 1L & bad$col == 2L)
+    bad[[attr]][k] <- switch(attr, font = "Wrong font", wrap = FALSE, border_top = "thin", fill = "FF00FF00")
+    golden_expect_detected(golden_publication_styles(bad, w, gl, wl, id))
+  }
+  bad_layout <- gl
+  bad_layout$merges <- setdiff(gl$merges, tail(gl$merges, 1L))
+  golden_expect_detected(golden_publication_styles(g, w, bad_layout, wl, id))
+  bad_layout <- gl
+  bad_layout$heights <- rbind(gl$heights, data.frame(row = end + 1L, height = 99))
+  golden_expect_detected(golden_publication_styles(g, w, bad_layout, wl, id))
+  bad <- g
+  extra <- note
+  extra$row <- end + 3L
+  extra$address <- paste0(golden_col_letters(extra$col), extra$row)
+  extra$value <- ""
+  golden_expect_detected(golden_publication_styles(rbind(bad, extra), w, gl, wl, id))
+  bad <- g
+  bad$value[bad$row == 4L & bad$col == 2L] <- "body fault"
+  parts <- golden_publication_styles(bad, w, gl, wl, id)
+  expect_false(identical(parts$g$value, parts$w$value))
+  # puttab writes the spacer and blank merged note cells too. Their style
+  # corruption must not disappear with an otherwise correct note anchor.
+  id <- "P13"
+  w <- golden_cell_styles(golden_book(id), id)
+  wl <- golden_sheet_layout(golden_book(id), id)
+  expect_identical(golden_publication_styles(w, w, wl, wl, id)$g$value,
+                   w$value[w$row < max(w$row)])
+  for (col in c(1L, 3L)) {
+    k <- which(w$row == max(w$row) & w$col == col)
+    expect_length(k, 1L)
+    bad <- w
+    bad$fill[k] <- "FF00FF00"
+    golden_expect_detected(golden_publication_styles(bad, w, wl, wl, id))
+  }
+})
+
+test_that("legacy SMD translation asserts exact source-derived note and header first", {
+  skip_if_not_installed("tidyxl")
+  note <- "SMD compares Primary vs Secondary only (the first two of 3 groups)."
+  tt <- list(meta = list(console_before = paste("Note:", note)),
+             cols = data.frame(role = c("label", "group", "group", "group", "p", "smd")),
+             header = list(list(text = c("", "Primary", "Secondary", "Tertiary", "p-value", "SMD (Primary vs Secondary)"))),
+             footnote = note)
+  out <- golden_strip_smd_note(tt, id = "T18")
+  expect_identical(out$header[[1]]$text[6L], "SMD")
+  expect_identical(out$footnote, "")
+  expect_identical(out$meta$console_before, "Note: SMD computed for first two groups only (Primary vs Secondary)")
+  for (field in c("header", "footnote", "console")) {
+    bad <- tt
+    if (field == "header") bad$header[[1]]$text[6L] <- "SMD (Secondary vs Primary)"
+    if (field == "footnote") bad$footnote <- paste0("Invented prior paragraph \\ ", note)
+    if (field == "console") bad$meta$console_before <- "Note: SMD compares Primary vs Tertiary only (the first two of 3 groups)."
+    golden_expect_detected(golden_strip_smd_note(bad, id = "T18"))
+  }
+  expect_error(golden_strip_smd_note(tt), "explicit authentic native inputs")
+})
+
+test_that("native scalar mask comparison projects only threshold and preserves P.4 metadata", {
+  native <- golden_read_stored("S08")
+  canonical <- list(threshold = 0L, mode = "primary", n_masked = 0L, n_linked = 0L)
+  stored <- list(smallcells = canonical)
+  expect_length(golden_compare_stored(stored, native, fields = "smallcells"), 0L)
+  expect_identical(stored$smallcells, canonical)
+  bad <- stored
+  bad$smallcells$threshold <- 1L
+  expect_gt(length(golden_compare_stored(bad, native, fields = "smallcells")), 0L)
+  bad <- stored
+  bad$smallcells$threshold <- NULL
+  expect_gt(length(golden_compare_stored(bad, native, fields = "smallcells")), 0L)
+  golden_assert_stratetab_mask_contract(list(stored = stored), "S08")
+  for (field in names(canonical)) {
+    bad <- stored
+    bad$smallcells[[field]] <- if (field == "mode") "strict" else 1L
+    golden_expect_detected(golden_assert_stratetab_mask_contract(list(stored = bad), "S08"))
+  }
+})
+
+test_that("annotation scanner uses the statically returned command across setup and missing slots", {
+  expected <- list(T34 = NULL, K05 = NULL, K06 = NULL, K08 = NULL, W18 = "", W22 = NULL)
+  for (id in names(expected)) expect_identical(golden_fn_user(golden_scenario(id)), expected[[id]], label = id)
+  # Earlier note-bearing setup calls must not bleed into the returned table.
+  scenario <- list(command = "puttab", r_call = 'puttab(data, footnote = "Setup"); suppressMessages(puttab(data, footnote = "Returned"))')
+  expect_identical(golden_fn_user(scenario), "Returned")
+  scenario$r_call <- 'data <- data[data$x > 1, ]; puttab(data, footnote = "Returned")'
+  expect_identical(golden_fn_user(scenario), "Returned")
+  scenario$r_call <- 'if (flag) puttab(data, footnote = "One") else puttab(data, footnote = "Two")'
+  expect_error(golden_fn_user(scenario), "identifiable final")
+})
+
+test_that("R publication counts are exact before nonmutating native wttab projection", {
+  skip_if_not_installed("tidyxl")
+  for (id in c("W16", "W18", "W19", "W21", "W22")) {
+    contract <- golden_publication_contract(id)
+    original <- structure(list(stored = list(n_rows = contract$grid_end + length(contract$paragraphs),
+                                             n_datarows = 71L, custom = "preserved")), class = "tt_table")
+    projected <- golden_wttab_publication_projection(original, id)
+    expect_identical(projected$stored$n_rows, nrow(contract$native_grid))
+    expect_identical(original$stored$n_rows, contract$grid_end + length(contract$paragraphs))
+    expect_identical(projected$stored[c("n_datarows", "custom")], original$stored[c("n_datarows", "custom")])
+    bad <- original
+    bad$stored$n_rows <- bad$stored$n_rows + 1L
+    golden_expect_detected(golden_wttab_publication_projection(bad, id))
+  }
+})
+
+test_that("CSV footer serialization retains exact quoting and empty-field bytes", {
+  skip_if_not_installed("tidyxl")
+  expect_identical(golden_footer_csv_records(c("tiny note", "a,b", 'a"b'), 3L),
+                   c("tiny note,,", '"a,b",,', '"a""b",,'))
+  id <- "P13"
+  native <- golden_artifact_path(id, paste0(id, ".csv"))
+  actual <- file.path(withr::local_tempdir(), "actual.csv")
+  file.copy(native, actual)
+  expect_length(golden_publication_sink(actual, id, "csv", ""), 0L)
+  lines <- golden_read_lines(native)
+  lines[length(lines)] <- sub("tiny note", '"tiny note"', lines[length(lines)], fixed = TRUE)
+  golden_write_lf(lines, actual)
+  golden_expect_detected(golden_publication_sink(actual, id, "csv", ""))
+  lines <- golden_read_lines(native)
+  lines[length(lines)] <- paste0(lines[length(lines)], ",")
+  golden_write_lf(lines, actual)
+  golden_expect_detected(golden_publication_sink(actual, id, "csv", ""))
+})
+
+test_that("both native footer style mutations and duplicate actual addresses are rejected", {
+  skip_if_not_installed("tidyxl")
+  id <- "P13"
+  w <- golden_cell_styles(golden_book(id), id)
+  wl <- golden_sheet_layout(golden_book(id), id)
+  end <- max(w$row)
+  golden_publication_styles(w, w, wl, wl, id)
+  for (attr in c("fill", "font", "border_left", "wrap", "number_format")) {
+    bad_native <- w
+    k <- which(w$row == end)
+    bad_native[[attr]][k] <- switch(attr, fill = "FF00FF00", font = "Wrong font", border_left = "thin", wrap = FALSE, number_format = "0.00")
+    golden_expect_detected(golden_publication_styles(w, bad_native, wl, wl, id))
+  }
+  duplicate <- w[w$row == end & w$col == 3L, , drop = FALSE]
+  expect_identical(nrow(duplicate), 1L)
+  duplicate$fill <- "FF00FF00"
+  golden_expect_detected(golden_publication_styles(rbind(w, duplicate), w, wl, wl, id))
+  child <- which(w$row == end & w$col == 3L)
+  for (side in c("R", "native")) {
+    removed <- w[-child, , drop = FALSE]
+    added <- w[child, , drop = FALSE]
+    added$col <- max(w$col) + 1L
+    added$address <- paste0(golden_col_letters(added$col), end)
+    for (bad in list(removed, rbind(w, w[child, , drop = FALSE]), rbind(w, added))) {
+      golden_expect_detected(golden_publication_styles(if (side == "R") bad else w,
+                                                      if (side == "native") bad else w, wl, wl, id))
+    }
+  }
+})
+
+test_that("complete native footer inventory supports exact command serialization templates", {
+  skip_if_not_installed("tidyxl")
+  sparse_ids <- character()
+  footer_ids <- character()
+  for (id in golden_ids_in_build(golden_scenarios()$id)) {
+    contract <- golden_publication_contract(id)
+    if (!length(contract$native_footers$xlsx)) next
+    footer_ids <- c(footer_ids, id)
+    templates <- golden_footer_style_templates(contract, id)
+    standard <- golden_scenario(id)$command %in% c("table1_tc", "regtab", "stratetab", "effecttab", "comptab", "hrcomptab")
+    if (standard) {
+      sparse_ids <- c(sparse_ids, id)
+      expect_identical(templates$R$col, 2L)
+      expect_identical(templates$R$address, paste0("B", contract$sheet_end + 1L))
+    } else expect_identical(templates$R, templates$native)
+    expect_identical(templates$halign, if (golden_scenario(id)$command == "stacktab") "general" else "left")
+  }
+  # Explicit complete inventory from the reviewed native-byte snapshot.
+  expect_setequal(sparse_ids, c("T20a", "T20b", "T20c", paste0("T", 25:29),
+    paste0("T30", c("d", "e", "f", "g", "h", "l", "m", "n")),
+    "R08", "R25k", "R25l", "R25m", "S01", "S07", "E02", "E04", "E19", "E24", "W13",
+    "C02", "C03", "C04", "C06"))
+  expect_length(footer_ids, 46L)
+})
+
+test_that("lossless merged footer serialization still detects every child mutation", {
+  skip_if_not_installed("tidyxl")
+  paragraphs <- list(S01 = "IRR = incidence rate ratio, Female vs Male. CI by log-normal method.",
+                     R08 = c("Estimates from a single model.", "* p<.1, ** p<.05, *** p<.01"))
+  for (id in names(paragraphs)) {
+    w <- golden_cell_styles(golden_book(id), id)
+    wl <- golden_sheet_layout(golden_book(id), id)
+    end <- max(w$row) - 1L
+    note <- w[w$row == end + 1L & w$col == 2L, , drop = FALSE]
+    g <- w[w$row <= end, , drop = FALSE]
+    gl <- wl
+    source_merge <- wl$merges[grepl(paste0("B", end + 1L, ":"), wl$merges, fixed = TRUE)]
+    gl$merges <- setdiff(wl$merges, source_merge)
+    source_height <- wl$heights[wl$heights$row == end + 1L, , drop = FALSE]
+    gl$heights <- wl$heights[wl$heights$row <= end, , drop = FALSE]
+    for (i in seq_along(paragraphs[[id]])) {
+      row <- end + i
+      anchor <- note
+      anchor$row <- row
+      anchor$address <- paste0("B", row)
+      anchor$value <- paragraphs[[id]][i]
+      g <- rbind(g, anchor)
+      gl$merges <- sort(c(gl$merges, gsub("[0-9]+", as.character(row), source_merge)))
+      if (nrow(source_height)) gl$heights <- rbind(gl$heights, data.frame(row = row, height = source_height$height))
+    }
+    rownames(g) <- NULL
+    parts <- golden_publication_styles(g, w, gl, wl, id)
+    expect_identical(parts$g, parts$w)
+    expect_identical(parts$gl, parts$wl)
+    child <- which(w$row == end + 1L & w$col == 3L)
+    expect_length(child, 1L)
+    added <- w[child, , drop = FALSE]
+    extra_native <- added
+    extra_native$col <- max(w$col) + 1L
+    extra_native$address <- paste0(golden_col_letters(extra_native$col), end + 1L)
+    for (bad in list(w[-child, , drop = FALSE], rbind(w, added), rbind(w, extra_native))) {
+      golden_expect_detected(golden_publication_styles(g, bad, gl, wl, id))
+    }
+    for (attr in c("value", "font", "size", "font_color", "bold", "italic", "wrap", "halign", "valign",
+                   "fill", "border_top", "border_bottom", "border_left", "border_right", "number_format", "format_id")) {
+      bad <- w
+      bad[[attr]][child] <- switch(attr, value = "invented child", font = "Wrong font", size = 99,
+        font_color = "FF000000", bold = TRUE, italic = TRUE, wrap = TRUE, halign = "right", valign = "top",
+        fill = "FF00FF00", border_top = "thin", border_bottom = "thin", border_left = "thin",
+        border_right = "thin", number_format = "0.00", format_id = 2L)
+      golden_expect_detected(golden_publication_styles(g, bad, gl, wl, id))
+    }
+    # R's declared representation contains only anchors. A redundant extra
+    # default child, a styled extra child, a duplicate or a missing anchor
+    # each violates its exact address contract.
+    styled <- added
+    styled$fill <- "FF00FF00"
+    anchor <- which(g$row == end + 1L & g$col == 2L)
+    for (bad in list(rbind(g, added), rbind(g, styled), rbind(g, g[anchor, , drop = FALSE]),
+                     g[-anchor, , drop = FALSE])) {
+      golden_expect_detected(golden_publication_styles(bad, w, gl, wl, id))
+    }
+    contract <- golden_publication_contract(id)
+    contract$native_styles$fill[contract$native_styles$row == end + 1L & contract$native_styles$col == 3L] <- "FF00FF00"
+    golden_expect_detected(golden_footer_style_templates(contract, id))
   }
 })
 
@@ -165,15 +649,8 @@ edit_file <- function(path, from, to) {
   hit <- grep(from, x, fixed = TRUE)
   stopifnot(length(hit) >= 1L)
   x[hit[1]] <- sub(from, to, x[hit[1]], fixed = TRUE)
-  write_lf(x, path)
+  golden_write_lf(x, path)
   path
-}
-
-# LF line endings on every platform, like the goldens.
-write_lf <- function(x, path) {
-  con <- file(path, "wb")
-  on.exit(close(con))
-  writeLines(x, con, useBytes = TRUE)
 }
 
 test_that("sink comparator accepts every golden against itself", {
@@ -215,7 +692,7 @@ test_that("Markdown sink comparator rejects broken bytes and ignores masked p-va
   f <- copy_golden("T34", "md")
   x <- readLines(f, encoding = "UTF-8")
   x <- sub("| 0.24 |", "| 0.5 |", x, fixed = TRUE)
-  write_lf(x, f)
+  golden_write_lf(x, f)
   expect_length(golden_compare_sink(f, g34, "p"), 0L)
   expect_gt(length(golden_compare_sink(f, g34, "")), 0L)
 })
@@ -420,7 +897,7 @@ edit_sheet_xml <- function(xlsx, sheet, from, to) {
   f <- file.path(tmp, target)
   x <- paste(readLines(f, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
   stopifnot(grepl(from, x, perl = TRUE))
-  write_lf(sub(from, to, x, perl = TRUE), f)
+  golden_write_lf(sub(from, to, x, perl = TRUE), f)
   out <- tempfile(fileext = ".xlsx")
   old <- setwd(tmp)
   on.exit(setwd(old))

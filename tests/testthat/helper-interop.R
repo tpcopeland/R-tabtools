@@ -324,9 +324,13 @@ expect_ft_matches_golden <- function(id, tt = interop_tt(id)) {
   # The footer line is one cell merged across the table (its hidden cells
   # repeat the text), italic, left-aligned, two points smaller.
   got_foot <- foot[foot$.part == "footer" & foot$.col_id == "c1", ]
-  if (nzchar(g$footnote)) {
-    expect_equal(unname(ft$footer$spans$rows[1, 1]), ncol(tt$body))
-    expect_identical(interop_nbsp(paste(got_foot$txt, collapse = "")), g$footnote)
+  contract <- golden_publication_contract(id)
+  golden_assert_native_footnote_tail(if (nzchar(g$footnote)) g$footnote else character(), contract, "xlsx")
+  values <- vapply(split(got_foot$txt, got_foot$.row_id), function(x) interop_nbsp(paste(x, collapse = "")), "")
+  golden_assert_footnote_tail(unname(values), contract, "presentation")
+  if (length(contract$paragraphs)) {
+    expect_identical(nrow(ft$footer$spans$rows), length(contract$paragraphs))
+    expect_true(all(ft$footer$spans$rows[, 1] == ncol(tt$body)))
     expect_true(all(got_foot$italic))
     expect_equal(unique(got_foot$font.size), max(tt$style$fontsize - 2, 6))
     pa <- flextable::information_data_paragraph(ft)
@@ -449,8 +453,10 @@ expect_gt_matches_golden <- function(id, tt = interop_tt(id)) {
     expect_true(is.null(cap) || all(is.na(cap)))
   }
   sn <- g$`_source_notes`
-  if (nzchar(gold$footnote)) {
-    expect_identical(interop_nbsp(as.character(sn[[1]])), gold$footnote)
+  contract <- golden_publication_contract(id)
+  golden_assert_native_footnote_tail(if (nzchar(gold$footnote)) gold$footnote else character(), contract, "xlsx")
+  golden_assert_footnote_tail(as.character(unlist(sn, use.names = FALSE)), contract, "presentation")
+  if (length(contract$paragraphs)) {
     st <- g$`_styles`
     note <- interop_gt_frame(list(interop_gt_combine(st$styles[st$locname == "source_notes"])))
     expect_true(note$italic, label = paste(id, "source note italic"))

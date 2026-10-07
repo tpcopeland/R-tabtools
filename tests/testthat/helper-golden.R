@@ -40,6 +40,22 @@ golden_scenario_live <- function(id, phase) {
 golden_dir <- function() test_path("golden")
 golden_path <- function(...) file.path(golden_dir(), ...)
 
+# Transitional Phase 2 routing, removed when WP-3G promotes the full baseline.
+# Only inventoried Phase 2 scenarios use the authentic c215afd artifacts.
+# Scenario input datasets and the legacy baseline remain untouched.
+golden_phase2_ids <- c(sprintf("P%02d", 1:15), sprintf("K%02d", 1:9),
+                       sprintf("S%02d", 1:8), "W15", sprintf("W%02d", 17:22))
+golden_phase2_dir <- function() golden_path("phase2-2.5.1")
+golden_baseline <- function(id) {
+  golden_scenario(id)  # reject unknown IDs rather than silently falling back
+  if (id %in% golden_phase2_ids) {
+    list(dir = golden_phase2_dir(), tabtools = "2.5.1", fvgen = "1.2.7")
+  } else {
+    list(dir = golden_dir(), tabtools = "2.1.14", fvgen = "1.2.5")
+  }
+}
+golden_artifact_path <- function(id, file) file.path(golden_baseline(id)$dir, file)
+
 golden_scenarios <- function() {
   utils::read.csv(golden_path("scenarios.csv"), stringsAsFactors = FALSE,
                   encoding = "UTF-8", na.strings = character())
@@ -254,7 +270,7 @@ golden_book_name <- function(id) {
   own <- sc$command == "stacktab" || grepl("using \"@ID@.xlsx\"", sc$stata_call, fixed = TRUE)
   paste0(if (own) id else sc$command, ".xlsx")
 }
-golden_book <- function(id) golden_path(golden_book_name(id))
+golden_book <- function(id) golden_artifact_path(id, golden_book_name(id))
 
 # The path of a golden fixture, or a skip when it is a source-only fixture
 # and this is not a source checkout. Every reader of a fixture file goes
@@ -292,14 +308,29 @@ golden_read_cells_file <- function(path) {
   m
 }
 
-golden_read_cells <- function(id) golden_read_cells_file(golden_path(paste0(id, ".csv")))
+golden_read_cells <- function(id) golden_read_cells_file(golden_artifact_path(id, paste0(id, ".csv")))
 
 golden_read_stored <- function(id) {
-  utils::read.csv(golden_path(paste0(id, "_stored.csv")), colClasses = "character",
+  utils::read.csv(golden_artifact_path(id, paste0(id, "_stored.csv")), colClasses = "character",
                   na.strings = character(), encoding = "UTF-8")
 }
 
 golden_read_lines <- function(path) readLines(path, warn = FALSE, encoding = "UTF-8")
+
+# Per-case provenance is checked independently of numeric stored results.
+# Golden comparisons intentionally ignore metadata; routing must not.
+golden_compare_provenance <- function(stored, id) {
+  b <- golden_baseline(id)
+  keys <- c("_golden_id", "_golden_tabtools_version", "_golden_fvgen_version")
+  meta <- stored[stored$kind == "meta" & stored$name %in% keys, , drop = FALSE]
+  want <- c(id, b$tabtools, b$fvgen)
+  why <- character()
+  for (i in seq_along(keys)) {
+    got <- meta$value[meta$name == keys[i]]
+    if (!identical(got, want[i])) why <- c(why, paste(keys[i], "provenance mismatch"))
+  }
+  why
+}
 
 # ---------------------------------------------------------------------------
 # Cells
@@ -419,7 +450,9 @@ expect_cells_match <- function(tt, id, mask = NULL, mode = NULL) {
   sc <- golden_scenario(id)
   mask <- if (is.null(mask)) sc$mask else mask
   mode <- if (is.null(mode)) sc$compare else mode
-  mm <- golden_compare_cells(tt, golden_read_cells(id), mask, mode)
+  parts <- golden_publication_cells(tt, id)
+  mm <- golden_compare_cells(parts$got, parts$want, mask, mode,
+                              p_rows = if (!is.null(tt$rows$vtype)) golden_grid_p_rows(tt))
   if (nrow(mm)) golden_fail(mm, paste("cells", id)) else testthat::succeed()
   invisible(mm)
 }
@@ -534,7 +567,9 @@ expect_sink_match <- function(path, id, ext = tools::file_ext(path), mask = NULL
   mask <- if (is.null(mask)) sc$mask else mask
   p_rows <- if (!is.null(tt$rows$vtype)) golden_grid_p_rows(tt)
   p_body <- if (!is.null(tt$rows$vtype)) golden_p_masked_rows(tt)
-  why <- golden_compare_sink(path, golden_path(paste0(id, ".", ext)), mask, p_rows = p_rows, p_body = p_body)
+  why <- if (is.null(tt)) {
+    golden_compare_sink(path, golden_artifact_path(id, paste0(id, ".", ext)), mask, p_rows = p_rows, p_body = p_body)
+  } else golden_publication_sink(path, id, ext, mask, tt)
   if (length(why)) {
     testthat::fail(paste0(ext, " sink ", id, ":\n", paste(utils::head(why, 8L), collapse = "\n")))
   } else {
@@ -656,7 +691,8 @@ expect_console_match <- function(tt, id, mask = NULL) {
   sc <- golden_scenario(id)
   mask <- if (is.null(mask)) sc$mask else mask
   lines <- if (is.character(tt)) tt else utils::capture.output(print(tt))
-  why <- golden_compare_console(lines, golden_read_lines(golden_path(paste0(id, "_console.txt"))), mask)
+  parts <- golden_publication_console(lines, golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt"))), id)
+  why <- golden_compare_console(parts$got, parts$want, mask)
   if (length(why)) {
     testthat::fail(paste0("console ", id, ":\n", paste(utils::head(why, 8L), collapse = "\n")))
   } else {
@@ -713,6 +749,13 @@ golden_stored_num <- function(s) {
 #' occurrence.
 golden_compare_stored <- function(stored, golden, fields = NULL, mask = character(), tolerance = 1e-9,
                                   p_table = NULL) {
+  # P.4 retains richer R mask metadata. Pinned native r(smallcells) is the
+  # scalar threshold, so project only that explicitly named native field.
+  # The caller's canonical list and its other metadata remain untouched.
+  if (!is.data.frame(stored) && is.list(stored$smallcells) &&
+      any(golden$name == "smallcells" & golden$kind == "scalar")) {
+    stored$smallcells <- stored$smallcells$threshold
+  }
   got <- if (is.data.frame(stored)) stored else golden_flatten_stored(stored)
   key <- function(d) {
     k <- paste(d$name, d$kind, d$row, d$col, sep = "\r")
@@ -894,7 +937,7 @@ golden_cell_styles <- function(xlsx, sheet) {
   data.frame(
     address = cells$address, row = cells$row, col = cells$col, value = txt,
     bold = fmt$font$bold[i], italic = fmt$font$italic[i],
-    font = fmt$font$name[i], size = fmt$font$size[i],
+    font = fmt$font$name[i], size = fmt$font$size[i], number_format = fmt$numFmt[i], format_id = i,
     font_color = fmt$font$color$rgb[i] %|NA|% "",
     halign = fmt$alignment$horizontal[i], valign = fmt$alignment$vertical[i],
     wrap = fmt$alignment$wrapText[i],
@@ -923,12 +966,16 @@ golden_style_attrs <- c("value", "bold", "italic", "font", "size", "font_color",
 #' row, reserved even when empty, rows 2-3 the header).
 golden_compare_styles <- function(got_xlsx, got_sheet, want_xlsx, want_sheet, mask = character(),
                                   got_width_offset = 0, want_width_offset = golden_width_offset,
-                                  width_tol = 0.5, highlight_fill = "FFFFFFCC", p_rows = NULL) {
+                                  width_tol = 0.5, highlight_fill = "FFFFFFCC", p_rows = NULL, publication_id = NULL) {
   mask <- golden_mask(mask)
   g <- golden_cell_styles(got_xlsx, got_sheet)
   w <- golden_cell_styles(want_xlsx, want_sheet)
   gl <- golden_sheet_layout(got_xlsx, got_sheet)
   wl <- golden_sheet_layout(want_xlsx, want_sheet)
+  if (!is.null(publication_id)) {
+    parts <- golden_publication_styles(g, w, gl, wl, publication_id)
+    g <- parts$g; w <- parts$w; gl <- parts$gl; wl <- parts$wl
+  }
   why <- character()
   if (!identical(gl$merges, wl$merges)) {
     why <- c(why, sprintf("merges: [%s] vs [%s]", paste(setdiff(gl$merges, wl$merges), collapse = " "),
@@ -998,7 +1045,7 @@ expect_styles_match <- function(xlsx, sheet, id, mask = NULL, got_width_offset =
   mask <- if (is.null(mask)) sc$mask else mask
   p_rows <- if (!is.null(tt$rows$vtype)) golden_p_masked_rows(tt)
   why <- golden_compare_styles(xlsx, sheet, golden_book(id), id,
-                               mask = mask, got_width_offset = got_width_offset, p_rows = p_rows)
+                               mask = mask, got_width_offset = got_width_offset, p_rows = p_rows, publication_id = id)
   if (length(why)) {
     testthat::fail(paste0("styles ", id, ":\n", paste(utils::head(why, 12L), collapse = "\n")))
   } else {
@@ -1162,7 +1209,7 @@ run_golden_scenario <- function(id, patch = NULL) {
   expect_identical(golden_check_derived(tt), character(), label = paste(id, "derived suppression cells"))
   # A documented, individually asserted divergence (test-golden-regtab.R)
   # may replace a cell before the comparators run.
-  if (!is.null(patch)) tt <- patch(tt)
+  if (!is.null(patch)) tt <- if (identical(patch, golden_strip_smd_note)) patch(tt, id = id) else patch(tt)
   expect_cells_match(tt, id)
   expect_console_match(tt, id)
   # Sink paths and Markdown row counts exist only when a sink is written, and
@@ -1217,20 +1264,46 @@ run_golden_scenario <- function(id, patch = NULL) {
 # note; it is then turned back into 2.1.14's so the rest of the table is
 # compared. Delete this once the goldens come from 2.4.0
 # (~/Stata-Dev/_take_action/2026-10-05-tabtools-smd-multigroup.md).
-golden_strip_smd_note <- function(tt) {
-  pre <- tt$meta$console_before %||% character()
-  rx <- "^Note: SMD compares (.*) vs (.*) only \\(the first two of [0-9]+ groups\\)\\.$"
-  hit <- grepl(rx, pre)
-  smd_col <- which(tt$cols$role == "smd")
-  head_new <- length(smd_col) == 1L && grepl("^SMD \\(.* vs .*\\)$", tt$header[[1]]$text[smd_col])
-  foot_rx <- " ?SMD compares .* only \\(the first two of [0-9]+ groups\\)\\.$"
-  foot_new <- grepl(foot_rx, tt$footnote)
-  testthat::expect_identical(c(head_new, foot_new), rep(any(hit), 2L),
-                             label = "2.4.0 pair header and footnote iff a 3+ group pair SMD")
-  if (any(hit)) {
-    tt$meta$console_before[hit] <- sub(rx, "Note: SMD computed for first two groups only (\\1 vs \\2)", pre[hit])
-    tt$header[[1]]$text[smd_col] <- "SMD"
-    tt$footnote <- sub(foot_rx, "", tt$footnote)
+golden_strip_smd_note <- function(tt, id = NULL, native_grid = NULL, native_console = NULL) {
+  if (!is.null(id)) {
+    native_grid <- golden_read_cells(id)
+    native_console <- golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt")))
   }
+  if (is.null(native_grid) || is.null(native_console)) {
+    stop("Legacy SMD translation requires explicit authentic native inputs.", call. = FALSE)
+  }
+  rx_old <- "^Note: SMD computed for first two groups only \\((.*) vs (.*)\\)$"
+  old <- grep(rx_old, native_console, value = TRUE)
+  actual_pre <- tt$meta$console_before %||% character()
+  smd_col <- which(tt$cols$role == "smd")
+  actual_new <- grep("^Note: SMD compares ", actual_pre, value = TRUE)
+  if (!length(old)) {
+    testthat::expect_identical(actual_new, character(), label = "no undeclared new SMD console note")
+    if (length(smd_col)) testthat::expect_false(grepl("^SMD \\(", tt$header[[1]]$text[smd_col]))
+    testthat::expect_false(any(startsWith(golden_fn_paragraphs(tt$footnote), "SMD compares ")))
+    return(tt)
+  }
+  testthat::expect_length(old, 1L)
+  pair <- sub(rx_old, "\\1 vs \\2", old)
+  hdr <- which(apply(native_grid, 1L, function(row) any(trimws(row) == "SMD")))[1L]
+  if (is.na(hdr)) stop("Native SMD note has no SMD header.", call. = FALSE)
+  groups <- trimws(native_grid[hdr, -1L])
+  groups <- sub("^(Crude|Weighted) ", "", groups)
+  groups <- unique(setdiff(groups, c("", "Total", "SMD", "p-value", "Test", "Statistic")))
+  note <- sprintf("SMD compares %s only (the first two of %d groups).", pair, length(groups))
+  expected_pre <- paste("Note:", note)
+  testthat::expect_identical(actual_new, expected_pre, label = "exact source-derived SMD console note")
+  testthat::expect_length(smd_col, 1L)
+  testthat::expect_identical(unname(tt$header[[1]]$text[smd_col]), paste0("SMD (", pair, ")"),
+                             label = "exact source-derived SMD pair header")
+  prior <- if (!is.null(id)) golden_publication_contract(id)$paragraphs else {
+    tail <- native_grid[nrow(native_grid), 1L]
+    if (startsWith(tail, "Counts below ")) tail else character()
+  }
+  testthat::expect_identical(golden_fn_paragraphs(tt$footnote), c(prior, note),
+                             label = "complete independently expected footer before SMD translation")
+  tt$meta$console_before[actual_pre == expected_pre] <- old
+  tt$header[[1]]$text[smd_col] <- "SMD"
+  tt$footnote <- paste(prior, collapse = " \\ ")
   tt
 }
