@@ -140,7 +140,11 @@ tt_vce_types.negbin <- function(fit) {
     env <- environment(fit$terms) %||% parent.frame()
     return(eval(mc, env))
   }
-  if (is.null(data)) stats::model.frame(f2) else stats::model.frame(f2, data = data)
+  if (is.null(data)) return(stats::model.frame(f2))
+  # Pass `data` by value: survival >= 3.8-12 model.frame.coxph() splices the
+  # unevaluated argument into the stored call and evaluates it in the
+  # formula environment, where the symbol `data` can find utils::data.
+  do.call(stats::model.frame, list(f2, data = data))
 }
 
 # The call's data object as it is now (NULL if it cannot be evaluated).

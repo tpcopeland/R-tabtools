@@ -6,6 +6,10 @@ fc_cox_metadata_data <- function() {
   d
 }
 
+# survival 3.8-12 stopped keeping factor `labels`/`label` in coxph()'s
+# retained frame; capture restores exactly what the fit kept, never more.
+fc_cox_kept <- function(fit, a) attr(fit$model$region, a, exact = TRUE)
+
 test_that("Cox capture restores only lost retained code metadata without changing fits", {
   skip_if_not_installed("survival")
   d <- fc_cox_metadata_data()
@@ -20,7 +24,7 @@ test_that("Cox capture restores only lost retained code metadata without changin
   expect_identical(record$snapshot$frame$region, fit$model$region)
   expect_identical(record$snapshot$source$region, d$region)
   expect_identical(levels(record$snapshot$frame$region), c("A", "B", "C", "Unused"))
-  expect_identical(attr(record$snapshot$frame$region, "labels"), c(A = 0, B = 3, C = 9, Unused = 11))
+  expect_identical(attr(record$snapshot$frame$region, "labels"), fc_cox_kept(fit, "labels"))
   expect_identical(.fc_evidence(fit), before)
   expect_identical(d, source_before)
 })
@@ -35,7 +39,7 @@ test_that("Cox term counts retain code zero, unused levels, and accepted record 
   expect_true(all(keys %in% record$terms$count_key))
   expect_equal(record$terms$events[match(keys, record$terms$count_key)], c(3, 3, 3))
   expect_false("11.region" %in% record$terms$count_key)
-  expect_identical(attr(record$snapshot$frame$region, "labels"), c(A = 0, B = 3, C = 9, Unused = 11))
+  expect_identical(attr(record$snapshot$frame$region, "labels"), fc_cox_kept(fit, "labels"))
   reordered_data <- d[18:1, ]
   # Caller row views also lose factor attributes; declare the same original
   # mapping explicitly rather than treating stripped metadata as historical.
@@ -52,11 +56,16 @@ test_that("Cox metadata restoration cannot conceal source mapping or predictor m
   d <- fc_cox_metadata_data()
   fit <- survival::coxph(survival::Surv(time, event) ~ region, data = d,
     ties = "breslow", model = TRUE, x = TRUE)
-  bad <- d
-  attr(bad$region, "labels") <- c(A = 9, B = 3, C = 0, Unused = 11)
-  expect_error(tt_fitcount(fit, "event", data = bad), class = "tabtools_error_fitcount")
-  bad <- d; attr(bad$region, "label") <- "Wrong region"
-  expect_error(tt_fitcount(fit, "event", data = bad), class = "tabtools_error_fitcount")
+  # A metadata mutation is detectable only against metadata the fit kept.
+  if (!is.null(fc_cox_kept(fit, "labels"))) {
+    bad <- d
+    attr(bad$region, "labels") <- c(A = 9, B = 3, C = 0, Unused = 11)
+    expect_error(tt_fitcount(fit, "event", data = bad), class = "tabtools_error_fitcount")
+  }
+  if (!is.null(fc_cox_kept(fit, "label"))) {
+    bad <- d; attr(bad$region, "label") <- "Wrong region"
+    expect_error(tt_fitcount(fit, "event", data = bad), class = "tabtools_error_fitcount")
+  }
   bad <- d; bad$region[1] <- "B"
   expect_error(tt_fitcount(fit, "event", data = bad), class = "tabtools_error_fitcount")
   bad <- d; bad$region <- ordered(as.character(bad$region), levels = levels(d$region))

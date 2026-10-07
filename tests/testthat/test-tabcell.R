@@ -171,6 +171,7 @@ test_that("fitted coefficients retain model-owned Student inference", {
 })
 
 test_that("parent console and every file sink share final protected text", {
+  skip_if_not_installed("openxlsx")
   directory <- withr::local_tempdir(pattern = "tabtools-cell-sinks-")
   workbook <- file.path(directory, "cells.xlsx")
   markdown <- file.path(directory, "cells.md")
