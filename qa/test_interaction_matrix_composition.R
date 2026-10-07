@@ -351,6 +351,8 @@ test_that("IMC-06 matrix dataframe and modelsummary summaries preserve missing i
     expect_identical(imc_counts(matrix_table), stats::setNames(rep(NA_real_, 12), names(imc_counts(matrix_table))))
     supplied <- data.frame(term = c("x", "z", "no_inference"), estimate = estimates,
                            std.error = c(.2, .3, NA_real_))
+    attr(supplied, "effect_scale") <- "Coef."
+    attr(supplied, "inference_reference") <- "normal"
     before_supplied <- supplied
     effects <- effecttab(supplied, type = "margins", level = 95)
     expect_equal(effects$meta$effect_rows$conf.low,
@@ -372,7 +374,7 @@ test_that("IMC-06 matrix dataframe and modelsummary summaries preserve missing i
     # evidence to an absent modelsummary backend or inventing source records.
     ms <- structure(list(tidy = supplied,
                          glance = data.frame(nobs = 73, logLik = -41.5)), class = "modelsummary_list")
-    converted <- tt_from_modelsummary(ms, exponentiate = TRUE, effect_scale = "OR")
+    converted <- tt_from_modelsummary(ms, exponentiate = TRUE, effect_scale = "OR", inference_reference = "normal")
     expect_equal(converted$estimate, exp(estimates), tolerance = 1e-12)
     table <- regtab(converted, vce = "stata", stats = c("n", "aic", "bic"))
     expect_equal(table$meta$regtab_rows$estimate, exp(estimates), tolerance = 1e-12)

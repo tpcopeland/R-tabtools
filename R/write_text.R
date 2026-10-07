@@ -175,6 +175,11 @@ tt_write_csv <- function(x, path) {
   }
   last <- h[[length(h)]]$text
   out <- last
+  if (identical(x$meta$regtab_orientation, "transpose")) {
+    first <- h[[1L]]$text
+    out <- ifelse(nzchar(first) & nzchar(last), paste0(first, ": ", last), ifelse(nzchar(first), first, last))
+    return(esc(out))
+  }
   if (x$layout$header_style == "model" && length(h) >= 2L) {
     first <- h[[1]]$text
     model <- x$cols$model

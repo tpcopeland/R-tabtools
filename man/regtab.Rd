@@ -65,7 +65,20 @@ regtab(
   zebracolor = NULL,
   csv = NULL,
   markdown = NULL,
-  mdappend = FALSE
+  mdappend = FALSE,
+  fitcounts = NULL,
+  mincount = NULL,
+  notestlabel = NULL,
+  absentlabel = NULL,
+  cnslabel = "(constrained)",
+  exposurelabel = NULL,
+  statlabels = NULL,
+  stat_values = NULL,
+  reftop = FALSE,
+  cellnote = NULL,
+  transpose = FALSE,
+  collabels = NULL,
+  addcol = NULL
 )
 }
 \arguments{
@@ -93,8 +106,7 @@ Automatic notes are separate paragraphs in every sink.}
 \item{nointercept, keepintercept}{Drop or keep the intercept row.
 \code{nointercept} has three states: \code{NULL} (default), the intercept is
 dropped when every model is on a ratio scale (for a data frame: an
-\code{effect_scale} with null 1, a ratio \code{stata_cmd}, or broom.helpers'
-\code{exponentiate} attribute) unless \code{keepintercept = TRUE}; \code{TRUE} drops
+explicit \code{effect_scale} with null 1) unless \code{keepintercept = TRUE}; \code{TRUE} drops
 it for every model; \code{FALSE} keeps it, ratio scale or not. An explicit
 \code{nointercept} wins over \code{keepintercept}: with both \code{TRUE} the
 intercept is dropped, silently, as Stata drops it when given both
@@ -110,9 +122,9 @@ and exponentiates it.}
 
 \item{noreeffects}{Omit random-effects rows of mixed models.}
 
-\item{stats}{Model statistics rows, as a vector or one space-separated
+\item{stats}{Structured statistic records, or a vector/space-separated
 string of tokens (case-insensitive): \code{"n"} (\code{"n_sub"}, \code{"subjects"}),
-\code{"events"}, \code{"groups"}, \code{"mi_m"}, \code{"aic"}, \code{"qic"}, \code{"bic"}, \code{"ll"},
+\code{"obs"}, \code{"events"}, \code{"people"}, \code{"exposure"}, \code{"groups"}, \code{"mi_m"}, \code{"aic"}, \code{"qic"}, \code{"bic"}, \code{"ll"},
 \code{"icc"}, \code{"r2"}, \code{"r2_a"}, \code{"rmse"}, \code{"F"}, \code{"fmi"}, and the R-only
 \code{"vce"}. The rows always come in that order, whatever the order of the
 tokens, and a row no model reports is left out; see the section on
@@ -260,6 +272,53 @@ footnote.}
 \item{csv, markdown, mdappend}{Additional export targets; \code{csv} must be a
 \code{.csv} file, and every target is checked before any is written, as in
 \code{\link[=table1_tc]{table1_tc()}}.}
+
+\item{fitcounts}{One \code{tt_fitcount} record for one model, or an exact-length
+ordered list (NULL for unused records or failed placeholders).}
+
+\item{mincount}{NULL, or a positive integer event threshold for eligible terms.}
+
+\item{notestlabel}{Literal no-test text; NULL resolves to \code{emptylabel}.}
+
+\item{absentlabel}{Literal sample-excluded-level text, default blank; requires
+\code{mincount} when explicitly non-NULL.}
+
+\item{cnslabel}{Literal fixed-coefficient text, default \code{"(constrained)"}.}
+
+\item{exposurelabel}{Optional literal label for requested \code{exposure}.}
+
+\item{statlabels}{Uniquely named character labels of requested canonical
+built-in tokens (\code{F} uses its canonical capital letter).}
+
+\item{stat_values}{NULL, or one ordered named list of finite numeric/NA scalar
+values per model. Authoritative fit-count aliases cannot be overridden.}
+
+\item{reftop}{Move a fit-owned reference level to the top of its contiguous
+factor block. Models with different reference levels in that block refuse.}
+
+\item{cellnote}{Literal publication replacements: a list of records
+\code{list(row = "exact label", model = 1L, text = "literal")}, or the native
+string \verb{"row label" model# "text"} with backslash-separated entries.
+Labels match exactly after trimming spaces and must match one coefficient
+or factor-heading row. Last text wins; empty text blanks the cell.
+Replacements clear CI/p text and publication numerics. Coefficient notes
+set state \code{masked}; structural heading notes keep the blank state. Both carry
+\code{override_origin = "cellnote"}/\code{override_text}. Raw analytical returns
+remain separately labeled; no disclosure counters increase.}
+
+\item{transpose}{Models as rows, statistics and term estimate/CI/p blocks
+as columns. Implies \code{compact}; refuses \code{addrow}, \code{dimnonsig}, \code{highlight}
+and \code{boldp}. Keyed \code{\link[=tt_flat]{tt_flat()}} and composition refuse this orientation;
+\code{tt_flat(x, keyed = FALSE)} returns a plain publication data frame.}
+
+\item{collabels}{Named character vector of exact raw terms and literal
+transposed headers; native term/quoted-label strings are also accepted.
+Normalized \code{c.}/factor base markers are ignored. \code{equation::term} or
+\code{equation:term} selects one equation; unqualified terms select all copies.}
+
+\item{addcol}{Custom transposed columns, as a named list of model values
+or records \code{list(label, values, after = term)}. Short vectors leave blank
+cells; excess values refuse. Repeated anchors retain specification order.}
 }
 \value{
 A \code{tt_table} object. It is returned invisibly when \code{xlsx}, \code{csv}
@@ -273,14 +332,19 @@ variable, where \code{strata()}, \code{cluster()}, \code{frailty()} and \code{of
 terms are not predictors and a \code{cmprsk::crr} fit with several
 coefficients gets no adjective; Stata builds it from the estimate
 header instead, so it differs where Stata's names the wrong model),
-\code{table} (display-scale estimates per row and model), \code{N_rows},
+\code{table} (raw analytical display-scale estimates per row and model),
+\code{table_role = "raw_analytical"}, and \code{publication_table} (eligible final
+publication numerics). Primary mincount and cellnote preserve \code{table}
+but remove affected publication numerics. \code{meta$regtab_raw_rows} is raw
+provenance; \code{meta$regtab_rows} is aligned publication provenance. \code{N_rows},
 \code{N_cols}, \code{N_models}, \code{stars}, per-model statistics (\code{n_1}, \code{aic_1}, ...),
 and, when written, \code{xlsx}, \code{sheet}, \code{markdown}, \code{markdown_rows},
 \code{markdown_cols}; and two R-only entries: \code{ci_method} (\code{"wald"} or
 \code{"profile"}), and, when a model's variance fell back to another source
 (mixed models only, with a warning), \code{vce_fallback}, one description
 per model (\code{""} for none). See \code{\link[=as_forest_data]{as_forest_data()}} for the estimates as
-data.
+data. Forest effects require state \code{est} and finite estimate/ordered
+finite bounds; missing p-values alone do not exclude an effect.
 
 \verb{$meta$sample_accounting} carries the source ledger described in
 \code{\link[=tt_table]{tt_table()}}, with separate fitted populations for each model or
@@ -439,6 +503,58 @@ two. As in fvgen, the factor comes first whatever the formula's order
 three-way). \code{interactions = "native"} reproduces native \code{regtab}: a
 \code{foreign#rep78} parent row and raw \verb{1.foreign#3.rep78} rows, with base
 cells \code{refcat}, empty cells \code{emptylabel}, and aliased cells \code{omitlabel}.
+}
+
+\section{Structured model statistics}{
+
+Structured statistic records extend the token interface. For example,
+\code{stats = list("n", list(name = "ev", pair = "total", label = "Events (total)", mincell = 5), list(text = c("Unweighted", "IPW"), label = "Weighting"))}
+uses exact case-preserved scalar names, with values supplied in ordered
+\code{stat_values} lists or available fitted-model scalars. Allowed fields are
+\code{name}, \code{pair}, \code{label}, \code{fmt}, \code{mincell}, \code{maskwith}, and \code{text}. Text records
+have only \code{text} and \code{label}; shorter text vectors are padded with blanks.
+A scalar unavailable in every model refuses; partial missing values stay
+blank. A pair with a missing first value stays blank. The strictest mincell
+threshold applies to every occurrence of a scalar; only values at least one
+and below that threshold are primary masks. Declared \code{maskwith} groups close
+transitively and withhold other available group values, including zeros.
+Pairs alone add no dependency. Literal replacement text cannot restore masked
+inference. Raw scalars remain explicitly labeled analytical metadata.
+}
+
+\section{Fit counts and minimum events}{
+
+Use \code{\link[=tt_fitcount]{tt_fitcount()}} immediately after fitting, then pass its record through
+\code{fitcounts} in original model order. Captured unweighted counts take precedence
+over model event statistics; \code{obs} retains record N when \code{n} shows subjects.
+\code{people} and \code{exposure} require explicitly captured columns. Fit/source and
+record evidence are compared exactly at reuse. Explicit \code{data} capture freezes
+the caller's declared source with compatibility checks; unavailable historical
+predictors cannot be authenticated. It never reconstructs from later live data.
+Reporting VCE changes leave the original fitted-source identity intact.
+Invalid count/staleness inputs signal \code{tabtools_error_fitcount}; invalid rich
+specifications signal \code{tabtools_error_statspec} (formats retain their existing
+\code{tabtools_error_fmt} condition class).
+
+\code{mincount} requires \code{terms = TRUE} records and masks eligible factor levels,
+factor interactions and the positive level of plain 0/1 indicators. Continuous
+terms, genuine fitted bases and individually fixed coefficients are exempt.
+Unusable fitted variance/omission takes priority over low event counts, using
+\code{notestlabel}; low events use \code{emptylabel} (an en dash when omitted under
+mincount). A missing level in an included term uses \code{absentlabel} if excluded
+from the sample, and \code{notestlabel} if sample-held but unestimated. Entire
+missing terms stay blank. This is reporting hygiene, not complementary
+disclosure protection. Publication inference/forest values are invalidated;
+\code{stored$table} and \code{meta$regtab_raw_rows} remain raw analytical returns, labeled
+separately from \code{stored$publication_table} and \code{meta$regtab_rows}.
+Native \code{N_masked} includes threshold and unusable cells; \code{N_absent} counts
+missing levels. Typed \code{smallcells} counts only threshold masks and has zero
+linked masks. Rich statistic masks have separate \code{N_stats_masked} and
+\code{N_stats_linked} per-part occurrence counts and raw/protection provenance.
+\code{\link[=tt_failed_model]{tt_failed_model()}} explicitly opts into a blank failed column in this
+workflow; at least one valid fit is required. NULL/errors remain refused.
+MI \code{esampvaryok} and pooled-MI mincount are unsupported: existing equal-sample
+MI rules remain, and an average N is not substituted for sample evidence.
 }
 
 \section{Model statistics}{
@@ -960,6 +1076,15 @@ coefficients (\verb{mi estimate, eform: glm ..., family(gaussian)}: \code{exp(b)
 in Stata; coefficients in R).
 }
 
+\section{Body insertion}{
+
+\code{addrow} also accepts records \code{list(label = text, values = vector, after = term)} and native trailing \verb{, after(term)}. A term is one exact
+coefficient or one contiguous factor block's last level, using keep/drop's
+factor-marker normalization. Missing or ambiguous anchors refuse before
+output. Anchors resolve before insertion; same-anchor entries retain input
+order and inherit indentation. Added rows have positional raw keys.
+}
+
 \section{Session destinations}{
 
 An explicitly supplied non-NULL \code{sheet} enables inherited workbook and
@@ -990,8 +1115,9 @@ Supplied intervals and p-values are shown as they are. A row with
 neither bound gets a Wald interval from \code{std.error}, and, when the
 data frame has no \code{p.value} column at all, a Wald p-value (a supplied
 \code{p.value} column is kept as it is, missing entries included). These
-use Student's t with the row's \code{df} (or \code{df.error}) when given, else
-the normal distribution;
+require Student's t \code{df}/\code{df.error} or explicit
+\code{attr(x, "inference_reference") = "normal"} (\code{df = Inf} also declares
+normal inference). Missing row degrees of freedom need the normal declaration;
 \item the scale of \code{std.error}: on a ratio scale (OR, HR, IRR, RRR, SHR, TR)
 a derived interval or p-value needs \code{attr(x, "se_scale")}: \code{"link"}
 when \code{std.error} is the standard error of log(\code{estimate}), as
@@ -1007,17 +1133,17 @@ label, \code{OR}, \code{HR}, \code{RR}, \code{IRR}, \code{RRR}, \code{SHR}, \cod
 \code{exp(b)} or its spelled-out name, has null 1, and a difference label,
 \code{Coef.}, \code{Beta}, \code{RD}, \code{MD}, ..., null 0; any other label needs
 \code{attr(x, "null_value")}, 0 or 1, whenever the null is used by a
-derived statistic or \code{dimnonsig}), else \code{attr(x, "stata_cmd")}, else
-broom.helpers' own record that it exponentiated the estimates
-(\code{attr(x, "exponentiate")}, with its \code{coefficients_label}, e.g. \code{OR},
-as the header), else \code{Coef.}. A broom \code{statistic} column that shows
+derived statistic or \code{dimnonsig}). This attribute is REQUIRED, including
+explicit \code{Coef.}. Command, exponentiate and header labels never declare
+the values' scale. Existing callers must add this explicit metadata. A broom \code{statistic} column that shows
 the estimates were exponentiated (log(estimate) / std.error, as
 \code{broom::tidy(exponentiate = TRUE)} returns it) on a frame taken as
 coefficients is refused, and so is a declared \code{se_scale = "link"} it
 contradicts, or any \code{se_scale} on a frame without ratio rows;
 \item the confidence level of supplied intervals: \code{attr(x, "conf.level")}
 (which \code{\link[broom.helpers:tidy_plus_plus]{broom.helpers::tidy_plus_plus()}} sets) or a constant
-\code{conf.level} column (a proportion or a percentage), else 95\%. With
+\code{conf.level} column (a proportion or a percentage), REQUIRED when bounds
+are supplied. With
 \code{level} left at its default, regtab uses that level (the data frames
 must agree); an explicit \code{level} that differs is refused: regtab
 cannot recompute supplied intervals. \code{vce} must be \code{"stata"} for a
@@ -1042,6 +1168,19 @@ Cutpoints and ancillary rows keep the estimate's own scale (null 0),
 follow \code{nointercept}/\code{keepintercept} with the intercept, and are keyed
 in Stata's \code{/} equation (\verb{/::sigma}), so they join a fitted model's
 ancillary rows of the same name;
+\item explicit analytical \code{status} may be \code{est}, \code{ref}, \code{omit}, \code{notest},
+\code{absent}, \code{empty} or \code{constrained}. Non-estimated states cannot carry CI/p
+inference. Zero standard errors require explicit non-estimated status;
+they never imply a reference or fixed value. A constrained row requires
+exact numeric \code{constraint_value} and nonempty \code{constraint_source} columns;
+\item custom \code{streg}, \code{stintreg} and \code{mestreg} declarations require
+\code{distribution} (\code{weibull}, \code{exponential}, \code{gompertz}, \code{lognormal},
+\code{loglogistic}, \code{generalized_gamma}) and \code{metric} (\code{log_time},
+\code{log_hazard}) attributes. Gompertz requires hazard; lognormal,
+loglogistic and generalized gamma require time. A TR/HR display scale
+must agree with time/hazard. Values and bounds are already on their
+declared display scale and are never exponentiated again. This escape
+hatch does not add native fitted-object support for arbitrary estimators;
 \item optional description columns: \code{label}, \code{var_label}, \code{variable},
 \code{var_type} (\code{"intercept"}, \code{"continuous"}, \code{"categorical"},
 \code{"dichotomous"}, \code{"interaction"}, \code{"cutpoint"}, \code{"ancillary"}),

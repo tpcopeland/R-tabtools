@@ -1,0 +1,4 @@
+"id","command","phase","fixture","description","stata_setup","stata_call","r_call","compare","mask"
+"FC001","regtab",4,"fitcount_v251_FC001","Frozen unweighted records/events/people/exposure; literal 6/4/4/3/13","run qa/stata/fitcount_v251_cases.do FC001 @OWNED_OUT@","See case-owned do recipe","fitcount_native_case('FC001')","exact",""
+"FC002","regtab",4,"fitcount_v251_FC002","True base2 factor-continuous keys; count 0/6/12; threshold7","run qa/stata/fitcount_v251_cases.do FC002 @OWNED_OUT@","See case-owned do recipe","fitcount_native_case('FC002')","exact",""
+"FC003","regtab",4,"fitcount_v251_FC003","Twelve model order; strictest repeated scalar/pair thresholds; transitive zero links","run qa/stata/fitcount_v251_cases.do FC003 @OWNED_OUT@","See case-owned do recipe","fitcount_native_case('FC003')","exact",""

@@ -1,4 +1,21 @@
+WP-4B adds `crossval_regtab_placement.R` to crossval/core/full and
+`test_regtab_placement.R` to interaction/core/full. Both check final placement,
+publication overrides and provenance; native RL001–RL004 comparisons require
+root-authenticated artifacts and cannot be counted as accepted before capture.
+
 # tabtools QA
+
+WP-4A adds `crossval_regtab_fitcount.R` to crossval/core/full. Seven nonempty
+installed blocks cover literal unweighted 6/4/4/3/13 counts and exact reuse,
+the complete held native FC001–FC003 grids/returns, session sinks and four
+real converter paths. The script launches no native process. Root generates
+the additive fixtures using `qa/stata/fitcount_v251_cases.do`, authenticating
+the complete pinned 712044f8/2.5.1 source closure before/after, then writes
+`qa/data/fitcount_v251_artifacts.csv` (id,file,md5,revision,tabtools_version).
+Missing/damaged artifacts or unavailable required converters fail. The case
+fragment in `qa/data/fitcount_v251_scenarios.csv` does not change the central
+manifest. Native generation and acceptance require the fresh reviewed source
+freeze. Existing goldens, comparator rules and tolerances are retained.
 
 This directory is `.Rbuildignore`d. It holds the QA runner and benchmarks
 (below) and the Stata parity harness. The goldens the harness writes live in

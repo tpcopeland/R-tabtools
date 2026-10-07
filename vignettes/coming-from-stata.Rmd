@@ -498,14 +498,17 @@ list(var.equal = TRUE))` gives Stata's pooled-variance tests. Stata's
   number of predictor variables. The R-only models name themselves
   (`pscl::hurdle()` count models are not Stata's `churdle`; `clm()` links
   Stata has no ordered model for).
-- **Data-frame input**: the ratio scale comes from `effect_scale`,
-  `stata_cmd` or broom.helpers' `exponentiate` record (exponentiated
-  `broom::tidy()` output declared as coefficients is refused); on a ratio
+- **Data-frame input**: the scale requires an explicit `effect_scale`
+  attribute, including `"Coef."`; command names and backend exponentiation
+  hints do not declare it (exponentiated `broom::tidy()` output declared as
+  coefficients is refused); on a ratio
   scale `std.error` is used only when its scale is declared
   (`attr(x, "se_scale")`: `"link"` for broom's `exponentiate = TRUE`,
   `"estimate"` for `parameters`); supplied intervals fix the
   confidence level (`attr(x, "conf.level")`, which `tidy_plus_plus()`
-  sets); a `df` column gives t statistics; factor levels are keyed
+  sets), and supplied bounds require that declaration; row `df`/`df.error`
+  gives t statistics, while derived inference without df requires an
+  explicit `inference_reference = "normal"`; factor levels are keyed
   `2.treat`, so `regtab(fit, tidy_plus_plus(fit))` shares their rows.
   Malformed columns (factors, reversed bounds, p outside \[0, 1\], ...) are
   refused. See `?regtab`, "Data-frame input".

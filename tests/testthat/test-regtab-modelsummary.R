@@ -10,6 +10,7 @@ ms_fake <- function(fit, exponentiated = FALSE) {
                    conf.low = NA_real_, conf.high = NA_real_, group = "", stringsAsFactors = FALSE)
   if (exponentiated) td$estimate <- exp(td$estimate)
   attr(td, "exponentiate") <- exponentiated
+  attr(td, "inference_reference") <- "normal"
   structure(list(tidy = td, glance = data.frame(aic = stats::AIC(fit), nobs = stats::nobs(fit),
                                                 logLik = as.numeric(stats::logLik(fit)))),
             class = "modelsummary_list")
@@ -50,12 +51,12 @@ test_that("7.15: a real modelsummary list, one and several equations", {
   skip_if_not_installed(pkg)
   msum <- getExportedValue(pkg, "modelsummary")
   f <- lm(mpg ~ wt + hp, mtcars)
-  x <- tt_from_modelsummary(msum(f, output = "modelsummary_list"), exponentiate = FALSE)
+  x <- tt_from_modelsummary(msum(f, output = "modelsummary_list"), exponentiate = FALSE, conf.level = .95, inference_reference = "normal")
   tt <- regtab(x, stats = c("n", "r2"))
   expect_identical(tt$body[[2]], regtab(f, stats = c("n", "r2"))$body[[2]])
   skip_if_not_installed("nnet")
   m <- nnet::multinom(factor(gear) ~ wt, mtcars, trace = FALSE)
-  xm <- tt_from_modelsummary(msum(m, output = "modelsummary_list"), exponentiate = TRUE, effect_scale = "RRR")
+  xm <- tt_from_modelsummary(msum(m, output = "modelsummary_list"), exponentiate = TRUE, effect_scale = "RRR", conf.level = .95, inference_reference = "normal")
   expect_identical(unique(xm$equation), c("4", "5"))
   expect_identical(regtab(xm)$body[[1]], c("4: wt", "5: wt"))
 })

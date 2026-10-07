@@ -56,6 +56,7 @@
 #' @export
 tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   tabs <- .tt_compose_args(list(...), "tt_merge")
+  .rt_guard_transpose_composition(tabs)
   if (is.null(spanners) && !is.null(names(tabs)) && all(nzchar(names(tabs)))) spanners <- names(tabs)
   if (!is.null(spanners) && (!is.character(spanners) || length(spanners) != length(tabs) || anyNA(spanners))) {
     cli::cli_abort("{.arg spanners} must be one label per table ({length(tabs)}).", call = NULL)
@@ -207,6 +208,11 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   meta <- first$meta
   meta$pvals <- pv
   meta$regtab_rows <- NULL
+  meta$regtab_raw_rows <- NULL
+  meta$regtab_mask_provenance <- NULL
+  meta$regtab_stats_provenance <- NULL
+  meta$fitcount_identity <- NULL
+  meta$fitcount_raw <- NULL
   meta$flat <- .tt_flat_merge_metadata(tabs, keys, rows, head_pos, orig_keys)
   meta$stack_group_rows <- if (length(head_pos)) head_pos
   meta$stars_notes <- unique(unlist(lapply(tabs, .tt_stars_note), use.names = FALSE))
@@ -263,6 +269,7 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
 #' @export
 tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   tabs <- .tt_compose_args(list(...), "tt_stack")
+  .rt_guard_transpose_composition(tabs)
   if (is.null(groups) && !is.null(names(tabs)) && all(nzchar(names(tabs)))) groups <- names(tabs)
   if (!is.null(groups) && (!is.character(groups) || length(groups) != length(tabs) || anyNA(groups))) {
     cli::cli_abort("{.arg groups} must be one label per table ({length(tabs)}).", call = NULL)
@@ -326,6 +333,11 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   meta <- first$meta
   meta$pvals <- pv
   meta$regtab_rows <- NULL
+  meta$regtab_raw_rows <- NULL
+  meta$regtab_mask_provenance <- NULL
+  meta$regtab_stats_provenance <- NULL
+  meta$fitcount_identity <- NULL
+  meta$fitcount_raw <- NULL
   meta$flat <- .tt_flat_stack_metadata(tabs, groups)
   meta$stack_group_rows <- if (length(head_rows)) head_rows
   meta$stars_notes <- unique(unlist(lapply(tabs, .tt_stars_note), use.names = FALSE))

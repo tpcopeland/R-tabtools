@@ -488,6 +488,10 @@ test_that("a tidy_plus_plus() data frame renders like the fitted model", {
   tp <- suppressWarnings(broom.helpers::tidy_plus_plus(f, tidy_fun = tf, exponentiate = TRUE,
                                                        add_header_rows = TRUE, intercept = TRUE))
   attr(tp, "stata_cmd") <- "logit"
+  attr(tp, "effect_scale") <- "OR"
+  attr(tp, "conf.level") <- .95
+  tp$status <- ifelse(tp$reference_row %in% TRUE, "ref", ifelse(is.na(tp$estimate), "omit", "est"))
+  attr(tp, "inference_reference") <- "normal"
   t1 <- suppressWarnings(regtab(f))
   t2 <- regtab(tp)
   expect_identical(t2$body[[1]], t1$body[[1]])
@@ -495,16 +499,12 @@ test_that("a tidy_plus_plus() data frame renders like the fitted model", {
   expect_identical(t2$body[[2]][3], "Reference")
   expect_false(any(t2$body[[1]] == "Intercept"))
   expect_identical(regtab(tp, keepintercept = TRUE)$body[[1]][nrow(t1$body) + 1L], "Intercept")
-  # Without stata_cmd: broom.helpers' own record (exponentiate = TRUE,
-  # coefficients_label "OR") gives the ratio scale (Milestone H review of
-  # group t2a, P0-1); without that record, Coef. and no automatic
-  # nointercept.
+  # Scale is explicit; removing unrelated backend hints does not change it.
   attr(tp, "stata_cmd") <- NULL
-  expect_identical(regtab(tp)$stored$coef_label, "OR")
   attr(tp, "exponentiate") <- NULL
-  expect_error(regtab(tp), "looks exponentiated", fixed = TRUE)
-  tp$statistic <- NULL
-  expect_identical(regtab(tp)$stored$coef_label, "Coef.")
+  expect_identical(regtab(tp)$stored$coef_label, "OR")
+  attr(tp, "effect_scale") <- NULL
+  expect_error(regtab(tp), class = "tabtools_error_regtab_metadata")
   attr(tp, "effect_scale") <- "OR"
   expect_identical(regtab(tp)$stored$coef_label, "OR")
 })
@@ -515,7 +515,12 @@ test_that("data-frame input: equations, Stata equation names, glance stats, erro
                   var_label = c("Dose", NA, "Score", NA, NA, "Zed"),
                   estimate = c(1.5, 2, 0.5, 0.7, 2.04, 0.1), std.error = c(0.1, 0.1, 0.04, 0.05, 0.09, 1),
                   stringsAsFactors = FALSE)
+  attr(x, "effect_scale") <- "Coef."
+  attr(x, "conf.level") <- .95
+  attr(x, "inference_reference") <- "normal"
   attr(x, "stata_cmd") <- "churdle"
+  attr(x, "effect_scale") <- "Coef."
+  attr(x, "inference_reference") <- "normal"
   attr(x, "glance") <- list(nobs = 1200, logLik = -1707.93, df = 5, pseudo.r.squared = 0.1)
   tt <- regtab(x, keepintercept = TRUE, stats = "n aic r2")
   expect_identical(tt$body[[1]], c("annual cost: Dose", "annual cost: Intercept", "Selection equation: Score",

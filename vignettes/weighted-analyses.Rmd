@@ -647,6 +647,7 @@ boot_ci <- data.frame(
   conf.high = exp(quantile(boot_log_or, 0.975))
 )
 attr(boot_ci, "effect_scale") <- "OR"
+attr(boot_ci, "conf.level") <- .95
 regtab(msm, boot_ci, models = c("MSM, cluster-robust", "MSM, bootstrap"),
        vce = c("cluster", "stata"), cluster = list(~id, NULL),
        keep = "treated")

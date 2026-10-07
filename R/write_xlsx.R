@@ -517,6 +517,7 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
 }
 
 .xlsx_layout_regtab <- function(x) {
+  if (identical(x$meta$regtab_orientation, "transpose")) return(.xlsx_layout_regtab_transpose(x))
   .tt_check_regression_shape(x)
   b <- as.matrix(x$body)
   role <- x$cols$role
@@ -613,11 +614,27 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
   add("bold", 3, 3, 2, num_cols, code = 1)
   add("halign", 3, 3, 2, num_cols, code = 2)
   add("valign", 3, 3, 2, num_cols, code = 2)
-  # Reference/omitted/empty labels merge across their own model's block only.
+  # Reference/omitted/empty/non-test labels merge within their model only.
+  # Native cns is excluded (regtab.ado:2190); its estimate and CI text stay
+  # separate. A visible sample-absent label gets the native label geometry,
+  # while a blank whole-model absent cell remains unmerged.
   for (m in models) {
     c1 <- first_col(m)
     c2 <- c1 + cpm - 1L
-    for (r in which(grid[seq_len(num_rows), c1] %in% c(refcat, omitlabel, emptylabel) & seq_len(num_rows) >= 4L)) {
+    semantic <- meta$flat$states
+    if (is.matrix(semantic) && nrow(semantic) == nb && ncol(semantic) >= m) {
+      labels <- semantic[, m] %in% c("ref", "omit", "empty", "notest", "masked")
+      visible_absent <- semantic[, m] %in% "absent" & nzchar(grid[seq_len(nb) + 3L, c1])
+      # Native note rows use the same per-model label geometry, including
+      # structural headings and notes with deliberately empty text.
+      overrides <- .tt_flat_overrides(meta$flat)
+      .tt_flat_overrides_check(overrides, semantic)
+      cellnote <- overrides$origin[, m] == "cellnote"
+      special <- which(labels | visible_absent | cellnote) + 3L
+    } else {
+      special <- which(grid[seq_len(num_rows), c1] %in% c(refcat, omitlabel, emptylabel) & seq_len(num_rows) >= 4L)
+    }
+    for (r in special) {
       add("merge", r, r, c1, c2)
       add("halign", r, r, c1, c1, code = 2)
       add("valign", r, r, c1, c1, code = 2)
@@ -650,7 +667,8 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
   for (kind in c("stat", "addrow")) {
     rows <- which(type == kind)
     if (!length(rows)) next
-    add("top", rows[1] + 3, rows[1] + 3, 2, num_cols, code = hb)
+    top_rows <- if (kind == "addrow" && !is.null(x$rows$inserted)) rows[!x$rows$inserted[rows]] else rows
+    if (length(top_rows)) add("top", top_rows[1] + 3, top_rows[1] + 3, 2, num_cols, code = hb)
     for (i in rows) {
       for (m in models) {
         c1 <- first_col(m)

@@ -1,5 +1,31 @@
 # tabtools (development version)
 
+* `tt_fitcount()` freezes unweighted observation/event/person/exposure and
+  term counts with exact fit/record reuse checks. `regtab()` adds `mincount`,
+  explicit failed columns, no-test/absent/constraint labels, and separate raw
+  analytical and publication numerics. Explicit source capture documents the
+  limits of authenticating historical predictors the fit did not retain.
+* Structured regression statistics add scalar pairs, literal text, formats,
+  labels, strictest thresholds and transitive `maskwith` groups, with typed
+  counters and raw per-part provenance in original numeric model order.
+* `regtab()` adds fit-owned `reftop`, exact row/model `cellnote`, raw-term
+  `addrow(after)` placement, and models-as-rows `transpose` with `collabels`
+  and `addcol`. Every publication sink shares the final placement and text.
+  Keyed flat output and composition explicitly refuse transposed orientation.
+* Cell notes set publication state `masked` and clear numeric/forest companions
+  without incrementing disclosure counters. Raw `stored$table` is explicitly
+  labeled `raw_analytical`; `publication_table`, publication row records and
+  separately labeled raw row provenance distinguish suppressed/replaced cells.
+* `dimnonsig` uses analytical states and structural blocks before masks or
+  overrides. Forest effects require finite estimates and ordered finite bounds.
+  Outcome/model/equation identities retain case. Supported fitted interval
+  `survreg` responses carry actual interval-censored AFT/TR provenance.
+* Custom regression frames now require explicit `effect_scale` (including
+  `Coef.`) and supplied-interval `conf.level`; SE-derived inference requires
+  df/df.error or declared normal reference. Survival command declarations
+  require compatible distribution/metric metadata. Explicit non-estimated and
+  fixed states carry evidence; zero SE and labels never manufacture a base.
+
 * Table 1 and `desctab()` add primary-only printed-count masking,
   `nosmallcells`, literal mask text and native-consistent session mode
   precedence. Strict suppression remains the default. Canonical typed mask

@@ -20,13 +20,14 @@
 #' @keywords internal
 #' @noRd
 tt_regtab_union <- function(mrows) {
+  mrows <- .rt_align_frames(mrows)
   master <- NULL
   for (m in seq_along(mrows)) {
     r <- mrows[[m]]
     r <- r[r$kind != "intercept", , drop = FALSE]
     for (i in seq_len(nrow(r))) {
       if (!is.null(master) && r$key[i] %in% master$key) next
-      new <- r[i, c("key", "block", "kind", "label", "role"), drop = FALSE]
+      new <- r[i, intersect(c("key", "block", "kind", "label", "role", "parent_key", "term_signature", "level_identity", "parent_label"), names(r)), drop = FALSE]
       if (is.null(master)) {
         master <- new
       } else {
@@ -61,16 +62,22 @@ tt_regtab_union <- function(mrows) {
       }
     }
   }
-  icpt <- do.call(rbind, lapply(mrows, function(r) r[r$kind == "intercept", c("key", "block", "kind", "label", "role"), drop = FALSE]))
+  icpt <- do.call(rbind, lapply(mrows, function(r) r[r$kind == "intercept", intersect(c("key", "block", "kind", "label", "role", "parent_key", "term_signature", "level_identity", "parent_label"), names(r)), drop = FALSE]))
   if (!is.null(icpt) && nrow(icpt)) master <- rbind(master, icpt[1, , drop = FALSE])
   if (is.null(master)) master <- data.frame(key = character(), block = character(), kind = character(),
                                             label = character(), role = character(), stringsAsFactors = FALSE)
   rownames(master) <- NULL
   cells <- lapply(mrows, function(r) {
     hit <- match(master$key, r$key)
-    data.frame(status = r$status[hit], estimate = r$estimate[hit], conf.low = r$conf.low[hit],
+    cell <- data.frame(status = r$status[hit], estimate = r$estimate[hit], conf.low = r$conf.low[hit],
                conf.high = r$conf.high[hit], p.value = r$p.value[hit], term = r$term[hit],
                ancillary = r$ancillary[hit] %in% TRUE, stringsAsFactors = FALSE)
+    for (field in setdiff(names(r), c("key", "block", "kind", "label", "role", "status", "estimate", "conf.low", "conf.high", "p.value", "term", "ancillary"))) cell[[field]] <- r[[field]][hit]
+    cell$status[is.na(cell$status)] <- "absent"
+    cell$status[cell$status == "base"] <- "ref"
+    cell$status[cell$status == "cns"] <- "constrained"
+    cell$status[cell$status == "header"] <- ""
+    cell
   })
   list(rows = master, cells = cells)
 }
@@ -202,15 +209,29 @@ tt_regtab_union <- function(mrows) {
 # beside the covariate; 2.1.11 showed Stata's colname `/p`, review T2B-14,
 # which R copied): the two rows differ by key (`/::alpha`) and position.
 
+# Preserve optional analytical provenance across different model classes and
+# empty/failed models, filling unavailable fields with typed missing values.
+.rt_align_frames <- function(frames) {
+  fields <- unique(unlist(lapply(frames, names), use.names = FALSE))
+  templates <- lapply(fields, function(field) {
+    frames[[which(vapply(frames, function(x) field %in% names(x), TRUE))[1L]]][[field]]
+  })
+  names(templates) <- fields
+  lapply(frames, function(x) {
+    for (field in setdiff(fields, names(x))) x[[field]] <- templates[[field]][rep(NA_integer_, nrow(x))]
+    x[fields]
+  })
+}
+
 # Append a union of trailing rows below the coefficient union.
 .rt_union_append <- function(u, v) {
   u$rows$trailing <- rep(FALSE, nrow(u$rows))
   if (!nrow(v$rows)) return(u)
   v$rows$trailing <- TRUE
-  u$rows <- rbind(u$rows, v$rows)
+  u$rows <- do.call(rbind, .rt_align_frames(list(u$rows, v$rows)))
   rownames(u$rows) <- NULL
   u$cells <- Map(function(a, b) {
-    out <- rbind(a, b)
+    out <- do.call(rbind, .rt_align_frames(list(a, b)))
     rownames(out) <- NULL
     out
   }, u$cells, v$cells)
@@ -444,38 +465,27 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
 # model's raw (unrounded) CI excludes that model's null; rows without a CI
 # are not dimmed unless they are reference/omitted/empty rows; a category
 # parent row (no CI, no values) is dimmed only when it has a reference child
-# and no significant child. Children are the following rows whose label
-# starts with a space.
-.rt_dimnonsig <- function(u, est_text, nulls, refs) {
+# and no significant child. Children are identified by structural parent keys.
+# Analytical states and structural blocks, before publication masks.
+.rt_dimnonsig <- function(u, nulls) {
   n <- nrow(u$rows)
-  nonsig <- rep(TRUE, n)
-  ci_seen <- rep(FALSE, n)
+  seen <- significant <- constrained <- rep(FALSE, n)
   for (m in seq_along(u$cells)) {
     c <- u$cells[[m]]
-    has <- c$status %in% "est" & !c$ancillary & is.finite(c$conf.low) & is.finite(c$conf.high)
-    ci_seen <- ci_seen | has
-    sig <- has & (c$conf.high < nulls[m] | c$conf.low > nulls[m])
-    nonsig[sig] <- FALSE
+    has <- c$status %in% "est" & !c$ancillary &
+      is.finite(c$conf.low) & is.finite(c$conf.high) & c$conf.low <= c$conf.high
+    seen <- seen | has
+    significant <- significant | (has & (c$conf.high < nulls[m] | c$conf.low > nulls[m]))
+    constrained <- constrained | c$status %in% c("base", "ref", "omit", "empty", "notest", "cns", "constrained")
   }
-  refrow <- Reduce(`|`, lapply(est_text, function(e) e %in% refs), rep(FALSE, n))
-  cathead <- !ci_seen & !refrow
-  for (e in est_text) cathead[nzchar(trimws(e))] <- FALSE
-  nonsig[!ci_seen & !refrow & !cathead] <- FALSE
-  lab <- u$rows$label
-  for (i in which(cathead)) {
-    has_ref <- FALSE
-    any_sig <- FALSE
-    k <- i + 1L
-    while (k <= n) {
-      if (cathead[k]) break
-      if (!startsWith(lab[k], " ")) break
-      if (refrow[k]) has_ref <- TRUE
-      if (!nonsig[k]) any_sig <- TRUE
-      k <- k + 1L
-    }
-    if ((has_ref && any_sig) || !has_ref) nonsig[i] <- FALSE
+  dim <- (seen | constrained) & !significant
+  heads <- which(u$rows$kind %in% c("cat_header", "int_header"))
+  for (i in heads) {
+    parent <- .rt_placement_parent(u$rows)
+    child <- which(parent == u$rows$key[i] & !u$rows$kind %in% c("cat_header", "int_header"))
+    dim[i] <- any(constrained[child]) && !any(significant[child])
   }
-  nonsig
+  dim
 }
 
 # r(table) row names (`regtab.ado:2923-2957`, 2.1.12): "." and " " become
@@ -543,7 +553,10 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
 # here are the defaults.
 .rt_stat_registry <- list(
   n = list(tokens = c("n", "n_sub", "subjects"), field = "N", label = "Observations", fmt = "%12.0fc", stored = "n"),
+  obs = list(tokens = "obs", field = "obs", label = "Observations", fmt = "%12.0fc", stored = "obs"),
   events = list(tokens = "events", field = "events", label = "Events", fmt = "%12.0fc", stored = "events"),
+  people = list(tokens = "people", field = "people", label = "People", fmt = "%12.0fc", stored = "people"),
+  exposure = list(tokens = "exposure", field = "exposure", label = "Exposure", fmt = "%12.0fc", stored = "exposure"),
   groups = list(tokens = "groups", field = "groups", label = "Groups", fmt = "%12.0fc", stored = "groups"),
   mi_m = list(tokens = "mi_m", field = "mi_m", label = "Imputations", fmt = "%12.0fc", stored = "mi_m"),
   aic = list(tokens = "aic", field = "aic", label = "AIC", fmt = "%12.2f", stored = "aic"),
@@ -613,7 +626,9 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
   rows <- list()
   add <- function(label, vals, fmt, key = nm) {
     txt <- ifelse(is.na(vals), "", stata_fmt(vals, fmt))
-    rows[[length(rows) + 1L]] <<- list(label = label, values = txt, key = paste0("stat:", key))
+    rows[[length(rows) + 1L]] <<- list(label = label, values = txt, key = paste0("stat:", key),
+      raw_values = list(vals), part_names = key,
+      part_states = list(ifelse(is.na(vals), "blank", "available")))
   }
   vals <- list()
   N <- get("N")
@@ -631,7 +646,8 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
     if (nm == "vce") {
       # Text, not a number: shown as it is, blank where unknown.
       txt <- vapply(st, function(s) as.character(s$vce_text %||% "")[1], "")
-      if (any(nzchar(txt))) rows[[length(rows) + 1L]] <- list(label = e$label, values = txt, key = "stat:vce")
+      if (any(nzchar(txt))) rows[[length(rows) + 1L]] <- list(label = e$label, values = txt, key = "stat:vce",
+        raw_values = list(), part_names = character(), part_states = list())
       next
     }
     v <- if (nm == "n") Nshow else get(e$field)
@@ -666,7 +682,7 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
   stored <- list()
   qic <- get("qic")
   for (m in seq_len(M)) {
-    for (nm in c("aic", "bic", "qic", "ll", "n", "groups", "events", "mi_m", "r2_a", "rmse", "F", "fmi", "icc")) {
+    for (nm in c("aic", "bic", "qic", "ll", "n", "obs", "people", "exposure", "groups", "events", "mi_m", "r2_a", "rmse", "F", "fmi", "icc")) {
       w <- if (nm == "qic") isTRUE(want$qic) || isTRUE(want$aic) else isTRUE(want[[nm]])
       v <- if (nm == "qic") qic else vals[[nm]]
       if (w && !is.null(v) && !is.na(v[m])) stored[[paste0(.rt_stat_registry[[nm]]$stored, "_", m)]] <- v[m]
@@ -714,6 +730,7 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
   rows <- list()
   for (e in sf) {
     txt <- vapply(seq_along(fits), function(m) {
+      if (.rt_failed(fits[[m]])) return("")
       v <- tryCatch(e$fun(fits[[m]]), error = function(err) {
         cli::cli_abort("{.arg stat_fun} entry {.val {e$label}} failed for model {m}.", parent = err, call = NULL)
       })
@@ -904,7 +921,9 @@ tt_regtab_build <- function(fits, infos, o) {
       if (seen) invokeRestart("muffleWarning")
     })
   }
+  failed <- vapply(fits, .rt_failed, TRUE)
   mrows <- lapply(seq_len(M), function(m) {
+    if (failed[m]) return(.rt_failed_rows())
     with_fb(m, tt_regtab_rows(fits[[m]], infos[[m]], level = o$level, ci_method = o$ci_method,
                               interactions = o$interactions, xsymbol = o$xsymbol, vsref = o$vsref,
                               vce = vces[[m]], cluster = clusters[[m]]))
@@ -914,11 +933,12 @@ tt_regtab_build <- function(fits, infos, o) {
   # labels or structure reads its first imputation.
   is_mi <- vapply(fits, inherits, TRUE, "tt_mi")
   fits1 <- lapply(fits, .rt_mi_first)
+  mrows <- lapply(seq_len(M), function(m) .rt_count_rows(mrows[[m]], fits[[m]], (o$fitcounts %||% rep(list(NULL), M))[[m]]))
   .rt_note_positional(mrows, o)
   mrows <- .rt_join_levels(mrows, fits1)
   rejoined <- attr(mrows, "rejoined")
   # Random-effects checks across models (R/regtab_models_mixed.R).
-  o <- .rt_re_prepare(fits1, infos, o)
+  o <- .rt_re_prepare(fits1[!failed], infos[!failed], o)
   for (m in seq_len(M)) {
     keep <- om[[m]][c("vce", "cluster")]
     om[[m]] <- o
@@ -929,6 +949,7 @@ tt_regtab_build <- function(fits, infos, o) {
   # footnote (every sink) as well as on the console.
   re_notes <- character()
   trows <- lapply(seq_len(M), function(m) {
+    if (failed[m]) return(.rt_failed_rows())
     withCallingHandlers(
       with_fb(m, tt_regtab_trailing_rows(fits1[[m]], infos[[m]], om[[m]])),
       tabtools_note_tmb_cov_ci = function(cnd) {
@@ -941,7 +962,7 @@ tt_regtab_build <- function(fits, infos, o) {
   # layout (review P0-3).
   if (.rt_coleq_layout(infos)) {
     for (m in seq_len(M)) {
-      if (!is.null(infos[[m]]$equations) || is.data.frame(fits[[m]])) next
+      if (failed[m] || !is.null(infos[[m]]$equations) || is.data.frame(fits[[m]])) next
       mrows[[m]] <- .rt_coleq_rows(mrows[[m]], fits1[[m]], infos[[m]], om[[m]])
       trows[[m]] <- .rt_coleq_rows(trows[[m]], fits1[[m]], infos[[m]], om[[m]], trailing = TRUE)
     }
@@ -950,6 +971,10 @@ tt_regtab_build <- function(fits, infos, o) {
   # mrows, before the intercept the union puts last; trailing rows form
   # their own union, appended after it.
   mrows <- lapply(mrows, .rt_ns_keys)
+  {
+    mrows <- lapply(seq_len(M), function(m) .rt_parent_labels(.rt_count_rows(mrows[[m]], fits[[m]], (o$fitcounts %||% rep(list(NULL), M))[[m]]), fits1[[m]]))
+    trows <- lapply(seq_len(M), function(m) .rt_parent_labels(.rt_count_rows(.rt_ns_keys(trows[[m]]), fits[[m]], (o$fitcounts %||% rep(list(NULL), M))[[m]]), fits1[[m]]))
+  }
   u <- .rt_union_append(tt_regtab_union(mrows), tt_regtab_union(trows))
   u <- .rt_order_joined_levels(u, rejoined)
   # nointercept: intercepts, cutpoints and ancillary rows go together,
@@ -974,8 +999,17 @@ tt_regtab_build <- function(fits, infos, o) {
                                                  is_cut[coef_rows], raw[coef_rows])
   u <- .rt_select(u, keep = o$keep, drop = o$drop, labelmatch = o$labelmatch)
   if (!nrow(u$rows)) cli::cli_abort("No coefficient rows to display.", call = NULL)
+  if (isTRUE(o$reftop)) u <- .rt_reftop(u)
   nr <- nrow(u$rows)
-  refs <- c(o$refcat, o$omitlabel, o$emptylabel)
+  raw_u <- u
+  dim <- if (o$dimnonsig) .rt_dimnonsig(raw_u, vapply(infos, function(i) as.numeric(i$null_value), 0)) else rep(FALSE, nr)
+  table <- .rt_numeric_table(raw_u)
+  masks <- list(stored = list(), provenance = NULL)
+  {
+    o$fits <- fits
+    masks <- .rt_mincount_union(u, o)
+    u <- masks$u
+  }
 
   # Per-model est / CI / p text.
   est_text <- ci_text <- p_text <- vector("list", M)
@@ -983,41 +1017,26 @@ tt_regtab_build <- function(fits, infos, o) {
     c <- u$cells[[m]]
     e <- rep("", nr)
     st <- c$status
-    is_est <- st %in% "est"
+    is_est <- st %in% c("est", "notest", "constrained")
     e[is_est] <- .rt_est_text(c$estimate[is_est], o$digits, o$numeric_format)
-    e[st %in% "base"] <- o$refcat
+    e[st %in% c("base", "ref")] <- o$refcat
     e[st %in% "omit"] <- o$omitlabel
-    e[st %in% "empty"] <- o$emptylabel
+    e[st %in% c("empty", "masked")] <- o$emptylabel
+    e[st %in% "notest"] <- o$notestlabel %||% "Not estimable"
+    fixed <- st %in% "constrained"
+    if (!is.null(c$mask_reason)) e[st %in% "absent" & c$mask_reason %in% "sample_absent"] <- o$absentlabel %||% "Absent"
     ci <- rep("", nr)
-    ci[is_est] <- .rt_ci_text(c$conf.low[is_est], c$conf.high[is_est], o$digits, o$sep, o$numeric_format)
+    # regtab.ado:1846-1850: a fixed coefficient keeps its numeric estimate;
+    # cnslabel occupies the separate CI cell, rather than a merged label row.
+    ci[fixed] <- o$cnslabel %||% "(constrained)"
+    inference <- st %in% "est"
+    ci[inference] <- .rt_ci_text(c$conf.low[inference], c$conf.high[inference], o$digits, o$sep, o$numeric_format)
     p <- rep("", nr)
-    p[is_est] <- format_p(c$p.value[is_est], o$pdp, o$highpdp)
+    p[inference] <- format_p(c$p.value[inference], o$pdp, o$highpdp)
     est_text[[m]] <- e
     ci_text[[m]] <- ci
     p_text[[m]] <- p
   }
-  dim <- if (o$dimnonsig) {
-    .rt_dimnonsig(u, est_text, vapply(infos, function(i) as.numeric(i$null_value), 0), refs)
-  } else rep(FALSE, nr)
-
-  # r(table): display-scale estimates of rows with data, built before stars
-  # and stats rows (`regtab.ado:2304-2342`).
-  # An estimate whose transform overflows (exp() of a huge coefficient) has
-  # no representable value: Stata (2.1.11 and later) stores it missing.
-  has_data <- Reduce(`|`, lapply(u$cells, function(c) c$status %in% "est" & is.finite(c$estimate)),
-                     rep(FALSE, nr))
-  table <- NULL
-  if (any(has_data)) {
-    idx <- which(has_data)
-    table <- matrix(NA_real_, length(idx), M)
-    for (m in seq_len(M)) {
-      c <- u$cells[[m]]
-      ok <- c$status[idx] %in% "est" & is.finite(c$estimate[idx])
-      table[ok, m] <- c$estimate[idx][ok]
-    }
-    dimnames(table) <- list(.rt_rowname(u$rows$label[idx], seq_along(idx)), paste0("c", seq_len(M)))
-  }
-
   # Stars on the estimate text (`regtab.ado:2232-2238`).
   if (o$stars) {
     sl <- o$starslevels
@@ -1029,6 +1048,11 @@ tt_regtab_build <- function(fits, infos, o) {
     }
   }
 
+  publication <- .rt_apply_cellnote(u, list(est = est_text, ci = ci_text, p = p_text), o$cellnote %||% list())
+  u <- publication$u
+  est_text <- publication$text$est; ci_text <- publication$text$ci; p_text <- publication$text$p
+  publication_table <- .rt_numeric_table(u, publication = TRUE)
+
   # Row metadata for the body so far.
   kind <- u$rows$kind
   type <- ifelse(kind %in% c("cat_header", "int_header"), "cat_header",
@@ -1037,13 +1061,14 @@ tt_regtab_build <- function(fits, infos, o) {
   for (i in which(type == "level")) {
     st <- unique(vapply(u$cells, function(c) c$status[i] %||% NA_character_, "")[
       !is.na(vapply(u$cells, function(c) c$status[i] %||% NA_character_, ""))])
-    if (length(st) == 1L && st %in% c("base", "omit", "empty")) {
-      type[i] <- c(base = "ref", omit = "omitted", empty = "empty")[[st]]
+    if (length(st) == 1L && st %in% c("base", "ref", "omit", "empty")) {
+      type[i] <- c(base = "ref", ref = "ref", omit = "omitted", empty = "empty")[[st]]
     }
   }
   labels <- u$rows$label
   keys <- .rt_row_keys(u$rows)
   st_all <- lapply(seq_len(M), function(m) {
+    if (failed[m]) return(list())
     s <- with_fb(m, .rt_quiet_zero_weight(tt_model_stats(fits[[m]], infos[[m]], vce = vces[[m]],
                                                          cluster = clusters[[m]])))
     # Probability weights (user weights with a robust or cluster vce, a
@@ -1056,26 +1081,15 @@ tt_regtab_build <- function(fits, infos, o) {
     s
   })
   if (!is.null(o$stats)) .rt_stat_notes(st_all, o$stats)
-  stats_out <- if (!is.null(o$stats)) .rt_stats_rows(o$stats, st_all) else list(rows = list(), stored = list())
+  stats_out <- .rt_rich_stats(o, st_all, fits)
   # R-only user statistics rows (stat_fun), after Stata's.
   user_rows <- .rt_stat_fun_rows(o$stat_fun %||% list(), fits)
-  extra <- c(lapply(c(stats_out$rows, user_rows), function(r) c(r, type = "stat")),
-             # addrow:<label> keys an addrow row, so tt_merge() can join it
-             # (stack review item 5).
-             lapply(o$addrow, function(r) c(r, type = "addrow", key = paste0("addrow:", r$label))))
-  for (r in extra) {
-    labels <- c(labels, r$label)
-    keys <- rbind(keys, data.frame(key = r$key %||% NA_character_, var = NA_character_, level = NA_character_,
-                                   stringsAsFactors = FALSE))
-    type <- c(type, r$type)
-    dim <- c(dim, FALSE)
-    vals <- c(r$values, rep("", M))[seq_len(M)]
-    for (m in seq_len(M)) {
-      est_text[[m]] <- c(est_text[[m]], vals[m])
-      ci_text[[m]] <- c(ci_text[[m]], "")
-      p_text[[m]] <- c(p_text[[m]], "")
-    }
-  }
+  statistic_rows <- lapply(c(stats_out$rows, user_rows), function(r) { r$type <- "stat"; r })
+  placed <- .rt_place_extra(u, list(est = est_text, ci = ci_text, p = p_text), labels, keys, type, dim,
+                            statistic_rows, o$addrow)
+  coefficient_type <- type
+  labels <- placed$labels; keys <- placed$keys; type <- placed$type; dim <- placed$dim
+  est_text <- placed$text$est; ci_text <- placed$text$ci; p_text <- placed$text$p
   nb <- length(labels)
 
   # p-values for boldp/highlight, read from the p text before compact and
@@ -1124,12 +1138,15 @@ tt_regtab_build <- function(fits, infos, o) {
                      dim = dim, stringsAsFactors = FALSE)
   rows[c("key", "var", "level")] <- keys
   rows$block <- seq_len(nb)
+  rows$inserted <- placed$inserted
   rows$p <- apply(pvals, 1L, function(p) if (all(is.na(p))) NA_real_ else min(p, na.rm = TRUE))
 
   # vce_note (milestone 5w): a sentence naming each model's non-default
   # variance, appended to the footnote (every sink), as the stars note is
   # to the xlsx footnote.
   # A user-supplied variance is always named (task 5.18).
+  failed_notes <- vapply(which(failed), function(m) paste0("Model ", m, ": ", fits[[m]]$reason), "")
+  if (length(failed_notes)) o$footnote <- .tt_append_footnotes(o$footnote, failed_notes)
   if (length(re_notes)) {
     o$footnote <- .tt_append_footnotes(o$footnote, re_notes)
   }
@@ -1159,7 +1176,7 @@ tt_regtab_build <- function(fits, infos, o) {
   }
 
   # From the models, not the header (task H11; R/regtab_methods.R).
-  methods <- tt_regtab_methods(infos, vapply(fits1, .rt_n_predictors, 0), o$level, o$stars,
+  methods <- tt_regtab_methods(infos[!failed], vapply(fits1[!failed], .rt_n_predictors, 0), o$level, o$stars,
                                if (o$starslevels_given) o$starslevels else NULL,
                                ci_method = o$ci_method %||% "wald")
   stored <- list(N_rows = nb + 3, N_cols = ncol(body) + 1, N_models = M, ci_level = ci_level,
@@ -1170,39 +1187,48 @@ tt_regtab_build <- function(fits, infos, o) {
   if (any(nzchar(fb))) stored$vce_fallback <- fb
   if (o$stars) stored$stars <- "stars"
   if (!is.null(table)) stored$table <- table
+  stored$table_role <- "raw_analytical"
+  stored$publication_table <- publication_table
+  stored <- c(stored, masks$stored)
   stored <- c(stored, stats_out$stored)
 
   # Phase 7 metadata: per-row numbers and per-model frame characteristics
   # (`regtab.ado:2285-2299`, `:2961-2976`).
-  long <- do.call(rbind, lapply(seq_len(M), function(m) {
-    c <- u$cells[[m]]
-    data.frame(row = seq_len(nrow(u$rows)), key = u$rows$key, label = u$rows$label,
-               type = type[seq_len(nrow(u$rows))], model = m, status = c$status,
-               estimate = c$estimate, conf.low = c$conf.low, conf.high = c$conf.high,
-               p.value = c$p.value, stringsAsFactors = FALSE)
-  }))
+  long <- .rt_long_rows(u, coefficient_type, placed$row_map)
+  raw_long <- .rt_long_rows(raw_u, coefficient_type, placed$row_map)
   frame_meta <- list(
     source = "regtab", ci_level = ci_level, n_models = M,
     statistic_ids = paste(c(if (o$compact) "estimate_ci" else c("estimate", "ci"),
                             if (!o$nopvalue) "pvalue"), collapse = " "),
     model_id = vapply(infos, function(i) i$model_id %||% NA_character_, ""),
     outcome_id = vapply(infos, function(i) i$outcome_id %||% NA_character_, ""),
-    effect_scale = unname(est_head),
+    effect_scale = vapply(infos, function(i) i$effect_scale, ""),
+    distribution = vapply(infos, function(i) i$distribution %||% NA_character_, ""),
+    metric = vapply(infos, function(i) i$metric %||% NA_character_, ""),
+    provenance = vapply(infos, function(i) i$provenance %||% "fitted_model", ""),
     model_label = model_labels
   )
   meta <- list(refcat = o$refcat, omitlabel = o$omitlabel, emptylabel = o$emptylabel,
                labelwidth = o$labelwidth, compact = o$compact, xlsx_footnote = xfoot,
                stars_notes = if (o$stars) note else character(),
-               pvals = pvals, sheet = o$sheet, regtab_rows = long, frame = frame_meta)
+               pvals = pvals, sheet = o$sheet, regtab_rows = long, regtab_raw_rows = raw_long,
+               regtab_mask_provenance = masks$provenance, regtab_stats_provenance = stats_out$provenance,
+               fitcount_identity = o$fitcount_identity,
+               fitcount_raw = lapply(o$fitcounts, function(record) {
+                 if (is.null(record)) return(NULL)
+                 record[intersect(c("schema_version", "evidence", "sample", "counts", "terms", "levels", "states"), names(record))]
+               }), frame = frame_meta)
   samples <- o$sample_accounting %||% lapply(seq_len(M), function(m) {
     .tt_sample_model_population(fits[[m]], "fit", model = m)
   })
   samples <- lapply(seq_len(M), function(m) .tt_sample_model_reported(samples[[m]], st_all[[m]]))
   meta$sample_accounting <- .tt_sample_bind(samples, prefixes = paste0("model", seq_len(M)))
-  meta$flat <- .tt_flat_metadata(u$cells, rows, M)
-  tt_table(body, list(list(text = h1), list(text = h2)), rows = rows, cols = cols,
+  meta$flat <- .tt_flat_metadata(placed$cells, rows, M)
+  tt <- tt_table(body, list(list(text = h1), list(text = h2)), rows = rows, cols = cols,
            title = o$title, footnote = o$footnote, style = o$style, stored = stored,
            command = "regtab", meta = meta)
+  if (isTRUE(o$transpose)) tt <- .rt_transpose_table(tt, u, publication$text, statistic_rows, o, scale)
+  tt
 }
 
 # A confidence level (a proportion) as the percentage text of the CI header

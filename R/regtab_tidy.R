@@ -1227,7 +1227,10 @@ tt_regtab_rows.default <- function(fit, info, level = 0.95, ci_method = "wald",
     term <- rows$term[k]
     w <- wald[wald$term == term, ]
     if (!nrow(w)) {
-      out[[length(out) + 1L]] <- .rt_row(key, v, kind, lab, "base", sub = pos + k / 1000)
+      # Only the fit-owned contrast mapping above establishes a reference.
+      # A nonreference level without a Wald coefficient is not estimable.
+      out[[length(out) + 1L]] <- .rt_row(key, v, kind, lab, "notest", term = term,
+                                       sub = pos + k / 1000)
       next
     }
     st <- .rt_na_status(term, w$estimate, mm)
