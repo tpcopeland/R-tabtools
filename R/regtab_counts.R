@@ -52,6 +52,13 @@ tt_failed_model <- function(reason, model_id = NULL) {
   if (is.null(rows$count_source_key)) rows$count_source_key <- .rt_count_key(rows$key)
   if (is.null(rows$level_identity)) {
     frame <- if (!is.null(record)) record$snapshot$frame else .fc_retained_frame(fit)
+    if (!is.null(frame)) {
+      # Match row extraction's checked label/code restoration. For captured
+      # records use only their frozen source, never a later caller binding.
+      source_fit <- if (is.null(record)) fit else
+        .fc_restore(fit, frame, record$snapshot$source)
+      frame <- .rt_restore_attrs(frame, source_fit, warn = FALSE)
+    }
     rows$level_identity <- vapply(rows$count_source_key, function(key) {
       if (is.null(frame)) return("")
       .fc_level_selection(key, frame)$identity
@@ -62,8 +69,12 @@ tt_failed_model <- function(reason, model_id = NULL) {
   rows$status[rows$status %in% "header"] <- ""
   # Custom frames declare semantic states; never reinterpret them as fit notes.
   if (!is.data.frame(fit) && nrow(rows)) {
-    covariance <- if (!is.null(record)) record$identity$covariance else
-      tryCatch(.rt_quiet_zero_weight(stats::vcov(fit)), error = function(e) NULL)
+    # Adapter covariance is a coefficient matrix even for Matrix-valued
+    # lme4 and list-valued glmmTMB vcov methods. A captured ordinary matrix
+    # remains authoritative; unsupported covariance leaves states unchanged.
+    covariance <- if (!is.null(record) && is.matrix(record$identity$covariance))
+      record$identity$covariance else
+        tryCatch(.rt_quiet_zero_weight(tt_vcov(fit, vce = "model")), error = function(e) NULL)
     variance <- rep(NA_real_, nrow(rows))
     if (is.matrix(covariance) && !is.null(rownames(covariance))) {
       variance <- diag(covariance)[match(rows$term, rownames(covariance))]

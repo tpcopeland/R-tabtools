@@ -84,10 +84,9 @@ interaction_files <- c("test_interaction_matrix_descriptive.R",
                        "test_interaction_matrix_likelihood_mixed.R",
                        "test_interaction_matrix_survival_survey_gee.R",
                        "test_interaction_matrix_composition.R",
-                       "test_interaction_matrix_independent.R",
-                       "test_regtab_placement.R")
+                       "test_interaction_matrix_independent.R")
 crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R", "crossval_table1_primary.R", "crossval_regtab_fitcount.R", "crossval_regtab_placement.R")
-testthat_files <- c(adversarial_files, sample_files, interaction_files, crossval_files, "test_demo_source.R", "test_demo_aipw.R")
+testthat_files <- c(adversarial_files, sample_files, interaction_files, crossval_files, "test_regtab_placement.R", "test_demo_source.R", "test_demo_aipw.R")
 LANES <- list(
   quick = c(adversarial_files, sample_files),
   core = c(testthat_files, "check_examples.R", "validation_wttab.R"),

@@ -798,7 +798,7 @@ tt_regtab_ancillary_rows.negbin <- function(fit, info, level = 0.95, vce = "stat
 # "labels" attributes (na.action keeps them). Copy them back from the data
 # the model was fitted on: `fit$data` (glm) or the call's `data` argument
 # evaluated in the formula's environment.
-.rt_restore_attrs <- function(mf, fit) {
+.rt_restore_attrs <- function(mf, fit, warn = TRUE) {
   if (is.null(mf)) return(mf)
   need <- names(mf)[vapply(names(mf), function(v) {
     is.null(attr(mf[[v]], "label", exact = TRUE)) && is.null(attr(mf[[v]], "labels", exact = TRUE))
@@ -853,7 +853,7 @@ tt_regtab_ancillary_rows.negbin <- function(fit, info, level = 0.95, vce = "stat
       if (!is.null(val)) attr(mf[[v]], a) <- val
     }
   }
-  if (length(stale)) {
+  if (length(stale) && warn) {
     cli::cli_warn(c(
       "Variable labels for {.var {stale}} could not be restored: the model's data no longer match its model frame.",
       "i" = "Labels are read from the data at {.fn regtab} time; call {.fn regtab} before modifying the data, or fit with {.fn glm}, which keeps a copy."
