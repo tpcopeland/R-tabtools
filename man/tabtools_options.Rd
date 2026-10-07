@@ -65,13 +65,14 @@ and \code{\link[=stacktab]{stacktab()}} frames mode, or NULL to clear it.}
 clear it. Commands with existing small-cell support inherit it when omitted;
 explicit NULL/0 disables it for one call without changing the session.}
 
-\item{smallcells_mode}{Session-only \code{"strict"} or \code{"primary"} mode transport,
-or NULL to clear it. Currently \code{\link[=table1_tc]{table1_tc()}} retains strict protection and
-\code{\link[=stratetab]{stratetab()}} primary-only publication masking; setting this key does not
-change either command's supported masking behavior.}
+\item{smallcells_mode}{Session-only \code{"strict"} or \code{"primary"} Table 1 mode,
+or NULL to clear it. An omitted Table 1 threshold inherits this mode;
+an explicit active threshold defaults strict unless mode is also explicit.
+Disabled Table 1 masking reports strict unless the call selects a mode.
+\code{\link[=stratetab]{stratetab()}} retains primary-only publication masking.}
 
-\item{masktext}{Session-only literal replacement text for existing \code{\link[=stratetab]{stratetab()}}
-masks, or NULL to clear it. An explicit command argument wins.}
+\item{masktext}{Session-only literal replacement text for \code{\link[=table1_tc]{table1_tc()}} and
+\code{\link[=stratetab]{stratetab()}} masks, or NULL to clear it. An explicit command argument wins.}
 }
 \value{
 The defaults in effect, invisibly when any were changed.

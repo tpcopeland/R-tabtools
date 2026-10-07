@@ -41,9 +41,11 @@
   tot <- K > G
   b <- tt_sc_block_cont(nn[seq_len(G)], .t1_sc_sample_n(o, gp, col_masks),
                         missingsummary = o$missingsummary, total = tot)
-  v <- tt_sc_variable(b, o$smallcells, fixedmargins = o$sc_nvars > 1L, variable = .t1_sc_varname(o, rec$label))
+  v <- tt_sc_variable(b, o$smallcells, fixedmargins = o$sc_nvars > 1L,
+                      variable = .t1_sc_varname(o, rec$label),
+                      primary = identical(o$smallcells_mode, "primary"))
   codes <- v$cells[1, ]
-  for (k in which(codes > 0)) rec$cells[k] <- c(tt_sc_render(nn[k], codes[k], o$smallcells, o$nformat))
+  for (k in which(codes > 0)) rec$cells[k] <- .t1_sc_render(nn[k], codes[k], o)
   rec$codes <- codes
   rec$sc <- list(derived = v$derived, missing = v$missing, sample = v$sample)
   rec
@@ -73,33 +75,39 @@
                        include_missing = o$missing, missing_level = missing_level,
                        missingsummary = o$missingsummary, slashN = o$slashN,
                        catrowperc = o$catrowperc, total = tot)
-  v <- tt_sc_variable(b, k_sc, fixedmargins = o$sc_nvars > 1L, variable = .t1_sc_varname(o, recs[[1]]$label))
+  v <- tt_sc_variable(b, k_sc, fixedmargins = o$sc_nvars > 1L,
+                      variable = .t1_sc_varname(o, recs[[1]]$label),
+                      primary = identical(o$smallcells_mode, "primary"))
   if (binary) tx <- list(tx)
   first <- if (binary) 1L else 2L
   for (li in seq_len(nrow(v$cells))) {
     ri <- first + li - 1L
     rec <- recs[[ri]]
+    rec$linked <- rep(FALSE, K)
     for (k in seq_len(K)) {
       code <- v$cells[li, k]
       if (code > 0) {
-        rec$cells[k] <- c(tt_sc_render(cn$cell_d[li, k], code, k_sc, o$nformat))
+        rec$cells[k] <- .t1_sc_render(cn$cell_d[li, k], code, o)
         rec$codes[k] <- code
         next
       }
-      if (!v$derived) next
       t <- tx[[li]][[k]]
+      dcode <- if (o$slashN) {
+        if (!binary && o$catrowperc) v$engine$rowmask[li] else v$denominator[k]
+      } else 0
+      if (!v$derived && dcode == 0) next
       nstr <- stata_fmt(t$cnt, o$nformat)
       if (o$slashN) {
-        dcode <- if (!binary && o$catrowperc) v$engine$rowmask[li] else v$denominator[k]
         if (dcode > 0) {
-          den <- c(tt_sc_render(t$den_slash, dcode, k_sc, o$nformat))
+          den <- .t1_sc_render(t$den_slash, dcode, o)
           rec$codes[k] <- dcode
         } else {
           den <- stata_fmt(t$den_slash, o$nformat)
         }
         nstr <- paste0(nstr, "/", den)
       }
-      rec$cells[k] <- nstr
+      rec$cells[k] <- if (v$derived) nstr else .t1_count_display(nstr, t$perc, o)
+      rec$linked[k] <- v$derived
     }
     recs[[ri]] <- rec
   }
@@ -120,12 +128,14 @@
 .t1_sc_nrow <- function(sampleN, codes, o, total_present) {
   txt <- ifelse(codes > 0,
                 vapply(seq_along(codes), function(k) {
-                  if (codes[k] > 0) c(tt_sc_render(sampleN[k], codes[k], o$smallcells, o$nformat)) else ""
+                  if (codes[k] > 0) .t1_sc_render(sampleN[k], codes[k], o) else ""
                 }, ""),
                 paste0("N=", stata_fmt(sampleN, o$nformat)))
   if (!o$headerperc) return(txt)
   txt <- gsub("N=", "", txt, fixed = TRUE)
   val <- suppressWarnings(as.numeric(gsub(",", "", txt, fixed = TRUE)))
+  # A literal numeric-looking mask is never numerical count evidence.
+  val[codes > 0] <- NA_real_
   K <- length(txt)
   den <- if (total_present) val[K] else {
     g <- val[seq_len(if (total_present) K - 1L else K)]
@@ -183,18 +193,20 @@
   body <- as.matrix(tt$body)
   codes <- vector("list", length(recs))
   derived <- logical(length(recs))
+  linked <- vector("list", length(recs))
   i <- 0L
   for (b in blocks) {
     head <- b[[1]]
     for (r in b) {
       i <- i + 1L
       codes[[i]] <- r$codes %||% rep(0, K)
+      linked[[i]] <- r$linked %||% rep(FALSE, K)
       if (identical(r$type, "missing_summary")) {
         m <- maxN - head$N
         for (j in which(!is.na(kmap))) {
           k <- kmap[j]
           if (!is.na(m[k]) && m[k] > 0 && head$sc$missing[k] > 0) {
-            body[i, j] <- c(tt_sc_render(m[k], head$sc$missing[k], o$smallcells, o$nformat))
+            body[i, j] <- .t1_sc_render(m[k], head$sc$missing[k], o)
             codes[[i]][k] <- head$sc$missing[k]
           }
         }
@@ -208,7 +220,7 @@
   role <- tt$cols$role
   stat_cols <- which(role %in% c("p", "test", "statistic", "smd"))
   for (i in which(derived)) {
-    body[i, stat_cols] <- "Suppressed"
+    body[i, stat_cols] <- .t1_sc_render(NA_real_, 3L, o)
     tt$rows$p[i] <- NA_real_
     tt$rows$smd[i] <- NA_real_
     tr <- tt$rows$table_row[i]
@@ -224,6 +236,8 @@
   tt$meta$row_codes <- codes
   tt$meta$sample_codes <- sample_codes
   tt$meta$derived_rows <- derived
+  tt$meta$linked_cells <- linked
+  tt$meta$header_linked <- isTRUE(o$headerperc) && any(sample_codes > 0)
   tt
 }
 
@@ -237,7 +251,7 @@
 #' are per display cell, so a margin shown twice counts twice.
 #' @keywords internal
 #' @noRd
-.t1_sc_stored <- function(tt, gp, by, smallcells, total, wtcompare = FALSE) {
+.t1_sc_stored <- function(tt, gp, by, smallcells, total, wtcompare = FALSE, mode = "strict") {
   sfx <- c(stata_macro_text(gp$codes), if (total) "T")
   nrow_body <- nrow(tt$body)
   if (wtcompare) {
@@ -260,7 +274,10 @@
     c(rows_g[[i]], rep(if (derived[i]) 3 else 0, length(stat)))
   }))
   dimnames(m) <- list(paste0("r", seq_len(nrow(m))), c(names_g, unname(stat)))
-  list(smallcells = as.numeric(smallcells),
+  list(smallcells = list(threshold = as.integer(smallcells), mode = mode,
+                         n_masked = as.integer(sum(m %in% c(1, 2))),
+                         n_linked = as.integer(sum(m == 3))),
+       smallcells_mode = if (mode == "strict") "full" else "primary",
        N_primary_suppressed = sum(m == 1),
        N_secondary_suppressed = sum(m == 2),
        N_derived_suppressed = sum(m == 3),

@@ -368,7 +368,7 @@
     # A weight sum still beyond the double range after the rescaled pass
     # (.t1w_cat_counts()) leaves the cell blank.
     if (!.st_ok(gw) || !.st_ok(den)) {
-      return(list(cnt = NA_real_, den_slash = if (catrowperc) den else grpN, cell = ""))
+      return(list(cnt = NA_real_, den_slash = if (catrowperc) den else grpN, perc = "", cell = ""))
     }
     if (gw > 0) cnt <- (num / gw) * grpN
   }
@@ -379,8 +379,9 @@
     if (.st_ok(h)) h / den else 100 * (num / den)
   } else NA_real_
   den_slash <- if (catrowperc) den else grpN
-  list(cnt = cnt, den_slash = den_slash,
-       cell = .t1_count_cell(cnt, den_slash, .t1_perc(pct, f$pfmt, o, cat_level), o))
+  perc <- .t1_perc(pct, f$pfmt, o, cat_level)
+  list(cnt = cnt, den_slash = den_slash, perc = perc,
+       cell = .t1_count_cell(cnt, den_slash, perc, o))
 }
 
 .t1w_bin_rows <- function(spec, v, gp, o, col_masks) {
@@ -691,7 +692,7 @@
   for (j in which(!is.na(kmap))) {
     k <- kmap[j]
     if (!is.null(sample_codes) && sample_codes[k] > 0) {
-      cells[j] <- "Suppressed"
+      cells[j] <- o$masktext %||% "Suppressed"
       codes[k] <- 3
     } else {
       # "ESS=" + string(ess, nformat): a missing ESS prints "ESS=."
@@ -715,6 +716,8 @@
   rows$indent <- NULL
   out <- .t1_retable(tt, body, rows)
   out$meta$row_codes <- c(list(codes), tt$meta$row_codes)
+  out$meta$linked_cells <- c(list(rep(FALSE, length(ess))), tt$meta$linked_cells)
+  out$meta$cellreplace_spec <- c(NA_integer_, tt$meta$cellreplace_spec)
   out
 }
 
@@ -780,6 +783,8 @@
   meta$crude_cols <- cr
   meta$weighted_cols <- wt
   meta$crude_sample_codes <- crude$meta$sample_codes
+  meta$crude_linked_cells <- c(list(rep(FALSE, length(cr))), crude$meta$linked_cells)
+  meta$crude_header_linked <- crude$meta$header_linked
   tt_table(body, list(unname(h1), unname(h2)), rows = rows, cols = cols, title = weighted$title,
            footnote = weighted$footnote, style = weighted$style, stored = weighted$stored,
            command = weighted$command, meta = meta, notes = weighted$notes)
@@ -841,7 +846,7 @@
     cd <- c(FALSE, crude$meta$derived_rows)
     smd_col <- which(tt$cols$role == "smd")
     for (i in which(cd)) {
-      tt$body[i, smd_col] <- "Suppressed"
+      tt$body[i, smd_col] <- o$masktext %||% "Suppressed"
       tt$rows$smd[i] <- NA_real_
       tr <- tt$rows$table_row[i]
       if (!is.null(tt$stored$table) && "smd" %in% colnames(tt$stored$table) && !is.na(tr)) {

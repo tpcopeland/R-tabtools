@@ -1,0 +1,2 @@
+path,source_commit,source_path,md5,sha256
+T25_stored.csv,c215afdb788f88363c8d5289d7d13e3a31cfbe38,tests/testthat/golden/T25_stored.csv,d61561fd210b16c79a6a4e00277adf34,88c670aec6d841e284e981c857ca1b88c747537bf4380575682a64e57b2a32fc

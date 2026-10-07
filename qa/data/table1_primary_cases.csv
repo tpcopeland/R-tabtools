@@ -1,0 +1,8 @@
+id,scope,native_options,R_contract
+T38,weighted unmasked,wt(w) wtn wtcompare nosmallcells,baseline analytical inference
+T39,weighted primary,"wt(w) wtn wtcompare smallcells(5, primary)",2 primary and 1 linked ESS display mask
+T40,weighted strict,wt(w) wtn wtcompare smallcells(5),4 primary and 2 linked display masks; no raw backup
+T41,unweighted primary,"smallcells(5, primary)",1 primary and 0 linked; ordinary inference unchanged
+T42,exact numeric-looking selectors,"nosmallcells cellreplace(""Age"" 1 ""FIRST"" \ "" Age "" ""2"" ""LAST"")",numeric value position and quoted header; repeated count2 lastwrite
+T43,native unsafe protected overwrite,"wt(w) wtn wtcompare smallcells(5, primary) cellreplace(""Effective sample size"" 3 ""2"")",native overwrites linked ESS; R refuses before sinks
+T44,descriptor N replacement,"nosmallcells cellreplace(""Mean±SD"" 1 ""Ncustom"")",N row eligible; only group1 reported_n publication ledger invalidated

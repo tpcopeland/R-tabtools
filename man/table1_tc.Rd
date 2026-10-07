@@ -65,7 +65,11 @@ table1_tc(
   test_args = NULL,
   dots = FALSE,
   excel = NULL,
-  nosmdhighlight = FALSE
+  nosmdhighlight = FALSE,
+  smallcells_mode = "strict",
+  nosmallcells = FALSE,
+  masktext = NULL,
+  cellreplace = NULL
 )
 
 desctab(data, vars = NULL, by = NULL, ...)
@@ -184,6 +188,7 @@ missing-summary rows and \code{headerperc} (Stata's quirk).}
 \item{missingsummary}{Add a missing-data row per variable.}
 
 \item{smallcells}{Optional integer >= 3 activating small-cell suppression.
+Omitted values inherit session defaults; explicit NULL or 0 disables them.
 Not available with percent-only cells (\code{percent}, or \code{wt} without \code{wtn}
 or \code{percent_n}).}
 
@@ -291,6 +296,30 @@ cells unhighlighted in Excel, equivalent to \code{smdthreshold = -1}. May
 not be combined with an explicitly supplied \code{smdthreshold} (error class
 \code{tabtools_error_smdhighlight}). Markdown does not highlight SMD cells.}
 
+\item{smallcells_mode}{\code{"strict"} (default) or \code{"primary"}, matched exactly.
+An explicit active threshold defaults strict regardless of session mode;
+an omitted threshold inherits session threshold and mode. An explicit mode
+wins; explicit NULL uses strict. Disabled masking reports strict unless
+the call explicitly selects a mode. Invalid modes raise
+\code{tabtools_error_smallcells_mode}.}
+
+\item{nosmallcells}{Ignore the session small-cell threshold for this call.
+Must be a nonmissing logical scalar (\code{tabtools_error_smallcells}).
+Cannot accompany an explicit non-NULL \code{smallcells}, including zero
+(\code{tabtools_error_smallcells_conflict}).}
+
+\item{masktext}{One literal masking string, including empty text, or NULL.
+Explicit text overrides session text; explicit NULL uses command-default
+markers. Explicit non-NULL text requires an active threshold
+(\code{tabtools_error_smallcells_masktext}).}
+
+\item{cellreplace}{NULL, an empty list, or a list of records, each with
+exactly the unique named fields \code{row}, \code{column}, and \code{text}. Row/text are
+nonmissing character scalars; column is a character header or positive
+integer value-column position. Invalid records/selectors raise
+\code{tabtools_error_cellreplace}/\code{tabtools_error_cellreplace_selector};
+an unavailable companion mapping raises \code{tabtools_error_cellreplace_companion}.}
+
 \item{...}{For \code{desctab()}: further arguments passed on to \code{table1_tc()}.}
 }
 \value{
@@ -310,11 +339,18 @@ whose Fisher p-value was simulated (with p-values);
 SMD column compares (when there is one; it is also in the footnote);
 \item for the files written: \code{xlsx}, \code{sheet}, \code{markdown}, \code{markdown_rows},
 \code{markdown_cols};
-\item with \code{smallcells}: \code{smallcells}, \code{N_primary_suppressed},
+\item \code{smallcells}: a list with integer \code{threshold} (0 disabled), character
+\code{mode} (strict/primary), integer \code{n_masked} (primary/complementary display
+cells) and \code{n_linked} (derived display cells). With active masking,
+native-compatible \code{smallcells_mode} is \code{full}/\code{primary}, with \code{N_primary_suppressed},
 \code{N_secondary_suppressed}, \code{N_derived_suppressed}, and \code{suppression},
 a matrix over every table row (both header rows included) by group
 column and \code{pvalue}/\code{test}/\code{statistic}/\code{smd_str}, coded 0 visible,
 1 primary, 2 complementary, 3 derived.
+\item with replacement: integer \code{n_cellreplace}, counting entries. Unmasked
+replacements and primary masking may retain \code{raw$table} and
+\code{raw$sample_accounting} as explicitly analytical aggregates; neither is
+used by publication exports, converter metadata or forest extraction.
 }
 
 \verb{$meta$sample_accounting} carries the source ledger described in
@@ -410,6 +446,45 @@ Count totals, artificial flow bounds, and required flows must be below
 2^53 for small-cell certification to preserve single-count changes;
 larger frequency-weighted blocks are refused with \code{smallcells}.
 
+\code{smallcells_mode = "primary"} masks only positive printed counts below the
+threshold, including printed missing counts, group/total Ns and slash
+denominators. Zeros stay visible. Other percentages, tests and SMDs stay as
+computed; no complementary protection against reconstruction is promised.
+A continuous summary whose contributing N is not printed stays visible.
+Weighted effective sample size linked to a masked sample N is still withheld
+and counts as a linked display mask, including in primary mode.
+Primary mode retains analytical aggregates in \code{stored$raw$table} and
+\code{stored$raw$sample_accounting}; publication ledger attachments are redacted.
+These raw aggregates are for analysis, not sharing as a protected table.
+Active strict masking never creates a raw backup, even if no cells are small.
+
+\strong{Publication replacements.} \code{cellreplace} takes structured R records,
+rather than Stata's command-language string. Row labels and column headers
+match exactly and case-sensitively after trimming leading/trailing spaces;
+ambiguous or missing matches are errors. Numeric column 1 means the first
+value column, excluding the row-label column; character \code{"1"} means that
+exact header. The final printed order, including Total/crude/weighted and
+statistical columns, determines positions. The descriptor/N row and ESS
+row can also be selected by their printed row labels. Every record is
+checked before any replacement or output; repeated targets apply in order,
+last text wins. Empty text and quotes, dollar signs, backticks and
+backslashes are literal cell content.
+
+Protected cells and withheld linked percentages/denominators cannot be
+replaced (\code{tabtools_error_cellreplace_protected}), including a visible count
+whose percentage was withheld under strict masking. This is a safety
+difference from native Stata's unchecked replacement. Replacement never
+interprets numeric-looking text as an estimate. Direct p/SMD replacements
+invalidate the corresponding numeric row/stored value; replacing a variable's
+group/Total, test or statistic cell invalidates that variable's publication
+p/SMD companions, including a category child's analytical parent. Other
+variables' inference remains intact. Replaced summaries invalidate the
+affected variable/pass/scope publication ledger; replacing a descriptor N
+invalidates only its \code{reported_n}, and replacing a published ESS only its
+\code{effective_n}. Permitted unmasked/primary analytical aggregates remain under
+\code{stored$raw}; active strict suppression has no such backup. Table 1 does not
+support \code{\link[=as_forest_data]{as_forest_data()}}, including after replacement.
+
 \code{desctab()} is an alias of \code{table1_tc()}, as in Stata, where
 \code{table1_tc} runs \code{desctab}: it takes the same arguments (\code{data},
 \code{vars}, \code{by}, and the rest passed on through \code{...}) and returns the
@@ -449,6 +524,8 @@ table1_tc(d3, by = "arm", vars = c(age = "contn"), smd = TRUE, smdtype = "popula
 
 # desctab() is the same command
 desctab(d, by = "arm", vars = c("age", "sex"))
+table1_tc(d, by = "arm", vars = c(age = "contn"),
+          cellreplace = list(list(row = "Age (years)", column = 1L, text = "Not reported")))
 }
 \references{
 Yang D, Dalton JE (2012). A unified approach to measuring the effect size

@@ -286,9 +286,10 @@ test_that("existing mask capabilities retain session defaults and explicit opt-o
   expect_error(stratetab(ss_rate(), smallcells = 3, nosmallcells = TRUE), class = "tabtools_error_smallcells_conflict")
   data <- data.frame(g = rep(c("A", "B"), each = 5), x = rep(c(0, 1, 1, 1, 1), 2))
   tab <- suppressMessages(table1_tc(data, vars = c(x = "bin"), by = "g"))
-  expect_identical(tab$stored$smallcells, 3)
-  expect_null(table1_tc(data, vars = c(x = "bin"), by = "g", smallcells = 0)$stored$smallcells)
-  # Transport keeps native future precedence but cannot relabel today's engine.
+  expect_identical(tab$stored$smallcells$threshold, 3L)
+  expect_identical(tab$stored$smallcells$mode, "primary")
+  expect_identical(table1_tc(data, vars = c(x = "bin"), by = "g", smallcells = 0)$stored$smallcells$threshold, 0L)
+  # Transport keeps native explicit-threshold strict precedence.
   resolved <- tabtools:::.tt_resolve_sinks(list(smallcells = 5), list(smallcells = TRUE), mask = "table1")
   expect_identical(resolved$values$smallcells, 5L)
   expect_identical(resolved$given$smallcells, TRUE)
@@ -327,7 +328,7 @@ test_that("Table 1 keeps legacy invalid-threshold errors and session reuse after
     expect_match(conditionMessage(error), "integer greater than or equal to 3", fixed = TRUE)
   }
   for (value in list(NULL, 0)) {
-    expect_null(table1_tc(data, vars = c(x = "bin"), by = "g", smallcells = value)$stored$smallcells)
-    expect_identical(suppressMessages(table1_tc(data, vars = c(x = "bin"), by = "g"))$stored$smallcells, 3)
+    expect_identical(table1_tc(data, vars = c(x = "bin"), by = "g", smallcells = value)$stored$smallcells$threshold, 0L)
+    expect_identical(suppressMessages(table1_tc(data, vars = c(x = "bin"), by = "g"))$stored$smallcells$threshold, 3L)
   }
 })
