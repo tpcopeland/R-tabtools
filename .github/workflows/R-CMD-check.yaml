@@ -1,5 +1,6 @@
 # R CMD check, started by hand only. Run it with
 #   gh workflow run R-CMD-check --ref main               # Linux + Windows
+#   gh workflow run R-CMD-check --ref main -f os=windows # Windows only
 #   gh workflow run R-CMD-check --ref main -f os=macos   # macOS only
 #   gh workflow run R-CMD-check --ref main -f os=all     # all five jobs
 # or locally on a Mac with qa/tools/check_local.sh. The Stata goldens are
@@ -10,7 +11,7 @@ on:
       os:
         description: 'Jobs to run (macOS bills 10x Linux minutes, Windows 2x)'
         type: choice
-        options: [linux-windows, macos, all]
+        options: [linux-windows, windows, macos, all]
         default: linux-windows
 
 name: R-CMD-check
@@ -31,7 +32,7 @@ jobs:
         # vignette tooling): every use of a suggested package must be
         # conditional. Vignettes load survival, a suggested package, so that
         # job neither builds nor checks them; the other jobs do.
-        config: ${{ fromJSON(inputs.os == 'macos' && '[{"os":"macos-latest","r":"release"}]' || inputs.os == 'all' && '[{"os":"ubuntu-latest","r":"release"},{"os":"ubuntu-latest","r":"oldrel-1"},{"os":"windows-latest","r":"release"},{"os":"macos-latest","r":"release"},{"os":"ubuntu-latest","r":"release","nosuggests":true}]' || '[{"os":"ubuntu-latest","r":"release"},{"os":"ubuntu-latest","r":"oldrel-1"},{"os":"windows-latest","r":"release"},{"os":"ubuntu-latest","r":"release","nosuggests":true}]') }}
+        config: ${{ fromJSON(inputs.os == 'windows' && '[{"os":"windows-latest","r":"release"}]' || inputs.os == 'macos' && '[{"os":"macos-latest","r":"release"}]' || inputs.os == 'all' && '[{"os":"ubuntu-latest","r":"release"},{"os":"ubuntu-latest","r":"oldrel-1"},{"os":"windows-latest","r":"release"},{"os":"macos-latest","r":"release"},{"os":"ubuntu-latest","r":"release","nosuggests":true}]' || '[{"os":"ubuntu-latest","r":"release"},{"os":"ubuntu-latest","r":"oldrel-1"},{"os":"windows-latest","r":"release"},{"os":"ubuntu-latest","r":"release","nosuggests":true}]') }}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes

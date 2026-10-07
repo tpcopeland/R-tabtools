@@ -258,6 +258,7 @@ runs only when started by hand (no push or pull-request triggers). The workflow 
 ```sh
 gh workflow enable R-CMD-check
 gh workflow run R-CMD-check --ref main               # os=linux-windows (default)
+gh workflow run R-CMD-check --ref main -f os=windows # Windows only
 gh workflow run R-CMD-check --ref main -f os=macos   # macOS only
 gh workflow run R-CMD-check --ref main -f os=all     # all five jobs
 gh workflow disable R-CMD-check                      # after the run
@@ -266,7 +267,8 @@ gh workflow disable R-CMD-check                      # after the run
 `linux-windows` runs ubuntu release and oldrel-1, windows release, and a
 hard-dependencies job (ubuntu release, `dependencies: '"hard"'`,
 `_R_CHECK_FORCE_SUGGESTS_: false`) that catches an unconditional use of a
-suggested package (pre-release review P1-2); `macos` runs macos-latest
+suggested package (pre-release review P1-2); `windows` runs only the
+windows release job (Linux checked locally); `macos` runs macos-latest
 release. Each job is capped at 45 minutes (Windows 75). All jobs set
 `NOT_CRAN: true`, so the golden sweeps run. Its current status is not
 recorded here.
