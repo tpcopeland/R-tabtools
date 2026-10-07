@@ -1,0 +1,19 @@
+  +----------------------------------------------+
+  |                                Overall (N=4) |
+  |      Median survival, yr                 2.0 |
+  |                 (95% CI)                     |
+  |               Events / N               2 / 4 |
+  |     Survival probability                     |
+  |                     1 yr               75.0% |
+  |                  2 years               50.0% |
+  |                  3 years               50.0% |
+  | RMST (3-yr), yr (95% CI)   2.25 (1.44, 3.06) |
+  |           Number at risk                     |
+  |                     1 yr                   4 |
+  |                  2 years                   3 |
+  |                  3 years                   2 |
+  +----------------------------------------------+
+
+CSV exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV004.csv
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV004.md
+Exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/survtab.xlsx, sheet SV004

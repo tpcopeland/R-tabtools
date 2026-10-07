@@ -8,9 +8,13 @@
   # Preserve final orientation in the frame that as.data.frame transports;
   # its existing exact snapshot check also binds imported orientation.
   if (identical(x$meta$regtab_orientation, "transpose")) x$meta$frame$orientation <- "transpose"
+  # Row compositions can retain canonical states after numeric companions
+  # are invalidated. Bind only those states for ordinary reference placement.
+  reference_states <- if (is.null(x$meta$regtab_rows)) x$meta$flat$states else NULL
   x$meta$composition <- list(version = 1L, body = x$body, header = x$header,
     rows = x$rows, frame = x$meta$frame, companion = x$meta$regtab_rows,
-    companion_hash = rlang::hash(x$meta$regtab_rows))
+    companion_hash = rlang::hash(x$meta$regtab_rows),
+    reference_states = reference_states, reference_states_hash = rlang::hash(reference_states))
   x
 }
 
@@ -54,10 +58,23 @@
   if (!identical(stamp$companion_hash, rlang::hash(stamp$companion))) {
     .ct_v251_abort("Composition source state or numeric companions changed after production.")
   }
+  if (!is.null(stamp$reference_states)) {
+    s <- stamp$reference_states
+    nm <- stamp$frame$n_models
+    if (!is.numeric(nm) || length(nm) != 1L || is.na(nm) ||
+        !is.finite(nm) || nm < 1L || nm != trunc(nm) ||
+        !is.matrix(s) || !is.character(s) || anyNA(s) ||
+        !identical(dim(s), c(nrow(stamp$body), as.integer(nm))) ||
+        any(!s %in% c("", "est", "ref", "omit", "empty", "notest", "absent", "constrained", "masked")) ||
+        !identical(stamp$reference_states_hash, rlang::hash(s))) {
+      .ct_v251_abort("Composition canonical reference states changed or are malformed.")
+    }
+  }
   if (inherits(x, "tt_table")) {
     if (!identical(stamp$body, x$body) || !identical(stamp$header, x$header) ||
         !identical(stamp$rows, x$rows) || !identical(stamp$frame, x$meta$frame) ||
-        !identical(stamp$companion, x$meta$regtab_rows)) {
+        !identical(stamp$companion, x$meta$regtab_rows) ||
+        !identical(stamp$reference_states, if (is.null(x$meta$regtab_rows)) x$meta$flat$states else NULL)) {
       .ct_v251_abort("Composition source text, identity or numeric companions changed after production.")
     }
   } else {

@@ -71,13 +71,15 @@ test_that(".tt_infer_cols recognises every SMD header (BUG-3)", {
   }
 })
 
-test_that("the xlsx SMD column stays at Stata's fixed 8 (desctab.ado:2203-2204)", {
+test_that("the xlsx SMD column fits its header (Stata 2.5.6 desctab.ado:2173)", {
   set.seed(1)
   d <- data.frame(arm = factor(rep(c("LongGroupNameA", "LongGroupNameB", "LongGroupNameC"), each = 10)),
                   age = stats::rnorm(30, 50, 10))
   lay <- tabtools:::.xlsx_layout_table1(table1_tc(d, by = "arm", vars = c(age = "contn"), smd = TRUE))
   w <- lay$rules[lay$rules$op == 13, ]
-  expect_identical(w$value[w$c1 == max(w$c1)], 8)
+  # "SMD (LongGroupNameA vs LongGroupNameB)" has 38 characters:
+  # native max(8, ceiling(38 * 0.85) + 2) is 35, not the old fixed 8.
+  expect_identical(w$value[w$c1 == max(w$c1)], 35)
 })
 
 test_that("automatic notes join a paragraph footnote as paragraphs; unspaced stays (BUG-5)", {

@@ -171,6 +171,9 @@ tt_regtab_union <- function(mrows) {
       sc <- .rt_row(.rt_eq_key("lnsigma", "_cons"), "lnsigma", "var", "Scale: Intercept", "est",
                     term = "Log(scale)", estimate = w$estimate, conf.low = w$conf.low,
                     conf.high = w$conf.high, p.value = w$p.value, ancillary = TRUE, role = "ancillary")
+      # The added scale row carries the same Phase 4 count/state schema.
+      sc <- .rt_count_rows(sc, fit)
+      if ("count_events" %in% names(rows)) sc$count_events <- NA_real_
       first_anc <- which(rows$block == "/")[1]
       rows <- if (is.na(first_anc)) rbind(rows, sc) else
         rbind(rows[seq_len(first_anc - 1L), , drop = FALSE], sc, rows[first_anc:nrow(rows), , drop = FALSE])
@@ -426,9 +429,10 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
 # ---------------------------------------------------------------------------
 # Cell text (task 4.5)
 
-# Estimate text: Stata pre-rounds with round(x, 10^-digits) and formats with
-# %32.<digits>f (`regtab.ado:1983-1989`, `:2079-2085`); CI bounds are
-# formatted without the pre-round (`:2146`).
+# Estimates use Stata round(x, 10^-digits) before fixed formatting.
+# From Stata tabtools 2.5.2, default CI bounds use the same rounding,
+# preserving original text for bounds that round to zero. Explicit cformat
+# remains unrounded (regtab.ado at 4eecca4d, coef_round/_ci_lo_r/_ci_hi_r).
 .rt_est_text <- function(x, digits, numeric_format = NULL) {
   if (!is.null(numeric_format$cformat)) {
     out <- rep("", length(x))
@@ -444,8 +448,14 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
   fmt <- paste0("%32.", digits, "f")
   ok <- is.finite(lo) & is.finite(hi)
   out <- rep("", length(lo))
-  render <- function(x) if (is.null(numeric_format$cformat)) stata_fmt(x, fmt) else
-    .tt_format_numeric(x, numeric_format)
+  render <- function(x) {
+    if (!is.null(numeric_format$cformat)) return(.tt_format_numeric(x, numeric_format))
+    rounded <- stata_round(x, 10^-digits)
+    # Keep -0.00 for a negative bound that rounds to zero: crossing zero
+    # remains visible, exactly as in the native cond(round(...) == 0, x, ...).
+    rounded[rounded == 0] <- x[rounded == 0]
+    stata_fmt(rounded, fmt)
+  }
   out[ok] <- paste0("(", render(lo[ok]), sep, render(hi[ok]), ")")
   out
 }
@@ -481,6 +491,9 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
   dim <- (seen | constrained) & !significant
   heads <- which(u$rows$kind %in% c("cat_header", "int_header"))
   for (i in heads) {
+    # Native interaction levels are unindented; they do not form a nested
+    # category block for header dimming (regtab.ado:1877-1880).
+    if (u$rows$kind[i] == "int_header") { dim[i] <- FALSE; next }
     parent <- .rt_placement_parent(u$rows)
     child <- which(parent == u$rows$key[i] & !u$rows$kind %in% c("cat_header", "int_header"))
     dim[i] <- any(constrained[child]) && !any(significant[child])

@@ -1,0 +1,19 @@
+Note: no failures in the analysis sample; the log-rank test is not possible and is omitted
+  +-------------------------------------------------------------------------------------------------------------+
+  |                                                                            1 (N=2)             2 (N=2)    p |
+  |                                            Median survival, yr                  NR                  NR      |
+  |                                                       (95% CI)                                              |
+  |                                                     Events / N               0 / 2               0 / 2      |
+  |                                           Survival probability                                              |
+  |                                                           1 yr              100.0%              100.0%      |
+  |                                                        2 years              100.0%              100.0%      |
+  |                                       RMST (2-yr), yr (95% CI)   2.00 (2.00, 2.00)   2.00 (2.00, 2.00)      |
+  |                                                 Number at risk                                              |
+  |                                                           1 yr                   2                   2      |
+  |                                                        2 years                   1                   2      |
+  | Log-rank test not possible: no failures in the analysis sample                                              |
+  +-------------------------------------------------------------------------------------------------------------+
+
+CSV exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV002.csv
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV002.md
+Exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/survtab.xlsx, sheet SV002

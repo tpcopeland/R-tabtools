@@ -479,7 +479,17 @@ test_that("svyglm: R2 for Gaussian identity fits, Subjects under subset() (P0-5)
   l <- lm(yc ~ treat + x1, d, weights = iptw)
   expect_equal(tabtools:::tt_model_stats.svyglm(s, NULL)$r2, summary(l)$r.squared, tolerance = 1e-12)
   sl <- survey::svyglm(y ~ treat + x1, des, family = quasibinomial())
-  expect_no_message(tt <- regtab(sl, stats = c("n", "ll", "aic", "r2")))
+  # Quasibinomial survey fits retain unavailable ll/aic/r2; the later
+  # built-in-stat contract reports their exact omission without inventing rows.
+  withr::local_options(cli.width = 1000L)
+  messages <- character()
+  tt <- withCallingHandlers(regtab(sl, stats = c("n", "ll", "aic", "r2")),
+    message = function(cnd) {
+      messages <<- c(messages, conditionMessage(cnd))
+      invokeRestart("muffleMessage")
+    })
+  expect_identical(messages,
+    "(regtab: no model reports 3 requested statistic(s), left out of the table: aic ll r2)")
   expect_identical(tt$body[[1]][nrow(tt$body)], "Observations")
   ss <- survey::svyglm(y ~ treat + x1, subset(des, x2 == 1), family = quasibinomial())
   ts <- regtab(ss, stats = "n")

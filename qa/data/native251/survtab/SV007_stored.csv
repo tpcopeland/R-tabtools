@@ -1,0 +1,23 @@
+name,kind,row,col,value
+_golden_id,meta,,,SV007
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,2
+markdown_rows,scalar,,,8
+ci_level,scalar,,,90
+rmst_ub_1,scalar,,,2.9319202894566549
+rmst_lb_1,scalar,,,1.5680797105433451
+rmst_se_1,scalar,,,.41457809879442492
+rmst_1,scalar,,,2.25
+median_1,scalar,,,2
+N_rows,scalar,,,10
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV007.md
+csv,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV007.csv
+sheet,macro,,,SV007
+xlsx,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/survtab.xlsx
+methods,macro,,,"Survival was estimated using the Kaplan-Meier method. Median survival time with 90% confidence intervals is reported. Restricted mean survival time was computed up to 3 years with 90% confidence intervals based on the Greenwood variance formula. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+table,matrix,t1,Overall,.75
+table,matrix,t2,Overall,.5
+table,matrix,t3,Overall,.5
+table,matrix,t4,Overall,.5

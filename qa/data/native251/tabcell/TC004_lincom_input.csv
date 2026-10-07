@@ -1,0 +1,13 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC004_lincom_input
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+df,scalar,,,21
+ub,scalar,,,1.4976363525373633
+lb,scalar,,,1.1709350760340653
+p,scalar,,,9.55385141795842e-14
+t,scalar,,,16.986765855032836
+level,scalar,,,95
+se,scalar,,,.07854854335855771
+estimate,scalar,,,1.3342857142857143

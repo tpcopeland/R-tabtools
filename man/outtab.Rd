@@ -59,19 +59,19 @@ outtab(
 \item{exposure}{One numeric/logical binary exposure column; 1 is exposed.}
 
 \item{models}{Ordered list of one-sided covariate formulas, or full formulas
-whose response matches the outcome. The default `list(~1)` is crude.}
+whose response matches the outcome. The default \code{list(~1)} is crude.}
 
-\item{estimator}{`"modified_poisson"` (Poisson log-link, robust ML variance),
-`"logit"` (model-based odds ratio), `"poisson"` (model-based incidence-rate
-ratio), or a function accepting `formula` and `data` and returning an ordinary
-`glm` retaining `model`, `x`, `y` and original row names.}
+\item{estimator}{\code{"modified_poisson"} (Poisson log-link, robust ML variance),
+\code{"logit"} (model-based odds ratio), \code{"poisson"} (model-based incidence-rate
+ratio), or a function accepting \code{formula} and \code{data} and returning an ordinary
+\code{glm} retaining \code{model}, \code{x}, \code{y} and original row names.}
 
 \item{estimator_args}{Named fitter arguments. Built-ins default to
-`glm.control(epsilon = 1e-12, maxit = 100)`; an explicit `control` wins.
-Built-ins accept `control`,
-`start`, `etastart`, `mustart` and `contrasts`; weights/offsets are unsupported.}
+\code{glm.control(epsilon = 1e-12, maxit = 100)}; an explicit \code{control} wins.
+Built-ins accept \code{control},
+\code{start}, \code{etastart}, \code{mustart} and \code{contrasts}; weights/offsets are unsupported.}
 
-\item{vce}{NULL for the estimator default, or `"model"`, `"robust"`, `"cluster"`.}
+\item{vce}{NULL for the estimator default, or \code{"model"}, \code{"robust"}, \code{"cluster"}.}
 
 \item{cluster}{Exact cluster column name, required only with cluster variance.}
 
@@ -98,7 +98,7 @@ may overlap and are displayed in supplied order.}
 \item{minevents}{Minimum crude exposed event count needed to attempt each fit.}
 
 \item{mintext, nonconvtext, failtext, droptext}{Literal diagnostic text. In failtext,
-`#` becomes an actual equivalent native code, or `R` for portable engine
+\verb{#} becomes an actual equivalent native code, or \code{R} for portable engine
 failures whose actual R condition class/message are retained separately.}
 
 \item{cformat, digits, sep}{Shared numeric format/digits and literal CI separator.}
@@ -122,12 +122,12 @@ publication styling. Omitted header shading inherits the session setting.}
 \item{open}{Open the written workbook in an interactive session.}
 }
 \value{
-A `tt_table`, invisibly after writing. `stored$table` is the raw matrix
-  `n1 e1 n0 e0 b1 lb1 ub1 rc1 ...`; `stored$fits` records one row per fit.
-  `meta$outtab` retains exact original/base/eligible/complete-case/fitted row
-  identities, per-fit diagnostics, raw and publication states and companions.
-  Ratio columns represent specifications, not one fabricated model. Unkeyed
-  data-frame conversion is supported; keyed model composition is unsupported.
+A \code{tt_table}, invisibly after writing. \code{stored$table} is the raw matrix
+\verb{n1 e1 n0 e0 b1 lb1 ub1 rc1 ...}; \code{stored$fits} records one row per fit.
+\code{meta$outtab} retains exact original/base/eligible/complete-case/fitted row
+identities, per-fit diagnostics, raw and publication states and companions.
+Ratio columns represent specifications, not one fabricated model. Unkeyed
+data-frame conversion is supported; keyed model composition is unsupported.
 }
 \description{
 Displays crude exposed/comparator events and denominators alongside ordered
@@ -136,25 +136,25 @@ separate sample populations.
 }
 \details{
 Binary response Poisson-log means use the risk model described by
-  Zou (2004), p.703. The default score sandwich uses the separate Stata ML
-  correction N/(N-1), with normal Wald intervals on the log scale before one
-  exponentiation. Cluster scores use G/(G-1); this is a software convention,
-  not a correction attributed to Zou. Plain Poisson and logit use declared
-  model variance by default. Function fits are verified against the explicit
-  formula/design/response snapshot and never refitted from mutable calls.
+Zou (2004), p.703. The default score sandwich uses the separate Stata ML
+correction N/(N-1), with normal Wald intervals on the log scale before one
+exponentiation. Cluster scores use G/(G-1); this is a software convention,
+not a correction attributed to Zou. Plain Poisson and logit use declared
+model variance by default. Function fits are verified against the explicit
+formula/design/response snapshot and never refitted from mutable calls.
 
-  Minimum events uses crude eligible exposed events. Ordinary covariate
-  missingness defines complete cases; additional estimator row removal is
-  diagnosed separately. All diagnostic rows still return their count table.
-  Non-attempted minimum-event cells are `notest`; failed fits are `empty`,
-  with distinct reasons. Primary masks are applied last: protected count cells
-  and all linked ratio cells change publication text/state, while raw counts,
-  fitted ratios and diagnostics remain available. This is printed-count
-  protection, not removal of analytical information.
+Minimum events uses crude eligible exposed events. Ordinary covariate
+missingness defines complete cases; additional estimator row removal is
+diagnosed separately. All diagnostic rows still return their count table.
+Non-attempted minimum-event cells are \code{notest}; failed fits are \code{empty},
+with distinct reasons. Primary masks are applied last: protected count cells
+and all linked ratio cells change publication text/state, while raw counts,
+fitted ratios and diagnostics remain available. This is printed-count
+protection, not removal of analytical information.
 
-  Unsupported families, weighted/MI fits, ambiguous contrasts and stale or
-  substituted model evidence raise classed `tabtools_error_outtab` errors.
-  R engine errors have native_rc=NA, never an invented Stata code.
+Unsupported families, weighted/MI fits, ambiguous contrasts and stale or
+substituted model evidence raise classed \code{tabtools_error_outtab} errors.
+R engine errors have native_rc=NA, never an invented Stata code.
 }
 \examples{
 d <- data.frame(exposed = c(rep(1, 10), rep(0, 20)),
@@ -164,6 +164,6 @@ outtab(d, outcomes = "event", exposure = "exposed", estimator = "logit")
 }
 \references{
 Zou G (2004). A Modified Poisson Regression Approach to Prospective
-  Studies with Binary Data. American Journal of Epidemiology 159(7):702--706.
-  doi:10.1093/aje/kwh090.
+Studies with Binary Data. American Journal of Epidemiology 159(7):702--706.
+doi:10.1093/aje/kwh090.
 }

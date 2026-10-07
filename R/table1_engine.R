@@ -741,6 +741,7 @@
     w <- rep(1, length(v))
     kind <- "none"
   }
+  w <- .t1w_smd_weights(w, gid, kind)
   # Mean and variance as .t1w_smd() forms them (unit weights: mean(), var()).
   wmv <- function(y, ww) {
     n <- length(y)

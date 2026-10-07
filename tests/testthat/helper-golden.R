@@ -967,6 +967,7 @@ golden_compare_styles <- function(got_xlsx, got_sheet, want_xlsx, want_sheet, ma
     parts <- golden_publication_styles(g, w, gl, wl, publication_id)
     g <- parts$g; w <- parts$w; gl <- parts$gl; wl <- parts$wl
   }
+  wl <- golden_upstream256_geometry(w, wl, publication_id, want_xlsx)
   why <- character()
   if (!identical(gl$merges, wl$merges)) {
     why <- c(why, sprintf("merges: [%s] vs [%s]", paste(setdiff(gl$merges, wl$merges), collapse = " "),
@@ -1245,4 +1246,48 @@ run_golden_scenario <- function(id, patch = NULL) {
     }
     expect_sink_match(path, id, ext, tt = tt)
   }
+}
+
+# Explicit 2.5.6 expected geometry against immutable 2.5.1 fixtures.
+# Only the expected layout changes; no actual result or cell style is rewritten.
+golden_upstream256_geometry <- function(w, wl, id, want_xlsx) {
+  old <- "712044f83ce6dd7bb4ca4237f3f6ffbc8aea5129"
+  new <- "4eecca4d09d61df0cfe773fc2024b015920b5fe6"
+  pin <- Sys.getenv("TABTOOLS_NATIVE_STYLE_PIN",unset=new)
+  if (!pin %in% c(old,new)) stop("Unknown declared native style pin")
+  if(pin==old || is.null(id) || !id %in% c("T18","demo/demo_puttab.xlsx:Panels","demo/demo_stacktab.xlsx:Frames")) return(wl)
+  fail <- function(ok,msg) if(!isTRUE(ok)) stop(paste("Historical geometry qualification:",msg))
+  native <- Sys.getenv("TABTOOLS_UPSTREAM256_NATIVE_DIR",
+    unset=file.path(golden_dir(),"post251-layout","out"))
+  fail(nzchar(native),"authenticated seven-case capture is required")
+  receipt <- jsonlite::fromJSON(file.path(dirname(native),"native-receipt-qualified.json"))
+  sha <- function(file) digest::digest(file=file,algo="sha256",serialize=FALSE)
+  fail(identical(receipt$source_pin,new) && isTRUE(receipt$cleanup_verified),"wrong native source/cleanup receipt")
+  fail(identical(receipt$recipe_sha256,"0661afbefb1d0ced1e266ce40b47298a7c854d64e6a15198d6c69dff5deaac10"),"wrong native recipe")
+  fail(identical(sort(list.files(native)),sort(names(receipt$files))) && length(receipt$files)==26L,"native artifact inventory")
+  for(name in names(receipt$files)) fail(identical(sha(file.path(native,name)),receipt$files[[name]]),paste("native artifact",name))
+  if(id=="T18") {
+    fail(identical(sha(want_xlsx),"ea08a7db1c16dbbfe623d2fc1caa5c4f7939f697a382ee63ae92e3243e237d59"),"T18 original workbook hash")
+    fail(identical(w$value[match("G2",w$address)],"SMD (Primary vs Secondary)"),"T18 literal original SMD header")
+    j <- which(wl$widths$col==7L)
+    fail(length(j)==1L && wl$widths$width[j]==8.7109375,"T18 original width")
+    wl$widths$width[j] <- 25.7109375
+  } else if(id=="demo/demo_puttab.xlsx:Panels") {
+    fail(identical(sha(want_xlsx),"aa87cc4f6fdaf73b4ed86cd686b75fcd1d0b7a8cd33e115fd651580efb7ffdbf"),"Panels original workbook hash")
+    fail(identical(w$value[match(c("B2","B6"),w$address)],c("A. Relapses","B. New MRI activity")),"Panels original literal headings")
+    fail(all(c("B2:D2","B6:D6") %in% wl$merges),"Panels original heading merges")
+    j <- which(wl$widths$col==2L)
+    fail(length(j)==1L && wl$widths$width[j]==16.7109375,"Panels original label width")
+    wl$merges <- setdiff(wl$merges,c("B2:D2","B6:D6"))
+    wl$widths$width[j] <- 21.7109375
+  } else {
+    # stacktab frames delegates directly to puttab panel(), including heading geometry.
+    fail(identical(sha(want_xlsx),"5095f782fd68dda4952af4bd88fcfba6249f6dfa5590f6676dd3d33469a01930"),"Frames original workbook hash")
+    fail(identical(w$value[match(c("B3","B11"),w$address)],c("All patients","Aged 65 and over")),"Frames original literal headings")
+    fail(identical(wl$merges,c("A1:E1","B11:E11","B3:E3")),"Frames original complete merge set")
+    j <- which(wl$widths$col==2L)
+    fail(length(j)==1L && wl$widths$width[j]==31.7109375,"Frames unchanged original label width")
+    wl$merges <- setdiff(wl$merges,c("B3:E3","B11:E11"))
+  }
+  wl
 }

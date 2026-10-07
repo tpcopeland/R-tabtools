@@ -466,7 +466,7 @@ test_that("H1 (F32): a level that conflicts with supplied intervals is refused; 
   err <- tryCatch(regtab(d, level = 0.90), error = function(e) conditionMessage(e))
   expect_match(err, "supplies 95% confidence intervals", fixed = TRUE)
   expect_match(err, "asks for 90%", fixed = TRUE)
-  expect_match(err, "broom's default", fixed = TRUE)
+  expect_match(err, "regtab does not recompute supplied intervals", fixed = TRUE)
   expect_error(regtab(d, level = 90), "asks for 90%", fixed = TRUE)
   expect_identical(regtab(d)$stored$ci_level, 95)
   # Declared 90% intervals: level = 0.9 (or 90) is right; left at its
@@ -919,7 +919,7 @@ test_that("R02: main-effect rows of a contrasts<- factor sit on the level its co
         }
         kb <- paste0(codes[[cs$base]], ".g")
         if (mode == "native" || !grepl("\\*", deparse(fm))) {
-          expect_identical(r$status[r$key == kb], "base", label = paste(lab, "base"))
+          expect_identical(r$status[r$key == kb], "ref", label = paste(lab, "base"))
         } else {
           expect_false(kb %in% r$key)
         }
@@ -930,7 +930,7 @@ test_that("R02: main-effect rows of a contrasts<- factor sit on the level its co
   f0 <- lm(y ~ 0 + g + x, cases[[1]]$d)
   r0 <- regtab(f0)$meta$regtab_rows
   expect_equal(unname(r0$estimate[match(paste0(0:2, ".g"), r0$key)]), unname(coef(f0)[c("g0", "g1", "g2")]))
-  expect_false("base" %in% r0$status)
+  expect_false("ref" %in% r0$status)
   # A mapping to coefficients the fit lacks is refused, not shown mislabelled.
   f <- lm(y ~ g + x, cases[[1]]$d)
   fr <- tabtools:::.rt_frame(f)
@@ -959,7 +959,7 @@ test_that("B06: level texts mixing integers and text whose codes would collide k
   b <- coef(f)
   expect_equal(unname(r$estimate[r$key == "2.g"]), unname(b[["g1"]]))
   expect_equal(unname(r$estimate[r$key == "3.g"]), unname(b[["g2"]]))
-  expect_identical(r$status[r$key == "1.g"], "base")
+  expect_identical(r$status[r$key == "1.g"], "ref")
   fi <- lm(y ~ g * x, d)
   bi <- coef(fi)
   for (mode in c("fvgen", "native")) {
@@ -974,7 +974,7 @@ test_that("B06: level texts mixing integers and text whose codes would collide k
   er <- tt_effect_rows(marginaleffects::avg_comparisons(fb, variables = "g"))
   rb <- regtab(fb)$meta$regtab_rows
   expect_identical(paste0(er$level, ".g"), rb$key[rb$status == "est" & grepl("\\.g$", rb$key)])
-  expect_identical(unique(paste0(er$base, ".g")), rb$key[rb$status == "base"])
+  expect_identical(unique(paste0(er$base, ".g")), rb$key[rb$status == "ref"])
 })
 
 test_that("review P0-3/P1-1: joined keys, data frames, and what is left to refuse", {

@@ -30,3 +30,5 @@
 ^tests/testthat/golden/P0[29](\.|_)
 ^demo$
 ^trailer$
+^\.claude$
+^\.codex$

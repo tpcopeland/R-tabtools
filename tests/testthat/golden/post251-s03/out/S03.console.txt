@@ -1,0 +1,93 @@
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  s03_round
+       log:  /tmp/tabtools-native-256-oqb_442_/out/S03.console.txt
+  log type:  text
+ opened on:   7 Oct 2026, 18:24:03
+
+. tabtools set clear
+tabtools: all persistent defaults cleared
+
+. cd "`package_root'/tests/testthat/golden"
+/home/tpcopeland/R-tabtools-wt/final-union/tests/testthat/golden
+
+. run "../../../qa/stata/golden_stratetab_blocks.do"
+
+. golden_strate_blocks S03 "`output_dir'/S03"
+
+. * The same declared original input is read for all three outcome blocks;
+. * prove exact binary tie/person-time and actual labelled category identity.
+. forvalues k = 1/3 {
+  2.     use "`output_dir'/S03_`k'.dta", clear
+  3.     assert _N == 3
+  4.     assert _Y == 2210.125 if group == 2
+  5.     assert _Y == 1523.456 if group == 1
+  6.     assert _Y == 899.5 if group == 3
+  7.     local medium : label (group) 2
+  8.     assert "`medium'" == "Medium"
+  9. }
+
+. stratetab, using("`output_dir'/S03_1" "`output_dir'/S03_2" "`output_dir'/S03_3") ///
+>     outcomes(3) outlabels("Stroke \ Myocardial infarction \ Any event") ///
+>     explabels("Dose tertile") level(90) digits(2) eventdigits(1) pydigits(2) ///
+>     headershade borderstyle(academic) font("Times New Roman") fontsize(9) ///
+>     title("Three outcomes at 90% confidence") frame(s03_round_frame, replace) ///
+>     xlsx("`output_dir'/S03.xlsx") sheet(S03) ///
+>     csv("`output_dir'/S03.csv") markdown("`output_dir'/S03.md")
+Markdown exported to /tmp/tabtools-native-256-oqb_442_/out/S03.md
+
+Three outcomes at 90% confidence
+  +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |     Exposure   Stroke                                               Myocardial infarction                                               Any event                                             |
+  |                Events   Person-Years (PY)   Per 1,000 PY (90% CI)                  Events   Person-Years (PY)   Per 1,000 PY (90% CI)      Events   Person-Years (PY)   Per 1,000 PY (90% CI) |
+  | Dose tertile                                                                                                                                                                                  |
+  |          Low     12.0            1,523.46      7.88 (4.90, 12.66)                     5.0            1,523.46       3.28 (1.57, 6.85)        44.0            1,523.46    28.88 (22.54, 37.01) |
+  |       Medium     31.0            2,210.13    14.03 (10.44, 18.85)                    18.0            2,210.13      8.14 (5.53, 12.00)        61.0            2,210.13    27.60 (22.36, 34.07) |
+  |         High      7.0              899.50      7.78 (4.18, 14.49)                     3.0              899.50       3.34 (1.29, 8.62)        29.0              899.50    32.24 (23.75, 43.76) |
+  +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Exported to /tmp/tabtools-native-256-oqb_442_/out/S03.xlsx, sheet S03
+
+. return list
+
+scalars:
+             r(N_nopt) =  0
+         r(smallcells) =  0
+           r(ci_level) =  90
+         r(N_outcomes) =  3
+        r(N_exposures) =  1
+             r(N_rows) =  7
+      r(markdown_cols) =  10
+      r(markdown_rows) =  4
+
+macros:
+              r(sheet) : "S03"
+               r(xlsx) : "/tmp/tabtools-native-256-oqb_442_/out/S03.xlsx"
+              r(frame) : "s03_round_frame"
+            r(methods) : "Incidence rates and confidence intervals were formatted at the 90% level; rate-ratio intervals use an independent-rate log-normal approximation at the same level."
+        r(outcome_ids) : "Stroke \ Myocardial infarction \ Any event"
+           r(markdown) : "/tmp/tabtools-native-256-oqb_442_/out/S03.md"
+                r(csv) : "/tmp/tabtools-native-256-oqb_442_/out/S03.csv"
+
+matrices:
+              r(rates) :  3 x 3
+
+. matrix S03_rates = r(rates)
+
+. matrix list S03_rates, format(%24.17g)
+
+S03_rates[3,3]
+                    Stroke        Myocardial~n           Any_event
+   Low             7.87683  3.2820100000000001  28.881699999999999
+Medium  14.026399999999999  8.1443399999999997  27.600199999999997
+  High  7.7820999999999998  3.3351899999999999  32.240099999999998
+
+. frame s03_round_frame: export delimited using "`output_dir'/S03.frame.csv", replace
+(file /tmp/tabtools-native-256-oqb_442_/out/S03.frame.csv not found)
+file /tmp/tabtools-native-256-oqb_442_/out/S03.frame.csv saved
+
+. log close s03_round
+      name:  s03_round
+       log:  /tmp/tabtools-native-256-oqb_442_/out/S03.console.txt
+  log type:  text
+ closed on:   7 Oct 2026, 18:24:03
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

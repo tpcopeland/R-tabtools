@@ -23,6 +23,9 @@ interop_golden <- function(id, nbody, ncol) {
   xlsx <- golden_book(id)
   w <- golden_cell_styles(xlsx, id)
   lay <- golden_sheet_layout(xlsx, id)
+  # Reuse the authenticated expected-layout qualification; actual converters
+  # and every historical workbook cell/style remain unchanged.
+  lay <- golden_upstream256_geometry(w, lay, id, xlsx)
   last <- nbody + 3L
   mg <- tabtools:::.tt_parse_merges(lay$merges)
   mg <- mg[mg$r1 >= 2L & mg$r2 <= last & mg$c1 >= 2L, , drop = FALSE]

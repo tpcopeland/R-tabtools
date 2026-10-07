@@ -1,0 +1,742 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 16-core  perpetual
+Serial number: 501706305188
+  Licensed to: Timothy Copeland
+               Karolinska Institutet
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /tmp/tabtools-native-256-8xdo3o0x/capture.do 
+
+. version 17.0
+
+. clear all
+
+. set more off
+
+. set linesize 255
+
+. set varabbrev off
+
+. adopath ++ "/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/fvgen"
+  [1]              "/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/fvgen"
+  [2]  (BASE)      "/usr/local/stata17/ado/base/"
+  [3]  (SITE)      "/usr/local/ado/"
+  [4]              "."
+  [5]  (PERSONAL)  "~/ado/personal/"
+  [6]  (PLUS)      "~/ado/plus/"
+  [7]  (OLDPLACE)  "~/ado/"
+
+. adopath ++ "/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/tabtools"
+  [1]              "/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/tabtools"
+  [2]              "/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/fvgen"
+  [3]  (BASE)      "/usr/local/stata17/ado/base/"
+  [4]  (SITE)      "/usr/local/ado/"
+  [5]              "."
+  [6]  (PERSONAL)  "~/ado/personal/"
+  [7]  (PLUS)      "~/ado/plus/"
+  [8]  (OLDPLACE)  "~/ado/"
+
+. adopath
+  [1]              "/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/tabtools"
+  [2]              "/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/fvgen"
+  [3]  (BASE)      "/usr/local/stata17/ado/base/"
+  [4]  (SITE)      "/usr/local/ado/"
+  [5]              "."
+  [6]  (PERSONAL)  "~/ado/personal/"
+  [7]  (PLUS)      "~/ado/plus/"
+  [8]  (OLDPLACE)  "~/ado/"
+
+. which puttab
+/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/tabtools/puttab.ado
+*! puttab Version 2.5.6  2026/10/07
+*! Style an in-memory table (current data, a frame, or a matrix) as one Excel sheet
+*! Author: Timothy P Copeland, Karolinska Institutet
+*! Program class: rclass
+
+. which table1_tc
+/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/tabtools/table1_tc.ado
+*! table1_tc Version 2.5.6  2026/10/07 - Descriptive Statistics Table Generator
+*! Author: Timothy P Copeland, Karolinska Institutet
+*! Program class: rclass
+*! Frontend for the consolidated desctab engine
+
+. which desctab
+/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/native-256-source/tabtools/desctab.ado
+*! desctab Version 2.5.6  2026/10/07 - Consolidated descriptive Table 1 engine
+*! Author: Timothy P Copeland, Karolinska Institutet
+*! Fork of -table1_mc- version 3.5 (2024-12-19) by Mark Chatfield
+*! This program generates descriptive statistics tables with formatting options
+*! and can export them to Excel with automatic column width calculation
+
+. do "/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-stata-post251-port-v1/weight-unitlabel-recipe-v2/capture-post251-weight-unitlabel.do" "/tmp/tabtools-native-256-8xdo3o0x/out"
+
+. * ROOT-owned pure native capture, unexecuted by implementer. Cold-load the
+. * authenticated 4eecca4d09d61df0cfe773fc2024b015920b5fe6 full closure first.
+. * Exactly eight IDs, twelve native commands (four ordinary/huge pairs).
+. version 17.0
+
+. set more off
+
+. set varabbrev off
+
+. args artifact_dir
+
+. if `"`artifact_dir'"' == "" exit 198
+
+. 
+. program define _post251_weight_capture
+  1.     syntax , OUTDIR(string) ID(string) WEIGHT(string) [SMDSPEC(string)]
+  2.     quietly save `"`outdir'/`id'-input.dta"', replace
+  3.     capture noisily table1_tc, by(g) vars(x contn) wt(`weight') nopvalue ///
+>         `smdspec' frame(_post251_weight, replace) ///
+>         csv(`"`outdir'/`id'.csv"') markdown(`"`outdir'/`id'.md"') ///
+>         excel(`"`outdir'/`id'.xlsx"') sheet(Table)
+  4.     local command_rc = _rc
+  5.     noisily display as text "POST251_WEIGHT_CASE `id' COMMAND_RC `command_rc'"
+  6.     if `command_rc' exit `command_rc'
+  7.     return list
+  8.     tempname T
+  9.     matrix `T' = r(table)
+ 10.     matrix list `T', format(%24.15g)
+ 11.     frame _post251_weight: quietly save `"`outdir'/`id'-frame.dta"', replace
+ 12.     frame _post251_weight: list, noobs
+ 13.     frame drop _post251_weight
+ 14. end
+
+. 
+. * WX01 pair, WX02 maxpair, WX03 population: hand-declared means/variances.
+. forvalues k = 1/3 {
+  2.     clear
+  3.     local n = cond(`k' == 1, 8, 12)
+  4.     quietly set obs `n'
+  5.     gen byte g = ceil(_n / 4)
+  6.     gen double x = mod(_n-1,4) + 1 + 2*(g-1)
+  7.     gen double unit = 1
+  8.     gen double huge = 2^1020
+  9.     local spec "smd"
+ 10.     if `k' == 2 local spec "smd smdtype(maxpair)"
+ 11.     if `k' == 3 local spec "smd smdtype(population)"
+ 12.     _post251_weight_capture, outdir(`"`artifact_dir'"') id(WX0`k'-unit) weight(unit) smdspec(`spec')
+ 13.     _post251_weight_capture, outdir(`"`artifact_dir'"') id(WX0`k'-huge) weight(huge) smdspec(`spec')
+ 14. }
+  +-------------------------------------------------+
+  |                         g = 1   g = 2   SMD     |
+  |-------------------------------------------------|
+  | Mean±SD                 N=4     N=4             |
+  |-------------------------------------------------|
+  | Effective sample size   ESS=4   ESS=4           |
+  |-------------------------------------------------|
+  | x                       2±1     4±1     1.549   |
+  +-------------------------------------------------+
+CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.csv
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.md
+POST251_WEIGHT_CASE WX01-unit COMMAND_RC 0
+
+scalars:
+      r(markdown_cols) =  4
+      r(markdown_rows) =  2
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.md"
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.xlsx"
+              r(frame) : "_post251_weight"
+            r(smdtype) : "pair"
+            r(varlist) : "x"
+               r(Dapa) : "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+
+matrices:
+              r(table) :  1 x 1
+
+symmetric __000000[1,1]
+                smd
+x  1.54919333848297
+
+  +-------------------------------------------------+
+  | factor                  g_1     g_2     smd_str |
+  |-------------------------------------------------|
+  |                         g = 1   g = 2   SMD     |
+  | Mean±SD                 N=4     N=4             |
+  | Effective sample size   ESS=4   ESS=4           |
+  | x                       2±1     4±1     1.549   |
+  +-------------------------------------------------+
+  +-------------------------------------------------+
+  |                         g = 1   g = 2   SMD     |
+  |-------------------------------------------------|
+  | Mean±SD                 N=4     N=4             |
+  |-------------------------------------------------|
+  | Effective sample size   ESS=4   ESS=4           |
+  |-------------------------------------------------|
+  | x                       2±1     4±1     1.549   |
+  +-------------------------------------------------+
+CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.csv
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.md
+POST251_WEIGHT_CASE WX01-huge COMMAND_RC 0
+
+scalars:
+      r(markdown_cols) =  4
+      r(markdown_rows) =  2
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.md"
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.xlsx"
+              r(frame) : "_post251_weight"
+            r(smdtype) : "pair"
+            r(varlist) : "x"
+               r(Dapa) : "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+
+matrices:
+              r(table) :  1 x 1
+
+symmetric __000000[1,1]
+                smd
+x  1.54919333848297
+
+  +-------------------------------------------------+
+  | factor                  g_1     g_2     smd_str |
+  |-------------------------------------------------|
+  |                         g = 1   g = 2   SMD     |
+  | Mean±SD                 N=4     N=4             |
+  | Effective sample size   ESS=4   ESS=4           |
+  | x                       2±1     4±1     1.549   |
+  +-------------------------------------------------+
+Note: Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.
+  +---------------------------------------------------------+
+  |                         g = 1   g = 2   g = 3   Max SMD |
+  |---------------------------------------------------------|
+  | Mean±SD                 N=4     N=4     N=4             |
+  |---------------------------------------------------------|
+  | Effective sample size   ESS=4   ESS=4   ESS=4           |
+  |---------------------------------------------------------|
+  | x                       2±1     4±1     6±1     3.098   |
+  +---------------------------------------------------------+
+CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.csv
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.md
+POST251_WEIGHT_CASE WX02-unit COMMAND_RC 0
+
+scalars:
+      r(markdown_cols) =  5
+      r(markdown_rows) =  2
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.md"
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.xlsx"
+              r(frame) : "_post251_weight"
+            r(smdnote) : "Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances."
+            r(smdtype) : "maxpair"
+            r(varlist) : "x"
+               r(Dapa) : "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+
+matrices:
+              r(table) :  1 x 1
+
+symmetric __000000[1,1]
+                smd
+x  3.09838667696593
+
+  +---------------------------------------------------------+
+  | factor                  g_1     g_2     g_3     smd_str |
+  |---------------------------------------------------------|
+  |                         g = 1   g = 2   g = 3   Max SMD |
+  | Mean±SD                 N=4     N=4     N=4             |
+  | Effective sample size   ESS=4   ESS=4   ESS=4           |
+  | x                       2±1     4±1     6±1     3.098   |
+  +---------------------------------------------------------+
+Note: Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.
+  +---------------------------------------------------------+
+  |                         g = 1   g = 2   g = 3   Max SMD |
+  |---------------------------------------------------------|
+  | Mean±SD                 N=4     N=4     N=4             |
+  |---------------------------------------------------------|
+  | Effective sample size   ESS=4   ESS=4   ESS=4           |
+  |---------------------------------------------------------|
+  | x                       2±1     4±1     6±1     3.098   |
+  +---------------------------------------------------------+
+CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.csv
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.md
+POST251_WEIGHT_CASE WX02-huge COMMAND_RC 0
+
+scalars:
+      r(markdown_cols) =  5
+      r(markdown_rows) =  2
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.md"
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.xlsx"
+              r(frame) : "_post251_weight"
+            r(smdnote) : "Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances."
+            r(smdtype) : "maxpair"
+            r(varlist) : "x"
+               r(Dapa) : "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+
+matrices:
+              r(table) :  1 x 1
+
+symmetric __000000[1,1]
+                smd
+x  3.09838667696593
+
+  +---------------------------------------------------------+
+  | factor                  g_1     g_2     g_3     smd_str |
+  |---------------------------------------------------------|
+  |                         g = 1   g = 2   g = 3   Max SMD |
+  | Mean±SD                 N=4     N=4     N=4             |
+  | Effective sample size   ESS=4   ESS=4   ESS=4           |
+  | x                       2±1     4±1     6±1     3.098   |
+  +---------------------------------------------------------+
+Note: Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).
+  +---------------------------------------------------------+
+  |                         g = 1   g = 2   g = 3   Pop. SB |
+  |---------------------------------------------------------|
+  | Mean±SD                 N=4     N=4     N=4             |
+  |---------------------------------------------------------|
+  | Effective sample size   ESS=4   ESS=4   ESS=4           |
+  |---------------------------------------------------------|
+  | x                       2±1     4±1     6±1     0.968   |
+  +---------------------------------------------------------+
+CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.csv
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.md
+POST251_WEIGHT_CASE WX03-unit COMMAND_RC 0
+
+scalars:
+      r(markdown_cols) =  5
+      r(markdown_rows) =  2
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.md"
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.xlsx"
+              r(frame) : "_post251_weight"
+            r(smdnote) : "Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013)."
+            r(smdtype) : "population"
+            r(varlist) : "x"
+               r(Dapa) : "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+
+matrices:
+              r(table) :  1 x 1
+
+symmetric __000000[1,1]
+                smd
+x  .967558893693794
+
+  +---------------------------------------------------------+
+  | factor                  g_1     g_2     g_3     smd_str |
+  |---------------------------------------------------------|
+  |                         g = 1   g = 2   g = 3   Pop. SB |
+  | Mean±SD                 N=4     N=4     N=4             |
+  | Effective sample size   ESS=4   ESS=4   ESS=4           |
+  | x                       2±1     4±1     6±1     0.968   |
+  +---------------------------------------------------------+
+Note: Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).
+  +---------------------------------------------------------+
+  |                         g = 1   g = 2   g = 3   Pop. SB |
+  |---------------------------------------------------------|
+  | Mean±SD                 N=4     N=4     N=4             |
+  |---------------------------------------------------------|
+  | Effective sample size   ESS=4   ESS=4   ESS=4           |
+  |---------------------------------------------------------|
+  | x                       2±1     4±1     6±1     0.968   |
+  +---------------------------------------------------------+
+CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.csv
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.md
+POST251_WEIGHT_CASE WX03-huge COMMAND_RC 0
+
+scalars:
+      r(markdown_cols) =  5
+      r(markdown_rows) =  2
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.md"
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.xlsx"
+              r(frame) : "_post251_weight"
+            r(smdnote) : "Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013)."
+            r(smdtype) : "population"
+            r(varlist) : "x"
+               r(Dapa) : "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+
+matrices:
+              r(table) :  1 x 1
+
+symmetric __000000[1,1]
+                smd
+x  .967558893693794
+
+  +---------------------------------------------------------+
+  | factor                  g_1     g_2     g_3     smd_str |
+  |---------------------------------------------------------|
+  |                         g = 1   g = 2   g = 3   Pop. SB |
+  | Mean±SD                 N=4     N=4     N=4             |
+  | Effective sample size   ESS=4   ESS=4   ESS=4           |
+  | x                       2±1     4±1     6±1     0.968   |
+  +---------------------------------------------------------+
+
+. 
+. * WX04: each w*x^2 is below native maxdouble, its group sum overflows.
+. clear
+
+. quietly set obs 40
+
+. gen byte g = 1 + (_n > 20)
+
+. gen double x = 3001 + mod(_n-1,20)
+
+. gen double unit = 1
+
+. gen double huge = 1e300
+
+. _post251_weight_capture, outdir(`"`artifact_dir'"') id(WX04-unit) weight(unit)
+  +-----------------------------------------+
+  |                         g = 1    g = 2  |
+  |-----------------------------------------|
+  | Mean±SD                 N=20     N=20   |
+  |-----------------------------------------|
+  | Effective sample size   ESS=20   ESS=20 |
+  |-----------------------------------------|
+  | x                       3010±6   3010±6 |
+  +-----------------------------------------+
+CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.csv
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.md
+POST251_WEIGHT_CASE WX04-unit COMMAND_RC 0
+
+scalars:
+      r(markdown_cols) =  3
+      r(markdown_rows) =  2
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.md"
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.xlsx"
+              r(frame) : "_post251_weight"
+            r(varlist) : "x"
+               r(Dapa) : "Weighted data are presented as mean±SD. P-values suppressed."
+
+symmetric __000000[1,1]
+    c1
+r1   .
+
+  +-----------------------------------------+
+  | factor                  g_1      g_2    |
+  |-----------------------------------------|
+  |                         g = 1    g = 2  |
+  | Mean±SD                 N=20     N=20   |
+  | Effective sample size   ESS=20   ESS=20 |
+  | x                       3010±6   3010±6 |
+  +-----------------------------------------+
+
+. _post251_weight_capture, outdir(`"`artifact_dir'"') id(WX04-huge) weight(huge)
+  +-----------------------------------------+
+  |                         g = 1    g = 2  |
+  |-----------------------------------------|
+  | Mean±SD                 N=20     N=20   |
+  |-----------------------------------------|
+  | Effective sample size   ESS=20   ESS=20 |
+  |-----------------------------------------|
+  | x                       3010±6   3010±6 |
+  +-----------------------------------------+
+CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.csv
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.md
+POST251_WEIGHT_CASE WX04-huge COMMAND_RC 0
+
+scalars:
+      r(markdown_cols) =  3
+      r(markdown_rows) =  2
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.md"
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.xlsx"
+              r(frame) : "_post251_weight"
+            r(varlist) : "x"
+               r(Dapa) : "Weighted data are presented as mean±SD. P-values suppressed."
+
+symmetric __000000[1,1]
+    c1
+r1   .
+
+  +-----------------------------------------+
+  | factor                  g_1      g_2    |
+  |-----------------------------------------|
+  |                         g = 1    g = 2  |
+  | Mean±SD                 N=20     N=20   |
+  | Effective sample size   ESS=20   ESS=20 |
+  | x                       3010±6   3010±6 |
+  +-----------------------------------------+
+
+. 
+. * UL01/02/03 default fractional/exponent units; UL04 explicit text.
+. forvalues k = 1/4 {
+  2.     clear
+  3.     quietly set obs 1
+  4.     gen byte g = 1
+  5.     gen byte e = 1
+  6.     gen double y = 10
+  7.     local per = cond(`k' == 1, 1e-6, cond(`k' == 2, .5, cond(`k' == 3, 1500.5, 1e-6)))
+  8.     local custom ""
+  9.     if `k' == 4 local custom "unitlabel(micro-unit)"
+ 10.     quietly save `"`artifact_dir'/UL0`k'-input.dta"', replace
+ 11.     capture noisily ratetab g, events(e) exposure(y) per(`per') `custom' ///
+>         frame(_post251_rate, replace) ///
+>         csv(`"`artifact_dir'/UL0`k'.csv"') markdown(`"`artifact_dir'/UL0`k'.md"') ///
+>         xlsx(`"`artifact_dir'/UL0`k'.xlsx"') sheet(Table) ///
+>         saving(`"`artifact_dir'/UL0`k'-saved.dta"', replace)
+ 12.     local command_rc = _rc
+ 13.     noisily display as text "POST251_UNITLABEL_CASE UL0`k' COMMAND_RC `command_rc'"
+ 14.     if `command_rc' exit `command_rc'
+ 15.     return list
+ 16.     tempname E
+ 17.     matrix `E' = r(estimates)
+ 18.     matrix list `E', format(%24.15g)
+ 19.     frame _post251_rate: quietly save `"`artifact_dir'/UL0`k'-frame.dta"', replace
+ 20.     frame _post251_rate: list, noobs
+ 21.     frame drop _post251_rate
+ 22. }
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL01.md
+  +---------------------------------------------------------------+
+  | Exposure        e                                             |
+  |            Events   Person-Years (PY)   Per 1e-06 PY (95% CI) |
+  |        g                                                      |
+  |        1        1                  10          0.0 (0.0, 0.0) |
+  +---------------------------------------------------------------+
+
+Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL01.xlsx, sheet Table
+POST251_UNITLABEL_CASE UL01 COMMAND_RC 0
+
+scalars:
+             r(N_nopt) =  0
+             r(N_noci) =  0
+             r(N_zero) =  0
+              r(level) =  95
+                r(per) =  1.00000000000e-06
+                  r(N) =  1
+         r(smallcells) =  0
+           r(ci_level) =  95
+         r(N_outcomes) =  1
+        r(N_exposures) =  1
+             r(N_rows) =  5
+      r(markdown_cols) =  4
+      r(markdown_rows) =  2
+
+macros:
+             r(saving) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL01-saved.dta"
+          r(ci_method) : "exact"
+            r(methods) : "Incidence rates per 1e-06 person-years with 95% confidence intervals from exact Poisson limits for the event count."
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL01.xlsx"
+              r(frame) : "_post251_rate"
+        r(outcome_ids) : "e"
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL01.md"
+                r(csv) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL01.csv"
+
+matrices:
+          r(estimates) :  1 x 8
+              r(rates) :  1 x 1
+
+__000000[1,8]
+                 outcome                 group                 level                events            persontime                  rate                    lb                    ub
+r1                     1                     1                     1                     1                    10  1.00000000000000e-07  2.53178079842899e-09  5.57164339093890e-07
+
+  +-----------------------------------------------------------------------+
+  | title         c1       c2                  c3                      c4 |
+  |-----------------------------------------------------------------------|
+  |                                                                       |
+  |         Exposure        e                                             |
+  |         Exposure   Events   Person-Years (PY)   Per 1e-06 PY (95% CI) |
+  |                g                                                      |
+  |                1        1                  10          0.0 (0.0, 0.0) |
+  +-----------------------------------------------------------------------+
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL02.md
+  +-------------------------------------------------------------+
+  | Exposure        e                                           |
+  |            Events   Person-Years (PY)   Per 0.5 PY (95% CI) |
+  |        g                                                    |
+  |        1        1                  10        0.1 (0.0, 0.3) |
+  +-------------------------------------------------------------+
+
+Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL02.xlsx, sheet Table
+POST251_UNITLABEL_CASE UL02 COMMAND_RC 0
+
+scalars:
+             r(N_nopt) =  0
+             r(N_noci) =  0
+             r(N_zero) =  0
+              r(level) =  95
+                r(per) =  .5
+                  r(N) =  1
+         r(smallcells) =  0
+           r(ci_level) =  95
+         r(N_outcomes) =  1
+        r(N_exposures) =  1
+             r(N_rows) =  5
+      r(markdown_cols) =  4
+      r(markdown_rows) =  2
+
+macros:
+             r(saving) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL02-saved.dta"
+          r(ci_method) : "exact"
+            r(methods) : "Incidence rates per 0.5 person-years with 95% confidence intervals from exact Poisson limits for the event count."
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL02.xlsx"
+              r(frame) : "_post251_rate"
+        r(outcome_ids) : "e"
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL02.md"
+                r(csv) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL02.csv"
+
+matrices:
+          r(estimates) :  1 x 8
+              r(rates) :  1 x 1
+
+__000001[1,8]
+               outcome               group               level              events          persontime                rate                  lb                  ub
+r1                   1                   1                   1                   1                  10                 .05  .00126589039921449    .278582169546945
+
+  +---------------------------------------------------------------------+
+  | title         c1       c2                  c3                    c4 |
+  |---------------------------------------------------------------------|
+  |                                                                     |
+  |         Exposure        e                                           |
+  |         Exposure   Events   Person-Years (PY)   Per 0.5 PY (95% CI) |
+  |                g                                                    |
+  |                1        1                  10        0.1 (0.0, 0.3) |
+  +---------------------------------------------------------------------+
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL03.md
+  +-----------------------------------------------------------------+
+  | Exposure        e                                               |
+  |            Events   Person-Years (PY)   Per 1,500.5 PY (95% CI) |
+  |        g                                                        |
+  |        1        1                  10        150.1 (3.8, 836.0) |
+  +-----------------------------------------------------------------+
+
+Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL03.xlsx, sheet Table
+POST251_UNITLABEL_CASE UL03 COMMAND_RC 0
+
+scalars:
+             r(N_nopt) =  0
+             r(N_noci) =  0
+             r(N_zero) =  0
+              r(level) =  95
+                r(per) =  1500.5
+                  r(N) =  1
+         r(smallcells) =  0
+           r(ci_level) =  95
+         r(N_outcomes) =  1
+        r(N_exposures) =  1
+             r(N_rows) =  5
+      r(markdown_cols) =  4
+      r(markdown_rows) =  2
+
+macros:
+             r(saving) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL03-saved.dta"
+          r(ci_method) : "exact"
+            r(methods) : "Incidence rates per 1,500.5 person-years with 95% confidence intervals from exact Poisson limits for the event count."
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL03.xlsx"
+              r(frame) : "_post251_rate"
+        r(outcome_ids) : "e"
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL03.md"
+                r(csv) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL03.csv"
+
+matrices:
+          r(estimates) :  1 x 8
+              r(rates) :  1 x 1
+
+__000002[1,8]
+             outcome             group             level            events        persontime              rate                lb                ub
+r1                 1                 1                 1                 1                10            150.05  3.79893708804269  836.025090810382
+
+  +-------------------------------------------------------------------------+
+  | title         c1       c2                  c3                        c4 |
+  |-------------------------------------------------------------------------|
+  |                                                                         |
+  |         Exposure        e                                               |
+  |         Exposure   Events   Person-Years (PY)   Per 1,500.5 PY (95% CI) |
+  |                g                                                        |
+  |                1        1                  10        150.1 (3.8, 836.0) |
+  +-------------------------------------------------------------------------+
+Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL04.md
+  +--------------------------------------------------------------------+
+  | Exposure        e                                                  |
+  |            Events   Person-Years (PY)   Per micro-unit PY (95% CI) |
+  |        g                                                           |
+  |        1        1                  10               0.0 (0.0, 0.0) |
+  +--------------------------------------------------------------------+
+
+Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL04.xlsx, sheet Table
+POST251_UNITLABEL_CASE UL04 COMMAND_RC 0
+
+scalars:
+             r(N_nopt) =  0
+             r(N_noci) =  0
+             r(N_zero) =  0
+              r(level) =  95
+                r(per) =  1.00000000000e-06
+                  r(N) =  1
+         r(smallcells) =  0
+           r(ci_level) =  95
+         r(N_outcomes) =  1
+        r(N_exposures) =  1
+             r(N_rows) =  5
+      r(markdown_cols) =  4
+      r(markdown_rows) =  2
+
+macros:
+             r(saving) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL04-saved.dta"
+          r(ci_method) : "exact"
+            r(methods) : "Incidence rates per micro-unit person-years with 95% confidence intervals from exact Poisson limits for the event count."
+              r(sheet) : "Table"
+               r(xlsx) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL04.xlsx"
+              r(frame) : "_post251_rate"
+        r(outcome_ids) : "e"
+           r(markdown) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL04.md"
+                r(csv) : "/tmp/tabtools-native-256-8xdo3o0x/out/UL04.csv"
+
+matrices:
+          r(estimates) :  1 x 8
+              r(rates) :  1 x 1
+
+__000003[1,8]
+                 outcome                 group                 level                events            persontime                  rate                    lb                    ub
+r1                     1                     1                     1                     1                    10  1.00000000000000e-07  2.53178079842899e-09  5.57164339093890e-07
+
+  +----------------------------------------------------------------------------+
+  | title         c1       c2                  c3                           c4 |
+  |----------------------------------------------------------------------------|
+  |                                                                            |
+  |         Exposure        e                                                  |
+  |         Exposure   Events   Person-Years (PY)   Per micro-unit PY (95% CI) |
+  |                g                                                           |
+  |                1        1                  10               0.0 (0.0, 0.0) |
+  +----------------------------------------------------------------------------+
+
+. noisily display as text "POST251_WEIGHT_UNITLABEL_CAPTURE_COMPLETE 8_IDS 12_COMMANDS"
+POST251_WEIGHT_UNITLABEL_CAPTURE_COMPLETE 8_IDS 12_COMMANDS
+
+. 
+end of do-file
+
+. display "ROOT_NATIVE_256_CAPTURE_COMPLETED"
+ROOT_NATIVE_256_CAPTURE_COMPLETED
+
+. exit, clear
+
+end of do-file

@@ -156,7 +156,11 @@
 #'   `keyed = FALSE`. They return a plain character body data frame with
 #'   `header`, `command`, `frame`, `sample_accounting` and `composition_export`
 #'   attributes; absent sample metadata remains absent. These editing products
-#'   cannot be reused as authenticated composition inputs.
+#'   cannot be reused as authenticated composition inputs. Composite exports
+#'   use `rowlabel`, `c1`, ... and retain full printed block/column headers
+#'   as column labels, so `puttab(flat, varlabels = TRUE)` publishes them.
+#'   R labels retain the full text; the native frame keeps that text in a
+#'   characteristic while its variable labels are limited to 80 bytes.
 #' @seealso [as.data.frame.tt_table()], [puttab()]
 #' @examples
 #' tab <- regtab(lm(mpg ~ wt + factor(cyl), mtcars), stats = "n")

@@ -1,0 +1,12 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC002_npempty
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+level,scalar,,,95
+ub,scalar,,,.
+lb,scalar,,,.
+pct,scalar,,,.
+missing,scalar,,,1
+citype,macro,,,exact
+form,macro,,,np

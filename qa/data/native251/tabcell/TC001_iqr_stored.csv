@@ -1,0 +1,8 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC001_iqr
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+missing,scalar,,,0
+form,macro,,,iqr
+cell,macro,,,"20 (18, 25)"

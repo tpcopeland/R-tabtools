@@ -116,8 +116,9 @@ as body rows. Coordinates outside the table are refused. Excel only.}
 column as 1: add a right rule. Excel only, including academic style.}
 
 \item{panel}{Data frames only: name of one source column. Changes in its
-values start panels in input order, with a bold merged heading using
-its value label or text. Blank panels have no heading or indentation.
+values start panels in input order, with a bold heading in the label
+column using its value label or text. Heading text contributes to Excel
+column width. Blank panels have no heading or indentation.
 This column is always excluded from the visible body, even in \code{vars}.}
 
 \item{panelheader}{Repeated panel header, requiring \code{panel}: names of

@@ -68,10 +68,13 @@ test_that("P2-3: effect_scale = 'OR' drops the intercept like stata_cmd and fitt
   z <- stats::qnorm(0.975)
   d <- data.frame(term = rownames(b), estimate = exp(b[, 1]), conf.low = exp(b[, 1] - z * b[, 2]),
                   conf.high = exp(b[, 1] + z * b[, 2]), p.value = b[, 4], row.names = NULL)
+  attr(d, "conf.level") <- .95  # the literal qnorm(0.975) bounds above
   a <- d
   attr(a, "effect_scale") <- "OR"
   s <- d
   attr(s, "stata_cmd") <- "logit"
+  expect_error(regtab(s), class = "tabtools_error_regtab_metadata")
+  attr(s, "effect_scale") <- "OR"  # command metadata alone cannot declare scale
   want <- regtab(f)$body[, 1]
   expect_false("Intercept" %in% want)
   expect_identical(regtab(a)$body[, 1], regtab(s)$body[, 1])

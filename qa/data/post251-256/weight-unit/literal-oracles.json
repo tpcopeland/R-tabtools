@@ -1,0 +1,876 @@
+{
+  "source_pin": "4eecca4d09d61df0cfe773fc2024b015920b5fe6",
+  "source_version": "2.5.6",
+  "capture_log_sha256": "d88912d28a7fd31ac683930ba8c07a9ef1042808b61e9bedda277528352b3052",
+  "case_ids": [
+    "WX01-unit",
+    "WX01-huge",
+    "WX02-unit",
+    "WX02-huge",
+    "WX03-unit",
+    "WX03-huge",
+    "WX04-unit",
+    "WX04-huge",
+    "UL01",
+    "UL02",
+    "UL03",
+    "UL04"
+  ],
+  "cases": {
+    "WX01-unit": {
+      "command_rc": 0,
+      "marker_line": 150,
+      "window_start_line": 139,
+      "window_end_line": 149,
+      "raw_publication_window": [
+        "  +-------------------------------------------------+",
+        "  |                         g = 1   g = 2   SMD     |",
+        "  |-------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4             |",
+        "  |-------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4           |",
+        "  |-------------------------------------------------|",
+        "  | x                       2±1     4±1     1.549   |",
+        "  +-------------------------------------------------+",
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.md"
+      ],
+      "native_console": [
+        "  +-------------------------------------------------+",
+        "  |                         g = 1   g = 2   SMD     |",
+        "  |-------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4             |",
+        "  |-------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4           |",
+        "  |-------------------------------------------------|",
+        "  | x                       2±1     4±1     1.549   |",
+        "  +-------------------------------------------------+"
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.md"
+      ],
+      "scalars": {
+        "markdown_cols": 4.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.xlsx",
+        "frame": "_post251_weight",
+        "smdtype": "pair",
+        "varlist": "x",
+        "Dapa": "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+      },
+      "returned_matrix_name": "table",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 1,
+        "rownames": [
+          "x"
+        ],
+        "colnames": [
+          "smd"
+        ],
+        "values": [
+          [
+            1.54919333848297
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  4\n      r(markdown_rows) =  2\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX01-unit.xlsx\"\n              r(frame) : \"_post251_weight\"\n            r(smdtype) : \"pair\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison.\"\n\nmatrices:\n              r(table) :  1 x 1\n"
+    },
+    "WX01-huge": {
+      "command_rc": 0,
+      "marker_line": 191,
+      "window_start_line": 180,
+      "window_end_line": 190,
+      "raw_publication_window": [
+        "  +-------------------------------------------------+",
+        "  |                         g = 1   g = 2   SMD     |",
+        "  |-------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4             |",
+        "  |-------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4           |",
+        "  |-------------------------------------------------|",
+        "  | x                       2±1     4±1     1.549   |",
+        "  +-------------------------------------------------+",
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.md"
+      ],
+      "native_console": [
+        "  +-------------------------------------------------+",
+        "  |                         g = 1   g = 2   SMD     |",
+        "  |-------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4             |",
+        "  |-------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4           |",
+        "  |-------------------------------------------------|",
+        "  | x                       2±1     4±1     1.549   |",
+        "  +-------------------------------------------------+"
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.md"
+      ],
+      "scalars": {
+        "markdown_cols": 4.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.xlsx",
+        "frame": "_post251_weight",
+        "smdtype": "pair",
+        "varlist": "x",
+        "Dapa": "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+      },
+      "returned_matrix_name": "table",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 1,
+        "rownames": [
+          "x"
+        ],
+        "colnames": [
+          "smd"
+        ],
+        "values": [
+          [
+            1.54919333848297
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  4\n      r(markdown_rows) =  2\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX01-huge.xlsx\"\n              r(frame) : \"_post251_weight\"\n            r(smdtype) : \"pair\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison.\"\n\nmatrices:\n              r(table) :  1 x 1\n"
+    },
+    "WX02-unit": {
+      "command_rc": 0,
+      "marker_line": 233,
+      "window_start_line": 221,
+      "window_end_line": 232,
+      "raw_publication_window": [
+        "Note: Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.",
+        "  +---------------------------------------------------------+",
+        "  |                         g = 1   g = 2   g = 3   Max SMD |",
+        "  |---------------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4     N=4             |",
+        "  |---------------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4   ESS=4           |",
+        "  |---------------------------------------------------------|",
+        "  | x                       2±1     4±1     6±1     3.098   |",
+        "  +---------------------------------------------------------+",
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.md"
+      ],
+      "native_console": [
+        "Note: Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.",
+        "  +---------------------------------------------------------+",
+        "  |                         g = 1   g = 2   g = 3   Max SMD |",
+        "  |---------------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4     N=4             |",
+        "  |---------------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4   ESS=4           |",
+        "  |---------------------------------------------------------|",
+        "  | x                       2±1     4±1     6±1     3.098   |",
+        "  +---------------------------------------------------------+"
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.md"
+      ],
+      "scalars": {
+        "markdown_cols": 5.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.xlsx",
+        "frame": "_post251_weight",
+        "smdnote": "Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.",
+        "smdtype": "maxpair",
+        "varlist": "x",
+        "Dapa": "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+      },
+      "returned_matrix_name": "table",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 1,
+        "rownames": [
+          "x"
+        ],
+        "colnames": [
+          "smd"
+        ],
+        "values": [
+          [
+            3.09838667696593
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  5\n      r(markdown_rows) =  2\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX02-unit.xlsx\"\n              r(frame) : \"_post251_weight\"\n            r(smdnote) : \"Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.\"\n            r(smdtype) : \"maxpair\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison.\"\n\nmatrices:\n              r(table) :  1 x 1\n"
+    },
+    "WX02-huge": {
+      "command_rc": 0,
+      "marker_line": 276,
+      "window_start_line": 264,
+      "window_end_line": 275,
+      "raw_publication_window": [
+        "Note: Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.",
+        "  +---------------------------------------------------------+",
+        "  |                         g = 1   g = 2   g = 3   Max SMD |",
+        "  |---------------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4     N=4             |",
+        "  |---------------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4   ESS=4           |",
+        "  |---------------------------------------------------------|",
+        "  | x                       2±1     4±1     6±1     3.098   |",
+        "  +---------------------------------------------------------+",
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.md"
+      ],
+      "native_console": [
+        "Note: Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.",
+        "  +---------------------------------------------------------+",
+        "  |                         g = 1   g = 2   g = 3   Max SMD |",
+        "  |---------------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4     N=4             |",
+        "  |---------------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4   ESS=4           |",
+        "  |---------------------------------------------------------|",
+        "  | x                       2±1     4±1     6±1     3.098   |",
+        "  +---------------------------------------------------------+"
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.md"
+      ],
+      "scalars": {
+        "markdown_cols": 5.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.xlsx",
+        "frame": "_post251_weight",
+        "smdnote": "Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.",
+        "smdtype": "maxpair",
+        "varlist": "x",
+        "Dapa": "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+      },
+      "returned_matrix_name": "table",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 1,
+        "rownames": [
+          "x"
+        ],
+        "colnames": [
+          "smd"
+        ],
+        "values": [
+          [
+            3.09838667696593
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  5\n      r(markdown_rows) =  2\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX02-huge.xlsx\"\n              r(frame) : \"_post251_weight\"\n            r(smdnote) : \"Max SMD: largest absolute pairwise difference across the 3 groups, in the root-mean of the group variances.\"\n            r(smdtype) : \"maxpair\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison.\"\n\nmatrices:\n              r(table) :  1 x 1\n"
+    },
+    "WX03-unit": {
+      "command_rc": 0,
+      "marker_line": 319,
+      "window_start_line": 307,
+      "window_end_line": 318,
+      "raw_publication_window": [
+        "Note: Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).",
+        "  +---------------------------------------------------------+",
+        "  |                         g = 1   g = 2   g = 3   Pop. SB |",
+        "  |---------------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4     N=4             |",
+        "  |---------------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4   ESS=4           |",
+        "  |---------------------------------------------------------|",
+        "  | x                       2±1     4±1     6±1     0.968   |",
+        "  +---------------------------------------------------------+",
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.md"
+      ],
+      "native_console": [
+        "Note: Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).",
+        "  +---------------------------------------------------------+",
+        "  |                         g = 1   g = 2   g = 3   Pop. SB |",
+        "  |---------------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4     N=4             |",
+        "  |---------------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4   ESS=4           |",
+        "  |---------------------------------------------------------|",
+        "  | x                       2±1     4±1     6±1     0.968   |",
+        "  +---------------------------------------------------------+"
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.md"
+      ],
+      "scalars": {
+        "markdown_cols": 5.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.xlsx",
+        "frame": "_post251_weight",
+        "smdnote": "Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).",
+        "smdtype": "population",
+        "varlist": "x",
+        "Dapa": "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+      },
+      "returned_matrix_name": "table",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 1,
+        "rownames": [
+          "x"
+        ],
+        "colnames": [
+          "smd"
+        ],
+        "values": [
+          [
+            0.967558893693794
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  5\n      r(markdown_rows) =  2\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX03-unit.xlsx\"\n              r(frame) : \"_post251_weight\"\n            r(smdnote) : \"Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).\"\n            r(smdtype) : \"population\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison.\"\n\nmatrices:\n              r(table) :  1 x 1\n"
+    },
+    "WX03-huge": {
+      "command_rc": 0,
+      "marker_line": 362,
+      "window_start_line": 350,
+      "window_end_line": 361,
+      "raw_publication_window": [
+        "Note: Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).",
+        "  +---------------------------------------------------------+",
+        "  |                         g = 1   g = 2   g = 3   Pop. SB |",
+        "  |---------------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4     N=4             |",
+        "  |---------------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4   ESS=4           |",
+        "  |---------------------------------------------------------|",
+        "  | x                       2±1     4±1     6±1     0.968   |",
+        "  +---------------------------------------------------------+",
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.md"
+      ],
+      "native_console": [
+        "Note: Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).",
+        "  +---------------------------------------------------------+",
+        "  |                         g = 1   g = 2   g = 3   Pop. SB |",
+        "  |---------------------------------------------------------|",
+        "  | Mean±SD                 N=4     N=4     N=4             |",
+        "  |---------------------------------------------------------|",
+        "  | Effective sample size   ESS=4   ESS=4   ESS=4           |",
+        "  |---------------------------------------------------------|",
+        "  | x                       2±1     4±1     6±1     0.968   |",
+        "  +---------------------------------------------------------+"
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.md"
+      ],
+      "scalars": {
+        "markdown_cols": 5.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.xlsx",
+        "frame": "_post251_weight",
+        "smdnote": "Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).",
+        "smdtype": "population",
+        "varlist": "x",
+        "Dapa": "Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison."
+      },
+      "returned_matrix_name": "table",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 1,
+        "rownames": [
+          "x"
+        ],
+        "colnames": [
+          "smd"
+        ],
+        "values": [
+          [
+            0.967558893693794
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  5\n      r(markdown_rows) =  2\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX03-huge.xlsx\"\n              r(frame) : \"_post251_weight\"\n            r(smdnote) : \"Pop. SB: largest absolute difference between a group mean and the overall mean, in overall-sample SDs, across the 3 groups (McCaffrey et al. 2013).\"\n            r(smdtype) : \"population\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Weighted data are presented as mean±SD. P-values suppressed. SMD reflects weighted comparison.\"\n\nmatrices:\n              r(table) :  1 x 1\n"
+    },
+    "WX04-unit": {
+      "command_rc": 0,
+      "marker_line": 420,
+      "window_start_line": 409,
+      "window_end_line": 419,
+      "raw_publication_window": [
+        "  +-----------------------------------------+",
+        "  |                         g = 1    g = 2  |",
+        "  |-----------------------------------------|",
+        "  | Mean±SD                 N=20     N=20   |",
+        "  |-----------------------------------------|",
+        "  | Effective sample size   ESS=20   ESS=20 |",
+        "  |-----------------------------------------|",
+        "  | x                       3010±6   3010±6 |",
+        "  +-----------------------------------------+",
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.md"
+      ],
+      "native_console": [
+        "  +-----------------------------------------+",
+        "  |                         g = 1    g = 2  |",
+        "  |-----------------------------------------|",
+        "  | Mean±SD                 N=20     N=20   |",
+        "  |-----------------------------------------|",
+        "  | Effective sample size   ESS=20   ESS=20 |",
+        "  |-----------------------------------------|",
+        "  | x                       3010±6   3010±6 |",
+        "  +-----------------------------------------+"
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.md"
+      ],
+      "scalars": {
+        "markdown_cols": 3.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.xlsx",
+        "frame": "_post251_weight",
+        "varlist": "x",
+        "Dapa": "Weighted data are presented as mean±SD. P-values suppressed."
+      },
+      "returned_matrix_name": null,
+      "matrix": null,
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  3\n      r(markdown_rows) =  2\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX04-unit.xlsx\"\n              r(frame) : \"_post251_weight\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Weighted data are presented as mean±SD. P-values suppressed.\"\n"
+    },
+    "WX04-huge": {
+      "command_rc": 0,
+      "marker_line": 459,
+      "window_start_line": 448,
+      "window_end_line": 458,
+      "raw_publication_window": [
+        "  +-----------------------------------------+",
+        "  |                         g = 1    g = 2  |",
+        "  |-----------------------------------------|",
+        "  | Mean±SD                 N=20     N=20   |",
+        "  |-----------------------------------------|",
+        "  | Effective sample size   ESS=20   ESS=20 |",
+        "  |-----------------------------------------|",
+        "  | x                       3010±6   3010±6 |",
+        "  +-----------------------------------------+",
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.md"
+      ],
+      "native_console": [
+        "  +-----------------------------------------+",
+        "  |                         g = 1    g = 2  |",
+        "  |-----------------------------------------|",
+        "  | Mean±SD                 N=20     N=20   |",
+        "  |-----------------------------------------|",
+        "  | Effective sample size   ESS=20   ESS=20 |",
+        "  |-----------------------------------------|",
+        "  | x                       3010±6   3010±6 |",
+        "  +-----------------------------------------+"
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.csv",
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.md"
+      ],
+      "scalars": {
+        "markdown_cols": 3.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.xlsx",
+        "frame": "_post251_weight",
+        "varlist": "x",
+        "Dapa": "Weighted data are presented as mean±SD. P-values suppressed."
+      },
+      "returned_matrix_name": null,
+      "matrix": null,
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  3\n      r(markdown_rows) =  2\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/WX04-huge.xlsx\"\n              r(frame) : \"_post251_weight\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Weighted data are presented as mean±SD. P-values suppressed.\"\n"
+    },
+    "UL01": {
+      "command_rc": 0,
+      "marker_line": 523,
+      "window_start_line": 514,
+      "window_end_line": 522,
+      "raw_publication_window": [
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL01.md",
+        "  +---------------------------------------------------------------+",
+        "  | Exposure        e                                             |",
+        "  |            Events   Person-Years (PY)   Per 1e-06 PY (95% CI) |",
+        "  |        g                                                      |",
+        "  |        1        1                  10          0.0 (0.0, 0.0) |",
+        "  +---------------------------------------------------------------+",
+        "",
+        "Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL01.xlsx, sheet Table"
+      ],
+      "native_console": [
+        "  +---------------------------------------------------------------+",
+        "  | Exposure        e                                             |",
+        "  |            Events   Person-Years (PY)   Per 1e-06 PY (95% CI) |",
+        "  |        g                                                      |",
+        "  |        1        1                  10          0.0 (0.0, 0.0) |",
+        "  +---------------------------------------------------------------+",
+        ""
+      ],
+      "sink_messages": [
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL01.md",
+        "Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL01.xlsx, sheet Table"
+      ],
+      "scalars": {
+        "N_nopt": 0.0,
+        "N_noci": 0.0,
+        "N_zero": 0.0,
+        "level": 95.0,
+        "per": 1e-06,
+        "N": 1.0,
+        "smallcells": 0.0,
+        "ci_level": 95.0,
+        "N_outcomes": 1.0,
+        "N_exposures": 1.0,
+        "N_rows": 5.0,
+        "markdown_cols": 4.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "saving": "/tmp/tabtools-native-256-8xdo3o0x/out/UL01-saved.dta",
+        "ci_method": "exact",
+        "methods": "Incidence rates per 1e-06 person-years with 95% confidence intervals from exact Poisson limits for the event count.",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/UL01.xlsx",
+        "frame": "_post251_rate",
+        "outcome_ids": "e",
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/UL01.md",
+        "csv": "/tmp/tabtools-native-256-8xdo3o0x/out/UL01.csv"
+      },
+      "returned_matrix_name": "estimates",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 8,
+        "rownames": [
+          "r1"
+        ],
+        "colnames": [
+          "outcome",
+          "group",
+          "level",
+          "events",
+          "persontime",
+          "rate",
+          "lb",
+          "ub"
+        ],
+        "values": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            10.0,
+            1e-07,
+            2.53178079842899e-09,
+            5.5716433909389e-07
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n             r(N_nopt) =  0\n             r(N_noci) =  0\n             r(N_zero) =  0\n              r(level) =  95\n                r(per) =  1.00000000000e-06\n                  r(N) =  1\n         r(smallcells) =  0\n           r(ci_level) =  95\n         r(N_outcomes) =  1\n        r(N_exposures) =  1\n             r(N_rows) =  5\n      r(markdown_cols) =  4\n      r(markdown_rows) =  2\n\nmacros:\n             r(saving) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL01-saved.dta\"\n          r(ci_method) : \"exact\"\n            r(methods) : \"Incidence rates per 1e-06 person-years with 95% confidence intervals from exact Poisson limits for the event count.\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL01.xlsx\"\n              r(frame) : \"_post251_rate\"\n        r(outcome_ids) : \"e\"\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL01.md\"\n                r(csv) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL01.csv\"\n\nmatrices:\n          r(estimates) :  1 x 8\n              r(rates) :  1 x 1\n"
+    },
+    "UL02": {
+      "command_rc": 0,
+      "marker_line": 577,
+      "window_start_line": 568,
+      "window_end_line": 576,
+      "raw_publication_window": [
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL02.md",
+        "  +-------------------------------------------------------------+",
+        "  | Exposure        e                                           |",
+        "  |            Events   Person-Years (PY)   Per 0.5 PY (95% CI) |",
+        "  |        g                                                    |",
+        "  |        1        1                  10        0.1 (0.0, 0.3) |",
+        "  +-------------------------------------------------------------+",
+        "",
+        "Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL02.xlsx, sheet Table"
+      ],
+      "native_console": [
+        "  +-------------------------------------------------------------+",
+        "  | Exposure        e                                           |",
+        "  |            Events   Person-Years (PY)   Per 0.5 PY (95% CI) |",
+        "  |        g                                                    |",
+        "  |        1        1                  10        0.1 (0.0, 0.3) |",
+        "  +-------------------------------------------------------------+",
+        ""
+      ],
+      "sink_messages": [
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL02.md",
+        "Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL02.xlsx, sheet Table"
+      ],
+      "scalars": {
+        "N_nopt": 0.0,
+        "N_noci": 0.0,
+        "N_zero": 0.0,
+        "level": 95.0,
+        "per": 0.5,
+        "N": 1.0,
+        "smallcells": 0.0,
+        "ci_level": 95.0,
+        "N_outcomes": 1.0,
+        "N_exposures": 1.0,
+        "N_rows": 5.0,
+        "markdown_cols": 4.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "saving": "/tmp/tabtools-native-256-8xdo3o0x/out/UL02-saved.dta",
+        "ci_method": "exact",
+        "methods": "Incidence rates per 0.5 person-years with 95% confidence intervals from exact Poisson limits for the event count.",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/UL02.xlsx",
+        "frame": "_post251_rate",
+        "outcome_ids": "e",
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/UL02.md",
+        "csv": "/tmp/tabtools-native-256-8xdo3o0x/out/UL02.csv"
+      },
+      "returned_matrix_name": "estimates",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 8,
+        "rownames": [
+          "r1"
+        ],
+        "colnames": [
+          "outcome",
+          "group",
+          "level",
+          "events",
+          "persontime",
+          "rate",
+          "lb",
+          "ub"
+        ],
+        "values": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            10.0,
+            0.05,
+            0.00126589039921449,
+            0.278582169546945
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n             r(N_nopt) =  0\n             r(N_noci) =  0\n             r(N_zero) =  0\n              r(level) =  95\n                r(per) =  .5\n                  r(N) =  1\n         r(smallcells) =  0\n           r(ci_level) =  95\n         r(N_outcomes) =  1\n        r(N_exposures) =  1\n             r(N_rows) =  5\n      r(markdown_cols) =  4\n      r(markdown_rows) =  2\n\nmacros:\n             r(saving) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL02-saved.dta\"\n          r(ci_method) : \"exact\"\n            r(methods) : \"Incidence rates per 0.5 person-years with 95% confidence intervals from exact Poisson limits for the event count.\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL02.xlsx\"\n              r(frame) : \"_post251_rate\"\n        r(outcome_ids) : \"e\"\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL02.md\"\n                r(csv) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL02.csv\"\n\nmatrices:\n          r(estimates) :  1 x 8\n              r(rates) :  1 x 1\n"
+    },
+    "UL03": {
+      "command_rc": 0,
+      "marker_line": 631,
+      "window_start_line": 622,
+      "window_end_line": 630,
+      "raw_publication_window": [
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL03.md",
+        "  +-----------------------------------------------------------------+",
+        "  | Exposure        e                                               |",
+        "  |            Events   Person-Years (PY)   Per 1,500.5 PY (95% CI) |",
+        "  |        g                                                        |",
+        "  |        1        1                  10        150.1 (3.8, 836.0) |",
+        "  +-----------------------------------------------------------------+",
+        "",
+        "Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL03.xlsx, sheet Table"
+      ],
+      "native_console": [
+        "  +-----------------------------------------------------------------+",
+        "  | Exposure        e                                               |",
+        "  |            Events   Person-Years (PY)   Per 1,500.5 PY (95% CI) |",
+        "  |        g                                                        |",
+        "  |        1        1                  10        150.1 (3.8, 836.0) |",
+        "  +-----------------------------------------------------------------+",
+        ""
+      ],
+      "sink_messages": [
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL03.md",
+        "Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL03.xlsx, sheet Table"
+      ],
+      "scalars": {
+        "N_nopt": 0.0,
+        "N_noci": 0.0,
+        "N_zero": 0.0,
+        "level": 95.0,
+        "per": 1500.5,
+        "N": 1.0,
+        "smallcells": 0.0,
+        "ci_level": 95.0,
+        "N_outcomes": 1.0,
+        "N_exposures": 1.0,
+        "N_rows": 5.0,
+        "markdown_cols": 4.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "saving": "/tmp/tabtools-native-256-8xdo3o0x/out/UL03-saved.dta",
+        "ci_method": "exact",
+        "methods": "Incidence rates per 1,500.5 person-years with 95% confidence intervals from exact Poisson limits for the event count.",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/UL03.xlsx",
+        "frame": "_post251_rate",
+        "outcome_ids": "e",
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/UL03.md",
+        "csv": "/tmp/tabtools-native-256-8xdo3o0x/out/UL03.csv"
+      },
+      "returned_matrix_name": "estimates",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 8,
+        "rownames": [
+          "r1"
+        ],
+        "colnames": [
+          "outcome",
+          "group",
+          "level",
+          "events",
+          "persontime",
+          "rate",
+          "lb",
+          "ub"
+        ],
+        "values": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            10.0,
+            150.05,
+            3.79893708804269,
+            836.025090810382
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n             r(N_nopt) =  0\n             r(N_noci) =  0\n             r(N_zero) =  0\n              r(level) =  95\n                r(per) =  1500.5\n                  r(N) =  1\n         r(smallcells) =  0\n           r(ci_level) =  95\n         r(N_outcomes) =  1\n        r(N_exposures) =  1\n             r(N_rows) =  5\n      r(markdown_cols) =  4\n      r(markdown_rows) =  2\n\nmacros:\n             r(saving) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL03-saved.dta\"\n          r(ci_method) : \"exact\"\n            r(methods) : \"Incidence rates per 1,500.5 person-years with 95% confidence intervals from exact Poisson limits for the event count.\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL03.xlsx\"\n              r(frame) : \"_post251_rate\"\n        r(outcome_ids) : \"e\"\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL03.md\"\n                r(csv) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL03.csv\"\n\nmatrices:\n          r(estimates) :  1 x 8\n              r(rates) :  1 x 1\n"
+    },
+    "UL04": {
+      "command_rc": 0,
+      "marker_line": 685,
+      "window_start_line": 676,
+      "window_end_line": 684,
+      "raw_publication_window": [
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL04.md",
+        "  +--------------------------------------------------------------------+",
+        "  | Exposure        e                                                  |",
+        "  |            Events   Person-Years (PY)   Per micro-unit PY (95% CI) |",
+        "  |        g                                                           |",
+        "  |        1        1                  10               0.0 (0.0, 0.0) |",
+        "  +--------------------------------------------------------------------+",
+        "",
+        "Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL04.xlsx, sheet Table"
+      ],
+      "native_console": [
+        "  +--------------------------------------------------------------------+",
+        "  | Exposure        e                                                  |",
+        "  |            Events   Person-Years (PY)   Per micro-unit PY (95% CI) |",
+        "  |        g                                                           |",
+        "  |        1        1                  10               0.0 (0.0, 0.0) |",
+        "  +--------------------------------------------------------------------+",
+        ""
+      ],
+      "sink_messages": [
+        "Markdown exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL04.md",
+        "Exported to /tmp/tabtools-native-256-8xdo3o0x/out/UL04.xlsx, sheet Table"
+      ],
+      "scalars": {
+        "N_nopt": 0.0,
+        "N_noci": 0.0,
+        "N_zero": 0.0,
+        "level": 95.0,
+        "per": 1e-06,
+        "N": 1.0,
+        "smallcells": 0.0,
+        "ci_level": 95.0,
+        "N_outcomes": 1.0,
+        "N_exposures": 1.0,
+        "N_rows": 5.0,
+        "markdown_cols": 4.0,
+        "markdown_rows": 2.0
+      },
+      "macros": {
+        "saving": "/tmp/tabtools-native-256-8xdo3o0x/out/UL04-saved.dta",
+        "ci_method": "exact",
+        "methods": "Incidence rates per micro-unit person-years with 95% confidence intervals from exact Poisson limits for the event count.",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-8xdo3o0x/out/UL04.xlsx",
+        "frame": "_post251_rate",
+        "outcome_ids": "e",
+        "markdown": "/tmp/tabtools-native-256-8xdo3o0x/out/UL04.md",
+        "csv": "/tmp/tabtools-native-256-8xdo3o0x/out/UL04.csv"
+      },
+      "returned_matrix_name": "estimates",
+      "matrix": {
+        "nrow": 1,
+        "ncol": 8,
+        "rownames": [
+          "r1"
+        ],
+        "colnames": [
+          "outcome",
+          "group",
+          "level",
+          "events",
+          "persontime",
+          "rate",
+          "lb",
+          "ub"
+        ],
+        "values": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            10.0,
+            1e-07,
+            2.53178079842899e-09,
+            5.5716433909389e-07
+          ]
+        ]
+      },
+      "absent_table": false,
+      "returned_matrix_listing": "\nscalars:\n             r(N_nopt) =  0\n             r(N_noci) =  0\n             r(N_zero) =  0\n              r(level) =  95\n                r(per) =  1.00000000000e-06\n                  r(N) =  1\n         r(smallcells) =  0\n           r(ci_level) =  95\n         r(N_outcomes) =  1\n        r(N_exposures) =  1\n             r(N_rows) =  5\n      r(markdown_cols) =  4\n      r(markdown_rows) =  2\n\nmacros:\n             r(saving) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL04-saved.dta\"\n          r(ci_method) : \"exact\"\n            r(methods) : \"Incidence rates per micro-unit person-years with 95% confidence intervals from exact Poisson limits for the event count.\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL04.xlsx\"\n              r(frame) : \"_post251_rate\"\n        r(outcome_ids) : \"e\"\n           r(markdown) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL04.md\"\n                r(csv) : \"/tmp/tabtools-native-256-8xdo3o0x/out/UL04.csv\"\n\nmatrices:\n          r(estimates) :  1 x 8\n              r(rates) :  1 x 1\n"
+    }
+  },
+  "derivation": "Literal native capture projection only, original full windows and line provenance retained; no R producer values."
+}

@@ -1,0 +1,22 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC004_lincom
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+lincom_estimate,scalar,,,1.3342857142857143
+se,scalar,,,.07854854335855771
+lincom_level,scalar,,,95
+t,scalar,,,16.986765855032836
+p,scalar,,,9.55385141795842e-14
+lincom_lb,scalar,,,1.1709350760340653
+lincom_ub,scalar,,,1.4976363525373633
+df,scalar,,,21
+scale,scalar,,,10
+level,scalar,,,90
+ub,scalar,,,43.46833125305109
+lb,scalar,,,33.172093285777848
+estimate,scalar,,,37.972826327563553
+missing,scalar,,,0
+source,macro,,,lincom
+form,macro,,,est
+cell,macro,,,"37.97 (33.17, 43.47)"

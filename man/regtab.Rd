@@ -128,7 +128,10 @@ string of tokens (case-insensitive): \code{"n"} (\code{"n_sub"}, \code{"subjects
 \code{"icc"}, \code{"r2"}, \code{"r2_a"}, \code{"rmse"}, \code{"F"}, \code{"fmi"}, and the R-only
 \code{"vce"}. The rows always come in that order, whatever the order of the
 tokens, and a row no model reports is left out; see the section on
-model statistics.}
+model statistics. The console identifies unavailable requested built-in
+tokens. A statistic missing in only some models keeps its row with blank
+cells. Structured custom scalars unavailable in every model still raise
+\code{tabtools_error_statspec}.}
 
 \item{stat_fun}{R only: extra statistics rows below the Stata ones, a
 named list whose names are the row labels and whose entries are
@@ -665,7 +668,11 @@ note appears and the statistics are shown.
 the \code{strata()} term gives no row. Only \code{method = "exact"} (the default,
 Stata's exact conditional likelihood, which survival fits unweighted);
 \code{vce = "stata"} or \code{"model"}. Observations counts the rows; \code{events} and
-\code{groups} add no row (Stata's clogit stores neither). As in Stata
+\code{groups} add no row (Stata's clogit stores neither). A requested groups
+row identifies the model and its retained grouping term in a console note.
+No count is derived from the current data; a verified \code{\link[=tt_fitcount]{tt_fitcount()}} record
+supplied through \code{fitcounts} can provide \code{people}, relabelled Groups with
+\code{statlabels}. As in Stata
 tabtools 2.1.14, which classifies \code{clogit} like \code{logit} (odds ratios
 whether or not it was fitted with \code{or}), the header is OR, \code{dimnonsig}
 judges against 1, the methods sentence says "conditional logistic
@@ -1082,7 +1089,7 @@ in Stata; coefficients in R).
 coefficient or one contiguous factor block's last level, using keep/drop's
 factor-marker normalization. Missing or ambiguous anchors refuse before
 output. Anchors resolve before insertion; same-anchor entries retain input
-order and inherit indentation. Added rows have positional raw keys.
+order and inherit indentation. Added rows use \verb{addrow:<label>} keys with collision-free occurrence suffixes.
 }
 
 \section{Session destinations}{

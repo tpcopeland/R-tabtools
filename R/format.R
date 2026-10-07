@@ -107,7 +107,7 @@ format_p <- function(p, pdp = 3L, highpdp = 2L) {
   if (p$w < 1L || p$w > 10000L || p$d > 400L ||
       (p$type == "g" && p$d == 0L && p$w > 402L)) {
     cli::cli_abort(c("Unsupported Stata display format {.val {fmt}}.",
-                     "i" = "R supports widths 1–10000 and decimals 0–400; zero-decimal g formats have width at most 402."),
+                     "i" = "R supports widths 1\u201310000 and decimals 0\u2013400; zero-decimal g formats have width at most 402."),
                    class = "tabtools_error_fmt", call = NULL)
   }
   if (p$type == "e" && p$comma) {
@@ -409,10 +409,12 @@ stata_macro_text <- function(x) {
     txt <- character(length(v))
     txt[sci] <- .tt_fmt_e(v[sci], 11L)
     fx <- !sci
-    dec <- ifelse(e[fx] >= 0, pmax(15 - e[fx], 0), 16)
-    f <- .tt_fmt_f(v[fx], dec)
-    f <- ifelse(grepl(".", f, fixed = TRUE), sub("\\.$", "", sub("0+$", "", f)), f)
-    txt[fx] <- sub("^(-?)0\\.", "\\1.", f)
+    if (any(fx)) {
+      dec <- ifelse(e[fx] >= 0, pmax(15 - e[fx], 0), 16)
+      f <- .tt_fmt_f(v[fx], dec)
+      f <- ifelse(grepl(".", f, fixed = TRUE), sub("\\.$", "", sub("0+$", "", f)), f)
+      txt[fx] <- sub("^(-?)0\\.", "\\1.", f)
+    }
     out[nz] <- txt
   }
   out

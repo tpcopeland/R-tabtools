@@ -1,7 +1,7 @@
 Package: tabtools
 Title: Publication-Ready Descriptive and Regression Tables
-Version: 0.1.1
-Date: 2026-10-06
+Version: 0.2.0
+Date: 2026-10-07
 Authors@R: c(
     person("Timothy P", "Copeland", role = c("aut", "cre"),
            email = "timothy.copeland@ki.se"),
@@ -11,19 +11,16 @@ Authors@R: c(
            comment = "Mersenne Twister MT19937-64 reference code in src/stata_mt64.c")
   )
 Copyright: See file inst/COPYRIGHTS
-Description: R implementation of the 'Stata' 'tabtools' commands
-    'table1_tc', 'regtab', 'puttab', 'stacktab', 'stratetab', 'effecttab',
-    'comptab' and 'hrcomptab' (version 2.1.14), and a weight-diagnostics
-    table for inverse probability weighting. Produces baseline
-    characteristics tables, regression tables, incidence-rate tables (with
-    the rates of 'Stata' 'strate'), cohort-study tables of incidence rates
-    beside hazard ratios, tables of treatment effects and margins, tables
-    of the distribution of inverse probability weights, and composite
-    sheets assembled from them, with row-level control over variable labels, category
-    indentation, reference rows, and house-styled 'Excel', Markdown, and CSV
-    output. Descriptive statistics, layout, and formatting target
-    cell-for-cell parity with the 'Stata' commands; hypothesis tests use R's
-    conventional defaults.
+Description: R interfaces to the 'Stata' 'tabtools' 2.5.1 table workflows:
+    descriptive and regression tables, categorical cross-tabulations,
+    correlations, survival summaries, cell formatting, incidence rates,
+    binary outcome ratios, treatment effects and composite tables.
+    Supports fit-time count records, publication masking, editable table
+    frames and shared output destinations. Writes house-styled 'Excel',
+    Markdown and CSV tables and converts tables for Word, HTML and LaTeX.
+    Targets the pinned native table structure and formatting while
+    documenting differences in statistical inference, numerical boundaries
+    and the separation of analytical returns from publication values.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-GB
@@ -39,9 +36,12 @@ Imports:
     utils,
     withr
 Suggests:
+    survRM2,
     AER,
+    broom,
     callr,
     cmprsk,
+    digest,
     flextable,
     geepack,
     glmmTMB,
@@ -60,6 +60,7 @@ Suggests:
     nlme,
     nnet,
     officer,
+    openxlsx,
     ordinal,
     pscl,
     rlang,

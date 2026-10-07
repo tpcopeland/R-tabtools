@@ -546,9 +546,18 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
 }
 
 .st_fmt_rate_spec <- function(est, lo, hi, format) {
-  value <- .tt_format_numeric(est, format)
-  out <- paste0(value, " (", .tt_format_numeric(lo, format), format$sep,
-                .tt_format_numeric(hi, format), ")")
+  render <- function(x) {
+    if (!is.null(format$cformat)) {
+      parsed <- .parse_stata_fmt(format$normalized)
+      # Native fixed cformat pre-rounds at its own decimals; g/e retain
+      # significant-digit formatting. round(x, 0) is x in Stata.
+      unit <- if (parsed$type == "f") 10^(-parsed$d) else 0
+      if (unit > 0) x <- stata_round(x, unit)
+    }
+    .tt_format_numeric(x, format)
+  }
+  value <- render(est)
+  out <- paste0(value, " (", render(lo), format$sep, render(hi), ")")
   nob <- is.na(lo) | is.na(hi)
   out[nob] <- paste0(value[nob], " (\u2013)")
   out
@@ -963,10 +972,12 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
   trimws(stata_fmt(stata_round(v, 10^(-d)), paste0("%11.", d, "f")))
 }
 
-.st_fmt_events <- function(v, d) trimws(stata_fmt(v, paste0("%24.", d, "fc")))
+# Stata tabtools 2.5.2 applies the same half-up rule to events and all
+# person-time precisions, rather than direct string() tie-to-even rounding.
+.st_fmt_events <- function(v, d) trimws(stata_fmt(stata_round(v, 10^(-d)), paste0("%24.", d, "fc")))
 
 .st_fmt_py <- function(v, d) {
-  if (d == 0L) trimws(stata_fmt(stata_round(v, 1), "%24.0fc")) else trimws(stata_fmt(v, paste0("%24.", d, "fc")))
+  trimws(stata_fmt(stata_round(v, 10^(-d)), paste0("%24.", d, "fc")))
 }
 
 .st_fmt_ci <- function(est, lo, hi, d, sep = ", ") {

@@ -124,6 +124,16 @@ golden_publication_contract <- function(id) {
       sc$command == "hrcomptab" || sc$command == "comptab" && grepl("golden_strate_blocks", sc$r_call, fixed = TRUE))) {
     console_note <- native_note
   }
+  if (identical(id, "T18")) {
+    # Native desctab prints this literal note before the box, not in its tail.
+    lines <- native_sources$console
+    edge <- which(grepl("^[ ]*\\+-+\\+[ ]*$", lines))
+    testthat::expect_true(length(edge) >= 2L, label = "T18 native console boundaries")
+    before <- lines[seq_len(edge[1L] - 1L)]
+    testthat::expect_identical(before[nzchar(trimws(before))], paste("Note:", note),
+      label = "T18 complete authentic native annotation before the box")
+    console_note <- character()
+  }
   c$native_footers <- list(csv = native_note, markdown = golden_fn_md(native_note),
                            console = console_note, xlsx = xnote)
   c$native_grid <- native_grid
@@ -263,7 +273,7 @@ golden_footer_style_templates <- function(contract, id) {
     label = paste(id, "complete native paragraph height rows"))
   testthat::expect_identical(heights$height, if (nrow(heights)) rep(heights$height[1L], length(rows)) else numeric(),
     label = paste(id, "uniform native paragraph heights"))
-  sparse <- command %in% c("table1_tc", "desctab", "regtab", "stratetab", "effecttab", "comptab", "hrcomptab")
+  sparse <- command %in% c("table1_tc", "desctab", "regtab", "stratetab", "effecttab", "comptab", "hrcomptab", "survtab", "corrtab", "crosstab")
   if (sparse) {
     footers <- contract$native_styles[contract$native_styles$row > contract$sheet_end, , drop = FALSE]
     children <- footers[footers$col != 2L, , drop = FALSE]
@@ -288,8 +298,38 @@ golden_footer_style_templates <- function(contract, id) {
        halign = if (command == "stacktab") "general" else "left")
 }
 
+# This R-only warning has no native paragraph to use as a template. Its exact
+# declared house style is checked before the complete native body comparison.
+golden_demo_reverse_styles <- function(g, w, gl, wl, contract) {
+  end <- contract$sheet_end
+  testthat::expect_identical(end, 8L)
+  testthat::expect_identical(contract$native_footers$xlsx, character())
+  testthat::expect_true(all(w$row <= end))
+  rows <- golden_footer_rows(max(g$row), end)
+  testthat::expect_identical(rows, 9L)
+  footer <- g[g$row > end, , drop = FALSE]
+  testthat::expect_identical(footer$address, "B9")
+  golden_assert_footnote_tail(footer$value, contract, "xlsx")
+  golden_assert_footnote_styles(g, 9L, 2:5, fontsize = 12, font = "Times New Roman")
+  literal <- list(bold = FALSE, italic = TRUE, font = "Times New Roman", size = 10,
+    number_format = "General", font_color = "", halign = "left", valign = "center", wrap = TRUE,
+    border_top = NA_character_, border_bottom = NA_character_, border_left = NA_character_,
+    border_right = NA_character_, fill = "")
+  for (name in names(literal)) testthat::expect_identical(footer[[name]], literal[[name]],
+    info = paste("R-only reverse complete footer style", name))
+  hi <- function(merges) as.integer(sub("^.*[A-Z]+([0-9]+)$", "\\1", merges))
+  gm <- gl$merges[hi(gl$merges) > end]
+  testthat::expect_identical(gm, "B9:E9")
+  testthat::expect_identical(wl$merges[hi(wl$merges) > end], character())
+  testthat::expect_identical(gl$heights[gl$heights$row > end, , drop = FALSE], gl$heights[FALSE, , drop = FALSE])
+  testthat::expect_identical(wl$heights[wl$heights$row > end, , drop = FALSE], wl$heights[FALSE, , drop = FALSE])
+  gl$merges <- setdiff(gl$merges, gm)
+  list(g = g[g$row <= end, , drop = FALSE], w = w, gl = gl, wl = wl)
+}
+
 golden_publication_styles <- function(g, w, gl, wl, id) {
   c <- golden_publication_contract(id)
+  if (isTRUE(c$R_only_reverse)) return(golden_demo_reverse_styles(g, w, gl, wl, c))
   end <- c$sheet_end
   gr <- golden_footer_rows(max(g$row), end)
   wr <- golden_footer_rows(max(w$row), end)

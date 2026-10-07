@@ -2,7 +2,8 @@
 # All103 source headings appear in order. The actual runtime manifest records
 # 102 native sheets in16 books,56 console commands and4 report tables.
 # Implemented examples compare against their own native demo artifacts;
-# pending WP-4–7 cases retain concrete owners and emit no invented sheets.
+# Phase 7B supplies the implemented command and layout examples below;
+# their new comparison enrollment remains pending independent review/execution.
 # Source-only datasets come from the accepted eight native snapshots. Run this
 # script in a private environment with optional out_dir/demo_data_file values.
 
@@ -43,6 +44,12 @@ xlsx_stratetab     <- file.path(out_dir, "demo_stratetab.xlsx")
 xlsx_hrcomptab     <- file.path(out_dir, "demo_hrcomptab.xlsx")
 xlsx_puttab        <- file.path(out_dir, "demo_puttab.xlsx")
 xlsx_stacktab      <- file.path(out_dir, "demo_stacktab.xlsx")
+xlsx_ratetab       <- file.path(out_dir, "demo_ratetab.xlsx")
+xlsx_outtab        <- file.path(out_dir, "demo_outtab.xlsx")
+xlsx_tabcell       <- file.path(out_dir, "demo_tabcell.xlsx")
+xlsx_corrtab       <- file.path(out_dir, "demo_corrtab.xlsx")
+xlsx_crosstab      <- file.path(out_dir, "demo_crosstab.xlsx")
+xlsx_survtab       <- file.path(out_dir, "demo_survtab.xlsx")
 markdown_report    <- file.path(out_dir, "demo_markdown_report.md")
 console_log        <- file.path(out_dir, "console_output.log")
 console_md         <- file.path(out_dir, "console_output.md")
@@ -59,7 +66,7 @@ tabtools_options(clear = TRUE)
 # Erase prior demo artifacts before regenerating the full documentation set.
 unlink(c(xlsx_table1, xlsx_desctab, xlsx_regtab, xlsx_regtab_models, xlsx_comptab, xlsx_effecttab,
          xlsx_stratetab, xlsx_hrcomptab, xlsx_puttab, xlsx_stacktab, markdown_report, console_log,
-         console_md))
+         console_md, xlsx_ratetab, xlsx_outtab, xlsx_tabcell, xlsx_corrtab, xlsx_crosstab, xlsx_survtab))
 
 # Stata logs the console sections with `log using console_output.log` and
 # `log on demo` / `log off demo`. console() is the R twin: it runs one call,
@@ -195,9 +202,12 @@ console(table1_tc(analysis, by = "treated",
 console(desctab(analysis, vars = c(education = "cat", cv_event = "bin")))
 
 # **# Console: survtab RMST + difference ----
-# Stata (survtab is not in the R port):
+# Stata:
 #   noisily survtab, times(365 730 1095 1460) by(treated) ///
 #       rmst(1460) difference median timeunit(days)
+console(survtab(demo_data$cohort, time = "follow_up", event = "cv_event",
+                times = c(365, 730, 1095, 1460), by = "treated",
+                rmst = 1460, difference = TRUE, median = TRUE, timeunit = "days"))
 
 # **# Console: regtab display ----
 # Stata:
@@ -257,13 +267,15 @@ console(regtab(zip_model, zinb_model, stats = c("n", "aic", "bic", "ll"), models
 #   noisily regtab, stats(n ll aic bic r2)
 
 # **# Console: corrtab display ----
-# Stata (corrtab is not in the R port; see cor.test()):
+# Stata:
 #   noisily corrtab index_age crp prior_hosp, ///
 #       star(0.05 0.01 0.001)
+console(corrtab(demo_data$cohort, c("index_age", "crp", "prior_hosp"), star = c(.05, .01, .001)))
 
 # **# Console: crosstab display ----
-# Stata (crosstab is not in the R port; see table() and chisq.test()):
+# Stata:
 #   noisily crosstab treated female, or label
+console(crosstab(demo_data$cohort, "treated", "female", or = TRUE, label = TRUE))
 
 # **# Console: smallcells() disclosure control ----
 # Stata builds three small tables from frequencies:
@@ -301,7 +313,8 @@ console(desctab(sc_primary, by = "group", vars = c(category = "cat"),
                 total = "after", smallcells = 5))
 
 # ## Primary suppression only: crosstab
-# Stata (not in the R port): noisily crosstab group category, label smallcells(5)
+# Stata: noisily crosstab group category, label smallcells(5)
+console(crosstab(sc_primary, "group", "category", label = TRUE, smallcells = 5))
 
 # ## Complementary suppression: table1_tc
 # Stata: (frequencies 2 8 6 4)
@@ -317,7 +330,8 @@ console(desctab(sc_complement, by = "group", vars = c(category = "cat"),
                 total = "after", smallcells = 5))
 
 # ## Complementary suppression: crosstab
-# Stata (not in the R port): noisily crosstab group category, label smallcells(5)
+# Stata: noisily crosstab group category, label smallcells(5)
+console(crosstab(sc_complement, "group", "category", label = TRUE, smallcells = 5))
 
 # ## Binary variable suppression: table1_tc
 # Stata: (rare_ae, frequencies 48 2 47 3)
@@ -350,13 +364,35 @@ console(tabtools_options(smallcells = NULL, smallcells_mode = NULL))
 stopifnot(is.null(tabtools_options()$smallcells), is.null(tabtools_options()$smallcells_mode))
 
 # **# Console: tabcell single cells ----
-# WP-5A: single-cell command family pending.
+cell_model <- glm(cv_event ~ treated + index_age + female, family = binomial, data = analysis)
+console(tabcell("est", model = cell_model, term = "treated", eform = TRUE))
+console(tabcell("est", model = cell_model, term = "treated", eform = TRUE,
+                format = "%5.3f", sep = " to "))
+# Native lincom treated + female: a normal coefficient-scale contrast.
+cell_contrast <- list(estimate = sum(coef(cell_model)[c("treated", "female")]),
+  std.error = sqrt(sum(vcov(cell_model)[c("treated", "female"), c("treated", "female")])),
+  df = Inf, conf.level = .95, effect_scale = "coefficient", native_source = "lincom")
+console(tabcell("est", contrast = cell_contrast, eform = TRUE))
+console(tabcell("p", p = .0004))
+console(tabcell("np", n = 3, d = 40, mincell = 5))
+console(tabcell("enp", e = 2149, n = 6066))
+followup_quartiles <- quantile(analysis$follow_up, c(.25, .5, .75), type = 2, na.rm = TRUE, names = FALSE)
+console(tabcell("iqr", median = followup_quartiles[2], q1 = followup_quartiles[1],
+                q3 = followup_quartiles[3], format = "%6.0fc"))
 
 # **# Console: ratetab incidence rates ----
-# WP-5B: saved-rate command family pending.
+# Explicit person-years reproduce the native stset scale(365.25).
+rate_data <- demo_data$cohort
+rate_data$person_years <- rate_data$follow_up / 365.25
+console(ratetab(rate_data, c("treated", "education"), events = "cv_event", exposure = "person_years",
+                outlabels = "CV events", explabels = c("Treatment", "Education")))
+console(ratetab(rate_data, "treated", events = "cv_event", exposure = "person_years",
+                ci = "cluster", cluster = "region", outlabels = "CV events", cformat = "%5.2f", sep = " to "))
 
 # **# Console: outtab binary outcomes by exposure ----
-# WP-5C: multi-outcome command family pending.
+console(outtab(analysis, c("cv_event", "selfharm", "fracture", "gi_bleed"), exposure = "treated",
+               models = list(~1, ~index_age + female + education + diabetes + hypertension),
+               modellabels = c("Crude", "Adjusted"), estimator = "modified_poisson", ratiolabel = "RR"))
 
 # **# Console: regtab 2.3 layout options ----
 layout_crude <- glm(cv_event ~ treated, family = binomial, data = analysis)
@@ -364,7 +400,22 @@ layout_adjusted <- glm(cv_event ~ treated + index_age + female + education + dia
                        family = binomial, data = analysis)
 console(regtab(layout_crude, layout_adjusted, cformat = "%5.3f", sep = " to ",
                nointercept = TRUE, models = c("Crude", "Adjusted")))
-# WP-4B: transpose/cellnote; WP-4A: fit-time counts/mincount await implementation.
+console(regtab(layout_crude, layout_adjusted, transpose = TRUE, keep = "treated", stats = "n",
+               nopvalue = TRUE, models = c("Crude", "Adjusted")))
+console(regtab(layout_crude, layout_adjusted, nointercept = TRUE, nopvalue = TRUE,
+               cellnote = list(list(row = "Diabetes", model = 1L, text = "Not in model")),
+               models = c("Crude", "Adjusted")))
+
+fit_data <- tt_as_factor(demo_data$cohort[demo_data$cohort$index_age >= 80, ], vars = "region")
+fit_data$person_years <- fit_data$follow_up / 365.25
+fit_crude <- survival::coxph(survival::Surv(person_years, gi_bleed) ~ region, data = fit_data, ties = "breslow", model = TRUE, x = TRUE)
+counts_crude <- tt_fitcount(fit_crude, events = "gi_bleed", people = "id", exposure = "person_years", terms = TRUE, data = fit_data)
+fit_adjusted <- survival::coxph(survival::Surv(person_years, gi_bleed) ~ region + treated + female,
+                              data = fit_data, ties = "breslow", model = TRUE, x = TRUE)
+counts_adjusted <- tt_fitcount(fit_adjusted, events = "gi_bleed", people = "id", exposure = "person_years", terms = TRUE, data = fit_data)
+console(regtab(fit_crude, fit_adjusted, fitcounts = list(counts_crude, counts_adjusted),
+               stats = c("events", "people", "exposure"), exposurelabel = "Person-years", mincount = 15,
+               models = c("Crude", "Adjusted")))
 
 # **# Console: puttab + stacktab export pipeline ----
 # Emit two styled estimate blocks with puttab, then assemble them into one
@@ -444,13 +495,17 @@ console(print(table1_tc(analysis, by = "treated",
                         title = "Table 1. Baseline Characteristics",
                         markdown = markdown_report)))
 
-# Stata (crosstab and corrtab are not in the R port):
+# Stata:
 #   noisily crosstab treated female, or label ///
 #       title("Table 2. Treatment by Sex") ///
 #       markdown("`markdown_report_export'") mdappend
 #   noisily corrtab index_age crp prior_hosp, star(0.05 0.01 0.001) ///
 #       title("Table 3. Correlation Matrix") ///
 #       markdown("`markdown_report_export'") mdappend
+console(print(crosstab(demo_data$cohort, "treated", "female", or = TRUE, label = TRUE,
+                        title = "Table 2. Treatment by Sex", markdown = markdown_report, mdappend = TRUE)))
+console(print(corrtab(demo_data$cohort, c("index_age", "crp", "prior_hosp"), star = c(.05, .01, .001),
+                       title = "Table 3. Correlation Matrix", markdown = markdown_report, mdappend = TRUE)))
 
 # Stata:
 #   preserve
@@ -1295,67 +1350,103 @@ stratetab(list(strate_cv_m, strate_sh_m, strate_cv_f, strate_sh_f),
           title = "Table 12. Incidence Rates per 1,000 Person-Years by Sex",
           footnote = "IRR = incidence rate ratio, Female vs Male. CI by log-normal method.")
 
+stratetab(list(strate_cv_m, strate_sh_m, strate_cv_f, strate_sh_f), outcomes = 2,
+          outlabels = c("CV Events", "Self-Harm"), explabels = c("Male", "Female"),
+          cformat = "%5.2f", sep = " to ", xlsx = xlsx_stratetab, sheet = "Rates Formatted",
+          title = "Table 12b. Incidence Rates, Two Decimals and 'to' Intervals")
+
 # **# Sheet 30: Correlation -- Pearson with stars (lower triangle) ----
-# Stata (corrtab is not in the R port):
+# Stata:
 #   corrtab index_age crp prior_hosp, ///
 #       xlsx("`xlsx_corrtab'") sheet("Correlation") ///
 #       title("Table 13. Pearson Correlation Matrix") ///
 #       star(0.05 0.01 0.001)
 
+corrtab(demo_data$cohort, c("index_age", "crp", "prior_hosp"), star = c(.05, .01, .001),
+        xlsx = xlsx_corrtab, sheet = "Correlation", title = "Table 13. Pearson Correlation Matrix")
+
 # **# Sheet 31: Correlation Spearman -- Spearman with p-values ----
-# Stata (corrtab is not in the R port):
+# Stata:
 #   corrtab index_age crp prior_hosp, ///
 #       xlsx("`xlsx_corrtab'") sheet("Correlation Spear") ///
 #       title("Table 14. Spearman Rank Correlation Matrix") ///
 #       spearman pvalues
 
+corrtab(demo_data$cohort, c("index_age", "crp", "prior_hosp"), spearman = TRUE, pvalues = TRUE,
+        xlsx = xlsx_corrtab, sheet = "Correlation Spear", title = "Table 14. Spearman Rank Correlation Matrix")
+
 # **# Sheet 32: Correlation Full -- Pearson full matrix (all cells) ----
-# Stata (corrtab is not in the R port):
+# Stata:
 #   corrtab index_age crp prior_hosp, ///
 #       xlsx("`xlsx_corrtab'") sheet("Correlation Full") ///
 #       title("Table 15. Pearson Correlation Matrix (Full)") ///
 #       full star(0.05 0.01 0.001)
 
+corrtab(demo_data$cohort, c("index_age", "crp", "prior_hosp"), full = TRUE, star = c(.05, .01, .001),
+        xlsx = xlsx_corrtab, sheet = "Correlation Full", title = "Table 15. Pearson Correlation Matrix (Full)")
+
 # **# Sheet 33: Cross-Tabulation -- 2x2 with Fisher's exact + OR ----
-# Stata (crosstab is not in the R port):
+# Stata:
 #   crosstab treated female, ///
 #       xlsx("`xlsx_crosstab'") sheet("Cross-Tabulation") ///
 #       title("Table 16. Treatment by Sex") ///
 #       exact or label
 
+crosstab(demo_data$cohort, "treated", "female", exact = TRUE, or = TRUE, label = TRUE,
+         xlsx = xlsx_crosstab, sheet = "Cross-Tabulation", title = "Table 16. Treatment by Sex")
+
 # **# Sheet 34: Cross-Tab Measures -- Risk ratio and risk difference ----
-# Stata (crosstab is not in the R port):
+# Stata:
 #   crosstab treated cv_event, ///
 #       xlsx("`xlsx_crosstab'") sheet("Cross-Tab Measures") ///
 #       title("Table 16a. Treatment-Outcome Association Measures") ///
 #       rr rd label ///
 #       footnote("RR = risk ratio; RD = risk difference with 95% CI.")
 
+crosstab(demo_data$cohort, "treated", "cv_event", rr = TRUE, rd = TRUE, label = TRUE,
+         xlsx = xlsx_crosstab, sheet = "Cross-Tab Measures",
+         title = "Table 16a. Treatment-Outcome Association Measures", footnote = "RR = risk ratio; RD = risk difference with 95% CI.")
+
 # **# Sheet 35: Cross-Tab Styled -- boldp() + zebra ----
-# Stata (crosstab is not in the R port):
+# Stata:
 #   crosstab outcome exposure, ///
 #       xlsx("`xlsx_crosstab'") sheet("Cross-Tab Styled") ///
 #       title("Table 16b. Outcome by Ordinal Exposure") ///
 #       trend label boldp(0.05) zebra ///
 #       footnote("Significant chi-squared and trend rows are bolded when p < 0.05.")
 
+# Exact literal native input, crosstab demo source1423-1434; no RNG redraw.
+cross_styled <- data.frame(outcome = rep(c(0, 1), 3), exposure = rep(0:2, each = 2), frequency = c(25, 5, 15, 15, 5, 25))
+cross_styled$outcome <- haven::labelled(cross_styled$outcome, c("No event" = 0, "Event" = 1))
+cross_styled$exposure <- haven::labelled(cross_styled$exposure, c("Low" = 0, "Medium" = 1, "High" = 2))
+crosstab(cross_styled, "outcome", "exposure", weights = "frequency", trend = TRUE, label = TRUE, boldp = .05, zebra = TRUE,
+         xlsx = xlsx_crosstab, sheet = "Cross-Tab Styled", title = "Table 16b. Outcome by Ordinal Exposure",
+         footnote = "Significant chi-squared and trend rows are bolded when p < 0.05.")
+
 # **# Sheet 36: Cross-Tab Trend -- Cochran-Armitage trend test ----
-# Stata (crosstab is not in the R port):
+# Stata:
 #   crosstab education cv_event, ///
 #       xlsx("`xlsx_crosstab'") sheet("Cross-Tab Trend") ///
 #       title("Table 16c. CV Events by Education Level (Trend Test)") ///
 #       trend label zebra
 
+crosstab(demo_data$cohort, "education", "cv_event", trend = TRUE, label = TRUE, zebra = TRUE,
+         xlsx = xlsx_crosstab, sheet = "Cross-Tab Trend", title = "Table 16c. CV Events by Education Level (Trend Test)")
+
 # **# Sheet 37: Cross-Tab Row Pct -- Row percentages instead of column ----
-# Stata (crosstab is not in the R port):
+# Stata:
 #   crosstab treated cv_event, ///
 #       xlsx("`xlsx_crosstab'") sheet("Cross-Tab Row Pct") ///
 #       title("Table 16d. Treatment-Outcome (Row Percentages)") ///
 #       rowpct or label ///
 #       footnote("Percentages are row percentages within each treatment group.")
 
+crosstab(demo_data$cohort, "treated", "cv_event", rowpct = TRUE, or = TRUE, label = TRUE,
+         xlsx = xlsx_crosstab, sheet = "Cross-Tab Row Pct", title = "Table 16d. Treatment-Outcome (Row Percentages)",
+         footnote = "Percentages are row percentages within each treatment group.")
+
 # **# Sheet 41: Survival -- Kaplan-Meier table with median ----
-# Stata (survtab is not in the R port):
+# Stata:
 #   stset follow_up, failure(cv_event)
 #   survtab, times(365 730 1095 1460) by(treated) ///
 #       xlsx("`xlsx_survtab'") sheet("Survival") ///
@@ -1363,8 +1454,12 @@ stratetab(list(strate_cv_m, strate_sh_m, strate_cv_f, strate_sh_f),
 #       median timeunit(days) ///
 #       footnote("Survival probabilities estimated by Kaplan-Meier method.")
 
+survtab(demo_data$cohort, "follow_up", "cv_event", times = c(365, 730, 1095, 1460), by = "treated", median = TRUE, timeunit = "days",
+        xlsx = xlsx_survtab, sheet = "Survival", title = "Table 18. Kaplan-Meier Survival Estimates",
+        footnote = "Survival probabilities estimated by Kaplan-Meier method.")
+
 # **# Sheet 42: Survival RMST -- RMST + risk set + between-group difference ----
-# Stata (survtab is not in the R port):
+# Stata:
 #   survtab, times(365 730 1095 1460) by(treated) ///
 #       rmst(1460) riskset difference ///
 #       xlsx("`xlsx_survtab'") sheet("Survival RMST") ///
@@ -1372,13 +1467,21 @@ stratetab(list(strate_cv_m, strate_sh_m, strate_cv_f, strate_sh_f),
 #       median timeunit(days) ///
 #       footnote("RMST = restricted mean survival time truncated at 1460 days.")
 
+survtab(demo_data$cohort, "follow_up", "cv_event", times = c(365, 730, 1095, 1460), by = "treated", rmst = 1460,
+        riskset = TRUE, difference = TRUE, median = TRUE, timeunit = "days", xlsx = xlsx_survtab, sheet = "Survival RMST",
+        title = "Table 18a. Survival with RMST and Group Differences", footnote = "RMST = restricted mean survival time truncated at 1460 days.")
+
 # **# Sheet 43: Cumulative Incidence -- Reverse survival function ----
-# Stata (survtab is not in the R port):
+# Stata:
 #   survtab, times(365 730 1095 1460) by(treated) ///
 #       reverse ///
 #       xlsx("`xlsx_survtab'") sheet("Cumul Incidence") ///
 #       title("Table 18b. Cumulative Incidence of CV Events") ///
 #       timeunit(days) font("Times New Roman") fontsize(12) borderstyle(academic)
+
+survtab(demo_data$cohort, "follow_up", "cv_event", times = c(365, 730, 1095, 1460), by = "treated", reverse = TRUE,
+        timeunit = "days", font = "Times New Roman", fontsize = 12, borderstyle = "academic", xlsx = xlsx_survtab,
+        sheet = "Cumul Incidence", title = "Table 18b. Cumulative Incidence of CV Events")
 
 # **# Sheet 44: Explicit Arial formatting ----
 # Demonstrates: Arial 10-point text with academic borders
@@ -1746,10 +1849,13 @@ sc <- desctab(sc_primary, by = "group", vars = c(category = "cat"), total = "aft
               xlsx = xlsx_desctab, sheet = "Small Cells Primary")
 stopifnot(sc$stored$N_primary_suppressed == 4, sc$stored$N_secondary_suppressed == 0)
 
-# Stata (crosstab is not in the R port):
+# Stata:
 #   crosstab group category, label smallcells(5) ///
 #       title("Small-cell suppression: primary counts only") ///
 #       xlsx("`xlsx_crosstab'") sheet("Small Cells Primary")
+
+crosstab(sc_primary, "group", "category", label = TRUE, smallcells = 5,
+         title = "Small-cell suppression: primary counts only", xlsx = xlsx_crosstab, sheet = "Small Cells Primary")
 
 # **## Complementary suppression prevents reconstruction ----
 # Stata:
@@ -1775,10 +1881,13 @@ sc <- desctab(sc_complement, by = "group", vars = c(category = "cat"), total = "
               xlsx = xlsx_desctab, sheet = "Small Cells Complement")
 stopifnot(sc$stored$N_primary_suppressed == 2, sc$stored$N_secondary_suppressed == 2)
 
-# Stata (crosstab is not in the R port):
+# Stata:
 #   crosstab group category, label smallcells(5) ///
 #       title("Small-cell suppression: complementary protection") ///
 #       xlsx("`xlsx_crosstab'") sheet("Small Cells Complement")
+
+crosstab(sc_complement, "group", "category", label = TRUE, smallcells = 5,
+         title = "Small-cell suppression: complementary protection", xlsx = xlsx_crosstab, sheet = "Small Cells Complement")
 
 # **## Binary variable suppression ----
 # Stata:
@@ -1821,7 +1930,24 @@ for (book in c(xlsx_table1, xlsx_desctab)) {
 # **# Sheets: regtab 2.3 options -- cformat, flat frame + reftop, transpose, cellnote, fit counts ----
 regtab(layout_adjusted, xlsx = xlsx_regtab, sheet = "Regtab cformat", nointercept = TRUE,
        cformat = "%5.3f", sep = " to ", title = "Table 2b. CV Events (Three Decimals, 'to' Intervals)")
-# WP-4B: native reftop/transpose/cellnote; WP-4A: fit counts/mincount pending.
+flat_fit <- glm(cv_event ~ treated + index_age + female + education, family = binomial,
+                data = analysis, contrasts = list(education = contr.treatment(3, base = 3)))
+flat_table <- regtab(flat_fit, reftop = TRUE, compact = TRUE, nointercept = TRUE)
+flat_keyed <- tt_flat(flat_table)
+stopifnot(all(c("_term", "_rowtype") %in% names(flat_keyed)))
+puttab(tt_flat(flat_table, keyed = FALSE), xlsx = xlsx_regtab, sheet = "Flat Reftop", varlabels = TRUE,
+       title = "Table 2c. regtab flat frame written by puttab (reference level on top)")
+regtab(layout_crude, layout_adjusted, transpose = TRUE, keep = "treated", stats = "n", nopvalue = TRUE,
+       models = c("Crude", "Adjusted"), xlsx = xlsx_regtab, sheet = "Transpose",
+       title = "Table 2d. Treatment Odds Ratio by Model Specification")
+regtab(layout_crude, layout_adjusted, nointercept = TRUE, nopvalue = TRUE,
+       cellnote = list(list(row = "Diabetes", model = 1L, text = "Not in model")), models = c("Crude", "Adjusted"),
+       xlsx = xlsx_regtab, sheet = "Cell Note", title = "Table 2e. Text in a Cell That Must Not Show an Estimate")
+masked_regression <- regtab(fit_crude, fit_adjusted, fitcounts = list(counts_crude, counts_adjusted),
+  stats = c("events", "people", "exposure"), exposurelabel = "Person-years", mincount = 15,
+  models = c("Crude", "Adjusted"), xlsx = xlsx_regtab, sheet = "Fit Counts",
+  title = "Table 2f. GI Bleeding by Region, Patients Aged 80+", footnote = "Regions with fewer than 15 events are not estimated (–).")
+stopifnot(masked_regression$stored$N_masked > 0)
 
 # **# Sheet: effecttab cformat() ----
 effecttab(list(ipw), data = analysis, xlsx = xlsx_effecttab, sheet = "ATE cformat",
@@ -1830,16 +1956,67 @@ effecttab(list(ipw), data = analysis, xlsx = xlsx_effecttab, sheet = "ATE cforma
           title = "Table 6b. Average Treatment Effect, Four Decimals")
 
 # **# Sheets: comptab cformat(), cisep(), and a flat frame ----
-# WP-5D: native rate/model composites and flat output pending.
+formatted_model <- survival::coxph(survival::Surv(follow_up, cv_event) ~ treated + index_age + female + diabetes + hypertension,
+                                 data = analysis, ties = "breslow", model = TRUE, x = TRUE)
+formatted_table <- regtab(formatted_model, nointercept = TRUE, coef = "HR")
+formatted_composite <- comptab(list(formatted_table), rows = c(1, 4, 5), cformat = "%5.3f", cisep = " to ",
+  xlsx = xlsx_comptab, sheet = "Composite Formatted", title = "Table S3. Selected Hazard Ratios (Three Decimals)")
+puttab(tt_flat(formatted_composite, keyed = FALSE), xlsx = xlsx_comptab, sheet = "Composite Flat", varlabels = TRUE,
+       title = "Table S3 flat frame written by puttab")
 
 # **# Sheets: ratetab -- rates from stset data, then rates + models with comptab ----
-# WP-5B / WP-5D: saved rates and rate/model composites pending.
+ratetab(rate_data, c("treated", "education"), events = "cv_event", exposure = "person_years", outlabels = "CV events",
+        explabels = c("Treatment", "Education"), xlsx = xlsx_ratetab, sheet = "Rates Exact",
+        title = "Table R1. CV Event Rates per 1,000 Person-Years (Exact Poisson CI)")
+ratetab(rate_data, c("treated", "education"), events = "cv_event", exposure = "person_years", ci = "poisson", per = 100,
+        outlabels = "CV events", explabels = c("Treatment", "Education"), xlsx = xlsx_ratetab, sheet = "Rates Poisson",
+        title = "Table R2. CV Event Rates per 100 Person-Years (Normal-Approximation CI)")
+ratetab(rate_data, "treated", events = "cv_event", exposure = "person_years", ci = "cluster", cluster = "region", outlabels = "CV events",
+        xlsx = xlsx_ratetab, sheet = "Rates Cluster", title = "Table R3. CV Event Rates with Region-Clustered CI")
+ratetab(rate_data, c("treated", "education"), events = "cv_event", exposure = "person_years", cformat = "%5.2f", sep = " to ",
+        outlabels = "CV events", explabels = c("Treatment", "Education"), xlsx = xlsx_ratetab, sheet = "Rates Formatted",
+        title = "Table R4. CV Event Rates, Two Decimals")
+rate_scaffold <- ratetab(rate_data, "education", events = "cv_event", exposure = "person_years", outlabels = "CV events")
+rate_crude <- survival::coxph(survival::Surv(follow_up, cv_event) ~ education, data = analysis, ties = "breslow", model = TRUE, x = TRUE)
+rate_adjusted <- survival::coxph(survival::Surv(follow_up, cv_event) ~ education + treated + index_age + female + diabetes + hypertension,
+                              data = analysis, ties = "breslow", model = TRUE, x = TRUE)
+rate_models <- regtab(rate_crude, rate_adjusted, nointercept = TRUE, compact = TRUE, models = c("Crude", "Adjusted"), keep = "education")
+comptab(rate_scaffold, modeltables = list(rate_models), rows = "all", allmodels = TRUE, keyed = TRUE, effect = "HR",
+        xlsx = xlsx_ratetab, sheet = "Rates Models", title = "Table R5. CV Events, Rates, and Hazard Ratios by Education",
+        footnote = "HR = hazard ratio. \\ Adjusted for treatment, age, sex, diabetes, and hypertension.")
 
 # **# Sheets: outtab -- binary outcomes by exposure ----
-# WP-5C: outcome grid/panels pending.
+outtab(analysis, c("cv_event", "selfharm", "fracture", "gi_bleed"), exposure = "treated",
+       models = list(~1, ~index_age + female + education + diabetes + hypertension), modellabels = c("Crude", "Adjusted"),
+       estimator = "modified_poisson", ratiolabel = "RR", xlsx = xlsx_outtab, sheet = "Outcomes",
+       title = "Table 3. Outcomes by Treatment: Events/N and Risk Ratios", footnote = "RR = risk ratio from modified Poisson regression with robust SE.")
+outcome_panels <- analysis
+outcome_panels$all_patients <- 1L
+outcome_panels$age_65plus <- as.integer(outcome_panels$index_age >= 65)
+attr(outcome_panels$all_patients, "label") <- "All patients"
+attr(outcome_panels$age_65plus, "label") <- "Aged 65 and over"
+outtab(outcome_panels, c("cv_event", "gi_bleed"), exposure = "treated", models = list(~1, ~index_age + female),
+       modellabels = c("Crude", "Adjusted"), estimator = "logit", ratiolabel = "OR", panels = c("all_patients", "age_65plus"),
+       xlsx = xlsx_outtab, sheet = "Outcomes OR Panels", title = "Table 3b. Outcomes by Treatment in Two Analysis Panels")
 
 # **# Sheet: tabcell columns, written to a tabtools session workbook ----
-# WP-5A: tabcell generation pending; session publication is exercised by Spans.
+# Stata collapse percentiles use the discontinuity-averaged (type2) rule.
+education_levels <- sort(unique(as.numeric(demo_data$cohort$education)))
+cell_summary <- data.frame(education = haven::labelled(education_levels,
+  labels = attr(demo_data$cohort$education, "labels", exact = TRUE)))
+cell_summary$n <- vapply(education_levels, function(code) sum(as.numeric(demo_data$cohort$education) == code), 0L)
+cell_summary$events <- vapply(education_levels, function(code) sum(analysis$cv_event[as.numeric(demo_data$cohort$education) == code]), 0)
+cell_quartiles <- t(vapply(education_levels, function(code) quantile(analysis$follow_up[as.numeric(demo_data$cohort$education) == code],
+  c(.25, .5, .75), type = 2, na.rm = TRUE, names = FALSE), numeric(3)))
+cell_summary$ev_cell <- tabcell("enp", e = cell_summary$events, n = cell_summary$n)
+cell_summary$fu_cell <- tabcell("iqr", median = cell_quartiles[, 2], q1 = cell_quartiles[, 1], q3 = cell_quartiles[, 3], format = "%6.0fc")
+attr(cell_summary$education, "label") <- attr(demo_data$cohort$education, "label", exact = TRUE)
+attr(cell_summary$ev_cell, "label") <- "CV events, n (%)"
+attr(cell_summary$fu_cell, "label") <- "Follow-up (days), median (IQR)"
+tabtools_options(workbook = xlsx_tabcell, headershade = TRUE)
+puttab(cell_summary, vars = c("education", "ev_cell", "fu_cell"), sheet = "Tabcell Column", varlabels = TRUE,
+       title = "Table T1. CV Events and Follow-up by Education (tabcell cells)")
+tabtools_options(workbook = NULL, headershade = NULL)
 
 # **# Sheets: puttab 2.2/2.3 layout options -- hlines/boldrows, panels, spans ----
 layout_data <- data.frame(group = c("Domestic", "Foreign", "Repair", "Good (4-5)", "Poor (1-3)"),
@@ -1906,14 +2083,20 @@ primary_demo <- table1_tc(sc_complement, by = "group", vars = c(category = "cat"
                             smallcells = 5, smallcells_mode = "primary",
                             title = "Small-cell suppression: primary mode", xlsx = xlsx_table1, sheet = "Small Cells Primary Mode")
 stopifnot(identical(primary_demo$stored$smallcells$n_masked, 2L), identical(primary_demo$stored$smallcells$n_linked, 0L))
-# WP-6A owns desctab/crosstab primary-mode adapters; no deferred sheet is emitted.
+desctab(sc_complement, by = "group", vars = c(category = "cat"), total = "after", smallcells = 5, smallcells_mode = "primary",
+        title = "Small-cell suppression: primary mode", xlsx = xlsx_desctab, sheet = "Small Cells Primary Mode")
+crosstab(sc_complement, "group", "category", label = TRUE, smallcells = 5, smallcells_mode = "primary",
+         title = "Small-cell suppression: primary mode", xlsx = xlsx_crosstab, sheet = "Small Cells Primary Mode")
 replace_demo <- table1_tc(analysis, by = "treated", vars = c(education = "cat", civil_status = "cat"),
                            cellreplace = list(list(row = "Widowed", column = "SNRI", text = "Not reported")),
                            title = "Table 1. cellreplace() Overwrites One Cell", xlsx = xlsx_table1, sheet = "Cell Replace")
 stopifnot(identical(replace_demo$stored$n_cellreplace, 1L))
 
 # **# Verify 2.3 workbook content ----
-# Future WP-4A/4B/5A/5B/5C/5D/6A checks remain pending; implemented examples above assert their actual returns.
+# Source refresh adds native-equivalent publications without changing the
+# authenticated dataset or prior compared calls. Root's reviewed installed demo
+# parity run asserts every newly enrolled body, style and annotation boundary.
+stopifnot(identical(tabtools_options()$workbook, NULL), is.null(tabtools_options()$headershade))
 
 # **# Convert console output to markdown ----
 # Stata: logdoc using "`console_log'", output("`console_md'") format(md) replace quiet
@@ -1923,7 +2106,7 @@ stopifnot(identical(replace_demo$stored$n_cellreplace, 1L))
 message("Demo complete. Outputs:")
 for (f in c(console_log, console_md, markdown_report, xlsx_table1, xlsx_desctab, xlsx_regtab,
             xlsx_regtab_models, xlsx_comptab, xlsx_effecttab, xlsx_stratetab, xlsx_hrcomptab,
-            xlsx_puttab, xlsx_stacktab)) {
+            xlsx_puttab, xlsx_stacktab, xlsx_ratetab, xlsx_outtab, xlsx_tabcell, xlsx_corrtab, xlsx_crosstab, xlsx_survtab)) {
   if (!file.exists(f)) stop("Expected demo artifact not found: ", f)
   message("  ", f)
 }

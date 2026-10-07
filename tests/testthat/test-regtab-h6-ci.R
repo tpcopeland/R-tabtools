@@ -16,7 +16,8 @@ test_that("tt_ci_methods(): profile for lm, glm and glm.nb only; refused by name
     expect_error(suppressWarnings(regtab(fit, ci_method = "profile")), paste0("not available for <", cls, ">"),
                  fixed = TRUE, label = cls)
   }
-  refuse(data.frame(term = "x", estimate = 1, std.error = 0.5), "data.frame")
+  refuse(structure(data.frame(term = "x", estimate = 1, std.error = 0.5),
+                   effect_scale = "Coef.", inference_reference = "normal"), "data.frame")
   if (requireNamespace("MASS", quietly = TRUE)) {
     expect_identical(tt_ci_methods(MASS::glm.nb(Days ~ Age, MASS::quine)), c("wald", "profile"))
     refuse(MASS::polr(factor(gear) ~ wt, mtcars, Hess = TRUE), "polr")

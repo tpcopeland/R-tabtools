@@ -140,6 +140,8 @@ test_that("supplied coefficient rows and display filtering do not invent records
   x <- data.frame(term = c("x", "(Intercept)"), estimate = c(0.5, 1),
                   std.error = c(0.2, 0.3), statistic = c(2.5, 10 / 3),
                   p.value = c(0.02, 0.002))
+  attr(x, "effect_scale") <- "Coef."
+  attr(x, "inference_reference") <- "normal"
   attr(x, "glance") <- list(nobs = 100.5)
   tt <- regtab(x, stats = "n")
   counts <- sample_model_measures(tt)

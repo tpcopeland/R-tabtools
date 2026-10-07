@@ -3,7 +3,11 @@ library(tabtools)
 
 # No native processes or fixture updates. Root authenticates the external capture.
 tc_native_dir <- function() {
-  directory <- Sys.getenv("TABTOOLS_TABCELL_NATIVE_DIR")
+  qa_source_root <- Sys.getenv("TABTOOLS_QA_SOURCE_ROOT")
+  if (!nzchar(qa_source_root)) qa_source_root <- if (file.exists("DESCRIPTION")) getwd() else dirname(getwd())
+  qa_source_root <- normalizePath(qa_source_root, mustWork = TRUE)
+  if (!file.exists(file.path(qa_source_root,"DESCRIPTION"))) stop("Cannot locate the staged QA package root")
+  directory <- Sys.getenv("TABTOOLS_TABCELL_NATIVE_DIR", unset = file.path(qa_source_root,"qa","data","native251","tabcell"))
   if (!nzchar(directory) || !dir.exists(directory)) {
     stop("TABTOOLS_TABCELL_NATIVE_DIR must name a root-authenticated TC capture.")
   }

@@ -208,6 +208,10 @@
           if (!is.na(m[k]) && m[k] > 0 && head$sc$missing[k] > 0) {
             body[i, j] <- .t1_sc_render(m[k], head$sc$missing[k], o)
             codes[[i]][k] <- head$sc$missing[k]
+          } else if (!is.na(m[k]) && m[k] > 0 && sample_codes[k] > 0) {
+            # The Missing percentage would reveal the withheld group N.
+            body[i, j] <- stata_fmt(m[k], o$nformat)
+            linked[[i]][k] <- TRUE
           }
         }
       }

@@ -132,9 +132,14 @@ test_that("variable outcome spans and export products keep truthful geometry", {
   expect_error(comptab(flat, rows = 1L), class = "tabtools_error_composition")
   vertical <- comptab(z$model, rows = 3L)
   plain <- tt_flat(vertical, keyed = FALSE)
-  expect_identical(plain, structure(vertical$body, header = vertical$header,
-    command = vertical$command, frame = vertical$meta$frame,
-    sample_accounting = vertical$meta$sample_accounting, composition_export = TRUE))
+  # Column labels travel independently from the unchanged publication cells.
+  expect_identical(unname(as.matrix(plain)), unname(as.matrix(vertical$body)))
+  expect_identical(names(plain), c("rowlabel", paste0("c", seq_len(ncol(plain) - 1L))))
+  expect_identical(attr(plain, "header"), vertical$header)
+  expect_identical(attr(plain, "command"), vertical$command)
+  expect_identical(attr(plain, "frame"), vertical$meta$frame)
+  expect_identical(attr(plain, "sample_accounting"), vertical$meta$sample_accounting)
+  expect_identical(attr(plain, "composition_export"), TRUE)
   expect_identical(class(plain), "data.frame")
 })
 

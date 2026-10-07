@@ -1,7 +1,97 @@
 library(testthat)
 library(tabtools)
 
-# Independent native Stata 2.5.1 artifact comparisons. Runtime workbooks,
+layout_current_proof <- function() {
+  root <- Sys.getenv("TABTOOLS_QA_SOURCE_ROOT")
+  if (!nzchar(root)) root <- if (file.exists("DESCRIPTION")) getwd() else dirname(getwd())
+  base <- Sys.getenv("TABTOOLS_PUTTAB_GEOMETRY256_DIR",
+    unset = file.path(root, "qa", "data", "post251_puttab_geometry_v256"))
+  base <- normalizePath(base, mustWork = TRUE)
+  expected <- c(
+    "capture.do" = "f63d53d886f9654fe2124de36116980d314597429994b4102b73fa0b397b46b3",
+    "capture.log" = "c43ccda524f9c52063f55bcaff7bca859c4883cf43a9a1e82c0e1bffe198d8cb",
+    "cleanup.json" = "9ca7aa74d157dd3cb6432d785f4bba71807ac006d5677e3cfab9bb6c5ab70e72",
+    "native-receipt.json" = "5a778df972243959d29e77f29124f637d3843033d2ee4b561d8ca861d586cd74",
+    "out/academic.csv" = "accacea99acd4743aacee45e902ffd8561e37fd8fba6b84c641e98be5c0c3120",
+    "out/academic.md" = "ce1cc582c2fd2fcea7f06b1120100644cbeb4e2974743414f9b5718d77fdb5d8",
+    "out/academic.xlsx" = "5441ef3a2c8e2d5d4b6a0584dfb927230088b39e27e87d09483c98830252ac60",
+    "out/counts.csv" = "e4bc884e1fa399aacbb79535269834017cfdb0a3b19e06d8e8ca88dbca5bed6e",
+    "out/frames.csv" = "cca24713dfd96b4690c60fad22213b26291ea60b00e6f3b388ff4bf4bf05f124",
+    "out/frames.md" = "b6e92f285d24a0f01e7e8509264099d7e15bb572fe34644bab1134384fbed77a",
+    "out/frames.xlsx" = "b0ca4b2a65a651a3e2765464fe5b231f8d80451ac347b783660d535aab61ce57",
+    "out/medium.csv" = "accacea99acd4743aacee45e902ffd8561e37fd8fba6b84c641e98be5c0c3120",
+    "out/medium.md" = "ce1cc582c2fd2fcea7f06b1120100644cbeb4e2974743414f9b5718d77fdb5d8",
+    "out/medium.xlsx" = "3413badd046f9dc70fe8348896a13388f66dc5fb2cf38068d79a50cf7ed49930",
+    "out/panel.csv" = "f88c8e0ddbf45dffa2a12ca7885f7f97291db80091e78b1c95cb0688311b832c",
+    "out/panel.md" = "b64903b9e56370cf74812a09d5c68810c579bdfd2f45968ddd507008c2f6c384",
+    "out/panel.xlsx" = "5c72dd56fe3a1f6305d0bf9807f050108a75322fbde48db77531e75bd8e773d5",
+    "out/thin.csv" = "accacea99acd4743aacee45e902ffd8561e37fd8fba6b84c641e98be5c0c3120",
+    "out/thin.md" = "ce1cc582c2fd2fcea7f06b1120100644cbeb4e2974743414f9b5718d77fdb5d8",
+    "out/thin.xlsx" = "18b2e4b33f2aa096643a61c17b6ea4144ce173b7cde7da0da897f2e7ea56ac7b",
+    "process.log" = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-provenance.json" = "9e8d70e642db5592845cf5561c8c470fdd72425cb5ef254f2ecb268c2a90a01b"
+  )
+  paths <- list.files(base, recursive = TRUE, all.files = TRUE, no.. = TRUE)
+  if (!identical(sort(paths), sort(names(expected)))) stop("Five-case native geometry proof inventory differs")
+  for (name in names(expected)) if (!identical(digest::digest(file = file.path(base, name),
+    algo = "sha256", serialize = FALSE), unname(expected[[name]]))) stop(paste("Native geometry proof changed:", name))
+  receipt <- jsonlite::fromJSON(file.path(base, "native-receipt.json"), simplifyVector = FALSE)
+  closure <- jsonlite::fromJSON(file.path(base, "source-provenance.json"), simplifyVector = FALSE)
+  cleanup <- jsonlite::fromJSON(file.path(base, "cleanup.json"), simplifyVector = FALSE)
+  if (!identical(receipt$source_pin, "4eecca4d09d61df0cfe773fc2024b015920b5fe6") ||
+    !identical(receipt$recipe_sha256, "cf4c6a3a1d725ebc624dc8a5c39138e6b3b6ce3b87af412cf44674354f164082") ||
+    !identical(receipt$source_provenance_sha256, unname(expected[["source-provenance.json"]])) ||
+    !identical(closure$pin, receipt$source_pin) || !identical(closure$version, "2.5.6") ||
+    length(closure$files) != 363L || !isTRUE(cleanup$absent) || cleanup$exit_status != 0L)
+    stop("Five-case native source/recipe/cleanup identity differs")
+  outputs <- sub("^out/", "", names(expected)[startsWith(names(expected), "out/")])
+  if (!identical(sort(names(receipt$files)), sort(outputs))) stop("Native receipt output inventory differs")
+  for (name in outputs) if (!identical(receipt$files[[name]], unname(expected[[paste0("out/", name)]])))
+    stop("Native receipt does not bind output bytes")
+  log <- readLines(file.path(base, "capture.log"), warn = FALSE)
+  if (sum(trimws(log) == "PUTTAB_CURRENT_GEOMETRY_COMPLETE") != 1L ||
+    any(grepl("^r\\([0-9]+\\);$", trimws(log)))) stop("Native geometry capture incomplete")
+  base
+}
+
+layout_current_peer <- function(proof, id, old, old_counts,
+  golden_sheet_layout, golden_cell_styles, golden_bytes, golden_style_attrs) {
+  removed <- switch(id, thin = c("B3:D3", "B7:D7"), medium = c("B3:D3", "B7:D7"),
+    academic = c("B3:D3", "B7:D7"), frames = c("B3:C3", "B5:C5"), panel = c("B4:E4", "B7:E7"))
+  if (is.null(removed)) stop("Only the five declared geometry cases may be qualified")
+  current <- file.path(proof, "out", paste0(id, ".xlsx"))
+  old_layout <- golden_sheet_layout(old, "S"); new_layout <- golden_sheet_layout(current, "S")
+  expected_new <- switch(id, frames = "A1:C1", panel = c("A1:E1", "B10:E10", "B9:E9", "C2:E2"), "A1:D1")
+  expect_identical(old_layout$merges, sort(c(expected_new, removed)), info = paste(id, "entire literal old merge ledger"))
+  expect_identical(new_layout$merges, expected_new, info = paste(id, "entire independently captured current merge ledger"))
+  expect_identical(new_layout$merges, sort(setdiff(old_layout$merges, removed)),
+    info = paste(id, "only two exact panel merges change; every other merge survives"))
+  expect_identical(new_layout$heights, old_layout$heights, info = paste(id, "complete old/new native heights"))
+  expect_identical(new_layout$widths, old_layout$widths, info = paste(id, "complete old/new native widths"))
+  # Workbook-local style-pool indices are serialization identities; compare
+  # their complete resolved number format, font, alignment, fill and borders.
+  attrs <- c("address", "row", "col", "number_format", golden_style_attrs)
+  expect_identical(golden_cell_styles(current, "S")[attrs], golden_cell_styles(old, "S")[attrs],
+    info = paste(id, "all old/new native cells and styles, including newly unmerged children"))
+  counts <- utils::read.csv(file.path(proof, "out", "counts.csv"), strip.white = TRUE)
+  expect_identical(counts$id, c("thin", "medium", "academic", "frames", "panel"))
+  row <- counts[counts$id == id, , drop = FALSE]
+  expect_identical(nrow(old_counts), 1L)
+  for (field in names(old_counts)) expect_identical(as.character(row[[field]]), as.character(old_counts[[field]]),
+    info = paste(id, "entire native return ledger", field))
+  heads <- switch(id, frames = c(B3 = "Panel A", B5 = "Panel A"), panel = c(B4 = "var", B7 = "stat"),
+    c(B3 = "Panel A", B7 = "Panel B"))
+  cells <- golden_cell_styles(current, "S")
+  expect_identical(cells$value[match(names(heads), cells$address)], unname(heads),
+    info = paste(id, "independent literal native panel text"))
+  for (ext in c("csv", "md")) expect_identical(golden_bytes(file.path(proof, "out", paste0(id, ".", ext))),
+    golden_bytes(sub("\\.xlsx$", paste0(".", ext), old)), info = paste(id, "entire old/current", ext, "bytes"))
+  current
+}
+
+
+# Independent native Stata 2.5.1 artifacts, with only five selected panel
+# merge geometries qualified by exact authenticated 2.5.6 publication peers. Runtime workbooks,
 # CSV/Markdown, do-files and licence-bearing logs stay inside unique scratch.
 # TABTOOLS_STATA_DIR selects the pinned export; installed ado files are not used.
 
@@ -55,7 +145,7 @@ layout_stata_run <- function(scratch, source_dir) {
   counts
 }
 
-test_that("native Stata 2.5.1 puttab and frames agree in cells, styles, layouts and text sinks", {
+test_that("native Stata 2.5.1 puttab and frames retain all cells/styles/sinks with exact 2.5.6 panel geometry", {
   skip_if_not_installed("processx")
   skip_if_not_installed("tidyxl")
   skip_if(!nzchar(Sys.which("stata-mp")), "stata-mp not on PATH")
@@ -66,6 +156,7 @@ test_that("native Stata 2.5.1 puttab and frames agree in cells, styles, layouts 
   source(test_path("..", "tests", "testthat", "helper-golden.R"), local = TRUE)
   scratch <- withr::local_tempdir(pattern = "tabtools-layout-stata-")
   counts <- layout_stata_run(scratch, source_dir)
+  current_geometry <- layout_current_proof()
   expect_identical(attr(counts, "native_frames"), 'first "Panel A" \\ second "Panel A" \\ third')
   d <- data.frame(p = c(1, 1, 2), term = c("a", "b", "c"), n = c(1000, 2000, 3000), rate = c(1234.6, 1234.7, 1234.8),
                   h1 = "", h2 = c("Counts A", "Counts A", "Counts B"), h3 = "Rates")
@@ -106,6 +197,9 @@ test_that("native Stata 2.5.1 puttab and frames agree in cells, styles, layouts 
   for (id in names(results)) {
     tt <- results[[id]]
     native <- file.path(scratch, paste0(id, ".xlsx"))
+    if (id %in% c("thin", "medium", "academic", "frames"))
+      native <- layout_current_peer(current_geometry, id, native, counts[counts$id == id, , drop = FALSE],
+        golden_sheet_layout, golden_cell_styles, golden_bytes, golden_style_attrs)
     own <- file.path(scratch, paste0(id, "-r.xlsx"))
     why <- golden_compare_styles(own, "S", native, "S", got_width_offset = golden_r_width_offset)
     expect_identical(why, character(), info = paste(id, paste(why, collapse = "\n")))

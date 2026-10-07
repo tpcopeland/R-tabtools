@@ -174,7 +174,10 @@
 #'   `ref`/`base` publication states. Custom reference labels, omitted/empty
 #'   labels and coefficient text overrides cannot turn an estimate into a
 #'   reference. Stale state companions refuse; stamped sources without usable
-#'   state companions cannot supply reference identity. Unstamped legacy
+#'   state companions cannot supply reference identity. A row composition with
+#'   invalidated numeric companions can retain separately snapshot-bound
+#'   reference states for placement; it still cannot supply numeric reformatting
+#'   or forest estimates. Unstamped legacy
 #'   sources retain their existing literal-label compatibility boundary.
 #'
 #' @param ratetable A [stratetab()] table (or [as.data.frame()] of one)
@@ -523,6 +526,7 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
     source$rows <- stamp$companion
     source$types <- stamp$rows$type
     source$keys <- stamp$rows$key
+    source$reference_states <- stamp$reference_states
   }
   source$authenticated <- !is.null(stamp)
   if (!is.null(cformat) && is.null(stamp)) {
@@ -578,6 +582,11 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   if (isTRUE(s$authenticated)) {
     layout <- .ct_layout(s, 1L)
     records <- s$rows
+    if (is.null(records) && !is.null(s$reference_states)) {
+      model <- (col - 1L) %/% layout$cpm + 1L
+      if (!is.null(s$model_map)) model <- s$model_map[model]
+      return(s$reference_states[r, model] %in% "ref")
+    }
     fields <- c("row", "model", "status")
     if (!is.data.frame(records) || any(!fields %in% names(records)) ||
         anyDuplicated(records[c("row", "model")]) || !is.character(records$status)) {
@@ -1819,6 +1828,16 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   foot <- nzchar(x$footnote)
   nr <- last + as.integer(foot)
   spans <- x$meta$outcome_spans %||% x$header[[1L]]$spans
+  valid_spans <- is.data.frame(spans) && nrow(spans) > 0L &&
+    all(c("from", "to") %in% names(spans)) &&
+    is.numeric(spans$from) && is.numeric(spans$to) &&
+    all(is.finite(spans$from)) && all(is.finite(spans$to)) &&
+    all(spans$from == floor(spans$from)) && all(spans$to == floor(spans$to)) &&
+    all(spans$from >= 2L & spans$from <= spans$to & spans$to <= nc)
+  if (!valid_spans || any(vapply(seq.int(2L, nc), function(j)
+      sum(j >= spans$from & j <= spans$to) != 1L, TRUE))) {
+    .tt_layout_needs("hrcomptab", "outcome spans covering each value column exactly once")
+  }
   outcomes <- nrow(spans)
   style <- x$style
   grid <- matrix("", nr, total)

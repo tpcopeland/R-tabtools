@@ -1,0 +1,17 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC006_parent
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,3
+markdown_rows,scalar,,,6
+n_spans,scalar,,,0
+n_panels,scalar,,,0
+n_datarows,scalar,,,6
+n_cols,scalar,,,3
+n_rows,scalar,,,9
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5abc/native-tc-v1/TC006.md
+csv,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5abc/native-tc-v1/TC006.csv
+file,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5abc/native-tc-v1/TC006.xlsx
+sheet,macro,,,Leaf
+source,macro,,,data

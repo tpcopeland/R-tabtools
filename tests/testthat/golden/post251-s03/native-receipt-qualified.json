@@ -1,0 +1,24 @@
+{
+  "status": "Genuine native runtime completed; R comparison pending",
+  "source_pin": "4eecca4d09d61df0cfe773fc2024b015920b5fe6",
+  "recipe_sha256": "cd3a243c31230fedaddc2b0930c7824164b64c42988b2c529489cbc61487dae7",
+  "source_provenance_sha256": "9e8d70e642db5592845cf5561c8c470fdd72425cb5ef254f2ecb268c2a90a01b",
+  "files": {
+    "S03.console.txt": "1ad44d657a1cbf1267b5ad24bdff159845750d8fc66cd3fe265d1de314dde459",
+    "S03.csv": "947267811a5f33e8fbeabdd8a250745f7f038799e4c64bfe9f84de792f089490",
+    "S03.frame.csv": "be265be565e5cd9b3fe949889d08873cf90649d933f9717441e080f9b44e9ab9",
+    "S03.md": "6ecba3c85e5c1adaebf6e2fa7284bc24cc5d034f37a56cc22e976dfc0fbd9ddd",
+    "S03.xlsx": "80cbdf0c0c650fe2a110b0d3f3f24e48b5d1cb84cd97b5050f6dedb25e398321",
+    "S03_1.dta": "91cc20e57e4797ae4fe06fcfb245622a4fe2ffde5893a5a7c8d1c5c67d162387",
+    "S03_2.dta": "a72ef241f73619df0053087ffc25625e134d321ba7cff3ee2c5413c3ed533e62",
+    "S03_3.dta": "e5fb8286984642eb096de9f46b5ce4ebc3826e1d06022b6ed656791a6a1b62bc"
+  },
+  "extra_input_sha256": {
+    "/home/tpcopeland/R-tabtools-wt/final-union/DESCRIPTION": "9a25475ec6a3ea59477b431bcf290f291d0e8b24875caf4420ab6d087336121f",
+    "/home/tpcopeland/R-tabtools-wt/final-union/tests/testthat/fixtures/stratetab_blocks.csv": "a978e4f833d1f62c13829deb2951efb4090bf1f80a4226d47ce64bd83fc63c99",
+    "/home/tpcopeland/R-tabtools-wt/final-union/qa/stata/golden_stratetab_blocks.do": "fe997115dcd8eea5e908c635a229657249cb9c7dcb893ca4a63c37f5ce8a31e8"
+  },
+  "cleanup_verified": true,
+  "capture_receipt_sha256": "74226cc0db40a3e9a5f512eb64e3ab5d5fd2b046b7cb47e15a40444012609968",
+  "cleanup_sha256": "cb57943a4919246ee89e3a1a46d9c29eef7d70a52772f74cc5e64fd0dd321e23"
+}

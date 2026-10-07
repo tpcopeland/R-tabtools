@@ -91,8 +91,29 @@ p3_s17_publication <- function(tt, want, native_console) {
   native <- split(native_console)
   golden_assert_footnote_tail(actual$foot[nzchar(actual$foot)], contract, "console")
   golden_assert_native_footnote_tail(native$foot, contract, "console")
+  # The preserved 2.5.1 S17 fixture predates the 2.5.6 strict slashN guard.
+  # Rescue has three records and zero binary events: its positive denominator
+  # is below four, so both crude/weighted denominators are withheld, code 3.
+  # Qualify only these two cells and the complete literal B console line.
+  expect_identical(unname(want[9L, c(1L, 4L, 7L)]), c("B", "0/<4", "0/<4"))
+  want[9L, c(4L, 7L)] <- "0/Suppressed"
+  expect_identical(native$body[16L], "  | B                                         ≥4              <4           0/<4           ≥4                 <4              0/<4              Suppressed            |")
+  native$body[16L] <- "  | B                                         ≥4              <4           0/Suppressed   ≥4                 <4              0/Suppressed      Suppressed            |"
   list(got = got[seq_len(end), , drop = FALSE], want = want[seq_len(end), , drop = FALSE],
        got_console = actual$body, want_console = native$body)
+}
+
+p3_s17_stored <- function(stored) {
+  # Keep every native field and matrix entry; only these two display cells
+  # migrate from primary to linked suppression under the later-source guard.
+  key <- paste(stored$name, stored$row, stored$col, sep = "|")
+  target <- c("N_derived_suppressed||", "N_primary_suppressed||",
+              "suppression|r9|Cr_3", "suppression|r9|Wt_3")
+  i <- vapply(target, function(x) which(key == x), 0L, USE.NAMES = FALSE)
+  expect_identical(stored$kind[i], c("scalar", "scalar", "matrix", "matrix"))
+  expect_identical(stored$value[i], c("4", "14", "1", "1"))
+  stored$value[i] <- c("6", "12", "3", "3")
+  stored
 }
 
 # Cells, listing, and stored results (Dapa, varlist, r(table) SMDs, the
@@ -119,6 +140,7 @@ p3_expect <- function(tt, id, mask = "p,test,statistic", console = TRUE) {
   }
   stored <- utils::read.csv(file.path(p3_case_dir(id), paste0(id, "_stored.csv")), colClasses = "character",
                             na.strings = character(), encoding = "UTF-8")
+  if (id == "S17") stored <- p3_s17_stored(stored)
   fields <- setdiff(unique(stored$name[stored$kind != "meta"]), c("xlsx", "sheet", "csv", "markdown", "markdown_rows", "markdown_cols"))
   expect_true(all(c("Dapa", "varlist") %in% fields), label = paste(id, "stored fixture holds r()"))
   why <- golden_compare_stored(tt$stored, stored, fields = fields, mask = "p", p_table = golden_table_p_rows(tt))
@@ -208,7 +230,16 @@ test_that("smallcells: 2x2 total(after) with test/statistic/smd, title, workbook
   p3_expect(tt, "S1")
   why <- golden_compare_styles(xlsx, "S1", file.path(p3_dir(), "phase3.xlsx"), "S1",
                                mask = "p,test,statistic,pstyle", got_width_offset = golden_r_width_offset)
-  expect_identical(why, character())
+  # Native 2.5.6 floors an SMD column containing "Suppressed" at 10.
+  # The old workbook remains authentic: all other cells/styles/geometry
+  # must still compare exactly under the existing inferential masks.
+  expect_identical(why, "col I width: 10 vs 8")
+  got_widths <- golden_sheet_layout(xlsx, "S1")$widths
+  old_widths <- golden_sheet_layout(file.path(p3_dir(), "phase3.xlsx"), "S1")$widths
+  expect_equal(got_widths$width[got_widths$col == 9L] - golden_r_width_offset,
+               10, tolerance = 1e-10)
+  expect_equal(old_widths$width[old_widths$col == 9L] - golden_width_offset,
+               8, tolerance = 1e-10)
 })
 
 test_that("smallcells: redundant complementary margins are absent (5 primary, 1 secondary)", {
@@ -323,8 +354,8 @@ test_that("wtcompare + smallcells with a coded group N: crude and weighted codes
   # (desctab.ado:994-1007 interleaves Cr_/Wt_ per group).
   tt <- table1_tc(p3_review_data("sg3"), by = "arm", vars = "x contn \\ k cat \\ b bin", wt = "w",
                   wtcompare = TRUE, wtn = TRUE, smallcells = 4, catrowperc = TRUE, slashN = TRUE, smd = TRUE)
-  # S17 is refreshed entirely from pinned 2.5.1 by the narrow transition
-  # producer; historical mixed presentation is retained under backcompat.
+  # The authentic 2.5.1 fixture is retained; p3_expect qualifies only its
+  # two strict binary denominator cells/counts to the later 2.5.6 guard.
   p3_expect(tt, "S17")
   m <- tt$stored$suppression
   expect_identical(unname(m["r3", c("Cr_3", "Wt_3")]), c(0, 3))

@@ -69,7 +69,7 @@
 # Policy and capabilities implement tabtools.sthlp:302-316; headershade is
 # puttab-only (:292). Explicit path writers activate no additional destinations.
 .tt_resolve_sinks <- function(values, given, policy = c("sheet", "omitted", "writer"),
-                              shade = FALSE, mask = c("none", "table1", "rates")) {
+                              shade = FALSE, mask = c("none", "table1", "rates", "crosstab")) {
   policy <- match.arg(policy)
   mask <- match.arg(mask)
   original <- values
@@ -123,7 +123,7 @@
       values["masktext"] <- list(getOption("tabtools.masktext"))
       inherited[["masktext"]] <- !is.null(values$masktext)
     }
-    if (mask == "table1" && is.numeric(values$smallcells) && !is.complex(values$smallcells) &&
+    if (mask %in% c("table1", "crosstab") && is.numeric(values$smallcells) && !is.complex(values$smallcells) &&
         is.null(dim(values$smallcells)) &&
         length(values$smallcells) == 1L && !is.na(values$smallcells) && values$smallcells == 0) {
       values["smallcells"] <- list(NULL)
@@ -135,7 +135,9 @@
                                     original$nosmallcells, original$masktext,
                                     supplied("masktext"), resolved = values)
     if (isTRUE(original$nosmallcells)) inherited[["smallcells"]] <- FALSE
-  } else if (mask == "table1") {
+  } else if (mask %in% c("table1", "crosstab")) {
+    # Crosstab uses the same explicit threshold/mode/text policy as Table 1;
+    # its analytical and publication masking remain command-specific.
     mask_result <- .t1_resolve_mask(original, original_given, values)
     values["smallcells"] <- list(mask_result$threshold)
     values$smallcells_mode <- mask_result$mode

@@ -1,0 +1,12 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC004_cols
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+ub,scalar,,,3
+lb,scalar,,,1
+estimate,scalar,,,2
+missing,scalar,,,0
+source,macro,,,matrix
+form,macro,,,est
+cell,macro,,,"2.00 (1.00, 3.00)"

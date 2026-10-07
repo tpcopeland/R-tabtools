@@ -1,0 +1,13 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC004_nlcom
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+level,scalar,,,95
+ub,scalar,,,1.4882380303060798
+lb,scalar,,,1.1803333982653488
+estimate,scalar,,,1.3342857142857143
+missing,scalar,,,0
+source,macro,,,nlcom
+form,macro,,,est
+cell,macro,,,"1.33 (1.18, 1.49)"

@@ -68,7 +68,7 @@ test_that("body insertion follows raw anchors and all aligned companions", {
     list(label = "Same $label", values = "first", after = "g"),
     list(label = "Same $label", values = "second", after = "3.g"),
     list(label = "Tail", values = "end")))
-  expect_identical(t$rows$key, c("g", "2.g", "1.g", "3.g", "addrow:1", "addrow:2", "x", "addrow:3"))
+  expect_identical(t$rows$key, c("g", "2.g", "1.g", "3.g", "addrow:Same $label", "addrow:Same $label:1", "x", "addrow:Tail"))
   expect_identical(t$body[[2L]][5:6], c("first", "second"))
   expect_identical(t$rows$inserted, c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE))
   expect_identical(tt_flat(t)[["_state_1"]], c("", "ref", "est", "est", "", "", "notest", ""))

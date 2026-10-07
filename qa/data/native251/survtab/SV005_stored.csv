@@ -1,0 +1,24 @@
+name,kind,row,col,value
+_golden_id,meta,,,SV005
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,2
+markdown_rows,scalar,,,12
+ci_level,scalar,,,95
+rmst_ub_1,scalar,,,2.4532708007442432
+rmst_lb_1,scalar,,,1.6376382901648481
+rmst_se_1,scalar,,,.20807334140142369
+rmst_1,scalar,,,2.0454545454545454
+atrisk_1,scalar,,,22
+events_1,scalar,,,11
+median_1,scalar,,,.
+N_rows,scalar,,,14
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV005.md
+csv,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV005.csv
+sheet,macro,,,SV005
+xlsx,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/survtab.xlsx
+methods,macro,,,"Survival was estimated using the Kaplan-Meier method. Frequency weights from stset were treated with replication semantics for counts and Greenwood RMST variance. Median survival time with 95% confidence intervals is reported. Restricted mean survival time was computed up to 3 years with 95% confidence intervals based on the Greenwood variance formula. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+table,matrix,t1,Overall,.54545454545454541
+table,matrix,t2,Overall,.49999999999999989
+table,matrix,t3,Overall,.49999999999999989

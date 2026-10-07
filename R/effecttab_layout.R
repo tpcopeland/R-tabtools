@@ -359,7 +359,8 @@
 # Cell text (effecttab.ado:1007-1139)
 
 # Collect path: the estimate pre-rounded with round(x, 10^-digits), then
-# %21.<digits>f; interval bounds formatted without the pre-round; p-values
+# %21.<digits>f; from Stata 2.5.2 interval bounds take the same rounding
+# unless they round to zero (the original signed text is preserved); p-values
 # by the pdp/highpdp rules. A matrix (from()) goes through its own text
 # first: the estimate is string(x, "%21.<d>f") before it is rounded and
 # formatted again, the bounds are formatted, read back and formatted again
@@ -386,7 +387,9 @@
 
 .et_bound <- function(x, d, matrix) {
   if (matrix) x <- as.numeric(.et_num(x, .et_fmt(d))) + 0
-  .et_num(x, .et_fmt(d))
+  rounded <- stata_round(x, 10^-d)
+  rounded[rounded == 0] <- x[rounded == 0]
+  .et_num(rounded, .et_fmt(d))
 }
 
 .et_ci_text <- function(lo, hi, d, sep, matrix) {

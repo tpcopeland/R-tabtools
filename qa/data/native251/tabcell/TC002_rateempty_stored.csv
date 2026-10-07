@@ -1,0 +1,13 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC002_rateempty
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+per,scalar,,,1000
+level,scalar,,,95
+ub,scalar,,,.
+lb,scalar,,,.
+rate,scalar,,,.
+missing,scalar,,,1
+citype,macro,,,exact
+form,macro,,,rate

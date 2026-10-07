@@ -21,18 +21,21 @@ test_that("TRUE-but-truncated commits restore every original without marking his
   expect_identical(state$written, before)
 })
 
-test_that("effecttab addrows use existing merged-row XLSX styling", {
+test_that("effecttab addrows retain native separate XLSX cells and table border", {
   x <- data.frame(term = "x", estimate = 1, conf.low = .5, conf.high = 1.5, p.value = .1)
   t <- effecttab(x, level = 95, addrow = '"N" 32')
   expect_identical(t$rows$type, c("var", "addrow"))
   lay <- tabtools:::.xlsx_layout_regtab(t)
   merge <- lay$rules[lay$rules$op == 14L & lay$rules$r1 == 5L, ]
-  expect_identical(as.integer(unlist(merge[1, c("r1", "r2", "c1", "c2")], use.names = FALSE)), c(5L, 5L, 3L, 5L))
+  expect_identical(nrow(merge), 0L)
+  bottom <- lay$rules[lay$rules$op == 9L & lay$rules$r1 == 5L, ]
+  expect_identical(as.integer(unlist(bottom[1, c("r1", "r2", "c1", "c2", "code")], use.names = FALSE)),
+                   c(5L, 5L, 2L, 5L, 1L))
   expect_identical(lay$grid[5L, 2:5], c("N", "32", "", ""))
   path <- withr::local_tempfile(fileext = ".xlsx")
   tt_write_xlsx(t, path, sheet = "Added")
   wb <- openxlsx2::wb_load(path)
-  expect_true(any(grepl("C5:E5", wb$worksheets[[1]]$mergeCells, fixed = TRUE)))
+  expect_false(any(grepl("C5:E5", wb$worksheets[[1]]$mergeCells, fixed = TRUE)))
 })
 
 test_that("native stack metadata names table end and first note paragraph", {

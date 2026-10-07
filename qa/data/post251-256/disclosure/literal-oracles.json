@@ -1,0 +1,862 @@
+{
+  "source_pin": "4eecca4d09d61df0cfe773fc2024b015920b5fe6",
+  "source_version": "2.5.6",
+  "capture_log_sha256": "fda6729fc9dfb751880b1c8baa07ccad10f571ccca6abc7130640357e8b7d29f",
+  "case_ids": [
+    "DS01",
+    "DS02",
+    "DS03",
+    "DS04",
+    "DS05",
+    "DS06",
+    "DS07",
+    "DS08"
+  ],
+  "cases": {
+    "DS01": {
+      "command_rc": 0,
+      "marker_line": 189,
+      "window_start_line": 176,
+      "window_end_line": 188,
+      "raw_publication_window": [
+        "  +-------------------------------------------------------------+",
+        "  |                  g = 1          g = 2          g = 3        |",
+        "  |-------------------------------------------------------------|",
+        "  | No. (Column %)   ≥3             N=9            ≥3           |",
+        "  |-------------------------------------------------------------|",
+        "  | v                                                           |",
+        "  |    1             <3             6/Suppressed   3/Suppressed |",
+        "  |    2             0/Suppressed   0/Suppressed   <3           |",
+        "  |    3             <3             <3             0/Suppressed |",
+        "  +-------------------------------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.",
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS01.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS01.md"
+      ],
+      "native_console": [
+        "  +-------------------------------------------------------------+",
+        "  |                  g = 1          g = 2          g = 3        |",
+        "  |-------------------------------------------------------------|",
+        "  | No. (Column %)   ≥3             N=9            ≥3           |",
+        "  |-------------------------------------------------------------|",
+        "  | v                                                           |",
+        "  |    1             <3             6/Suppressed   3/Suppressed |",
+        "  |    2             0/Suppressed   0/Suppressed   <3           |",
+        "  |    3             <3             <3             0/Suppressed |",
+        "  +-------------------------------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count."
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS01.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS01.md"
+      ],
+      "scalars": {
+        "markdown_cols": 4.0,
+        "markdown_rows": 4.0,
+        "N_derived_suppressed": 5.0,
+        "N_secondary_suppressed": 2.0,
+        "N_primary_suppressed": 4.0,
+        "smallcells": 3.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-dhbtxfa8/out/DS01.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-dhbtxfa8/out/DS01.xlsx",
+        "frame": "_post251_result",
+        "smallcells_mode": "full",
+        "varlist": "v",
+        "Dapa": "Data are presented as No./total (%). P-values suppressed."
+      },
+      "returned_matrix_name": "suppression",
+      "matrix": {
+        "nrow": 6,
+        "ncol": 3,
+        "rownames": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ],
+        "colnames": [
+          "g_1",
+          "g_2",
+          "g_3"
+        ],
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            0.0,
+            2.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            3.0,
+            3.0
+          ],
+          [
+            3.0,
+            3.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            3.0
+          ]
+        ]
+      },
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  4\n      r(markdown_rows) =  4\n  r(N_derived_suppres\n    sed)               =  5\n  r(N_secondary_suppr\n    essed)             =  2\n  r(N_primary_suppres\n    sed)               =  4\n         r(smallcells) =  3\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS01.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS01.xlsx\"\n              r(frame) : \"_post251_result\"\n    r(smallcells_mode) : \"full\"\n            r(varlist) : \"v\"\n               r(Dapa) : \"Data are presented as No./total (%). P-values suppressed.\"\n\nmatrices:\n        r(suppression) :  6 x 3\n"
+    },
+    "DS02": {
+      "command_rc": 0,
+      "marker_line": 262,
+      "window_start_line": 252,
+      "window_end_line": 261,
+      "raw_publication_window": [
+        "  +-------------------------------------------------------------+",
+        "  |                  1     2       3              Total         |",
+        "  |-------------------------------------------------------------|",
+        "  | No. (Column %)   N=6   N=13    ≥3             ≥3            |",
+        "  |-------------------------------------------------------------|",
+        "  | b                6/6   10/13   4/Suppressed   20/Suppressed |",
+        "  +-------------------------------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.",
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS02.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS02.md"
+      ],
+      "native_console": [
+        "  +-------------------------------------------------------------+",
+        "  |                  1     2       3              Total         |",
+        "  |-------------------------------------------------------------|",
+        "  | No. (Column %)   N=6   N=13    ≥3             ≥3            |",
+        "  |-------------------------------------------------------------|",
+        "  | b                6/6   10/13   4/Suppressed   20/Suppressed |",
+        "  +-------------------------------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count."
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS02.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS02.md"
+      ],
+      "scalars": {
+        "markdown_cols": 5.0,
+        "markdown_rows": 1.0,
+        "N_derived_suppressed": 2.0,
+        "N_secondary_suppressed": 2.0,
+        "N_primary_suppressed": 0.0,
+        "smallcells": 3.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-dhbtxfa8/out/DS02.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-dhbtxfa8/out/DS02.xlsx",
+        "frame": "_post251_result",
+        "smallcells_mode": "full",
+        "varlist": "b",
+        "Dapa": "Data are presented as No./total (row %). P-values suppressed."
+      },
+      "returned_matrix_name": "suppression",
+      "matrix": {
+        "nrow": 3,
+        "ncol": 4,
+        "rownames": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "colnames": [
+          "g_1",
+          "g_2",
+          "g_3",
+          "g_T"
+        ],
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            2.0,
+            2.0
+          ],
+          [
+            0.0,
+            0.0,
+            3.0,
+            3.0
+          ]
+        ]
+      },
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  5\n      r(markdown_rows) =  1\n  r(N_derived_suppres\n    sed)               =  2\n  r(N_secondary_suppr\n    essed)             =  2\n  r(N_primary_suppres\n    sed)               =  0\n         r(smallcells) =  3\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS02.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS02.xlsx\"\n              r(frame) : \"_post251_result\"\n    r(smallcells_mode) : \"full\"\n            r(varlist) : \"b\"\n               r(Dapa) : \"Data are presented as No./total (row %). P-values suppressed.\"\n\nmatrices:\n        r(suppression) :  3 x 4\n"
+    },
+    "DS03": {
+      "command_rc": 0,
+      "marker_line": 351,
+      "window_start_line": 336,
+      "window_end_line": 350,
+      "raw_publication_window": [
+        "  +-----------------------------------------------------------------------------------------------+",
+        "  |                             1              2      3              4              Total         |",
+        "  |-----------------------------------------------------------------------------------------------|",
+        "  | No. (Column %) or Mean±SD   N=14           N=6    N=6            N=9            N=35          |",
+        "  |-----------------------------------------------------------------------------------------------|",
+        "  | x                           8±4            18±2   24±2           31±3           18±10         |",
+        "  |-----------------------------------------------------------------------------------------------|",
+        "  | v                                                                                             |",
+        "  |    1                        <3             <3     <3             <3             6/Suppressed  |",
+        "  |    2                        0/Suppressed   <3     0/Suppressed   3/Suppressed   ≥3            |",
+        "  |    3                        6/Suppressed   <3     <3             ≥3             12/Suppressed |",
+        "  +-----------------------------------------------------------------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.",
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS03.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS03.md"
+      ],
+      "native_console": [
+        "  +-----------------------------------------------------------------------------------------------+",
+        "  |                             1              2      3              4              Total         |",
+        "  |-----------------------------------------------------------------------------------------------|",
+        "  | No. (Column %) or Mean±SD   N=14           N=6    N=6            N=9            N=35          |",
+        "  |-----------------------------------------------------------------------------------------------|",
+        "  | x                           8±4            18±2   24±2           31±3           18±10         |",
+        "  |-----------------------------------------------------------------------------------------------|",
+        "  | v                                                                                             |",
+        "  |    1                        <3             <3     <3             <3             6/Suppressed  |",
+        "  |    2                        0/Suppressed   <3     0/Suppressed   3/Suppressed   ≥3            |",
+        "  |    3                        6/Suppressed   <3     <3             ≥3             12/Suppressed |",
+        "  +-----------------------------------------------------------------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count."
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS03.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS03.md"
+      ],
+      "scalars": {
+        "markdown_cols": 6.0,
+        "markdown_rows": 5.0,
+        "N_derived_suppressed": 6.0,
+        "N_secondary_suppressed": 2.0,
+        "N_primary_suppressed": 7.0,
+        "smallcells": 3.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-dhbtxfa8/out/DS03.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-dhbtxfa8/out/DS03.xlsx",
+        "frame": "_post251_result",
+        "smallcells_mode": "full",
+        "varlist": "x v",
+        "Dapa": "Data are presented as mean±SD for continuous measures, and No./total (%) for categorical measures. P-values suppressed."
+      },
+      "returned_matrix_name": "suppression",
+      "matrix": {
+        "nrow": 7,
+        "ncol": 5,
+        "rownames": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ],
+        "colnames": [
+          "g_1",
+          "g_2",
+          "g_3",
+          "g_4",
+          "g_T"
+        ],
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            3.0
+          ],
+          [
+            3.0,
+            1.0,
+            3.0,
+            3.0,
+            2.0
+          ],
+          [
+            3.0,
+            1.0,
+            1.0,
+            2.0,
+            3.0
+          ]
+        ]
+      },
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  6\n      r(markdown_rows) =  5\n  r(N_derived_suppres\n    sed)               =  6\n  r(N_secondary_suppr\n    essed)             =  2\n  r(N_primary_suppres\n    sed)               =  7\n         r(smallcells) =  3\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS03.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS03.xlsx\"\n              r(frame) : \"_post251_result\"\n    r(smallcells_mode) : \"full\"\n            r(varlist) : \"x v\"\n               r(Dapa) : \"Data are presented as mean±SD for continuous measures, and No./total (%) for categorical measures. P-values suppressed.\"\n\nmatrices:\n        r(suppression) :  7 x 5\n"
+    },
+    "DS04": {
+      "command_rc": 0,
+      "marker_line": 416,
+      "window_start_line": 401,
+      "window_end_line": 415,
+      "raw_publication_window": [
+        "  +--------------------------------------------------------------------------------+",
+        "  |                             1          2      3          4          Total      |",
+        "  |--------------------------------------------------------------------------------|",
+        "  | No. (Column %) or Mean±SD   N=14       N=6    N=6        N=9        N=35       |",
+        "  |--------------------------------------------------------------------------------|",
+        "  | x                           8±4        18±2   24±2       31±3       18±10      |",
+        "  |--------------------------------------------------------------------------------|",
+        "  | v                                                                              |",
+        "  |    1                        <3         <3     <3         <3         6/22 (27)  |",
+        "  |    2                        0/8 (0)    <3     0/<3 (0)   3/8 (38)   4/22 (18)  |",
+        "  |    3                        6/8 (75)   <3     <3         4/8 (50)   12/22 (55) |",
+        "  +--------------------------------------------------------------------------------+",
+        "Counts from 1 to 2 are shown as <3 without a percentage (primary suppression only: no complementary cells are masked). This protects printed counts only.",
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS04.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS04.md"
+      ],
+      "native_console": [
+        "  +--------------------------------------------------------------------------------+",
+        "  |                             1          2      3          4          Total      |",
+        "  |--------------------------------------------------------------------------------|",
+        "  | No. (Column %) or Mean±SD   N=14       N=6    N=6        N=9        N=35       |",
+        "  |--------------------------------------------------------------------------------|",
+        "  | x                           8±4        18±2   24±2       31±3       18±10      |",
+        "  |--------------------------------------------------------------------------------|",
+        "  | v                                                                              |",
+        "  |    1                        <3         <3     <3         <3         6/22 (27)  |",
+        "  |    2                        0/8 (0)    <3     0/<3 (0)   3/8 (38)   4/22 (18)  |",
+        "  |    3                        6/8 (75)   <3     <3         4/8 (50)   12/22 (55) |",
+        "  +--------------------------------------------------------------------------------+",
+        "Counts from 1 to 2 are shown as <3 without a percentage (primary suppression only: no complementary cells are masked). This protects printed counts only."
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS04.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS04.md"
+      ],
+      "scalars": {
+        "markdown_cols": 6.0,
+        "markdown_rows": 5.0,
+        "N_derived_suppressed": 0.0,
+        "N_secondary_suppressed": 0.0,
+        "N_primary_suppressed": 8.0,
+        "smallcells": 3.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-dhbtxfa8/out/DS04.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-dhbtxfa8/out/DS04.xlsx",
+        "frame": "_post251_result",
+        "smallcells_mode": "primary",
+        "varlist": "x v",
+        "Dapa": "Data are presented as mean±SD for continuous measures, and No./total (%) for categorical measures. P-values suppressed."
+      },
+      "returned_matrix_name": "suppression",
+      "matrix": {
+        "nrow": 7,
+        "ncol": 5,
+        "rownames": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ],
+        "colnames": [
+          "g_1",
+          "g_2",
+          "g_3",
+          "g_4",
+          "g_T"
+        ],
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  6\n      r(markdown_rows) =  5\n  r(N_derived_suppres\n    sed)               =  0\n  r(N_secondary_suppr\n    essed)             =  0\n  r(N_primary_suppres\n    sed)               =  8\n         r(smallcells) =  3\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS04.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS04.xlsx\"\n              r(frame) : \"_post251_result\"\n    r(smallcells_mode) : \"primary\"\n            r(varlist) : \"x v\"\n               r(Dapa) : \"Data are presented as mean±SD for continuous measures, and No./total (%) for categorical measures. P-values suppressed.\"\n\nmatrices:\n        r(suppression) :  7 x 5\n"
+    },
+    "DS05": {
+      "command_rc": 0,
+      "marker_line": 507,
+      "window_start_line": 496,
+      "window_end_line": 506,
+      "raw_publication_window": [
+        "  +----------------------------------------------------------------------------------------------------+",
+        "  |                  Total           1              2              3              4              5     |",
+        "  |----------------------------------------------------------------------------------------------------|",
+        "  | No. (Column %)   N=48            ≥3             ≥3             ≥3             ≥3             N=12  |",
+        "  |----------------------------------------------------------------------------------------------------|",
+        "  | b                33/Suppressed   3/Suppressed   6/Suppressed   4/Suppressed   8/Suppressed   12/12 |",
+        "  |    Missing       ≥3              <3             4              <3             4              0     |",
+        "  +----------------------------------------------------------------------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.",
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS05.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS05.md"
+      ],
+      "native_console": [
+        "  +----------------------------------------------------------------------------------------------------+",
+        "  |                  Total           1              2              3              4              5     |",
+        "  |----------------------------------------------------------------------------------------------------|",
+        "  | No. (Column %)   N=48            ≥3             ≥3             ≥3             ≥3             N=12  |",
+        "  |----------------------------------------------------------------------------------------------------|",
+        "  | b                33/Suppressed   3/Suppressed   6/Suppressed   4/Suppressed   8/Suppressed   12/12 |",
+        "  |    Missing       ≥3              <3             4              <3             4              0     |",
+        "  +----------------------------------------------------------------------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count."
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS05.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS05.md"
+      ],
+      "scalars": {
+        "markdown_cols": 7.0,
+        "markdown_rows": 2.0,
+        "N_derived_suppressed": 5.0,
+        "N_secondary_suppressed": 5.0,
+        "N_primary_suppressed": 2.0,
+        "smallcells": 3.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-dhbtxfa8/out/DS05.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-dhbtxfa8/out/DS05.xlsx",
+        "frame": "_post251_result",
+        "smallcells_mode": "full",
+        "varlist": "b",
+        "Dapa": "Data are presented as No./total (%). P-values suppressed."
+      },
+      "returned_matrix_name": "suppression",
+      "matrix": {
+        "nrow": 4,
+        "ncol": 6,
+        "rownames": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "colnames": [
+          "g_1",
+          "g_2",
+          "g_3",
+          "g_4",
+          "g_5",
+          "g_T"
+        ],
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            0.0,
+            0.0
+          ],
+          [
+            3.0,
+            3.0,
+            3.0,
+            3.0,
+            0.0,
+            3.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            2.0
+          ]
+        ]
+      },
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  7\n      r(markdown_rows) =  2\n  r(N_derived_suppres\n    sed)               =  5\n  r(N_secondary_suppr\n    essed)             =  5\n  r(N_primary_suppres\n    sed)               =  2\n         r(smallcells) =  3\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS05.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS05.xlsx\"\n              r(frame) : \"_post251_result\"\n    r(smallcells_mode) : \"full\"\n            r(varlist) : \"b\"\n               r(Dapa) : \"Data are presented as No./total (%). P-values suppressed.\"\n\nmatrices:\n        r(suppression) :  4 x 6\n"
+    },
+    "DS06": {
+      "command_rc": 0,
+      "marker_line": 580,
+      "window_start_line": 569,
+      "window_end_line": 579,
+      "raw_publication_window": [
+        "  +------------------------------------+",
+        "  |              g = 1   g = 2   g = 3 |",
+        "  |------------------------------------|",
+        "  | Mean±SD      ≥3      N=6     N=6   |",
+        "  |------------------------------------|",
+        "  | x            2±1     8±2     14±1  |",
+        "  |    Missing   <3      0       <3    |",
+        "  +------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.",
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS06.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS06.md"
+      ],
+      "native_console": [
+        "  +------------------------------------+",
+        "  |              g = 1   g = 2   g = 3 |",
+        "  |------------------------------------|",
+        "  | Mean±SD      ≥3      N=6     N=6   |",
+        "  |------------------------------------|",
+        "  | x            2±1     8±2     14±1  |",
+        "  |    Missing   <3      0       <3    |",
+        "  +------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count."
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS06.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS06.md"
+      ],
+      "scalars": {
+        "markdown_cols": 4.0,
+        "markdown_rows": 2.0,
+        "N_derived_suppressed": 0.0,
+        "N_secondary_suppressed": 1.0,
+        "N_primary_suppressed": 2.0,
+        "smallcells": 3.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-dhbtxfa8/out/DS06.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-dhbtxfa8/out/DS06.xlsx",
+        "frame": "_post251_result",
+        "smallcells_mode": "full",
+        "varlist": "x",
+        "Dapa": "Data are presented as mean±SD. P-values suppressed."
+      },
+      "returned_matrix_name": "suppression",
+      "matrix": {
+        "nrow": 4,
+        "ncol": 3,
+        "rownames": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "colnames": [
+          "g_1",
+          "g_2",
+          "g_3"
+        ],
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  4\n      r(markdown_rows) =  2\n  r(N_derived_suppres\n    sed)               =  0\n  r(N_secondary_suppr\n    essed)             =  1\n  r(N_primary_suppres\n    sed)               =  2\n         r(smallcells) =  3\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS06.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS06.xlsx\"\n              r(frame) : \"_post251_result\"\n    r(smallcells_mode) : \"full\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Data are presented as mean±SD. P-values suppressed.\"\n\nmatrices:\n        r(suppression) :  4 x 3\n"
+    },
+    "DS07": {
+      "command_rc": 0,
+      "marker_line": 636,
+      "window_start_line": 625,
+      "window_end_line": 635,
+      "raw_publication_window": [
+        "  +---------------------------------------+",
+        "  |              1     2     3      Total |",
+        "  |---------------------------------------|",
+        "  | Mean±SD      ≥3    N=6   N=6    ≥3    |",
+        "  |---------------------------------------|",
+        "  | x            2±1   8±2   14±1   8±5   |",
+        "  |    Missing   <3    0     <3     3     |",
+        "  +---------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count.",
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS07.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS07.md"
+      ],
+      "native_console": [
+        "  +---------------------------------------+",
+        "  |              1     2     3      Total |",
+        "  |---------------------------------------|",
+        "  | Mean±SD      ≥3    N=6   N=6    ≥3    |",
+        "  |---------------------------------------|",
+        "  | x            2±1   8±2   14±1   8±5   |",
+        "  |    Missing   <3    0     <3     3     |",
+        "  +---------------------------------------+",
+        "Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent exact reconstruction. Percentages are withheld for any variable carrying a suppressed count."
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS07.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS07.md"
+      ],
+      "scalars": {
+        "markdown_cols": 5.0,
+        "markdown_rows": 2.0,
+        "N_derived_suppressed": 0.0,
+        "N_secondary_suppressed": 2.0,
+        "N_primary_suppressed": 2.0,
+        "smallcells": 3.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-dhbtxfa8/out/DS07.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-dhbtxfa8/out/DS07.xlsx",
+        "frame": "_post251_result",
+        "smallcells_mode": "full",
+        "varlist": "x",
+        "Dapa": "Data are presented as mean±SD. P-values suppressed."
+      },
+      "returned_matrix_name": "suppression",
+      "matrix": {
+        "nrow": 4,
+        "ncol": 4,
+        "rownames": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "colnames": [
+          "g_1",
+          "g_2",
+          "g_3",
+          "g_T"
+        ],
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            0.0,
+            0.0,
+            2.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ]
+      },
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  5\n      r(markdown_rows) =  2\n  r(N_derived_suppres\n    sed)               =  0\n  r(N_secondary_suppr\n    essed)             =  2\n  r(N_primary_suppres\n    sed)               =  2\n         r(smallcells) =  3\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS07.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS07.xlsx\"\n              r(frame) : \"_post251_result\"\n    r(smallcells_mode) : \"full\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Data are presented as mean±SD. P-values suppressed.\"\n\nmatrices:\n        r(suppression) :  4 x 4\n"
+    },
+    "DS08": {
+      "command_rc": 0,
+      "marker_line": 692,
+      "window_start_line": 681,
+      "window_end_line": 691,
+      "raw_publication_window": [
+        "  +------------------------------------+",
+        "  |              g = 1   g = 2   g = 3 |",
+        "  |------------------------------------|",
+        "  | Mean±SD      N=4     N=6     N=6   |",
+        "  |------------------------------------|",
+        "  | x            2±1     8±2     14±1  |",
+        "  |    Missing   <3      0       <3    |",
+        "  +------------------------------------+",
+        "Counts from 1 to 2 are shown as <3 without a percentage (primary suppression only: no complementary cells are masked). This protects printed counts only.",
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS08.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS08.md"
+      ],
+      "native_console": [
+        "  +------------------------------------+",
+        "  |              g = 1   g = 2   g = 3 |",
+        "  |------------------------------------|",
+        "  | Mean±SD      N=4     N=6     N=6   |",
+        "  |------------------------------------|",
+        "  | x            2±1     8±2     14±1  |",
+        "  |    Missing   <3      0       <3    |",
+        "  +------------------------------------+",
+        "Counts from 1 to 2 are shown as <3 without a percentage (primary suppression only: no complementary cells are masked). This protects printed counts only."
+      ],
+      "sink_messages": [
+        "CSV exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS08.csv",
+        "Markdown exported to /tmp/tabtools-native-256-dhbtxfa8/out/DS08.md"
+      ],
+      "scalars": {
+        "markdown_cols": 4.0,
+        "markdown_rows": 2.0,
+        "N_derived_suppressed": 0.0,
+        "N_secondary_suppressed": 0.0,
+        "N_primary_suppressed": 2.0,
+        "smallcells": 3.0
+      },
+      "macros": {
+        "markdown": "/tmp/tabtools-native-256-dhbtxfa8/out/DS08.md",
+        "sheet": "Table",
+        "xlsx": "/tmp/tabtools-native-256-dhbtxfa8/out/DS08.xlsx",
+        "frame": "_post251_result",
+        "smallcells_mode": "primary",
+        "varlist": "x",
+        "Dapa": "Data are presented as mean±SD. P-values suppressed."
+      },
+      "returned_matrix_name": "suppression",
+      "matrix": {
+        "nrow": 4,
+        "ncol": 3,
+        "rownames": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "colnames": [
+          "g_1",
+          "g_2",
+          "g_3"
+        ],
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "absent_table": true,
+      "returned_matrix_listing": "\nscalars:\n      r(markdown_cols) =  4\n      r(markdown_rows) =  2\n  r(N_derived_suppres\n    sed)               =  0\n  r(N_secondary_suppr\n    essed)             =  0\n  r(N_primary_suppres\n    sed)               =  2\n         r(smallcells) =  3\n\nmacros:\n           r(markdown) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS08.md\"\n              r(sheet) : \"Table\"\n               r(xlsx) : \"/tmp/tabtools-native-256-dhbtxfa8/out/DS08.xlsx\"\n              r(frame) : \"_post251_result\"\n    r(smallcells_mode) : \"primary\"\n            r(varlist) : \"x\"\n               r(Dapa) : \"Data are presented as mean±SD. P-values suppressed.\"\n\nmatrices:\n        r(suppression) :  4 x 3\n"
+    }
+  },
+  "derivation": "Literal native capture projection only, original full windows and line provenance retained; no R producer values."
+}

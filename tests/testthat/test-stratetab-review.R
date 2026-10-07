@@ -137,10 +137,10 @@ test_that("F9/C8: stratetab rounds at the exact unit 10^(-d), as Stata 2.1.14, e
   expect_identical(stratetab(b, digits = 2, ratescale = 1000)$body$c4[2], "100.00 (50.00, 422.40)")
 })
 
-test_that("F9: half events round to even, half person-years up (kills M09)", {
+test_that("F9: events and person-years both round half upward (Stata 2.5.2)", {
   b <- rv_block(cats = c("A", "B"), D = c(2.5, 3.5), Y = c(2.5, 0.5))
   tt <- stratetab(b)
-  expect_identical(tt$body$c2[-1], c("2", "4"))
+  expect_identical(tt$body$c2[-1], c("3", "4"))
   expect_identical(tt$body$c3[-1], c("3", "1"))
 })
 

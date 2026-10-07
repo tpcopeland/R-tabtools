@@ -111,7 +111,8 @@ tt_layout_defaults <- function(command) {
 #'   (`"left"`/`"right"`), `console_sepby`, `console_title`, `console_blank`,
 #'   `header_style` (`"descriptor"`, `"model"`, `"plain"`), `xlsx_rules`
 #'   (`"descriptive"`, `"regression"`, `"puttab"`, `"stacktab"`,
-#'   `"stratetab"`, `"comptab"`, `"hrcomptab"`), `sheet`, `csv_reservedrow` (default `TRUE`: the CSV
+#'   `"stratetab"`, `"comptab"`, `"hrcomptab"`, `"crosstab"`,
+#'   `"corrtab"`, `"survtab"`), `sheet`, `csv_reservedrow` (default `TRUE`: the CSV
 #'   sink drops leading rows blank in every column), and `md_header`
 #'   (`"first"`: the Markdown header is the first header row and the later
 #'   header rows are written as body rows, as comptab's rate-mode Markdown
@@ -363,7 +364,7 @@ validate_tt_table <- function(x) {
   if (!is.list(x$layout) || !isTRUE(x$layout$align %in% c("left", "right")) ||
       !isTRUE(x$layout$header_style %in% c("descriptor", "model", "plain")) ||
       !isTRUE(x$layout$xlsx_rules %in% c("descriptive", "regression", "puttab", "stacktab", "stratetab",
-                                         "comptab", "hrcomptab", "none"))) {
+                                         "comptab", "hrcomptab", "crosstab", "corrtab", "survtab", "none"))) {
     bad("{.field layout} needs {.field align}, {.field header_style}, and {.field xlsx_rules} from the documented values.")
   }
   for (f in c("console_sepby", "console_title", "console_blank")) {

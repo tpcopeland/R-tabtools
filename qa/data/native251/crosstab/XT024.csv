@@ -1,0 +1,6 @@
+row,1,2,Total
+1,<3,0,<3
+2,0,<3,<3
+Total,<3,<3,<3
+Fisher's exact test: p = 1.000,,,
+"Counts from 1 to 2 are shown as <3 without a percentage (primary suppression only: no complementary cells are masked, and totals and tests are shown as computed). This protects printed counts only.",,,

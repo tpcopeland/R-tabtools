@@ -1,0 +1,12 @@
+,a-b (N=2),a b (N=2),Difference (a-b - a b),p
+Events / N,2 / 2,0 / 2,,0.090
+Cumulative incidence,,,,
+  1 yr,50.0%,0.0%,"50.0 (-19.3, 119.3)",
+  2 years,100.0%,0.0%,"100.0 (30.7, 169.3)",
+  5 years,100.0%,0.0%,100.0,
+Number at risk,,,,
+  1 yr,2,2,,
+  2 years,1,2,,
+  5 years,0,0,,
+"Log-rank test: chi2(1) = 2.88, p = 0.090",,,,
+Native annotation.,,,,

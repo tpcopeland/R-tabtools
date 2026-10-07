@@ -1,0 +1,24 @@
+{
+  "status": "Genuine native runtime completed; R comparison pending",
+  "source_pin": "4eecca4d09d61df0cfe773fc2024b015920b5fe6",
+  "recipe_sha256": "cf4c6a3a1d725ebc624dc8a5c39138e6b3b6ce3b87af412cf44674354f164082",
+  "source_provenance_sha256": "9e8d70e642db5592845cf5561c8c470fdd72425cb5ef254f2ecb268c2a90a01b",
+  "files": {
+    "academic.csv": "accacea99acd4743aacee45e902ffd8561e37fd8fba6b84c641e98be5c0c3120",
+    "academic.md": "ce1cc582c2fd2fcea7f06b1120100644cbeb4e2974743414f9b5718d77fdb5d8",
+    "academic.xlsx": "5441ef3a2c8e2d5d4b6a0584dfb927230088b39e27e87d09483c98830252ac60",
+    "counts.csv": "e4bc884e1fa399aacbb79535269834017cfdb0a3b19e06d8e8ca88dbca5bed6e",
+    "frames.csv": "cca24713dfd96b4690c60fad22213b26291ea60b00e6f3b388ff4bf4bf05f124",
+    "frames.md": "b6e92f285d24a0f01e7e8509264099d7e15bb572fe34644bab1134384fbed77a",
+    "frames.xlsx": "b0ca4b2a65a651a3e2765464fe5b231f8d80451ac347b783660d535aab61ce57",
+    "medium.csv": "accacea99acd4743aacee45e902ffd8561e37fd8fba6b84c641e98be5c0c3120",
+    "medium.md": "ce1cc582c2fd2fcea7f06b1120100644cbeb4e2974743414f9b5718d77fdb5d8",
+    "medium.xlsx": "3413badd046f9dc70fe8348896a13388f66dc5fb2cf38068d79a50cf7ed49930",
+    "panel.csv": "f88c8e0ddbf45dffa2a12ca7885f7f97291db80091e78b1c95cb0688311b832c",
+    "panel.md": "b64903b9e56370cf74812a09d5c68810c579bdfd2f45968ddd507008c2f6c384",
+    "panel.xlsx": "5c72dd56fe3a1f6305d0bf9807f050108a75322fbde48db77531e75bd8e773d5",
+    "thin.csv": "accacea99acd4743aacee45e902ffd8561e37fd8fba6b84c641e98be5c0c3120",
+    "thin.md": "ce1cc582c2fd2fcea7f06b1120100644cbeb4e2974743414f9b5718d77fdb5d8",
+    "thin.xlsx": "18b2e4b33f2aa096643a61c17b6ea4144ce173b7cde7da0da897f2e7ea56ac7b"
+  }
+}

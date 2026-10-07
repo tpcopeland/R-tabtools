@@ -10,13 +10,17 @@
 #
 # Cell/margin states (Mata `state`): -1 free (not published: any value
 # 0..upper), 0 published exactly, 1 primary suppression (shown "<k", value in
-# [1, k-1]), 2 complementary suppression (shown ">=k", value in [k, upper]).
+# [1, k-1]), 2 complementary suppression (shown ">=k", value in [k, upper]),
+# 3 released lower bound (a visible summary establishes n >= k; no mask).
 # A primary cell is protected when a reader who knows every published value
 # and every marker's range cannot pin it down: actual - 1 or actual + 1 must
 # also be feasible. Feasibility is a bounded-flow problem on the bipartite
 # rows x columns network with margin arcs, checked by max-flow.
 
 # ---------------------------------------------------------------------------
+# Post-baseline 2.5.2-2.5.4 repairs are pinned to 4eecca4d: withheld slashN
+# denominators and visible-summary lower bounds; the 2.5.1 goldens remain historical.
+#
 # Engine internals (Mata `_ttsc_*`)
 
 # Lower/upper bounds for a cell or margin in a given state
@@ -24,7 +28,7 @@
 .sc_bounds <- function(actual, state, k, upper) {
   if (state == 0) return(c(actual, actual))
   if (state == 1) return(c(1, k - 1))
-  if (state == 2) return(c(k, upper))
+  if (state %in% c(2, 3)) return(c(k, upper))
   c(0, upper)
 }
 
@@ -177,7 +181,9 @@
 # The whole decision procedure (`_ttsc_run`, :352-587). Returns
 # list(status = -1 invalid input | 0 uncertifiable | 1 certified, ...).
 .sc_run <- function(counts, exact, sensitive, rowexact, rowsensitive, colexact,
-                    colsensitive, grandexact, grandsensitive, k, fixedmargins = FALSE) {
+                    colsensitive, grandexact, grandsensitive, k, fixedmargins = FALSE,
+                    lower = matrix(0, nrow(counts), ncol(counts)),
+                    rowlower = rep(0, nrow(counts))) {
   nr <- nrow(counts)
   nc <- ncol(counts)
   bad <- list(status = -1L)
@@ -191,15 +197,20 @@
   if (!.sc_valid_binary(colexact) || !.sc_valid_binary(colsensitive)) return(bad)
   if (!.sc_valid_binary(grandexact) || !.sc_valid_binary(grandsensitive)) return(bad)
 
+  if (!identical(dim(lower), dim(counts)) || length(rowlower) != nr ||
+      !.sc_valid_binary(lower) || !.sc_valid_binary(rowlower)) return(bad)
+
   rowtotals <- rowSums(counts)
   coltotals <- colSums(counts)
   grand <- sum(counts)
 
   # Initial states (:405-424).
   state <- matrix(-1, nr, nc)
+  state[lower == 1] <- ifelse(counts[lower == 1] == 0, 0, 3)
   state[exact == 1] <- 0
   state[sensitive == 1 & counts > 0 & counts < k] <- 1
   rowstate <- rep(-1, nr)
+  rowstate[rowlower == 1] <- ifelse(rowtotals[rowlower == 1] == 0, 0, 3)
   rowstate[rowexact == 1] <- 0
   rowstate[rowsensitive == 1 & rowtotals > 0 & rowtotals < k] <- 1
   colstate <- rep(-1, nc)
@@ -335,9 +346,10 @@
   }
   if (!ok()) return(list(status = 0L))
 
-  mask <- pmax(state, 0)
+  # State 3 is a released lower bound, not a withheld display cell.
+  mask <- ifelse(state == 3, 0, pmax(state, 0))
   dim(mask) <- dim(counts)
-  rowmask <- pmax(rowstate, 0)
+  rowmask <- ifelse(rowstate == 3, 0, pmax(rowstate, 0))
   colmask <- pmax(colstate, 0)
   totalmask <- max(grandstate, 0)
   list(
@@ -365,6 +377,8 @@
 #' @param rowexact,rowsensitive,colexact,colsensitive 0/1 vectors for the row
 #'   and column margins. Default all 0.
 #' @param grandexact,grandsensitive 0/1 flags for the grand total.
+#' @param lower,rowlower Internal 0/1 flags for cells and row margins whose
+#'   visible summary establishes a lower count bound of k (or exact zero).
 #' @param fixedmargins When `TRUE`, column and grand margins are never
 #'   withheld as complementary cells (they are published elsewhere, e.g. the
 #'   group N shared by every variable of a table; Stata 2.1.17).
@@ -377,7 +391,8 @@
 tt_smallcells <- function(counts, smallcells, exact = NULL, sensitive = NULL,
                           rowexact = NULL, rowsensitive = NULL,
                           colexact = NULL, colsensitive = NULL,
-                          grandexact = 0, grandsensitive = 0, fixedmargins = FALSE) {
+                          grandexact = 0, grandsensitive = 0, fixedmargins = FALSE,
+                          lower = NULL, rowlower = NULL) {
   k <- .sc_check_threshold(smallcells)
   counts <- as.matrix(counts)
   nr <- nrow(counts)
@@ -402,6 +417,8 @@ tt_smallcells <- function(counts, smallcells, exact = NULL, sensitive = NULL,
   }
   exact <- full(exact, 1, nr, nc)
   sensitive <- full(sensitive, 1, nr, nc)
+  lower <- full(lower, 0, nr, nc)
+  rowlower <- if (is.null(rowlower)) rep(0, nr) else as.vector(rowlower)
   rowexact <- if (is.null(rowexact)) rep(0, nr) else as.vector(rowexact)
   rowsensitive <- if (is.null(rowsensitive)) rep(0, nr) else as.vector(rowsensitive)
   colexact <- if (is.null(colexact)) rep(0, nc) else as.vector(colexact)
@@ -412,7 +429,7 @@ tt_smallcells <- function(counts, smallcells, exact = NULL, sensitive = NULL,
   }
   res <- .sc_run(counts, exact, sensitive, rowexact, rowsensitive, colexact,
                  colsensitive, grandexact, grandsensitive, k,
-                 fixedmargins = isTRUE(fixedmargins))
+                 fixedmargins = isTRUE(fixedmargins), lower = lower, rowlower = rowlower)
   if (res$status == -1L) {
     .sc_abort_input("Counts and masks must be conformable nonnegative integer/binary matrices.")
   }
@@ -469,7 +486,8 @@ tt_sc_render <- function(value, mask, smallcells, format = "%12.0fc") {
 #' Count block for a continuous variable (contn/contln/conts)
 #'
 #' Rows: contributing N and missing count per group (`_desctab_collect.ado:
-#' 646-668`). N is never published exactly (only the mean/SD etc. are); the
+#' 646-668`). N is never published exactly, but a visible summary establishes
+#' n >= k (and a blank empty summary establishes zero); the
 #' missing row is published under `missingsummary`. The group Ns (column
 #' margins) are published and sensitive; the total column publishes the row
 #' margins under `missingsummary` and the grand total when `total` is on.
@@ -486,6 +504,8 @@ tt_sc_block_cont <- function(n, sample_n, missingsummary = FALSE, total = FALSE)
     type = "cont",
     counts = rbind(n, sample_n - n, deparse.level = 0),
     exact = rbind(rep(0, g), rep(ms, g)),
+    lower = rbind(rep(1, g), rep(0, g)),
+    rowlower = c(tot, 0),
     sensitive = rbind(rep(1, g), rep(ms, g)),
     rowexact = c(0, ms * tot),
     rowsensitive = c(tot, ms * tot),
@@ -610,7 +630,7 @@ tt_sc_variable <- function(block, smallcells, fixedmargins = FALSE, variable = N
     if (primary) .t1_sc_primary(block, k) else tt_smallcells(block$counts, k, block$exact, block$sensitive,
                   block$rowexact, block$rowsensitive, block$colexact,
                   block$colsensitive, block$grandexact, block$grandsensitive,
-                  fixedmargins = fixedmargins),
+                  fixedmargins = fixedmargins, lower = block$lower, rowlower = block$rowlower),
     tabtools_smallcells_uncertified = function(e) {
       if (!isTRUE(fixedmargins)) stop(e)
       # _desctab_collect.ado (2.1.17): with two or more variables a count
@@ -638,7 +658,13 @@ tt_sc_variable <- function(block, smallcells, fixedmargins = FALSE, variable = N
     if (isTRUE(block$slash_den)) {
       d <- block$nonmiss
       if (tot) d <- c(d, sum(d))
-      den[d > 0 & d < k] <- 1
+      den[d > 0 & d < k] <- if (primary) 1 else 3
+      if (!primary) {
+        # A denominator beside a withheld N gives the protected level sum
+        # back; a visible Total would also reveal a withheld group by subtraction.
+        den[seq_len(g)][res$colmask > 0] <- 3
+        if (tot && (res$totalmask > 0 || any(den[seq_len(g)] > 0))) den[g + 1L] <- 3
+      }
     }
   }
   list(

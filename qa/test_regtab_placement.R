@@ -14,7 +14,7 @@ test_that("installed publication overrides cannot leak stale numerical effects",
                markdown = file.path(scratch, "ordinary.md"))
   expect_identical(tt$body[[2L]][1L], text)
   expect_identical(tt$body[[3L]][1L], "")
-  expect_identical(tt$rows$key, c("x", "addrow:1", "y"))
+  expect_identical(tt$rows$key, c("x", "addrow:Inside", "y"))
   expect_identical(tt_flat(tt)[["_state_1"]], c("masked", "", "est"))
   expect_identical(as_forest_data(tt)$source_row, c(1L, 3L, 3L))
   expect_identical(tt$stored$table[1L, 1L], 2)

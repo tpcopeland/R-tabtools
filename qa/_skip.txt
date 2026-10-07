@@ -12,3 +12,4 @@ make_mi_fixture.R                  generator: needs mice (install it into a temp
 make_demo_data.R                   generator: rewrites qa/demo/demo_tabtools.rds from the golden fixtures (qa/demo_parity.R --update checks it is current)
 
 helper-comptab-v251.R              sourced helper: deterministic literal native composite builders/authentication; contains no tests
+helper-crosstab-qa.R               source helper: deterministic cases explicitly loaded by crosstab QA

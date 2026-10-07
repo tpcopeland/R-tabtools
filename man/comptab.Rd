@@ -367,7 +367,10 @@ additionally accepts sources with no p-value column.
 \code{ref}/\code{base} publication states. Custom reference labels, omitted/empty
 labels and coefficient text overrides cannot turn an estimate into a
 reference. Stale state companions refuse; stamped sources without usable
-state companions cannot supply reference identity. Unstamped legacy
+state companions cannot supply reference identity. A row composition with
+invalidated numeric companions can retain separately snapshot-bound
+reference states for placement; it still cannot supply numeric reformatting
+or forest estimates. Unstamped legacy
 sources retain their existing literal-label compatibility boundary.
 }
 }

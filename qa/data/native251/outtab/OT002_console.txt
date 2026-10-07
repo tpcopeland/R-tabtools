@@ -1,0 +1,7 @@
+  +---------------------------------------------------------------------------------------+
+  |            exposed = 1, events/N (%)   exposed = 0, events/N (%)   Crude, RR (95% CI) |
+  |---------------------------------------------------------------------------------------|
+  |    event                 4/10 (40.0)                 2/20 (10.0)   6.00 (0.87, 41.44) |
+  +---------------------------------------------------------------------------------------+
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5abc/native-ot-v2/OT002.md
+puttab: wrote 1 data rows x 4 cols (frame source) to sheet OT002 in /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5abc/native-ot-v2/outtab.xlsx

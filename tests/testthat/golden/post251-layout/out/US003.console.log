@@ -1,0 +1,36 @@
+-------------------------------------------------------------------------------
+      name:  case
+       log:  /tmp/tabtools-native-256-4st4nwoo/out/US003.console.log
+  log type:  text
+ opened on:   7 Oct 2026, 15:46:54
+
+. puttab lab a b c using `"`book'"', sheet(US003) panel(pan) spanheader(`"`span
+> '"' 2/3) csv(`"`output'/US003.csv"') markdown(`"`output'/US003.md"')
+Markdown exported to /tmp/tabtools-native-256-4st4nwoo/out/US003.md
+puttab: wrote 5 data rows x 4 cols (data source) to sheet US003 in /tmp/tabtool
+> s-native-256-4st4nwoo/out/upstream256_layout.xlsx
+
+. return list
+
+scalars:
+      r(markdown_cols) =  4
+      r(markdown_rows) =  5
+            r(n_spans) =  1
+           r(n_panels) =  2
+         r(n_datarows) =  5
+             r(n_cols) =  4
+             r(n_rows) =  7
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-4st4nwoo/out/US003.md"
+                r(csv) : "/tmp/tabtools-native-256-4st4nwoo/out/US003.csv"
+               r(file) : "/tmp/tabtools-native-256-4st4nwoo/out/upstream256.."
+              r(sheet) : "US003"
+             r(source) : "data"
+
+. log close case
+      name:  case
+       log:  /tmp/tabtools-native-256-4st4nwoo/out/US003.console.log
+  log type:  text
+ closed on:   7 Oct 2026, 15:46:54
+-------------------------------------------------------------------------------

@@ -1,0 +1,6 @@
+row,0,1,5,Total
+1,10 (25.0%),20 (50.0%),30 (75.0%),60
+2,30 (75.0%),20 (50.0%),10 (25.0%),60
+Total,40,40,40,120
+"Pearson's chi-squared test: chi2 = 20.00, p < 0.001",,,,
+P for trend (Cochran-Armitage) = <0.001,,,,

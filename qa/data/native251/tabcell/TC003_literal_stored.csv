@@ -1,0 +1,12 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC003_literal
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+ub,scalar,,,.
+lb,scalar,,,.
+estimate,scalar,,,.
+missing,scalar,,,1
+source,macro,,,numbers
+form,macro,,,est
+cell,macro,,,"missing $TC_SENTINEL `absent' ""quote"""

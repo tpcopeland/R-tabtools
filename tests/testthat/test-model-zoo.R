@@ -210,6 +210,10 @@ zoo <- list(
   list(name = "data frame (tidy_plus_plus)", scale = "OR", pkgs = "broom.helpers", fit = function(d) {
     tp <- broom.helpers::tidy_plus_plus(glm(yb ~ x + f, binomial, d), exponentiate = TRUE)
     attr(tp, "stata_cmd") <- "logit"
+    attr(tp, "effect_scale") <- "OR"
+    attr(tp, "se_scale") <- "link"
+    attr(tp, "conf.level") <- .95
+    attr(tp, "inference_reference") <- "normal"
     tp
   }),
   # Refused, by name with a hint.

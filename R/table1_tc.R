@@ -37,9 +37,12 @@
 #' Also refused are
 #' `Inf`, `-Inf`, `NaN`, and values of 2^1023 (about 8.99e307) or more,
 #' which a Stata variable cannot hold; use `NA` for a missing value. Very
-#' large values give Stata's cells: a mean in Stata's e-notation
-#' (`2.e+200`), a missing SD (`.`) when the squares overflow, and a blank
-#' cell, p-value, or SMD when a sum overflows.
+#' large values use Stata's e-notation for the mean (`2.e+200`). An
+#' unavailable raw second moment or required sum can leave the SD missing
+#' (`.`) or a cell, p-value, or SMD blank. R retains a finite SD when the
+#' square of the weighted centered-deviation sum overflows but its variance
+#' correction remains finite; this deliberately differs from pinned Stata.
+#' SMD uses the unscaled sums and is blank where they overflow.
 #'
 #' `open` needs a resolved workbook, and `mdappend` needs
 #' `markdown`. Unlike Stata, `title`, `footnote`, and `borderstyle` work

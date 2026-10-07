@@ -414,8 +414,7 @@ test_that("brute force: the P0-2 table is checked and passes", {
   expect_gt(dc_feasibility(d, 5, c(v = "cat")), 0L)
 })
 
-test_that("brute force: known slashN denominator leak 1 (shared with Stata 2.5.1)", {
-  skip("Known slashN denominator leak shared with Stata 2.5.1; see Stata-Dev _take_action 2026-10-06-tabtools-smallcells-slashN-denominator-leak.md")
+test_that("brute force: slashN denominator leak 1 closed by the Stata 2.5.2 port", {
   mk <- function(g, v) data.frame(g = g, v = v)
   d <- rbind(mk("x", c(3, 3, 1, 1)), mk("y", c(NA, 1, 1, 1, 3, 1, 1, 3, 1)),
              mk("z", c(2, NA, 2, 1, NA, NA, 1, NA, 1)))
@@ -424,16 +423,15 @@ test_that("brute force: known slashN denominator leak 1 (shared with Stata 2.5.1
   expect_true(!is.na(dc_feasibility(d, 3, c(v = "cat"), slashN = TRUE)))
 })
 
-test_that("brute force: known slashN denominator leak 2 (shared with Stata 2.5.1)", {
-  skip("Known slashN denominator leak shared with Stata 2.5.1; see Stata-Dev _take_action 2026-10-06-tabtools-smallcells-slashN-denominator-leak.md")
+test_that("brute force: slashN denominator leak 2 closed by the Stata 2.5.2 port", {
   mk <- function(g, p, n) data.frame(g = g, b = c(rep(1, p), rep(0, n)))
   d <- rbind(mk("x", 6, 0), mk("y", 10, 3), mk("z", 4, 1))
   d$g <- factor(d$g)
   expect_true(!is.na(dc_feasibility(d, 3, c(b = "bin"), slashN = TRUE, catrowperc = TRUE, total = "after")))
 })
 
-test_that("brute force: slashN random sweep (known leak; remove the skip with the Stata fix)", {
-  skip("Known slashN denominator leak shared with Stata 2.5.1; see Stata-Dev _take_action 2026-10-06-tabtools-smallcells-slashN-denominator-leak.md")
+test_that("brute force: slashN random sweep after the Stata 2.5.2 denominator fix", {
+  withr::local_preserve_seed()
   set.seed(1)
   for (i in 1:30) {
     d <- dc_random(sample(2:3, 1), second = i %% 2 == 0)
