@@ -1,0 +1,30 @@
+-------------------------------------------------------------------------------
+      name:  co_case
+       log:  /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/nat
+> ive-co-v2/CO005.console.txt
+  log type:  text
+ opened on:   7 Oct 2026, 12:43:29
+
+. comptab _co_stars, rows(3/4) cformat(%8.4f) cisep(" to ") csv("`out'/CO005.cs
+> v") markdown("`out'/CO005.md") xlsx("`out'/comptab.xlsx") sheet(CO005)
+  +-------------------------------------------------+
+  |           Model                                 |
+  |             IRR                95% CI   p-value |
+  |   B    1.6667**    (0.3983 to 6.9739)      0.48 |
+  |   C   2.6667***   (0.7075 to 10.0516)      0.15 |
+  +-------------------------------------------------+
+
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/w
+> p-5d/native-co-v2/CO005.md
+Exported 5 rows × 5 cols to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-
+> 10-06/wp-5d/native-co-v2/comptab.xlsx, sheet CO005
+
+. mata: golden_dump_r("`out'/CO005_stored.csv", "CO005")
+
+. log close co_case
+      name:  co_case
+       log:  /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/nat
+> ive-co-v2/CO005.console.txt
+  log type:  text
+ closed on:   7 Oct 2026, 12:43:29
+-------------------------------------------------------------------------------

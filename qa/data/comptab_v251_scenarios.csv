@@ -1,0 +1,7 @@
+id,command,scope,expected_native_rc
+CO001,hrcomptab,allmodels two IRR models; keyed explicit reference; numeric formatting,0
+CO002,hrcomptab,keyed rates-only section preserved,0
+CO003,hrcomptab,model-only factor heading and plain row; no rate data for appendix,0
+CO004,hrcomptab,two outcomes reordered mapping; eligible forest,0
+CO005,comptab,authenticated numeric companion format with stars and literal separator,0
+CO006,comptab,canonical text separator-only rewrite,0

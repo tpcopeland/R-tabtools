@@ -10,3 +10,5 @@ make_regtab_5w_review_data.R       generator: rewrites the 5w review fixture dat
 make_regtab_h_t2b_data.R           generator: rewrites the Milestone H group t2b fixture data (tests/testthat/fixtures/regtab_h_t2b/: offs.dta, lung.dta, gee.dta); qa/stata/make_regtab_h_t2b.do must then be rerun
 make_mi_fixture.R                  generator: needs mice (install it into a temporary library); rewrites tests/testthat/golden/fixtures/mi_cohort.dta, after which goldens MI01-MI07 and qa/stata/make_regtab_mi.do must be rerun
 make_demo_data.R                   generator: rewrites qa/demo/demo_tabtools.rds from the golden fixtures (qa/demo_parity.R --update checks it is current)
+
+helper-comptab-v251.R              sourced helper: deterministic literal native composite builders/authentication; contains no tests

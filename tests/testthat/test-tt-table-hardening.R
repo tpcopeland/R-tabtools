@@ -137,6 +137,9 @@ test_that("A07: a hand-built table under each Excel layout writes or names what 
   expect_error(tt_write_xlsx(mk("regression"), withr::local_tempfile(fileext = ".xlsx")), "cols\\$model")
   expect_error(tt_write_xlsx(mk("stratetab"), withr::local_tempfile(fileext = ".xlsx")), "two header rows")
   expect_error(tt_write_xlsx(mk("hrcomptab"), withr::local_tempfile(fileext = ".xlsx")), "two header rows")
+  expect_error(tt_write_xlsx(mk("hrcomptab", list(c("", "All"), c("", "N"))),
+    withr::local_tempfile(fileext = ".xlsx")),
+    "outcome spans covering each value column exactly once", fixed = TRUE)
   expect_error(tt_write_xlsx(mk("comptab"), withr::local_tempfile(fileext = ".xlsx")), "two header rows")
   # A regression table built by hand with model blocks writes.
   reg <- tt_table(body = data.frame(label = c("Age", "Female"), est = c("1.10", "0.90"), ci = c("(1.0, 1.2)", "(0.8, 1.0)"),

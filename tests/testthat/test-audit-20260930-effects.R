@@ -23,10 +23,20 @@ test_that("data-frame composite sources retain known additive-scale provenance",
   x <- data.frame(term = "treat", estimate = -0.3, conf.low = -0.5,
                   conf.high = -0.1, p.value = 0.01)
   e <- effecttab(x, effect = "HR", models = "death", level = 95)
-  # A recorded additive scale, as marginaleffects difference results carry.
-  e$meta$frame$effect_additive <- TRUE
+  # Producer snapshots bind scale provenance; postproduction edits refuse.
+  altered <- e
+  altered$meta$frame$effect_additive <- TRUE
   r <- stratetab(ct_block(c("No", "Yes"), c(5, 8), c(100, 200)),
                   outcomeids = "death")
+  expect_error(hrcomptab(r, altered, rows = 1, outcomemap = "death"),
+               class = "tabtools_error_composition")
+  expect_error(hrcomptab(r, as.data.frame(altered), rows = 1, outcomemap = "death"),
+               class = "tabtools_error_composition")
+  # Deliberately imported legacy text has caller-declared additive metadata,
+  # without an authenticated numerical companion or a producer snapshot.
+  e <- as.data.frame(e)
+  attr(e, "composition") <- NULL
+  attr(e, "effect_additive") <- TRUE
   expect_error(hrcomptab(r, e, rows = 1, outcomemap = "death"),
                 class = "tabtools_error_not_hazard_ratio")
   expect_error(hrcomptab(r, as.data.frame(e), rows = 1, outcomemap = "death"),
@@ -105,7 +115,11 @@ test_that("continuous exponentiated log ratios retain their source ratio scale",
   declared <- effecttab(data.frame(term = "mpg", estimate = x$estimate,
                                     conf.low = x$conf.low, conf.high = x$conf.high,
                                     p.value = x$p.value), effect = "HR", models = "vs", level = 95)
-  declared$meta$frame$effect_log_scale <- NULL
+  expect_identical(declared$meta$frame$effect_log_scale, "")
+  altered <- declared
+  altered$meta$frame$effect_log_scale <- NULL
+  expect_error(comptab(list(altered, e), rows = list(1, 1)),
+               class = "tabtools_error_composition")
   vertical <- comptab(list(declared, e), rows = list(1, 1))
   expect_s3_class(hrcomptab(r, vertical, rows = 2, outcomemap = "vs"), "tt_table")
 })

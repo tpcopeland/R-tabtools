@@ -338,7 +338,7 @@ tt_console_lines <- function(x) {
   lay <- x$layout
   # stratetab.ado:879-886 blanks the lower console header's first cell
   # while retaining both Exposure labels in the frame and workbook.
-  if (identical(x$command, "stratetab") && nh == 2L) g[2L, 1L] <- ""
+  if (x$command %in% c("stratetab", "ratetab") && nh == 2L) g[2L, 1L] <- ""
   # layout$console_skip_blank_header (effecttab): a header row blank in
   # every column is not listed.
   if (isTRUE(lay$console_skip_blank_header) && nh) {

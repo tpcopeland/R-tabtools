@@ -19,7 +19,10 @@ characteristics (\code{x$meta$frame}; regtab: \code{source}, \code{ci_level},
 \code{n_models}, \code{statistic_ids}, and per-model \code{model_id}, \code{outcome_id},
 \code{effect_scale}, \code{model_label}) return them as attributes.
 When present, the source ledger documented in \code{\link[=tt_table]{tt_table()}} is returned
-as a separate \code{sample_accounting} attribute.
+as a separate \code{sample_accounting} attribute. Producer-owned publication
+snapshots, when available, remain in \code{composition} for exact source reuse
+and numeric companion formatting; changing text or identity invalidates
+their use by \code{\link[=comptab]{comptab()}}.
 }
 \description{
 The analogue of Stata's \code{frame()} / \code{clear}: header rows followed by the

@@ -1541,7 +1541,7 @@ as_forest_data <- function(x) {
   # the model tables when the composite was made (R/comptab.R).
   if (inherits(x, "tt_table") && x$command %in% c("comptab", "hrcomptab")) {
     if (is.null(x$meta$forest)) {
-      cli::cli_abort(x$meta$forest_error %||% "No forest data were kept for this composite.", call = NULL)
+      cli::cli_abort(x$meta$forest_error %||% "No forest data were kept for this composite.", class = "tabtools_error_composition", call = NULL)
     }
     return(x$meta$forest)
   }

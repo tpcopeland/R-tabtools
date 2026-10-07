@@ -41,7 +41,10 @@ test_that("rate mode: the Table 2 layout, reference rows, and hrcomptab() = comp
   expect_identical(cells(z3), cells(x))
   z4 <- hrcomptab(as.data.frame(r), list(as.data.frame(m), as.data.frame(m)), rows = list(1, 4:5))
   expect_identical(cells(z4), cells(x))
-  expect_error(as_forest_data(z4), "not a data frame")
+  expected_import <- as_forest_data(x)
+  expected_import$source_frame[expected_import$source_frame == "r"] <- "as.data.frame(r)"
+  expected_import$source_frame[expected_import$source_frame == "m"] <- "as.data.frame(m)"
+  expect_identical(as_forest_data(z4), expected_import)
   df <- as.data.frame(x)
   expect_identical(attr(df, "source"), "hrcomptab")
   expect_identical(attr(df, "statistic_ids"), "events person_years rate_ci estimate_ci pvalue")
@@ -392,7 +395,12 @@ test_that("vertical mode: forest data follow the table's rows, fold a section ov
   folded <- as_forest_data(comptab(list(one), rows = 1, section = "Only"))
   expect_identical(folded$rowtype, "effect")
   expect_identical(folded$label, "Only")
-  expect_error(as_forest_data(comptab(list(as.data.frame(m)), rows = 1)), "not a data frame")
+  expected_import <- as_forest_data(comptab(list(m), rows = 1))
+  expected_import$source_frame[] <- "as.data.frame(m)"
+  expect_identical(as_forest_data(comptab(list(as.data.frame(m)), rows = 1)), expected_import)
+  legacy <- as.data.frame(m)
+  attr(legacy, "composition") <- NULL
+  expect_error(as_forest_data(comptab(list(legacy), rows = 1)), "not a data frame")
 })
 
 test_that("both modes: sinks, the sheet's own spelling, converters", {
@@ -430,7 +438,9 @@ test_that("review P2-2: model tables with different statistic identities are ref
   a <- as.data.frame(m)
   b <- as.data.frame(m)
   attr(b, "statistic_ids") <- "estimate pvalue ci"
-  expect_error(comptab(list(a, b), rows = list(1, 1)), "different statistics")
+  expect_error(comptab(list(a, b), rows = list(1, 1)),
+               "Imported composition text or frame identity differs",
+               fixed = TRUE, class = "tabtools_error_composition")
   expect_identical(nrow(comptab(list(a, a), rows = list(1, 1))$body), 2L)
 })
 

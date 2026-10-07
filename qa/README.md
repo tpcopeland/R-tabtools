@@ -21,6 +21,17 @@ This directory is `.Rbuildignore`d. It holds the QA runner and benchmarks
 (below) and the Stata parity harness. The goldens the harness writes live in
 `tests/testthat/golden/`, so tests and CI never need Stata.
 
+## Leaf, saved-rate and binary-outcome QA
+
+`crossval_tabcell.R` compares exact binomial/Poisson tails with independent
+stats oracles and installed S3, scale and protected-companion contracts.
+`test_ratetab.R` covers installed rate grouping, cluster variance, masks and
+all sinks; `crossval_ratetab.R` authenticates and compares RT001–RT012 actual
+native cases. `crossval_outtab.R` checks OT001–OT009 actual native grids,
+full sample identities, callback retention and modified-Poisson/logit ratios.
+These scripts are registered in the curated cross-validation/full lanes;
+native execution is local and retains the pinned source closure.
+
 ## Transitional Phase 2 golden baselines
 
 The default golden directory retains authentic Stata tabtools 2.1.14 / fvgen
@@ -458,3 +469,9 @@ acceptance. Generated demo books/logs/report and `SOURCE.csv` remain pending
 until a second independent native reconstruction passes every source/RDS guard
 and the affected R comparisons pass. The first transition must use the whole
 manifest, without `--only`.
+
+## Native composite union QA
+
+`crossval_comptab_v251.R` belongs to `crossval`, `core` and `full` and consumes the exact promoted six-case `data/comptab_v251` capture. It authenticates the closed artifact/source inventory and actual Stata17 metadata before comparing CSV/stored/forest/Markdown/console/XLSX cells, styles, merges, widths and heights without numeric masks. `helper-comptab-v251.R` is sourced explicitly and registered as a non-executed helper. The regression stamp occurs after final placement/orientation and transports source companions with their hash.
+
+`crossval_tabcell_native.R` uses the authenticated capture named by `TABTOOLS_TABCELL_NATIVE_DIR`. `crossval_outtab.R` uses `TABTOOLS_OUTTAB_NATIVE_DIR` and runs directly, outside testthat; `crossval_tabcell.R`, `test_ratetab.R` and `crossval_ratetab.R` use testthat in `crossval`/`core`/`full`. Existing 3G demo/AIPW and 4AB count/placement scripts remain registered. No native generation occurs in the composite consumer.

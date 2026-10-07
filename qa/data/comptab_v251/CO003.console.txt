@@ -1,0 +1,49 @@
+-------------------------------------------------------------------------------
+      name:  co_case
+       log:  /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/nat
+> ive-co-v2/CO003.console.txt
+  log type:  text
+ opened on:   7 Oct 2026, 12:43:29
+
+. hrcomptab _co_rate, modelframes(_co_appendix) rows(all) modelonly effect("IRR
+> ") csv("`out'/CO003.csv") markdown("`out'/CO003.md") xlsx("`out'/comptab.xlsx
+> ") sheet(CO003)
+  +----------------------------------------------------------------------------
+> ----------------+
+  | Exposure       ev                                                          
+>                 |
+  |            Events   Person-Years (PY)   Per 100 PY (95% CI)         IRR (95
+> % CI)   p-value |
+  |        g                                                                   
+>                 |
+  |        A        3                 120        2.5 (0.8, 7.8)            Refe
+> rence           |
+  |        B        5                 120       4.2 (1.7, 10.0)    1.67 (0.40, 
+> 6.97)      0.48 |
+  |        C        8                 120       6.7 (3.3, 13.3)   2.67 (0.71, 1
+> 0.05)      0.15 |
+  |    other                                                                   
+>                 |
+  |       No                                                               Refe
+> rence           |
+  |      Yes                                                       1.05 (0.38, 
+> 2.86)      0.93 |
+  |        x                                                       0.74 (0.62, 
+> 0.90)     0.002 |
+  +----------------------------------------------------------------------------
+> ----------------+
+
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/w
+> p-5d/native-co-v2/CO003.md
+Exported 11 rows × 6 cols to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026
+> -10-06/wp-5d/native-co-v2/comptab.xlsx, sheet CO003
+
+. mata: golden_dump_r("`out'/CO003_stored.csv", "CO003")
+
+. log close co_case
+      name:  co_case
+       log:  /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/nat
+> ive-co-v2/CO003.console.txt
+  log type:  text
+ closed on:   7 Oct 2026, 12:43:29
+-------------------------------------------------------------------------------
