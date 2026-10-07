@@ -114,7 +114,11 @@
   exp_name <- paste(deparse(as.name(exposure)), collapse = "")
   labels <- attr(terms, "term.labels")
   if (sum(labels == exp_name) != 1L || !exposure %in% all.vars(f)) .ot_abort("The exposure must occur as one unambiguous main term.", "capability")
-  if (any(grepl("\\.", labels, fixed = TRUE)) || any(colSums(factors != 0) > 1 & factors[exp_name, ] != 0)) {
+  # The exposure may enter no other term: an interaction (exposed:z) or a
+  # term built from it (I(exposed * z)) makes its coefficient conditional.
+  others <- labels[labels != exp_name]
+  inside <- vapply(others, function(l) exposure %in% all.vars(str2lang(l)), TRUE)
+  if (any(inside) || any(colSums(factors != 0) > 1 & factors[exp_name, ] != 0)) {
     .ot_abort("Exposure interactions require a separately supported contrast capability.", "capability")
   }
   f

@@ -195,3 +195,15 @@ test_that("explicit built-in convergence controls remain caller-owned", {
   expect_equal(outtab(d, "event", "exposed", estimator = "logit")$meta$outtab$fits[[1L]][[1L]]$variance,
     35/36, tolerance = 1e-7)
 })
+
+test_that("review 2026-10-07 A5: the exposure may not enter another term; dotted names are fine", {
+  d <- ot_truth()
+  d$z <- rep(c(0, 1), 15)
+  d$age.grp <- rep(1:3, 10)
+  expect_error(outtab(d, "event", "exposed", models = list(~ I(exposed * z))),
+    class = "tabtools_error_outtab_capability")
+  expect_error(outtab(d, "event", "exposed", models = list(~ z + log1p(exposed))),
+    class = "tabtools_error_outtab_capability")
+  ok <- outtab(d, "event", "exposed", models = list(~ age.grp))
+  expect_s3_class(ok, "tt_table")
+})

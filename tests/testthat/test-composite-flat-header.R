@@ -20,3 +20,11 @@ test_that("composite flat exports retain literal native variable headers", {
   expect_identical(tab, before)
   expect_error(comptab(flat, rows = 1L), class = "tabtools_error_composition")
 })
+
+test_that("review 2026-10-07 A5: composite footnote paragraphs are joined by the table", {
+  d <- data.frame(term = "x", estimate = 2, conf.low = 1, conf.high = 3, p.value = .01)
+  attr(d, "effect_scale") <- "HR"; attr(d, "conf.level") <- .95
+  m <- regtab(d, models = "Model")
+  tab <- comptab(list(m), rows = 1L, footnote = c("First.", "Second."))
+  expect_identical(tab$footnote, tabtools:::.tt_footnote_text(c("First.", "Second.")))
+})

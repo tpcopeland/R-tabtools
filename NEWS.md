@@ -189,6 +189,8 @@
   each column's outcome block from the published top header, so outcome-mapped
   composites (which carry no model keys) no longer label every block with the
   first outcome in `puttab(varlabels = TRUE)`.
+* `outtab()` refuses model formulas in which the exposure enters another term
+  (for example `I(exposed * z)`), not only explicit interactions.
 
 # tabtools 0.1.1
 

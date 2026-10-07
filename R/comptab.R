@@ -828,8 +828,8 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
                                !grepl("\\.(md|markdown|qmd|rmd)$", tolower(a$markdown)))) {
     cli::cli_abort("{.arg markdown} must specify a .md, .markdown, .qmd, or .rmd file.", call = NULL)
   }
+  # Footnote paragraphs are joined by tt_table(), not here.
   for (f in c("title", "footnote")) .tt_check_text_arg(a[[f]], f)
-  a$footnote <- .tt_footnote_text(a$footnote)
   invisible(TRUE)
 }
 
