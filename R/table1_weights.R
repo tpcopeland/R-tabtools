@@ -219,14 +219,16 @@
   sw <- .st_sum(w)
   p1 <- w * y
   p2 <- w * yy
-  # Overflow (H10; tabtools 2.1.12, C5): under wt(), a weight sum or a
-  # product w * y or w * y^2 beyond the double range makes Stata divide the
-  # weights by a power of two and start again (.t1w_wscale()); a sum that
-  # still holds a missing product (a y^2 beyond the range) is missing, so
+  # Overflow (H10; tabtools 2.1.12, C5): under wt(), a weight sum, a
+  # product w * y or w * y^2, or their sum beyond the double range makes
+  # Stata divide the weights by a power of two and start again
+  # (.t1w_wscale()); a sum that still holds a missing product (a y^2
+  # beyond the range) is missing, so
   # the SD is ".", and a mean whose sum overflows is a blank cell. The
   # centered ss keeps the finite quotient of an overflowing square of
   # sum(w d), where Stata 2.5.1 prints "." (.t1_centered_ss()).
-  if (kind == "wt" && (is.na(sw) || !all(.st_ok(p1)) || !all(.st_ok(p2)))) {
+  if (kind == "wt" && (is.na(sw) || !all(.st_ok(p1)) || !all(.st_ok(p2)) ||
+                       is.na(.st_sum(p1)) || is.na(.st_sum(p2)))) {
     w <- w / .t1w_wscale(w)
     sw <- .st_sum(w)
     p1 <- w * y
@@ -627,6 +629,7 @@
 #' @keywords internal
 #' @noRd
 .t1w_smd <- function(type, v, g, w, kind, level1 = 1L, level2 = 2L) {
+  w <- .t1w_smd_weights(w, g, kind)
   g1 <- !is.na(g) & g == level1
   g2 <- !is.na(g) & g == level2
   wmean_sd <- function(y, ww) {
@@ -673,6 +676,21 @@
     }
   }
   if (is.na(out) || !.st_ok(out)) NA_real_ else stata_macro_num(out)
+}
+
+# Probability-weight SMDs are scale invariant. The post-2.5.1 native
+# repair (_desctab_collect.ado:353-369, 4eecca4d) uses one common scale
+# over the by() sample before any variable/pair subset. Recover before
+# sum(w) or sum(w)*(n-1) can overflow; frequency weights retain their scale.
+# Use the existing bounded power-of-two helper, including at R's accepted
+# upper weight endpoint where the native inline 2^k can itself overflow.
+.t1w_smd_weights <- function(w, g, kind) {
+  if (kind != "wt") return(w)
+  keep <- !is.na(g) & !is.na(w) & w > 0
+  if (!any(keep)) return(w)
+  mw <- max(w[keep])
+  if (mw * sum(keep)^2 >= 1e300) w <- w / .t1w_wscale(w[keep])
+  w
 }
 
 # Finishing -----------------------------------------------------------------

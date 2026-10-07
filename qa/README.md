@@ -32,15 +32,13 @@ full sample identities, callback retention and modified-Poisson/logit ratios.
 These scripts are registered in the curated cross-validation/full lanes;
 native execution is local and retains the pinned source closure.
 
-## Transitional Phase 2 golden baselines
+## Historical Phase 2 golden routing
 
-The default golden directory retains authentic Stata tabtools 2.1.14 / fvgen
-1.2.5 output. Until WP-3G promotes the full 2.5.1 baseline, the golden readers
-route P01-P15, K01-K09, S01-S08, W15 and W17-W22 to
-`tests/testthat/golden/phase2-2.5.1/`. These 39 scenarios cover WP-2C's boxed
-puttab borders (including every K workbook's setup sheets) and WP-2E's rate
-precision, formatting and counters. Other scenarios and input datasets keep
-the legacy baseline.
+Phase 2 temporarily routed 39 affected scenarios through authentic
+`phase2-2.5.1` artifacts while the remaining scenarios retained the older
+baseline. WP-3G subsequently promoted the complete native 2.5.1 baseline;
+`golden_baseline()` now selects it for every ordinary scenario. The old
+2.1.14 fixtures are retained only as named backward-compatibility cases.
 
 The selected artifacts are byte-for-byte copies from native inventory commit
 `c215afdb788f88363c8d5289d7d13e3a31cfbe38` (Stata tabtools 2.5.1 / fvgen
@@ -51,8 +49,8 @@ The harness asserts each scenario's versions and copied artifact hashes,
 then uses the existing strict cell, console, sink and style comparators.
 P02/P09 remain source-only in both baseline directories.
 
-The complete inventory branch stays unmerged until WP-3G. The transitional
-router and versioned copies must be removed when that full baseline lands.
+The transitional router was removed when the full baseline landed. Historical
+routing receipts remain provenance evidence, not the active reader contract.
 R's automatic footnote paragraphs across all sinks are a deliberate publication
 contract; they require separate independent literal footer assertions before
 strict comparisons of authentic native table content and styles. Routing alone
@@ -465,13 +463,53 @@ projects the seven-member demo RDS from these authentic snapshots. The actual
 native catalog contains 102 sheets in 16 workbooks, 56 console blocks and four
 report tables; `golden/demo/manifest.csv` classifies all 162 entries. Its 103
 headings record source provenance. Catalog classification is not R execution
-acceptance. Generated demo books/logs/report and `SOURCE.csv` remain pending
-until a second independent native reconstruction passes every source/RDS guard
-and the affected R comparisons pass. The first transition must use the whole
-manifest, without `--only`.
+acceptance. The complete guarded native reconstruction and its original 98 R
+comparisons were accepted before the expanded demo was enrolled. The expanded
+coverage now has 149 passing checks across 146 artifact records; combined local acceptance is recorded in `PAR-reconciliation.md`. Future baseline transitions must
+still use the whole manifest, without `--only`.
 
 ## Native composite union QA
 
 `crossval_comptab_v251.R` belongs to `crossval`, `core` and `full` and consumes the exact promoted six-case `data/comptab_v251` capture. It authenticates the closed artifact/source inventory and actual Stata17 metadata before comparing CSV/stored/forest/Markdown/console/XLSX cells, styles, merges, widths and heights without numeric masks. `helper-comptab-v251.R` is sourced explicitly and registered as a non-executed helper. The regression stamp occurs after final placement/orientation and transports source companions with their hash.
 
 `crossval_tabcell_native.R` uses the authenticated capture named by `TABTOOLS_TABCELL_NATIVE_DIR`. `crossval_outtab.R` uses `TABTOOLS_OUTTAB_NATIVE_DIR` and runs directly, outside testthat; `crossval_tabcell.R`, `test_ratetab.R` and `crossval_ratetab.R` use testthat in `crossval`/`core`/`full`. Existing 3G demo/AIPW and 4AB count/placement scripts remain registered. No native generation occurs in the composite consumer.
+
+Authenticated new-command captures are promoted under `qa/data/native251`.
+The scripts use those hash-bound directories by default; optional
+`TABTOOLS_TABCELL_NATIVE_DIR`, `TABTOOLS_OUTTAB_NATIVE_DIR`, and
+`TABTOOLS_SURVTAB_NATIVE_DIR` overrides must name equally authenticated captures.
+The native scripts validate artifact inventories, pinned source and runtime;
+missing captures fail. Survival and outcome cross-validation use direct QA
+markers; correlation and rate cross-validation use testthat blocks.
+
+## Selected later-source regressions
+
+For T36, require independently calculated finite R SMDs and the complete
+historical sink/style comparisons; retain its genuine 2.5.6 capture with four
+missing SMDs as evidence of the uncapped `2^1023` scale, separately from the
+finite SD difference.
+
+The reference baseline and its historical artifacts remain pinned to tabtools
+2.5.1 (`712044f8`). Selected source repairs use the separately authenticated
+2.5.6 snapshot (`4eecca4d`). Keep their targeted native inputs, publication
+artifacts and source closure under a separate version-qualified fixture route;
+never replace historical baseline bytes or claim a complete later-version gate.
+Direct/native cross-validation must use each case's declared source pin.
+The selected later-source corpus contains 33 cases and 37 native commands with
+passing native and installed-R counterpart receipts, including the four
+rounding blocks' 314 checks. This does not claim a full 2.5.6 gate. Combined local acceptance and its
+complete-file evidence qualification are recorded in `PAR-reconciliation.md`.
+
+The post-baseline fast controls cover strict slashN denominators, printed
+continuous-summary lower bounds, Missing percentages beside withheld N,
+probability-weight SMD and weighted-product sum overflow, default rate units,
+panel-heading geometry and SMD widths. Earlier literal denominator
+reconstructions and their random sweep are active assertions again. Numerical
+inference boundaries, protected-target refusals, ordinary primary policies and
+the finite-SD R choice remain independently asserted.
+
+Targeted native/installed acceptance must be authenticated against the exact
+reviewed candidate union before these ports are counted as accepted. Source
+checks and a recipe's existence are not acceptance. Pending capture/registration
+is recorded here as a gap; no fresh native or installed result is asserted by
+this documentation update.

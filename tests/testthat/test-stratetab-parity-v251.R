@@ -199,14 +199,12 @@ test_that("publication sinks consume the masked body with literal formatting", {
 })
 
 test_that("rendered help explains the publication and analytical split", {
-  page <- tools::parse_Rd(test_path("..", "..", "man", "stratetab.Rd"))
-  text <- paste(capture.output(tools::Rd2txt(page)), collapse = "\n")
+  text <- wp2d_help_text("stratetab")
   expect_match(text, "primary only", fixed = TRUE)
   expect_match(text, "raw", fixed = TRUE)
   expect_match(text, "N_nopt", fixed = TRUE)
   expect_match(text, "tabtools_error_format_conflict", fixed = TRUE)
-  rate <- tools::parse_Rd(test_path("..", "..", "man", "tt_rates.Rd"))
-  expect_match(paste(capture.output(tools::Rd2txt(rate)), collapse = "\n"), "zero_length", fixed = TRUE)
+  expect_match(wp2d_help_text("tt_rates"), "zero_length", fixed = TRUE)
 })
 
 test_that("gt renders publication masks while raw rates remain stored", {

@@ -111,6 +111,48 @@
   st
 }
 
+# Built-in rows may be unavailable in every model; explain their omission.
+# Group diagnostics use only retained clogit terms, never a recount from data.
+.rt_builtin_stat_notes <- function(want, builtin, st, fits) {
+  if (is.null(want)) return(invisible(NULL))
+  shown <- vapply(builtin, function(row) sub("^stat:", "", row$key), "")
+  # Native identifies the QICu fallback under the requested aic token.
+  if (isTRUE(want$aic) && "qic" %in% shown) shown <- c(shown, "aic")
+  grouped <- integer()
+  descriptions <- character()
+  if (isTRUE(want$groups)) for (m in seq_along(fits)) {
+    if (!inherits(fits[[m]], "clogit") || !is.na(st[[m]]$groups %||% NA_real_)) next
+    terms <- .fc_field(fits[[m]], "terms")
+    variables <- as.list(attr(terms, "variables"))[-1L]
+    groups <- Filter(function(x) is.call(x) &&
+      (identical(x[[1L]], as.name("strata")) || identical(x[[1L]], quote(survival::strata))), variables)
+    if (!length(groups)) next
+    grouped <- c(grouped, m)
+    descriptions <- c(descriptions, paste0("model ", m, " (clogit, grouping term ",
+      paste(vapply(groups, function(x) paste(deparse(x), collapse = " "), ""), collapse = " + "), ")"))
+  }
+  explained <- character()
+  if (length(grouped)) {
+    if (!"groups" %in% shown) {
+      note <- paste0("Note: stats(groups) left out: no model stores a group count; ",
+        paste(descriptions, collapse = "; "))
+      cli::cli_inform("{note}")
+      cli::cli_inform("Capture tt_fitcount() with the fit-time event and people columns, then request stats = 'people' with statlabels = c(people = 'Groups').")
+      explained <- "groups"
+    } else {
+      cli::cli_inform(paste0("(regtab: stats(groups) is blank for model(s) ",
+        paste(grouped, collapse = " "), ": the fit stores no group count; see tt_fitcount(..., people = <group column>).)"))
+    }
+  }
+  native_ids <- c("n", "obs", "events", "people", "exposure", "groups", "mi_m",
+    "aic", "qic", "bic", "ll", "icc", "r2", "r2_a", "rmse", "F", "fmi")
+  requested <- native_ids[vapply(native_ids, function(nm) isTRUE(want[[nm]]), TRUE)]
+  omitted <- setdiff(requested, c(shown, explained))
+  if (length(omitted)) cli::cli_inform(paste0("(regtab: no model reports ", length(omitted),
+    " requested statistic(s), left out of the table: ", paste(omitted, collapse = " "), ")"))
+  invisible(NULL)
+}
+
 .rt_rich_stats <- function(o, st_all, fits) {
   spec <- o$stats_spec
   st_all <- .rt_count_stats(st_all, o$fitcounts %||% rep(list(NULL), length(fits)))
@@ -203,5 +245,6 @@
       if (!is.na(values[i, m])) stored[[paste0("e_", spec$nodes[i], "_", m)]] <- unname(values[i, m])
     }
   }
+  .rt_builtin_stat_notes(o$stats, builtin$rows, st_all, fits)
   list(rows = rows, stored = stored, provenance = if (length(provenance)) do.call(rbind, provenance) else data.frame())
 }

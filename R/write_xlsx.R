@@ -61,7 +61,7 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
                      "i" = "Set {.code layout$xlsx_rules} to {.val descriptive}, {.val regression}, {.val puttab}, {.val stacktab}, {.val stratetab}, {.val comptab}, or {.val hrcomptab}."),
                    call = NULL)
   }
-  if (x$layout$xlsx_rules %in% c("descriptive", "regression", "stratetab", "comptab", "hrcomptab") &&
+  if (x$layout$xlsx_rules %in% c("descriptive", "regression", "stratetab", "comptab", "hrcomptab", "crosstab", "corrtab", "survtab") &&
       (!nrow(x$body) || ncol(x$body) < 2L)) {
     # Stata refuses an empty export with r(2000).
     cli::cli_abort("Nothing to export: the table needs at least one body row and one value column.",
@@ -78,7 +78,10 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
                 stacktab = .xlsx_layout_stacktab(x),
                 stratetab = .xlsx_layout_stratetab(x),
                 comptab = .xlsx_layout_comptab(x),
-                hrcomptab = .xlsx_layout_hrcomptab(x))
+                hrcomptab = .xlsx_layout_hrcomptab(x),
+                crosstab = .xlsx_layout_crosstab(x),
+                corrtab = .xlsx_layout_corrtab(x),
+                survtab = .xlsx_layout_survtab(x))
   st <- .xlsx_apply_rules(lay$rules, nrow(lay$grid), ncol(lay$grid), x$style)
   # A failed load or save names the sink and the file (H20), not only
   # openxlsx2's "Failed to save workbook"; the warnings that come with the
@@ -403,10 +406,14 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
   for (j in p_pos) add("width", 1, 1, j, j, value = 10)
   for (j in test_pos) add("width", 1, 1, j, j, value = text_width(j, 12))
   for (j in stat_pos) add("width", 1, 1, j, j, value = text_width(j, 14))
-  # Stata hard-codes the SMD column width to 8 (desctab.ado:2203-2204,
-  # "13 1 1 smd_pos smd_pos 8"); parity outranks fitting a long pair header.
-  # A measured width is pending a Stata-side change.
-  for (j in smd_pos) add("width", 1, 1, j, j, value = 8)
+  # Native 2.5.6 sizes SMD from its display-width header, with a floor
+  # for the exact smallcells derived-statistic marker (desctab.ado:2167-2180).
+  for (j in smd_pos) {
+    w <- max(8, ceiling(.dwidth(grid[2L, j]) * 0.85) + 2)
+    if (isTRUE(x$stored$smallcells$threshold > 0) &&
+        any(grid[seq_len(num_rows), j] == "Suppressed")) w <- max(w, 10)
+    add("width", 1, 1, j, j, value = w)
+  }
 
   add("font", 1, num_rows, 1, num_cols, value = style$fontsize)
   add("font", 1, 1, 1, num_cols, value = style$fontsize + 2)

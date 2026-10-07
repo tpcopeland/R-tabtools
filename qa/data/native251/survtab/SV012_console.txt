@@ -1,0 +1,16 @@
+  +-----------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                                            .1000000014901161 (N=2)   .2000000029802322 (N=2)   Difference (.1000000014901161 - .2000000029802322)       p |
+  |                               Events / N                     2 / 2                     0 / 2                                                        0.090 |
+  |                     Survival probability                                                                                                                  |
+  |                                     1 yr                     50.0%                    100.0%                                 -50.0 (-119.3, 19.3)         |
+  |                                  2 years                      0.0%                    100.0%                               -100.0 (-169.3, -30.7)         |
+  |                 RMST (2-yr), yr (95% CI)         1.50 (0.81, 2.19)         2.00 (2.00, 2.00)                                  -0.50 (-1.19, 0.19)         |
+  |                           Number at risk                                                                                                                  |
+  |                                     1 yr                         2                         2                                                              |
+  |                                  2 years                         1                         2                                                              |
+  | Log-rank test: chi2(1) = 2.88, p = 0.090                                                                                                                  |
+  +-----------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+CSV exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV012.csv
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV012.md
+Exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/survtab.xlsx, sheet SV012

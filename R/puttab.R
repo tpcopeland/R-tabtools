@@ -117,8 +117,9 @@
 #' @param vlines Whole-number exported columns, starting with the label
 #'   column as 1: add a right rule. Excel only, including academic style.
 #' @param panel Data frames only: name of one source column. Changes in its
-#'   values start panels in input order, with a bold merged heading using
-#'   its value label or text. Blank panels have no heading or indentation.
+#'   values start panels in input order, with a bold heading in the label
+#'   column using its value label or text. Heading text contributes to Excel
+#'   column width. Blank panels have no heading or indentation.
 #'   This column is always excluded from the visible body, even in `vars`.
 #' @param panelheader Repeated panel header, requiring `panel`: names of
 #'   character source columns (always excluded from the visible body),
@@ -741,8 +742,8 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   # [12, 50], others [8, 32].
   add("width", 1, 1, 1, 1, value = 1)
   for (j in seq_len(K)) {
-    width_rows <- setdiff(seq.int(2L, last_data),
-                          c(if (nh == 2L) 2L, data_start - 1L + x$meta$puttab_panels$heading))
+    # Spanning headers are merged; unmerged panel headings size column B.
+    width_rows <- setdiff(seq.int(2L, last_data), if (nh == 2L) 2L)
     col <- grid[width_rows, j + 1L]
     col <- col[nzchar(col)]
     w <- if (length(col)) ceiling(max(.blen(col)) * 0.95) + 2 else 10

@@ -1,0 +1,25 @@
+  +---------------------------------------------------------------------------------------------------+
+  |                                            a-b (N=2)   a b (N=2)   Difference (a-b - a b)       p |
+  |                               Events / N       2 / 2       0 / 2                            0.090 |
+  |                     Cumulative incidence                                                          |
+  |                                     1 yr       50.0%        0.0%      50.0 (-19.3, 119.3)         |
+  |                                  2 years      100.0%        0.0%      100.0 (30.7, 169.3)         |
+  |                                  5 years      100.0%        0.0%                    100.0         |
+  |                           Number at risk                                                          |
+  |                                     1 yr           2           2                                  |
+  |                                  2 years           1           2                                  |
+  |                                  5 years           0           0                                  |
+  | Log-rank test: chi2(1) = 2.88, p = 0.090                                                          |
+  +---------------------------------------------------------------------------------------------------+
+
+Note: reverse reports 1 - Kaplan-Meier, which equals the cumulative
+      incidence only with a single event type (no competing risks). With
+      competing events, 1 - KM overestimates absolute risk; use a
+      competing-risks estimator instead (Aalen-Johansen: stcompet, stcrreg,
+      or the finegray package).
+Note: times beyond the last observed follow-up of a group repeat the final
+      Kaplan-Meier estimate and are not supported by the data:
+      a-b: 5 (last follow-up 2); a b: 5 (last follow-up 4)
+CSV exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV006.csv
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV006.md
+Exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/survtab.xlsx, sheet SV006

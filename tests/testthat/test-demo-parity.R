@@ -134,6 +134,14 @@ local({
           got <- console_body$got; want <- console_body$want
           got_md <- markdown_body$got; want_md <- markdown_body$want
         }
+        if (row$task == "P7B") {
+          adapt <- if (row$r == "tabcell") function(g, w) golden_demo_leaf_console(g, w, row$item, run$leaves) else
+            function(g, w) golden_demo_phase7_console(g, w, row$item)
+          console_body <- adapt(got, want)
+          markdown_body <- adapt(got_md, want_md)
+          got <- console_body$got; want <- console_body$want
+          got_md <- markdown_body$got; want_md <- markdown_body$want
+        }
         golden_expect_none(golden_compare_console(got, want, row$mask), paste("console", row$item))
         golden_expect_none(golden_compare_console(got_md, want_md, row$mask), paste("console md", row$item))
       })
@@ -164,4 +172,38 @@ test_that("demo_markdown_report.md equals Stata's without its unported tables", 
   expect_s3_class(tt, "tt_table")
   why <- golden_compare_sink(got, want, mask = "p", p_body = golden_p_masked_rows(tt))
   golden_expect_none(why, "demo_markdown_report.md")
+})
+
+test_that("new group commands and scalar leaves retain genuine publication records", {
+  for (i in which(sheet_rows$task == "P7B")) {
+    row <- sheet_rows[i, ]
+    tt <- run$tables[[paste(row$artefact, row$item)]]
+    expect_s3_class(tt, "tt_table")
+    expected_command <- row$command
+    if (identical(row$artefact, "demo_desctab.xlsx") && identical(row$item, "Small Cells Primary Mode")) {
+      expect_identical(row$command, "desctab")
+      expected_command <- "table1_tc"
+    }
+    if (identical(row$artefact, "demo_ratetab.xlsx") && identical(row$item, "Rates Models")) {
+      expect_identical(row$command, "comptab")
+      expected_command <- "hrcomptab"
+    }
+    expect_identical(tt$command, expected_command)
+  }
+  expect_identical(sort(names(run$leaves)), sprintf("L%02d", 1:9))
+  expect_identical(unname(vapply(run$leaves[sprintf("L%02d", 1:7)], function(x) length(x), 0L)), rep(1L, 7L))
+  expect_identical(vapply(run$leaves[c("L08", "L09")], function(x) length(x), 0L), c(L08 = 3L, L09 = 3L))
+  for (name in c("crosstab", "corrtab")) {
+    tt <- run$tables[[paste("demo_markdown_report.md", name)]]
+    expect_s3_class(tt, "tt_table")
+    expect_identical(tt$command, name)
+  }
+  # The report legend is independently literal on both sides, then the entire
+  # existing report byte comparator above still checks all four tables.
+  for (path in c(file.path(run$out_dir, "demo_markdown_report.md"), golden_demo_path("demo_markdown_report.md"))) {
+    report <- golden_demo_report_tables(golden_read_lines(path))
+    block <- report[["Table 3. Correlation Matrix"]]
+    expect_identical(block[nzchar(block)][length(block[nzchar(block)])],
+      "*\\* p\\<0.05, \\*\\* p\\<0.01, \\*\\*\\* p\\<0.001*")
+  }
 })

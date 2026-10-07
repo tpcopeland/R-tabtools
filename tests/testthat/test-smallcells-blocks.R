@@ -63,12 +63,13 @@ test_that("binary blocks carry negative and missing rows", {
   expect_equal(b$rowexact, c(1, 0, 0))
 })
 
-test_that("slashN denominators: small ones are primary, derived ones code 3", {
-  # Group 2 has a non-missing denominator of 4 (< 5): code 1.
+test_that("strict slashN denominators: small ones are withheld with code 3", {
+  # Group 2 has a non-missing denominator of 4 (< 5). The later native
+  # strict guard withholds it as code 3; primary mode alone uses code 1.
   b <- tabtools:::tt_sc_block_cat(rbind(c(6, 1), c(7, 3)), nonmiss = c(13, 4),
                                   sample_n = c(13, 4), slashN = TRUE)
   v <- tabtools:::tt_sc_variable(b, 5)
-  expect_equal(v$denominator[2], 1)
+  expect_equal(v$denominator[2], 3)
   expect_true(v$derived)
 })
 

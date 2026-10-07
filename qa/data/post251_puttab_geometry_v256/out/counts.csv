@@ -1,0 +1,6 @@
+id,n_rows,n_cols,n_datarows,n_panels,n_spans
+thin,           8,           3,           7,           2,           0
+medium,           8,           3,           7,           2,           0
+academic,           8,           3,           7,           2,           0
+frames,           6,           2,           5,           2,           0
+panel,          10,           4,           5,           2,           1

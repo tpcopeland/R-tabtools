@@ -1,0 +1,21 @@
+name,kind,row,col,value
+_golden_id,meta,,,XT008
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,6
+ci_level,scalar,,,90
+N,scalar,,,100
+rd,scalar,,,.40000000000000002
+rr,scalar,,,3
+p,scalar,,,.0000445570906041
+chi2,scalar,,,16.666666666666671
+sheet,macro,,,XT008
+xlsx,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6a/native-xt-v2/XT008.xlsx
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6a/native-xt-v2/XT008.md
+methods,macro,,,"Cross-tabulation was performed for row by  column. Statistical significance was assessed using Pearson's chi-squared test. The risk ratio comparing column 2 versus 1 for row 2 versus 1 is reported with a 90% confidence interval. The risk difference comparing column 2 versus 1 for row 2 versus 1 is reported with a 90% confidence interval. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+table,matrix,1,1,40
+table,matrix,1,2,20
+table,matrix,2,1,10
+table,matrix,2,2,30

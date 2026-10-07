@@ -1,0 +1,9 @@
+Leaf publication,,
+Row,Percent,Rate
+row1,"0 (0.0; 0.0, 16.8)","0.0 (0.0, 36.9)"
+row2,<5,–
+row3,"20 (100.0; 83.2, 100.0)","200.0 (122.2, 308.9)"
+row4,"missing $TC_SENTINEL `absent' ""quote""","missing $TC_SENTINEL `absent' ""quote"""
+row5,0,"missing $TC_SENTINEL `absent' ""quote"""
+row6,"5 (25.0; 8.7, 49.1)","50.0 (16.2, 116.7)"
+Protected cells stay protected.,,

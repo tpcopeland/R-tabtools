@@ -169,7 +169,7 @@ ratetab <- function(data, by, events = NULL, exposure = NULL, per = 1000,
   outlabels <- .st_labels(outlabels, length(s$events), "outlabels", "outcome labels", "outcomes", defaults(s$events))
   explabels <- .st_labels(explabels, length(s$by), "explabels", "grouping labels", "groups", defaults(s$by))
   ids <- .st_outcome_ids(outcomeids %||% s$events, outlabels, length(s$events))
-  if (is.null(unitlabel) || !nzchar(unitlabel)) unitlabel <- base::format(per, big.mark = ",", scientific = FALSE, trim = TRUE)
+  if (is.null(unitlabel) || !nzchar(unitlabel)) unitlabel <- .rat_unitlabel(per)
   .tt_preflight_targets(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend)
   .rat_saving_preflight(saving, replace, list(xlsx, csv, markdown))
   est <- .rat_estimates(s, ci, ci_level / 100, per, pyscale, if (excludemasked) mask$threshold else 1L)
@@ -206,4 +206,13 @@ ratetab <- function(data, by, events = NULL, exposure = NULL, per = 1000,
     written <- TRUE
   }
   if (written) invisible(tt) else tt
+}
+
+# Native ratetab.ado:301-305 (post-baseline 4eecca4d): retain fractional
+# per(), commas, and compact exponent notation instead of forcing fixed text.
+.rat_unitlabel <- function(per) {
+  out <- trimws(stata_fmt(per, "%21.15gc"))
+  if (startsWith(out, ".")) out <- paste0("0", out)
+  if (grepl("e", out, fixed = TRUE)) out <- sub("[.]?0+e", "e", out)
+  out
 }

@@ -1,0 +1,30 @@
+
+. capture noisily crosstab row column [fw=frequency], `opts' `destination' sheet(`id') ///
+>     csv("`out'/`id'.csv") markdown("`out'/`id'.md")
+  +---------------------------------------------------------------------------------------+
+  |                                                 row            1            2   Total |
+  |                                                   1   40 (80.0%)   20 (40.0%)      60 |
+  |                                                   2   10 (20.0%)   30 (60.0%)      40 |
+  |                                               Total           50           50     100 |
+  | Pearson's chi-squared test: chi2 = 16.67, p < 0.001                                   |
+  +---------------------------------------------------------------------------------------+
+
+CSV exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6a/native-xt-v2/XT018.csv
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6a/native-xt-v2/XT018.md
+Exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6a/native-xt-v2/XT018.xlsx, sheet XT018
+
+. local rc = _rc
+
+. local nr .
+
+. local nc .
+
+. if !`rc' {
+.     mata: golden_dump_r("`out'/`id'_stored.csv", "`id'")
+.     tempname xttable
+.     matrix `xttable' = r(table)
+.     local nr = rowsof(`xttable')
+.     local nc = colsof(`xttable')
+. }
+
+. log close xt

@@ -265,11 +265,7 @@ test_that("WP-2C frame headers, identities, width validation and legacy columnme
 })
 
 test_that("WP-2C rendered help scopes frame replacement and sequential sink guarantees", {
-  path <- withr::local_tempfile(fileext = ".txt")
-  tools::Rd2txt(test_path("..", "..", "man", "stacktab.Rd"), out = path,
-                options = list(underline_titles = FALSE))
-  text <- paste(readLines(path), collapse = " ")
-  text <- gsub("[[:space:]]+", " ", text)
+  text <- wp2d_help_text("stacktab")
   expect_match(text, "In block mode an existing sheet", fixed = TRUE)
   expect_match(text, "created or replaced", fixed = TRUE)
   expect_match(text, "writes CSV, Markdown and Excel sequentially", fixed = TRUE)

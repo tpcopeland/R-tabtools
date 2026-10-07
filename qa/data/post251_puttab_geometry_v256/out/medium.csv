@@ -1,0 +1,8 @@
+Term,N,Rate
+Panel A,,
+,Counts A,Rates
+   a,"1,000","1,234.60"
+   b,"2,000","1,234.70"
+Panel B,,
+,Counts B,Rates
+   c,"3,000","1,234.80"

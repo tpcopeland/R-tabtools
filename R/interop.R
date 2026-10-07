@@ -71,7 +71,7 @@
   }
   rules <- x$layout$xlsx_rules
   if (identical(rules, "none") ||
-      (rules %in% c("regression", "descriptive", "stratetab", "comptab", "hrcomptab") && ncol(x$body) < 2L)) {
+      (rules %in% c("regression", "descriptive", "stratetab", "comptab", "hrcomptab", "crosstab", "corrtab", "survtab") && ncol(x$body) < 2L)) {
     return(.tt_plain_spec(x))
   }
   nb <- nrow(x$body)
@@ -87,7 +87,10 @@
                 stacktab = .xlsx_layout_stacktab(x),
                 stratetab = .xlsx_layout_stratetab(x),
                 comptab = .xlsx_layout_comptab(x),
-                hrcomptab = .xlsx_layout_hrcomptab(x))
+                hrcomptab = .xlsx_layout_hrcomptab(x),
+                crosstab = .xlsx_layout_crosstab(x),
+                corrtab = .xlsx_layout_corrtab(x),
+                survtab = .xlsx_layout_survtab(x))
   hdr_rows <- switch(rules, regression = , descriptive = , stratetab = , comptab = , hrcomptab = 2:3,
                      if (nh) seq.int(2L, length.out = nh) else integer())
   body_rows <- switch(rules, regression = , descriptive = , stratetab = , comptab = , hrcomptab = seq_len(nb) + 3L,

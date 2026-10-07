@@ -12,13 +12,13 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 has_flextable <- requireNamespace("flextable", quietly = TRUE)
 ```
 
-tabtools is the R implementation of the Stata `tabtools` commands
-`table1_tc`, `regtab`, `puttab`, `stacktab`, `stratetab`, `effecttab`,
-`comptab` and `hrcomptab` (Stata tabtools 2.1.14). What a reader sees
-targets cell-for-cell parity with the Stata output: row structure, labels
-and indents, descriptive statistics, number formats, headers, and the Excel
-styling, checked against tables written by Stata. Hypothesis tests use R's
-conventional tests (see [Deliberate differences](#deliberate-differences)).
+The development interfaces target the pinned Stata `tabtools` 2.5.1 suite
+(commit `712044f8`): descriptive, regression, cell, rate, binary-outcome,
+categorical, correlation, survival, effect and composite workflows.
+Table structure and formatting follow the native source within the explicit
+statistical, estimator and numerical boundaries below. `?tabtools` is the
+command catalog; R inputs replace active Stata datasets, collection state and
+local/global result macros.
 
 This vignette translates Stata calls into R, option by option, and ends
 with every place where R deliberately differs. For a whole analysis
@@ -30,8 +30,9 @@ translated, see [The Stata demo in R](#the-stata-demo-in-r).
    `boldp`, `headershade`, and the rest keep their Stata names. A switch
    becomes `TRUE`, `opt(x)` becomes `opt = x`, and `opt("A \ B")` becomes
    either `opt = c("A", "B")` or the same Stata string.
-2. **Every call returns a table object**, a `tt_table` (Stata's `r()`
-   results are in `$stored`). `xlsx =`, `csv =` and `markdown =` also
+2. **Table-building calls return a `tt_table`** (Stata's `r()`
+   results are in `$stored`). `tabcell()` instead returns `tt_cell` text with
+   numerical provenance; `tt_fitcount()` returns a frozen count record. `xlsx =`, `csv =` and `markdown =` also
    write it, as the Stata options do, and the table is then returned
    invisibly: assign it (`t2 <- regtab(fit, xlsx = "t2.xlsx")`) to print
    it. The object can be written later with `tt_write_xlsx()`, `tt_write_csv()` and
@@ -114,12 +115,11 @@ flextable::as_flextable(t2)
 
 ## The Stata demo in R
 
-The package's source repository has an R twin of the Stata demo
-(`demo/demo_tabtools.do`): the same sections under the same `**#` headings,
-each R block headed by the Stata command it replaces. Every sheet of a
-ported command (61 of the Stata demo's 77) matches the Stata demo's output
-cell by cell; `corrtab`, `crosstab`, `survtab` and the `xtreg, re`, `qreg`
-and `churdle` models are not in the R port. The demo,
+The source repository contains an R twin of the pinned Stata demo, arranged
+under corresponding command headings. Existing translated workflows remain;
+the new cell/rate/outcome and analytical sections are being enrolled separately.
+A command's presence in the catalog does not claim that its future demo section
+has passed. The demo,
 `qa/demo/demo_tabtools.R` in the GitHub repository `tpcopeland/R-tabtools`,
 is not installed with the package, because its data include Stata's
 example datasets `auto` and `union`, which the package does not
@@ -155,11 +155,15 @@ source("qa/demo/demo_tabtools.R", local = demo)
 | `spacelowpercent`, `extraspace`, `percent`, `percent_n`, `slashN`, `catrowperc` | same names, `TRUE` | |
 | `pdp(#)`, `highpdp(#)` | `pdp =`, `highpdp =` | |
 | `missingsummary` | `missingsummary = TRUE` | |
-| `smallcells(#)` | `smallcells = 5` | same suppression engine and markers |
+| `smallcells(#)` / `smallcells(#, primary)` | `smallcells = 5, smallcells_mode = "strict"` / `"primary"` | strict is default; publication/raw boundaries below |
+| `nosmallcells` | `nosmallcells = TRUE` | opt out of inherited protection |
+| `cellreplace()` | `cellreplace = list(list(row = "Age", column = "Treated", text = "literal"))` | exact trimmed labels; integer value-column index excludes the label; protected targets refuse |
+| `smdtype()`, `smdpair()` | same names | pair, population standardized bias or max-pair shared-scale SMD; explicit values/labels selection |
+| `nosmdhighlight` | `smdthreshold = -1` | equivalent; Markdown has no SMD highlighting |
 | `wtcompare`, `wtn` | `wtcompare = TRUE`, `wtn = TRUE` | |
 | `smdthreshold(#)` | `smdthreshold =` | `-1` disables |
 | `xlsx()`, `excel()` | `xlsx =`, `excel =` | `excel` wins when both are given, as in Stata |
-| `sheet()`, `title()`, `footnote()`, `open` | same names | `sheet` and `open` need `xlsx`, as in Stata; `title` and `footnote` need no file (see "Deliberate differences") |
+| `sheet()`, `title()`, `footnote()`, `open` | same names | `sheet` may resolve an opt-in session workbook; `open` needs its resolved workbook; `title` and `footnote` need no file |
 | `borderstyle()`, `font()`, `fontsize()` | same names | `borderstyle` needs no file (see "Deliberate differences") |
 | `boldp(#)`, `highlight(#)`, `zebra`, `headershade`, `headercolor()`, `zebracolor()` | same names | colours as Stata names, `"R G B"` or hex |
 | `csv()`, `markdown()`, `mdappend` | same names | |
@@ -241,7 +245,14 @@ way; R has no such prefix and shows them too. See `?tt_mi`.
 | `digits(#)` | `digits =` | |
 | `level(#)` | `level = 0.95` or `95` | Stata checks the collection's level; R fits carry none, so `level` sets the intervals |
 | `keep()`, `drop()`, `labelmatch` | same names | Stata-style keys: `age`, `2.education`, `1.foreign#3.rep78` |
-| `dimnonsig`, `factorlabel` | same names | `factorlabel` is accepted; labels are always shown |
+| `dimnonsig`, `factorlabel` | same names | analytical state determines references, never matching printed text |
+| `tabtools fitcount` | `tt_fitcount(fit, events = "event", data = d, terms = TRUE)` | capture at fit time, pass as `fitcounts` |
+| `mincount`, `notestlabel`, `absentlabel`, `cnslabel` | same names | explicit fit-owned states and reporting masks |
+| `reftop`, `cellnote` | same names | exact placement and literal overrides; publication inference invalidated |
+| `addrow ..., after()` | structured `addrow` with an exact anchor | factor anchors select the end of the block |
+| `transpose`, `collabels`, `addcol` | same names | models become rows; explicit raw/equation term keys |
+| `cformat`, `cilabel`, `plabel`, `statlabels` | same names | formats/custom headers; explicit digits conflict |
+| rich `stats()` | structured `stats` records with `stat_values` | named scalars, formats, pairs/text, `mincell` and linked `maskwith` |
 | `refcat()`, `omitlabel()`, `emptylabel()` | same names | |
 | `cutlabels()` | `cutlabels =` | ordered-model cutpoints |
 | `compact`, `nopvalue`, `stars`, `starslevels()` | same names | |
@@ -250,7 +261,7 @@ way; R has no such prefix and shows them too. See `?tt_mi`.
 | `xlsx()`, `sheet()`, `open` | same names | regtab has no `excel()` synonym in Stata either; `excel =` is refused with a pointer to `xlsx =` |
 | `borderstyle()`, `font()`, `fontsize()`, `boldp()`, `highlight()`, `zebra`, `headershade`, `headercolor()`, `zebracolor()` | same names | |
 | `csv()`, `markdown()`, `mdappend` | same names | |
-| `frame(name)` | `as.data.frame(tab)` | frame characteristics become attributes |
+| `frame(name)` | `tt_flat(tab)` | keyed regression/effect rows with validated attributes; use `keyed = FALSE` for publication-only families |
 | `eplotframe(name)` | `as_forest_data(tab)` | for a `comptab()` table, `model`, `model_label` and `label` are the composite's as displayed (Stata copies the source table's); the source index is in `source_model` |
 | `fvgen` + `regtab` | `interactions = "fvgen"` (default), `xsymbol =`, `vsref =` | a native R interaction reproduces the fvgen-flattened table |
 | native factor interactions | `interactions = "native"` | raw `1.foreign#3.rep78` keys |
@@ -276,10 +287,10 @@ head(as_forest_data(t2))
 
 ## Composite, rate and effect tables
 
-The development version adds the rest of Stata tabtools' table commands
-except `survtab`, `crosstab` and `corrtab`. Each keeps the Stata option
-names and is tested against the output of Stata tabtools 2.1.14; its help
-page lists the differences.
+Rate and model tables retain explicit identities and validated numerical
+companions. `allmodels`, keyed categorical placement and `modelonly` extend
+the rate scaffold. A publication flat frame is an editing/export product,
+not a new model or count source.
 
 | Stata | R | Notes |
 |---|---|---|
@@ -290,7 +301,153 @@ page lists the differences.
 | `effecttab` after `teffects` or `margins` | `effecttab()` on marginaleffects results, data frames or matrices | see [Weighted analyses](weighted-analyses.html) |
 | `comptab framelist, rows()` | `comptab(list(m1, m2), rows = list(1, 3:5))` | `regtab()`/`effecttab()` tables for frames; `rownames` patterns match case-insensitive parts of labels (`"treated"` also matches `Untreated`), and the R-only `rownames_exact = TRUE` matches whole labels; see [Regression tables](regression-tables.html#table-2) |
 | `hrcomptab rateframe, modelframes() rows()` (or `comptab ..., rateframe()`) | `hrcomptab(rates, list(m1, m2), rows = list(1, 3:5))` | a `coxph()` fit's outcome identity is its event variable, so `outcomemap` is often unnecessary |
-| `survtab`, `crosstab`, `corrtab` | not yet | |
+| `survtab`, `crosstab`, `corrtab` | `survtab()`, `crosstab()`, `corrtab()` | See the analytical recipes below for survival, categorical association and correlations. |
+
+## New analytical and cell workflows
+
+```{r new-cell-and-categorical}
+tabcell("np", n = c(2, 5), d = c(10, 10), ci = "exact")
+categorical <- data.frame(event = c(0, 1, 0, 1), group = c(0, 0, 1, 1),
+                          frequency = c(40, 10, 20, 30))
+crosstab(categorical, "event", "group", weights = "frequency",
+         or = TRUE, rr = TRUE, rd = TRUE)
+corrtab(mtcars, vars = c("mpg", "wt", "hp"), spearman = TRUE)
+```
+
+`tabcell` covers `est`, `p`, `n`, `np`, `enp`, `iqr` and `rate`, with supplied
+values, supported fitted coefficients, matrix rows or explicit contrasts.
+It preserves supplied inference and redacts masked percentage/rate companions.
+Crosstab's second numerical row and column define event/exposure direction;
+labels never reverse it. Expected counts below five choose exact Fisher,
+otherwise uncorrected Pearson. The sample OR is ad/bc. With positive cells,
+its equal-tail Fisher limits follow Stata 17 `cc`: Cornfield starting values
+and secant iteration stopping at a 0.5% successive-odds-ratio difference.
+These returned limits can differ from `fisher.test()`'s root tolerance;
+zero count cells select the native unadjusted Cornfield interval. Neither
+interval changes the sample OR to the conditional-MLE point estimate.
+
+```{r new-rates-outcomes}
+cohort$years <- rep(1, nrow(cohort))
+cohort$exposed <- as.integer(cohort$treated == "SNRI")
+ratetab(cohort, by = "treated", events = "cv_event", exposure = "years")
+outtab(cohort, outcomes = "cv_event", exposure = "exposed",
+       models = list(~1, ~ index_age + female), estimator = "modified_poisson")
+```
+
+`ratetab` keeps separate sections for each grouping variable and a common
+complete outcome/exposure sample. Its default is exact Poisson, distinct from
+legacy `tt_rates`/`stratetab` log-normal intervals. Zero events with positive
+time have exact bounds under every method; no-time cells are empty, and events
+without time refuse. Cluster intervals use full fitted-cluster score sums and
+G/(G-1): one event-contributing cluster can have a valid interval if other
+clusters contribute exposure and score variance is positive. Supplying an ID
+does not create an interval when there is only one fitted cluster or zero variance.
+
+`outtab` distinguishes outcome-specific crude counts from each adjusted fit's
+complete-case sample. The default is modified Poisson with robust variance;
+`logit` and `poisson` are explicit alternatives. Built-in GLMs use
+`glm.control(epsilon = 1e-12, maxit = 100)` unless `estimator_args$control`
+is supplied. Diagnostic text records nonconvergence, unavailable exposure
+inference, fit failure or additional sample reduction; arbitrary weighted/MI
+estimators are not inferred from a display label.
+
+```{r new-survival}
+followup <- data.frame(time = c(1, 2, 3, 4), died = c(1, 0, 1, 0))
+survtab(followup, "time", "died", times = c(1, 3), rmst = 3,
+        median = TRUE, riskset = TRUE)
+```
+
+Survival is KM with Greenwood/log-log inference, independent-subject RMST and
+full-follow-up log-rank inference. Delayed entry and split intervals require
+explicit coherent subject evidence; IDs do not select robust IJ or recurrent-event
+methods. RMST beyond any included group's support refuses; requested KM times
+beyond support retain the final estimate with flags and a note. `reverse`
+means 1−KM, not competing-risks incidence. At terminal zero survival, native
+queried SE may forward-fill a previous SE for the requested contrast, while
+mathematical event-grid and RMST variances retain their own values.
+
+## Publication protection, identity and session policy
+
+* **Strict and primary differ by command.** Table 1/crosstab strict protection
+  redacts protected count returns and linked publication inference. Table 1
+  primary retains explicitly labeled `stored$raw$table` and sample aggregates
+  for analysis; its protected publication counts/percentages and linked ESS
+  remain unavailable. Crosstab primary redacts protected returned counts and
+  dependent percentages but retains computed tests/association estimates.
+  Primary protection promises no complementary reconstruction guarantee.
+* **Printed-only masks retain analytical data.** `stratetab`, `ratetab`,
+  `outtab` and regression `mincount` preserve raw analytical returns under
+  publication masks. `mincount` is reporting hygiene, not disclosure protection.
+  Regression `stored$table`/raw row metadata are separate from
+  `stored$publication_table`/publication rows and eligible forest inference.
+  The native FC002 mincount return has four unsuppressed rows; R deliberately
+  retains all six analytical rows, with the matching four-row publication
+  matrix. Neither raw rows nor native identities are dropped to claim parity.
+* **Overrides use canonical state.** Table 1 replacements class-refuse primary,
+  complementary or linked-withheld targets before any mutation, an intentional
+  safer difference from native unchecked replacement. `cellreplace` uses R
+  records with exactly row/column/text; numeric column1 means the first value
+  column, whereas character `"1"` means an exact header. Regression `cellnote`
+  clears publication inference and forest eligibility while preserving raw
+  analysis. A real estimate printed `1.00` is never inferred to be Reference.
+* **Later-source strict count guards.** Table 1 ports the denominator and
+  printed-continuous-summary guards from pinned tabtools 2.5.2–2.5.6 source
+  (`4eecca4d`). Strict `slashN` withholds small denominators and denominators
+  beside masked N, including a reconstructive Total; visible Missing counts
+  omit percentages when their denominator is withheld. A printed continuous
+  summary contributes the released nonmissing-count lower bound to strict
+  feasibility. These selected repairs do not establish universal protection
+  beyond supported layouts or complete equivalence to 2.5.6. Primary mode
+  retains its documented limited protection, and the finite-SD R choice stays.
+* **Flat frames have truthful scope.** Keyed regression/effect rows preserve raw
+  equation keys, original model/state matrices and unique occurrence blocks.
+  Puttable technical keys are omitted only when actually selected and omitted-key
+  diagnostics are separate paragraphs in every R sink (native console only).
+  Transposed regression and composite/rate/outcome/categorical/correlation/survival
+  publications require plain unkeyed export (`tt_flat(x, keyed = FALSE)`).
+  No artificial regression model IDs/states are assigned. Composites authenticate
+  numerical companions and classify references from canonical flags, not labels;
+  keyed/model-only/multiple-model-per-outcome forest requests refuse.
+* **Session opt-in and explicitness.** `tabtools_options()` queries the defaults;
+  use `tabtools_options()$digits`, not unnamed `tabtools_options("digits")`.
+  Explicit named NULL clears a session key. Ordinary commands inherit workbook
+  and Markdown only for an explicitly supplied non-NULL sheet. Their omitted
+  default sheet causes no inherited write. Explicit destination NULL opts out.
+  `puttab` and `stacktab` frame publication has its documented omitted-destination
+  inheritance. Missing workbook for an explicit sheet warns; internal staging
+  never triggers a second hidden write. Successful session Markdown writes
+  replace/create first and append subsequently, with explicit append winning.
+  Workbook alias priorities are command-specific: non-NULL excel wins for
+  Table 1, nonempty xlsx first for cross-tabulation/correlation. Explicit
+  `excel = NULL` alone opts Table 1 out of inherited workbooks.
+  An explicit active `smallcells = k` defaults to strict unless the call
+  explicitly selects a mode. Omitted threshold/mode inherit together;
+  explicit NULL/0 or `nosmallcells` disables inheritance, with the documented
+  argument-conflict rules. Publication notes describe threshold/protection
+  limits; analytical backup field details belong in help, not those notes.
+* **Paragraphs are cross-sink.** A footnote character vector or the reserved
+  single spaced-backslash token makes separate paragraphs. Unspaced/doubled
+  backslashes, dollar signs, quotes and backticks remain literal data.
+  R carries complete notes through text, workbook and presentation renderers;
+  some native console-only diagnostics become all-sink R paragraphs.
+* **Inference is selected, not generic.** Table 1 retains the R test map below.
+  Corrtab recomputes pairwise tied ranks and N; the chosen Stata17 Spearman
+  engine uses t(N−2), unlike the current manual's beta method or R AS89/exact
+  inference. Corrtab N2 p-values are missing; for N>2 perfect positive
+  Spearman p=0 while perfect negative Spearman p is unavailable. Constants
+  have blank undefined diagonals and useful pair counts. Crosstab refuses
+  unavailable N<=2/negative-perfect trend inference before sinks.
+* **Estimator limits are explicit.** `effecttab(full)` remains the deliberate
+  `regtab()` component-fit alternative, with equation-aware term identities.
+  Interval-censored supported `survreg` AFT fits use TR; Gaussian interval
+  regression uses Coef. Unsupported native estimator families require an
+  explicit custom-frame effect scale, confidence level, inference and survival
+  metric metadata; no class support is inferred from a header. MI varying-sample
+  `esampvaryok` and pooled-MI mincount remain unsupported. `lmerTest` objects
+  retain the documented Stata mixed-model z policy, not Satterthwaite inference.
+  Ratio-scale effect SEs retain delta-method Wald limits and warn on a
+  nonpositive derived lower bound. Logical Table 1 groups remain 0/1; SMD
+  selectors accept TRUE/FALSE (logical or strings) as1/0.
 
 ## Deliberate differences
 
@@ -323,21 +480,26 @@ list(var.equal = TRUE))` gives Stata's pooled-variance tests. Stata's
 - **Invalid display formats** are an error. Stata's `string()` silently
   returns `""` for a format such as `%5.1x` or `%5.5g` (decimals not
   fewer than the width), so the cell prints as `±`.
-  `%e` formats are refused too (Stata's `%e` is not C's).
+  Fixed, general and exponential formats are supported; `%ec` is refused.
+  General formats requesting at least 13 significant digits can differ in
+  final rounding digits. Allocation limits are widths 1–10000 and decimals
+  0–400; a zero-decimal general format has width at most 402.
 - **Dates** (`Date`, `POSIXt` columns) are refused: Stata counts days from
   1960 and R from 1970, so no summary could match. Convert them first.
 - **Non-finite values**: `Inf`, `-Inf`, `NaN`, and values of 2^1023
   (8.99e307) or more, in any analysed column (`by` included) or in a
   weight, are refused by name. A Stata variable cannot hold them; a Stata
   weight of 1e308 is a missing value that silently drops its record.
-- **Overflow** follows Stata. Values of 1e200 print `2.e+200±.` (the
-  squares overflow), and a sum of values beyond 8.99e307 leaves the cell
-  (and its p-value and SMD) blank. A weighted sum beyond the range is
-  formed again from the weights divided by a power of two, as Stata
-  tabtools does (since 2.1.12), so huge weights give the true means, SDs,
-  quartiles, percentages, effective counts and ESS (weights of 1e200 give
-  `ESS=10` and `6±3`); the SMD, which Stata computes from the unscaled
-  sums, stays blank where they overflow.
+- **Centered SD overflow**: by explicit user choice, R retains a finite SD
+  where the pinned native square of the weighted centered-deviation sum
+  overflows and prints missing, but its variance correction remains finite.
+  Ordinary centered calculations prevent cancellation at large offsets.
+  This finite-SD boundary is an intentional difference, not an assertion of
+  native missing-value equivalence. Weighted rescaling and other unavailable
+  sum/SMD boundaries follow their documented command contracts.
+- **SMDs under extreme weights**: for accepted weights near `8e307`, R uses
+  bounded rescaling to retain finite SMDs where Stata 2.5.6 returns missing
+  values, separately from the finite SD choice.
 - **Tiny weights and huge values** follow Stata tabtools (since 2.1.14):
   a weight total below 1 is multiplied by a power of two before the
   weighted quartiles (1..10 under weights of 1e-12 prints `6 (3, 8)`, as
@@ -376,7 +538,7 @@ list(var.equal = TRUE))` gives Stata's pooled-variance tests. Stata's
   to go. In R the table goes on to `flextable::as_flextable()`, `tt_as_gt()` or
   a later `tt_write_xlsx()`, so `table1_tc()` accepts them without a file,
   as `regtab()` already did. `sheet`, `open` and `mdappend` still need their
-  file.
+  resolved file.
 
 ### Rate tables (stratetab)
 
@@ -498,17 +660,14 @@ list(var.equal = TRUE))` gives Stata's pooled-variance tests. Stata's
   number of predictor variables. The R-only models name themselves
   (`pscl::hurdle()` count models are not Stata's `churdle`; `clm()` links
   Stata has no ordered model for).
-- **Data-frame input**: the scale requires an explicit `effect_scale`
-  attribute, including `"Coef."`; command names and backend exponentiation
-  hints do not declare it (exponentiated `broom::tidy()` output declared as
-  coefficients is refused); on a ratio
+- **Data-frame input**: the ratio scale comes from `effect_scale`,
+  `stata_cmd` or broom.helpers' `exponentiate` record (exponentiated
+  `broom::tidy()` output declared as coefficients is refused); on a ratio
   scale `std.error` is used only when its scale is declared
   (`attr(x, "se_scale")`: `"link"` for broom's `exponentiate = TRUE`,
   `"estimate"` for `parameters`); supplied intervals fix the
   confidence level (`attr(x, "conf.level")`, which `tidy_plus_plus()`
-  sets), and supplied bounds require that declaration; row `df`/`df.error`
-  gives t statistics, while derived inference without df requires an
-  explicit `inference_reference = "normal"`; factor levels are keyed
+  sets); a `df` column gives t statistics; factor levels are keyed
   `2.treat`, so `regtab(fit, tidy_plus_plus(fit))` shares their rows.
   Malformed columns (factors, reversed bounds, p outside \[0, 1\], ...) are
   refused. See `?regtab`, "Data-frame input".

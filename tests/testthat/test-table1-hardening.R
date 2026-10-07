@@ -171,10 +171,12 @@ test_that("H10: one weight near Stata's limit among ones (probes D8, D8n, E8)", 
   tt <- table1_tc(d, by = "g", vars = "x contn \\ x conts \\ b bin \\ c cat", wt = "w", smd = TRUE)
   out <- h10_cells(tt)
   expect_identical(out[3], "Effective sample size,ESS=1,ESS=10,")
-  # The weight on x = 3 dominates group 1. The SMD comes from Stata's
-  # unrescaled sums (blank where w * x overflows), as before.
-  expect_identical(out[4], "x,3\u00b10,16\u00b13,")
-  expect_identical(out[5], "x,\"3 (3, 3)\",\"16 (13, 18)\",")
+  # The weight on x = 3 dominates group 1. Accepted bounded rescaling
+  # retains the finite SMD: 12.5 / sqrt((82.5 / 9) / 2) = 5.8387420812.
+  # Native 2.5.6 still overflows its uncapped scale at this endpoint;
+  # these literals assert the documented R improvement, not native equality.
+  expect_identical(out[4], "x,3\u00b10,16\u00b13,5.839")
+  expect_identical(out[5], "x,\"3 (3, 3)\",\"16 (13, 18)\",5.839")
   expect_identical(out[6:10], c("b,100,50,1.414", "c,,,2.160", "   0,100,30,", "   1,0,30,", "   2,0,40,"))
   # wtn: effective counts.
   out <- h10_cells(table1_tc(d, by = "g", vars = "x contn \\ b bin \\ c cat", wt = "w", wtn = TRUE))
@@ -189,9 +191,10 @@ test_that("H10: weight sums beyond Stata's range give the rescaled cells (probes
   d <- data.frame(x = 1:20, g = rep(1:2, each = 10), w = 8e307, b = (1:20) %% 2, c = (1:20) %% 3)
   out <- h10_cells(table1_tc(d, by = "g", vars = "x contn \\ x conts \\ b bin \\ c cat", wt = "w", smd = TRUE))
   expect_identical(out[3], "Effective sample size,ESS=10,ESS=10,")
-  # The cells are the equal-weight values; the SMD stays blank (Stata's
-  # SMD sums are not rescaled).
-  expect_identical(out[4:10], c("x,6\u00b13,16\u00b13,", "x,\"6 (3, 8)\",\"16 (13, 18)\",", "b,50,50,", "c,,,",
+  # Bounded scale recovery preserves the equal-weight SMDs: continuous
+  # 10 / sqrt(82.5 / 9), binary zero, and categorical sqrt(4 / 69).
+  # The uncapped native endpoint remains separately qualified.
+  expect_identical(out[4:10], c("x,6\u00b13,16\u00b13,3.303", "x,\"6 (3, 8)\",\"16 (13, 18)\",3.303", "b,50,50,0.000", "c,,,0.241",
                                 "   0,30,30,", "   1,40,30,", "   2,30,40,"))
   out <- h10_cells(table1_tc(d, by = "g", vars = "b bin \\ c cat", wt = "w", wtn = TRUE, total = "after"))
   expect_identical(out[3:8], c("Effective sample size,ESS=10,ESS=10,ESS=20", "b,5 (50),5 (50),10 (50)", "c,,,",

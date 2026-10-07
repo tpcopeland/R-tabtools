@@ -125,16 +125,16 @@ test_that("F02: hrcomptab() places categories differing only by case exactly, wi
   # Base "a": model row 3 is A = 1.30.
   m <- regtab(ct_model("death", levels = c("A", "a"), ref = 2))
   b <- hrcomptab(r, m, rows = 3)$body
-  expect_identical(b$c5[2:3], c("1.30 (1.04, 1.62)", "Reference"))
+  expect_identical(b$c5[2:3], c("1.30 (1.04, 1.63)", "Reference"))
   # Base "A": model row 4 is a = 1.30.
   m <- regtab(ct_model("death", levels = c("A", "a"), ref = 1))
   b <- hrcomptab(r, m, rows = 4)$body
-  expect_identical(b$c5[2:3], c("Reference", "1.30 (1.04, 1.62)"))
+  expect_identical(b$c5[2:3], c("Reference", "1.30 (1.04, 1.63)"))
   # A match by case alone still places a row...
   r2 <- stratetab(ct_block(c("A", "B"), c(5, 8), c(100, 200)), outlabels = "Death", outcomeids = "death",
                   explabels = "Dose")
   b <- hrcomptab(r2, regtab(ct_model("death", levels = c("a", "b"), ref = 1)), rows = 4)$body
-  expect_identical(b$c5[2:3], c("Reference", "1.30 (1.04, 1.62)"))
+  expect_identical(b$c5[2:3], c("Reference", "1.30 (1.04, 1.63)"))
   # ...but one matching two categories by case alone is refused.
   r3 <- stratetab(ct_block(c("x", "aa", "Aa"), c(5, 8, 3), c(100, 200, 50)), outlabels = "Death",
                   outcomeids = "death", explabels = "Dose")

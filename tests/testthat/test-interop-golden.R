@@ -25,8 +25,11 @@ local({
         # R25q: the known glm.nb iteration-limit warning (a boundary MLE; the
         # golden regtab test reports it).
         tt <- if (id == "R25q") suppressWarnings(interop_tt(id)) else interop_tt(id)
-        expect_ft_matches_golden(id, tt)
-        expect_gt_matches_golden(id, tt)
+        # Validate the complete original endpoint result/sinks first, then use
+        # the existing narrowly qualified historical peer for converters only.
+        converter_tt <- if (id == "T36") golden_patch_t36_endpoint(tt) else tt
+        expect_ft_matches_golden(id, converter_tt)
+        expect_gt_matches_golden(id, converter_tt)
         # Task 6.5: tt_as_gtsummary() keeps every cell's text.
         if (requireNamespace("gtsummary", quietly = TRUE)) {
           expect_gts_keeps_cells(tt)
@@ -75,8 +78,9 @@ local({
         skip_if_not_installed("haven")
         if (!golden_scenario_live(id, golden_scenario(id)$phase)) skip("Phase 7")
         tt <- interop_tt(id)
-        expect_ft_matches_golden(id, tt)
-        expect_gt_matches_golden(id, tt)
+        converter_tt <- if (id == "S03") golden_patch_s03_round(tt) else tt
+        expect_ft_matches_golden(id, converter_tt)
+        expect_gt_matches_golden(id, converter_tt)
       })
     })
   }

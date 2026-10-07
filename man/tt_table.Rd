@@ -60,7 +60,8 @@ Automatic notes are separate paragraphs in every sink.}
 (\code{"left"}/\code{"right"}), \code{console_sepby}, \code{console_title}, \code{console_blank},
 \code{header_style} (\code{"descriptor"}, \code{"model"}, \code{"plain"}), \code{xlsx_rules}
 (\code{"descriptive"}, \code{"regression"}, \code{"puttab"}, \code{"stacktab"},
-\code{"stratetab"}, \code{"comptab"}, \code{"hrcomptab"}), \code{sheet}, \code{csv_reservedrow} (default \code{TRUE}: the CSV
+\code{"stratetab"}, \code{"comptab"}, \code{"hrcomptab"}, \code{"crosstab"},
+\code{"corrtab"}, \code{"survtab"}), \code{sheet}, \code{csv_reservedrow} (default \code{TRUE}: the CSV
 sink drops leading rows blank in every column), and \code{md_header}
 (\code{"first"}: the Markdown header is the first header row and the later
 header rows are written as body rows, as comptab's rate-mode Markdown

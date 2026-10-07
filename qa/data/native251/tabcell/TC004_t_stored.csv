@@ -1,0 +1,13 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC004_t
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+level,scalar,,,95
+ub,scalar,,,.38510173063681757
+lb,scalar,,,.28346969793461113
+estimate,scalar,,,.33428571428571435
+missing,scalar,,,0
+source,macro,,,e()
+form,macro,,,est
+cell,macro,,,"0.33 (0.28, 0.39)"

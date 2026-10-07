@@ -3,7 +3,11 @@ source("qa/tools/qa_result.R", local = TRUE)
 
 # Native producer execution/authentication is root-owned, after source review.
 # This lane consumes only its independently accepted, hash-bound output.
-directory <- Sys.getenv("TABTOOLS_OUTTAB_NATIVE_DIR")
+qa_source_root <- Sys.getenv("TABTOOLS_QA_SOURCE_ROOT")
+if (!nzchar(qa_source_root)) qa_source_root <- if (file.exists("DESCRIPTION")) getwd() else dirname(getwd())
+qa_source_root <- normalizePath(qa_source_root, mustWork = TRUE)
+if (!file.exists(file.path(qa_source_root,"DESCRIPTION"))) stop("Cannot locate the staged QA package root")
+directory <- Sys.getenv("TABTOOLS_OUTTAB_NATIVE_DIR", unset = file.path(qa_source_root,"qa","data","native251","outtab"))
 if (!nzchar(directory) || !dir.exists(directory)) {
   stop("Set TABTOOLS_OUTTAB_NATIVE_DIR to independently authenticated OT001--OT009 output.")
 }
@@ -83,9 +87,15 @@ for (id in names(specifications)) {
   # The capture contains the preview followed by two native sink messages.
   # Assert the whole declared tail before selecting the complete literal box.
   tail <- if (length(boundaries) == 2L) native_console[seq.int(boundaries[2L] + 1L, length(native_console))] else character()
-  expected_tail <- c(paste("Markdown exported to", file.path(directory, paste0(id, ".md"))),
+  # Native status paths are frozen returns, even after fixture relocation.
+  native_xlsx <- native[native$name == "xlsx", , drop = FALSE]
+  qa_check(paste(id,"unique authentic workbook destination"),
+    nrow(native_xlsx)==1L && identical(native_xlsx$kind,"macro") &&
+      identical(basename(native_xlsx$value),"outtab.xlsx"))
+  native_capture_directory <- dirname(native_xlsx$value)
+  expected_tail <- c(paste("Markdown exported to", file.path(native_capture_directory, paste0(id, ".md"))),
     sprintf("puttab: wrote %d data rows x %d cols (frame source) to sheet %s in %s",
-      nrow(actual$body), ncol(actual$body), id, file.path(directory, "outtab.xlsx")))
+      nrow(actual$body), ncol(actual$body), id, native_xlsx$value))
   qa_check(paste(id, "exact native preview/sink-message boundary"),
     length(boundaries) == 2L && boundaries[1L] == 1L && identical(tail, expected_tail))
   native_box <- if (length(boundaries) == 2L) native_console[seq_len(boundaries[2L])] else native_console

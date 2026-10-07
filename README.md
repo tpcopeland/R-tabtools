@@ -1,8 +1,8 @@
 # tabtools for R — publication-ready descriptive and regression tables
 
-**Version 0.1.1** | 2026-10-06
+**Version 0.2.0** | 2026-10-07
 
-tabtools makes the tables of a clinical or epidemiological paper: a Table 1 of baseline characteristics, regression tables, incidence rates beside hazard ratios, treatment effects and margins, and inverse-probability-weight diagnostics. Every table prints in the console and writes to Excel, Word, HTML, Markdown and CSV with the same rows, labels, indented category levels and Reference rows in each.
+tabtools makes the tables of a clinical or epidemiological paper: baseline characteristics, regression estimates, categorical comparisons, correlations, survival summaries, incidence rates, binary outcome ratios, treatment effects and weight diagnostics. Every table prints in the console and writes to Excel, Word, HTML, Markdown and CSV with the same rows, labels, indented category levels and Reference rows in each.
 
 ## Quick Start
 
@@ -80,8 +80,15 @@ remotes::install_github("tpcopeland/R-tabtools")
 | `regtab()` | Regression table of one or more fitted models, side by side |
 | `regtab_uv()` | One univariable model per covariate, as one `regtab()` column |
 | `tt_mi()` | Multiply imputed fits, pooled by Rubin's rules, for `regtab()` |
-| `tt_rates()`, `stratetab()` | Events, person-time and incidence rates per group, and their table |
-| `hrcomptab()`, `comptab()` | Cohort-study Table 2 (rates beside hazard ratios); selected rows of several model tables |
+| `tabcell()` | Vectorized estimate, p-value, count, percentage, event-percentage, quartile and rate cells with analytical provenance |
+| `tt_fitcount()`, `tt_failed_model()` | Capture fit-time sample/term counts; explicitly represent a failed regression column |
+| `crosstab()` | Two-way counts/percentages, Pearson or Fisher tests, sample OR/RR/RD and signed trend inference |
+| `corrtab()` | Pairwise Pearson/Spearman matrices with stars or p-values and pair-specific N |
+| `survtab()` | Kaplan-Meier summaries, risks/events, median, RMST and two-group contrasts |
+| `tt_rates()`, `stratetab()` | Legacy computed/saved incidence-rate blocks and their table |
+| `ratetab()` | Separate grouping sections, multiple outcomes, exact/log-Poisson or clustered rate intervals |
+| `outtab()` | Binary outcomes by binary exposure, crude counts and ordered crude/adjusted ratio specifications |
+| `hrcomptab()`, `comptab()` | Rates beside HR/IRR models, multiple models per outcome, keyed placement and model-only rows |
 | `effecttab()`, `tt_effect_rows()` | Treatment effects and margins from marginaleffects results, data frames or matrices |
 | `wttab()` | Distribution and effective sample size of inverse probability weights |
 | `puttab()`, `stacktab()` | Style any data frame or matrix as a sheet; assemble several tables into one sheet |
@@ -89,14 +96,14 @@ remotes::install_github("tpcopeland/R-tabtools")
 | `tt_write_xlsx()`, `tt_write_csv()`, `tt_write_markdown()` | Write a table to a file |
 | `flextable::as_flextable()`, `tt_as_gt()`, `tt_as_gtsummary()`, `tt_as_tinytable()` | Convert a table for Word, HTML, Quarto and LaTeX |
 | `as_forest_data()`, `as.data.frame()` | The numbers behind a table, for forest plots; the table as text cells |
-| `tt_flat()` | Editable regression and effect body rows with raw keys, model states and preserved headers |
+| `tt_flat()` | Editable regression/effect rows with keys and preserved headers; plain unkeyed publication frames for other families |
 | `tt_vcov()`, `tt_vce_types()`, `tt_ci_methods()` | The variance and interval methods `regtab()` uses, for use elsewhere |
 | `tt_from_modelsummary()` | Table a modelsummary model list with `regtab()` |
-| `tabtools_options()` | Default font, border style, digits and colours |
+| `tabtools_options()` | Query/set/clear styling, masking and opt-in workbook/Markdown destinations |
 | `tt_as_factor()` | Turn Stata value-labelled columns into factors |
 | `tt_table()`, `validate_tt_table()` | The table object every renderer reads |
 
-Every command returns a `tt_table`, which prints as above.
+Table-building commands return a `tt_table`, which prints as above. `tabcell()` returns a vector of `tt_cell` text with aligned numerical provenance; `tt_fitcount()` returns a frozen count record. `?tabtools` is the command catalog, with short recipes and links to the detailed help pages.
 
 ## Worked Examples
 
@@ -187,13 +194,13 @@ source("qa/demo/demo_tabtools.R", local = demo)
 - `vignette("weighted-analyses", package = "tabtools")`: IPTW and marginal structural models: balance tables, `wttab()` for the weights, robust and clustered variances, and `effecttab()` for treatment effects and margins.
 - `vignette("compared-with-gtsummary", package = "tabtools")`: the same Table 1 and Table 2 made with gtsummary and with tabtools.
 - `vignette("coming-from-stata", package = "tabtools")`: for Stata users, option-by-option translation and every deliberate difference.
-- `?table1_tc`, `?regtab` and the other help pages list every argument.
+- `?tabtools`: the 2.5.1 command catalog and compact recipes; individual help pages list arguments and return contracts.
 
 **Using tabtools with an AI assistant:** paste [`inst/llm/tabtools-syntax.md`](inst/llm/tabtools-syntax.md) (installed at `system.file("llm", "tabtools-syntax.md", package = "tabtools")`) and a data dictionary (no row-level data) into the chat, and ask for the code of your tables.
 
 ## Coming from Stata
 
-tabtools is the R implementation of the Stata [`tabtools`](https://github.com/tpcopeland/Stata-Tools/tree/main/tabtools) commands `table1_tc`, `regtab`, `puttab`, `stacktab`, `stratetab`, `effecttab`, `comptab` and `hrcomptab`. Argument names are the Stata option names, so a call translates option by option; `regtab()` takes the fitted models instead of reading a `collect`.
+The development interfaces target the Stata [`tabtools`](https://github.com/tpcopeland/Stata-Tools/tree/main/tabtools) 2.5.1 command suite, including `tabcell`, `ratetab`, `outtab`, `crosstab`, `corrtab` and `survtab`. Selected disclosure, overflow and formatting repairs follow the later 2.5.2–2.5.6 source at commit `4eecca4d`; this does not claim complete equivalence to 2.5.6. Argument names follow the Stata options; fitted models and data are explicit R inputs rather than active `collect` or dataset state. `?tabtools` supplies the catalog and the migration vignette documents supported estimator mappings.
 
 ```stata
 table1_tc, by(treated) vars(age contn %5.1f \ female bin \ education cat) smd xlsx("t1.xlsx")
@@ -212,7 +219,9 @@ fit <- glm(event ~ treated + age + female + education, binomial, data = cohort)
 regtab(fit, coef = "OR", nointercept = TRUE, xlsx = "t2.xlsx", sheet = "Logistic")
 ```
 
-**Parity.** Everything a reader sees targets cell-for-cell parity with Stata `tabtools` 2.1.14: row structure, labels, indents, descriptive statistics, number formats, headers and Excel styling. The package is tested against 272 scenarios generated by Stata (56 `table1_tc`, 138 `regtab`, 15 `puttab`, 9 `stacktab`, 8 `stratetab`, 28 `effecttab`, 8 `wttab`, 8 `comptab`, 2 `hrcomptab`), compared in the table, the console listing, the CSV and Markdown files, the stored results and the Excel formatting. Every sheet of a ported command in the Stata demo matches (61 of its 77 sheets; `corrtab`, `crosstab`, `survtab` and three model families are not ported). `wttab()` has no Stata command yet; its reference tables are Stata `puttab` sheets of the same statistics. Hypothesis tests use R's conventional defaults (Welch t test, Wilcoxon rank-sum, Pearson's chi-squared without continuity correction as in Stata, Fisher's exact); the p-value format is Stata's. `vignette("coming-from-stata", package = "tabtools")` lists every place where R differs on purpose.
+**Parity.** The reference target is pinned Stata `tabtools` 2.5.1 (commit `712044f8`). The retained baseline inventory has 272 scenarios; 89 additional native cases or refusals are recorded separately across fit counts (3), cell formatting (6), rates (12), outcomes (9), composites (6), cross-tabulations (28), correlations (13) and survival (12). Separately, 33 selected Stata 2.5.6 regression cases (37 native commands) have genuine native and installed-R counterpart evidence, and the expanded demo has 149 passing checks across 146 artifact records. These scoped comparisons retain their declared source pins and documented boundaries. Matching targets include displayed cells, table structure, numerical returns and workbook styling, subject to the documented differences in `vignette("coming-from-stata", package = "tabtools")`. Table 1 uses conventional R hypothesis tests; correlation/Spearman tables follow the installed Stata 17 engine invoked by the pinned suite. `wttab()` remains an R addition.
+
+Strict Table 1/crosstab masking redacts protected numerical returns. Primary rate/outcome/regression masks retain separately identified analytical numbers: a masked publication is not a protected analytical data file. Regression `mincount` is reporting hygiene. General formats with at least 13 significant digits may differ in their final rounding digits; Table 1 closes the earlier `slashN` denominator leaks through the selected later-source guards and retains the documented finite-SD overflow difference. With accepted weights near `8e307`, R can also retain finite SMDs where Stata 2.5.6 returns missing values, separately from the finite SD choice. `effecttab(full)` has the deliberate R alternative of `regtab()` on the component models.
 
 ## QA
 
@@ -220,6 +229,7 @@ QA suites and how to run them are documented in [`qa/README.md`](qa/README.md).
 
 ## Version History
 
+- **0.2.0**: pinned Stata tabtools 2.5.1 workflows, fit-count and regression publication controls, scalar cells, rates, binary outcomes, composite models, cross-tabulations, correlations and survival summaries. See NEWS.md.
 - **0.1.1**: bug fixes from the 2026-10-06 audits (small-cell protection of derivable hidden counts, centered SDs, `smdpair` resolution, `tt_stack()`/`tt_merge()` group keys, Stata colour names, ordinal link labels and others), plus SMD pair naming, `smdpair` and `smdtype`. See NEWS.md.
 - **0.1.0**: first release. Descriptive, regression, incidence-rate, treatment-effect, weight-diagnostic and composite tables (`table1_tc()`/`desctab()`, `regtab()`, `regtab_uv()`, `stratetab()`, `tt_rates()`, `effecttab()`, `wttab()`, `comptab()`, `hrcomptab()`, `puttab()`, `stacktab()`), table composition (`tt_merge()`, `tt_stack()`), and converters to flextable, gt, gtsummary and tinytable.
 

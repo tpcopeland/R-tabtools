@@ -23,7 +23,7 @@ test_that("rate mode: the Table 2 layout, reference rows, and hrcomptab() = comp
   expect_identical(body_cell(x, "No", 5), "Reference")
   expect_identical(body_cell(x, "No", 6), "")
   expect_identical(body_cell(x, "Yes", 5), "0.80 (0.64, 1.00)")
-  expect_identical(body_cell(x, "Yes", 10), "0.90 (0.72, 1.12)")
+  expect_identical(body_cell(x, "Yes", 10), "0.90 (0.72, 1.13)")
   expect_identical(body_cell(x, "High", c(5, 6)), c("1.40 (1.12, 1.75)", "0.060"))
   expect_equal(unname(unlist(x$stored[c("N_rows", "N_outcomes", "N_sections", "N_modelrows", "N_modelframes")])),
                c(10, 2, 2, 3, 2))

@@ -1,0 +1,9 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC005_p
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+N_missing,scalar,,,1
+N,scalar,,,4
+form,macro,,,p
+varname,macro,,,v_p

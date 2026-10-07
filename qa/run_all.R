@@ -1,5 +1,5 @@
 # qa/run_all.R - the developer QA lane in one command (Milestone H, H16).
-#   Rscript qa/run_all.R [full|adversarial|sample|interaction|crossval|quick|core|benchmark]
+#   Rscript qa/run_all.R [full|adversarial|sample|interaction|crossval|stata|quick|core|benchmark]
 #
 # 1. Builds the package (R CMD build --no-build-vignettes) and installs the
 #    tarball, byte-compiled, into a temporary library. Nothing is installed
@@ -7,8 +7,8 @@
 # 2. Runs the selected lane against that installed copy (TABTOOLS_QA_LIB
 #    points the scripts at it), each in a supervised R process with a
 #    per-file timeout. New adversarial files run with testthat::test_file().
-# 3. Reconciles qa/: every top-level qa/*.R is either run here or listed in
-#    qa/_skip.txt with a reason; an unlisted script is a failure.
+# 3. Reconciles qa/: every top-level qa/*.R is run here, an explicitly
+#    sourced helper, or listed in qa/_skip.txt; an unlisted script is a failure.
 # 4. Reconciles each script's result: every script prints one completion
 #    marker (qa/tools/qa_result.R) with the comparisons it executed,
 #    skipped and failed. The runner recomputes the status from those counts:
@@ -38,6 +38,12 @@ source(file.path(qa_dir, "tools", "qa_result.R"))  # qa_reconcile()
 
 # Scripts this runner executes, in order, with what each checks.
 run <- c(
+  validation_crosstab.R = "installed strict/primary contingency contracts and converters",
+  crossval_crosstab.R = "XT001-XT028 authenticated full native tables/returns/sinks and refusals",
+  test_corrtab.R = "installed correlation matrices, pairwise ledgers and all sinks",
+  crossval_corrtab.R = "CR001-CR013 authenticated full correlation matrices and counts",
+  validation_survtab.R = "independent Kaplan-Meier, Greenwood RMST and ordinary log-rank references",
+  crossval_survtab.R = "SV001-SV012 authenticated full native survival surfaces and returns",
   check_examples.R = "installed public API: every export documented, its examples run",
   bench_fisher.R = "Fisher exact test wall-clock bounds (workspace escalation, simulated fallback)",
   bench_fweight.R = "fweight tests: time (5 s) and memory (100 MB) bounds up to a total frequency of 5e7",
@@ -56,6 +62,10 @@ run <- c(
   crossval_ratetab.R = "RT001–RT012 authentic native rates and numeric returns",
   crossval_outtab.R = "direct OT001–OT009 authentic outcome/sample/ratio controls",
   crossval_comptab_v251.R = "CO001–CO006 authenticated complete native composite surfaces and immutable references",
+  crossval_upstream256_layout.R = "US001-US003/UW001-UW004 authentic 2.5.6 panel/SMD geometry and full sinks",
+  crossval_post251_disclosure.R = "DS01-DS08 authentic 2.5.6 disclosure masks, numeric returns and full sinks",
+  crossval_post251_weight_unit.R = "authentic 2.5.6 weight diagnostics and unit correction with full sinks",
+  crossval_post251_rounding.R = "ten authentic 2.5.6 estimate/CI/rate rounding cases with full sinks",
   crossval_smd_balance.R = "table1_tc() smdtype population/maxpair/pair against cobalt and twang",
   demo_parity.R = "the R demo (qa/demo/demo_tabtools.R) against the Stata demo, sheet by sheet (Milestone D)",
   test_demo_source.R = "complete native demo source/storage/schema/RDS integrity, strict staging CLI and authentic manifest routes",
@@ -91,9 +101,14 @@ interaction_files <- c("test_interaction_matrix_descriptive.R",
                        "test_interaction_matrix_survival_survey_gee.R",
                        "test_interaction_matrix_composition.R",
                        "test_interaction_matrix_independent.R")
-crossval_files <- c("crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R", "crossval_table1_primary.R", "crossval_regtab_fitcount.R", "crossval_regtab_placement.R", "crossval_tabcell_native.R", "crossval_tabcell.R", "test_ratetab.R", "crossval_ratetab.R", "crossval_outtab.R", "crossval_comptab_v251.R")
+# These consume committed authenticated artifacts; no live Stata is launched.
+post251_files <- c("crossval_upstream256_layout.R", "crossval_post251_disclosure.R",
+                   "crossval_post251_weight_unit.R", "crossval_post251_rounding.R")
+SOURCED_FILES <- "helper-post251-native.R"
+crossval_files <- c(post251_files, "crossval_smd_balance.R", "crossval_puttab_layout.R", "crossval_regtab_formats.R", "crossval_puttab_flat.R", "crossval_session_sinks.R", "crossval_table1_primary.R", "crossval_regtab_fitcount.R", "crossval_regtab_placement.R", "crossval_tabcell_native.R", "crossval_tabcell.R", "test_ratetab.R", "crossval_ratetab.R", "crossval_outtab.R", "crossval_comptab_v251.R", "test_corrtab.R", "crossval_corrtab.R", "validation_survtab.R", "crossval_survtab.R", "validation_crosstab.R", "crossval_crosstab.R")
 testthat_files <- c(adversarial_files, sample_files, interaction_files,
-                   setdiff(crossval_files, "crossval_outtab.R"), "test_regtab_placement.R", "test_demo_source.R", "test_demo_aipw.R")
+  setdiff(crossval_files, c("crossval_outtab.R", "validation_survtab.R", "crossval_survtab.R")),
+  "test_regtab_placement.R", "test_demo_source.R", "test_demo_aipw.R")
 LANES <- list(
   quick = c(adversarial_files, sample_files),
   core = c(testthat_files, "check_examples.R", "validation_wttab.R"),
@@ -102,6 +117,7 @@ LANES <- list(
   sample = sample_files,
   interaction = interaction_files,
   crossval = crossval_files,
+  stata = post251_files,
   benchmark = c("bench_fisher.R", "bench_fweight.R")
 )
 if (!lane %in% names(LANES)) stop("unknown QA lane: ", lane)
@@ -120,12 +136,14 @@ skip_lines <- if (file.exists(skip_file)) readLines(skip_file, warn = FALSE) els
 skip_lines <- trimws(skip_lines[!grepl("^\\s*(#|$)", skip_lines)])
 skips <- stats::setNames(trimws(sub("^\\S+\\s*", "", skip_lines)), sub("\\s.*$", "", skip_lines))
 scripts <- setdiff(list.files(qa_dir, pattern = "\\.R$"), "run_all.R")
-unlisted <- setdiff(scripts, c(names(run), names(skips)))
+unlisted <- setdiff(scripts, c(names(run), names(skips), SOURCED_FILES))
+missing_sourced <- setdiff(SOURCED_FILES, scripts)
 missing_run <- setdiff(names(run), scripts)
 stale_skip <- setdiff(names(skips), scripts)
 failures <- character()
 if (length(unlisted)) failures <- c(failures, paste0(unlisted, ": not run and not in qa/_skip.txt"))
 if (length(missing_run)) failures <- c(failures, paste0(missing_run, ": in the run list but missing"))
+if (length(missing_sourced)) failures <- c(failures, paste0(missing_sourced, ": declared sourced helper but missing"))
 # A skip entry for a script not (yet) in this tree is only reported: the
 # list may name a script another branch adds.
 

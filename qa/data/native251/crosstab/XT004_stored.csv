@@ -1,0 +1,20 @@
+name,kind,row,col,value
+_golden_id,meta,,,XT004
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,5
+ci_level,scalar,,,95
+N,scalar,,,8
+or,scalar,,,.1111111111111111
+p,scalar,,,.48571428571428532
+chi2,scalar,,,.
+sheet,macro,,,XT004
+xlsx,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6a/native-xt-v2/XT004.xlsx
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6a/native-xt-v2/XT004.md
+methods,macro,,,"Cross-tabulation was performed for row by  column. Statistical significance was assessed using Fisher's exact test. The odds ratio comparing column 2 versus 1 for row 2 versus 1 is reported with a 95% confidence interval. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+table,matrix,1,1,1
+table,matrix,1,2,3
+table,matrix,2,1,3
+table,matrix,2,2,1

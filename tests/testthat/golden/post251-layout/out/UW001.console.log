@@ -1,0 +1,58 @@
+-------------------------------------------------------------------------------
+      name:  case
+       log:  /tmp/tabtools-native-256-4st4nwoo/out/UW001.console.log
+  log type:  text
+ opened on:   7 Oct 2026, 15:46:54
+
+. table1_tc, by(g) vars(x contn \ b bin) smd smallcells(3) excel(`"`book'"') sh
+> eet(UW001) frame(uw001, replace) csv(`"`output'/UW001.csv"') markdown(`"`outp
+> ut'/UW001.md"')
+  +---------------------------------------------------------------------+
+  |                             g = 1   g = 2   p-value      SMD        |
+  |---------------------------------------------------------------------|
+  | No. (Column %) or Mean±SD   N=25    N=25                            |
+  |---------------------------------------------------------------------|
+  | x                           13±7    38±7    <0.001       3.397      |
+  |---------------------------------------------------------------------|
+  | b                           <3      20      Suppressed   Suppressed |
+  +---------------------------------------------------------------------+
+Counts below 3 are shown as <3; complementary cells are shown as ≥3 to prevent 
+> exact reconstruction. Percentages are withheld for any variable carrying a su
+> ppressed count.
+CSV exported to /tmp/tabtools-native-256-4st4nwoo/out/UW001.csv
+Markdown exported to /tmp/tabtools-native-256-4st4nwoo/out/UW001.md
+
+. return list
+
+scalars:
+      r(markdown_cols) =  5
+      r(markdown_rows) =  2
+  r(N_derived_suppres
+    sed)               =  2
+  r(N_secondary_suppr
+    essed)             =  0
+  r(N_primary_suppres
+    sed)               =  1
+         r(smallcells) =  3
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-4st4nwoo/out/UW001.md"
+              r(sheet) : "UW001"
+               r(xlsx) : "/tmp/tabtools-native-256-4st4nwoo/out/upstream256.."
+              r(frame) : "uw001"
+    r(smallcells_mode) : "full"
+            r(smdtype) : "pair"
+            r(varlist) : "x b"
+            r(methods) : "Baseline characteristics were compared between gr.."
+               r(Dapa) : "Data are presented as mean±SD for continuous meas.."
+
+matrices:
+        r(suppression) :  4 x 4
+              r(table) :  2 x 2
+
+. log close case
+      name:  case
+       log:  /tmp/tabtools-native-256-4st4nwoo/out/UW001.console.log
+  log type:  text
+ closed on:   7 Oct 2026, 15:46:55
+-------------------------------------------------------------------------------

@@ -53,7 +53,7 @@ test_that("profile intervals replace only the bounds", {
   expect_equal(w$p.value, tabtools:::tt_wald(g)$p.value)
 })
 
-test_that("estimates are pre-rounded with Stata's round(); CI bounds are not", {
+test_that("estimates and default CI bounds use Stata round with signed-zero preservation", {
   est <- tabtools:::.rt_est_text
   # Stata round(x, u) = floor(x/u + 0.5) * u: halves go toward +Inf.
   expect_identical(est(c(0.125, 1.115, -0.125, 2.675), 2), c("0.13", "1.12", "-0.12", "2.68"))
@@ -61,7 +61,7 @@ test_that("estimates are pre-rounded with Stata's round(); CI bounds are not", {
   expect_identical(est(c(-0.00336, 1234.5), c(2)), c("0.00", "1234.50"))
   expect_identical(est(1234.5, 0), "1235")
   ci <- tabtools:::.rt_ci_text
-  expect_identical(ci(0.125, 2.675, 2, ", "), "(0.12, 2.67)")
+  expect_identical(ci(0.125, 2.675, 2, ", "), "(0.13, 2.68)")
   expect_identical(ci(-0.0004, 1, 2, "; "), "(-0.00; 1.00)")
   expect_identical(ci(NA, 1, 2, ", "), "")
 })

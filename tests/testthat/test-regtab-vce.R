@@ -241,9 +241,12 @@ test_that("svyglm: design variance, t(design df), unweighted N, no likelihood", 
   info <- tabtools:::tt_model_info(s1)
   expect_identical(info$effect_scale, "OR")
   expect_identical(tabtools:::tt_model_info(s3)$effect_scale, "IRR")
-  # svy stores no log-likelihood: blank, with no note (Stata shows
-  # nothing either; 5w review P0-5, fixture D07).
-  expect_no_message(tt <- regtab(s1, stats = c("n", "ll", "aic")))
+  # No likelihood is stored: the unavailable rows stay absent, with the
+  # selected upstream omission note naming exactly aic and ll.
+  withr::local_options(cli.width = 120L)
+  expect_message(tt <- regtab(s1, stats = c("n", "ll", "aic")),
+    "^\\(regtab: no model reports 2 requested statistic\\(s\\), left out of the table: aic ll\\)$",
+    class = "rlang_message")
   expect_equal(tt$stored$n_1, 15000)
   expect_null(tt$stored$ll_1)
   expect_null(tt$stored$aic_1)

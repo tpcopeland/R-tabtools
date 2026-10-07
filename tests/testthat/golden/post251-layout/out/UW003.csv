@@ -1,0 +1,4 @@
+ ,Primary,Secondary,Tertiary,p-value,SMD (Primary vs Secondary)
+Mean±SD,N=6,N=6,N=6,,
+x,4±2,10±2,16±2,<0.001,3.207
+SMD compares Primary vs Secondary only (the first two of 3 groups).,,,,,

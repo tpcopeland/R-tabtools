@@ -1,0 +1,23 @@
+name,kind,row,col,value
+_golden_id,meta,,,XT014
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,5
+markdown_rows,scalar,,,5
+ci_level,scalar,,,95
+N,scalar,,,27
+p_trend,scalar,,,.42756835480021538
+p,scalar,,,.29969799572707501
+chi2,scalar,,,.
+sheet,macro,,,XT014
+xlsx,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6a/native-xt-v2/XT014.xlsx
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6a/native-xt-v2/XT014.md
+methods,macro,,,"Cross-tabulation was performed for row by  column. Statistical significance was assessed using Fisher's exact test. A Spearman rank-correlation test for trend across ordered column levels is also reported. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
+trend_method,macro,,,Spearman rank correlation
+table,matrix,1,1,5
+table,matrix,1,2,2
+table,matrix,1,3,4
+table,matrix,2,1,3
+table,matrix,2,2,7
+table,matrix,2,3,6

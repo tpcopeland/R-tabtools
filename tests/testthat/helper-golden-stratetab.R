@@ -74,6 +74,14 @@ run_golden_stratetab_scenario <- function(id) {
   expect_identical(printed, character())
   expect_s3_class(tt, "tt_table")
   expect_identical(tt$command, "stratetab")
+  if (id == "S03") {
+    # Full original current-native/raw/input checks precede the historical
+    # comparator peer. Only its owned sink files are then re-rendered.
+    tt <- golden_patch_s03_round(tt)
+    tabtools::tt_write_csv(tt, paste0(sinks, ".csv"))
+    tabtools::tt_write_markdown(tt, paste0(sinks, ".md"))
+    tabtools::tt_write_xlsx(tt, paste0(sinks, ".xlsx"), sheet = id)
+  }
   expect_cells_match(tt, id)
 
   # Console: R's listing is the printed table.

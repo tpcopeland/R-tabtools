@@ -313,7 +313,11 @@
 #'   the `strata()` term gives no row. Only `method = "exact"` (the default,
 #'   Stata's exact conditional likelihood, which survival fits unweighted);
 #'   `vce = "stata"` or `"model"`. Observations counts the rows; `events` and
-#'   `groups` add no row (Stata's clogit stores neither). As in Stata
+#'   `groups` add no row (Stata's clogit stores neither). A requested groups
+#'   row identifies the model and its retained grouping term in a console note.
+#'   No count is derived from the current data; a verified [tt_fitcount()] record
+#'   supplied through `fitcounts` can provide `people`, relabelled Groups with
+#'   `statlabels`. As in Stata
 #'   tabtools 2.1.14, which classifies `clogit` like `logit` (odds ratios
 #'   whether or not it was fitted with `or`), the header is OR, `dimnonsig`
 #'   judges against 1, the methods sentence says "conditional logistic
@@ -759,7 +763,10 @@
 #'   `"icc"`, `"r2"`, `"r2_a"`, `"rmse"`, `"F"`, `"fmi"`, and the R-only
 #'   `"vce"`. The rows always come in that order, whatever the order of the
 #'   tokens, and a row no model reports is left out; see the section on
-#'   model statistics.
+#'   model statistics. The console identifies unavailable requested built-in
+#'   tokens. A statistic missing in only some models keeps its row with blank
+#'   cells. Structured custom scalars unavailable in every model still raise
+#'   `tabtools_error_statspec`.
 #' @param stat_fun R only: extra statistics rows below the Stata ones, a
 #'   named list whose names are the row labels and whose entries are
 #'   functions of the fit (for a multiply imputed model, its [tt_mi()]

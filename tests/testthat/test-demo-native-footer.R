@@ -152,3 +152,95 @@ test_that("the frame demo adapter retains publication descriptor rows and the ex
   expect_identical(attr(repaired, "sample_accounting", exact = TRUE), ledger)
   expect_identical(raw, saved)
 })
+
+test_that("phase7 enrollment preserves native identities and all52 pending intent rows", {
+  map <- utils::read.csv(golden_demo_script("phase7b-map.csv"), colClasses = "character")
+  manifest <- golden_demo_manifest()
+  key <- function(x) paste(x$kind, x$artefact, x$item, sep = "\r")
+  expect_identical(as.integer(table(map$kind)[c("sheet", "console", "report")]), c(30L, 20L, 2L))
+  expect_false(anyDuplicated(key(map)) > 0L)
+  expect_identical(map$state, rep("source_authored_pending_review_execution", 52L))
+  selected <- manifest[match(key(map), key(manifest)), , drop = FALSE]
+  expect_identical(key(selected), key(map))
+  expect_identical(selected$status, rep("compared", 52L))
+  expect_identical(selected$task, rep("P7B", 52L))
+  expect_identical(selected$r, map$r)
+  expect_identical(selected$mask, rep("", 52L))
+  expect_identical(sum(manifest$status == "compared"), 146L)
+  expect_identical(sum(manifest$status == "not_ported" & manifest$kind == "sheet"), 3L)
+})
+
+test_that("new publication annotations are full independent native and R literals", {
+  skip_if_not_installed("tidyxl")
+  skip_if_not_installed("openxlsx2")
+  legend <- "* p<0.05, ** p<0.01, *** p<0.001"
+  corr <- golden_demo_publication_contract("demo/demo_corrtab.xlsx:Correlation")
+  expect_identical(corr$paragraphs, legend)
+  expect_identical(corr$native_footers$xlsx, legend)
+  strict <- golden_demo_publication_contract("demo/demo_crosstab.xlsx:Small Cells Complement")
+  native <- "Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction."
+  r <- paste0(native, " Percentages are withheld when their count or selected denominator is suppressed. ",
+    "Tests and association estimates are withheld when primary counts are protected.")
+  expect_identical(strict$paragraphs, r)
+  expect_identical(strict$native_footers$xlsx, native)
+  body <- c("+--------+", "| Factor |", "+--------+")
+  parts <- golden_demo_phase7_console(c(body, "", r), c(body, "", native), "C25")
+  expect_identical(parts$got, body)
+  expect_identical(parts$want, body)
+  golden_expect_detected(golden_demo_phase7_console(c(body, native), c(body, native), "C25"))
+  golden_expect_detected(golden_demo_phase7_console(c(body, r, "extra"), c(body, native), "C25"))
+  clusters <- "(ratetab: treated: 6 clusters of region)"
+  rate_parts <- golden_demo_phase7_console(body, c(body, clusters), "C41")
+  expect_identical(rate_parts$got, body)
+  expect_identical(rate_parts$want, body)
+  golden_expect_detected(golden_demo_phase7_console(body,
+    c(body, "(ratetab: treated: 5 clusters of region)"), "C41"))
+  golden_expect_detected(golden_demo_phase7_console(body, c(body, clusters, "extra"), "C41"))
+  reverse <- golden_demo_publication_contract("demo/demo_survtab.xlsx:Cumul Incidence")
+  expect_identical(reverse$paragraphs, paste0("reverse reports 1 - Kaplan-Meier, which equals cumulative incidence only with a single event type ",
+    "(no competing risks). With competing events, use a competing-risks estimator (Aalen-Johansen)."))
+  expect_identical(reverse$native_footers$xlsx, character())
+  expect_true(reverse$R_only_reverse)
+  expect_identical(reverse$sheet_end, 8L)
+})
+
+test_that("leaf comparisons require actual publication, declared form and source", {
+  c <- golden_demo_leaf_contract("C35")
+  literal <- "1.10 (1.00, 1.22)"
+  # Build a genuine cell through the public contrast API so text and the
+  # complete analytical provenance remain aligned under registered methods.
+  leaf <- tabcell("est", contrast = list(estimate = log(1.10), std.error = 0.051,
+    df = Inf, conf.level = 0.95, effect_scale = "coefficient", native_source = "lincom"),
+    eform = TRUE, digits = 2L)
+  result <- golden_demo_leaf_console('[1] "1.10 (1.00, 1.22)"', literal, "C35", list(L03 = leaf))
+  expect_identical(result$got, literal)
+  expect_identical(result$want, literal)
+  changed <- leaf
+  attr(changed, "provenance")$rows$form <- "p"
+  golden_expect_detected(golden_demo_leaf_console('[1] "1.10 (1.00, 1.22)"', literal, "C35", list(L03 = changed)))
+  golden_expect_detected(golden_demo_leaf_console('[1] "0.10 (-0.00, 0.20)"', literal, "C35", list(L03 = leaf)))
+  golden_expect_detected(golden_demo_leaf_console('[1] "1.10 (1.00, 1.22)"', "1.11 (1.00, 1.22)", "C35", list(L03 = leaf)))
+})
+
+test_that("R-only reverse footer refuses altered text and complete style geometry", {
+  # Synthetic style controls exercise the declared adapter; they are never
+  # native goldens or an oracle for the survival estimates/body.
+  note <- golden_demo_phase7_notes("survtab", "Cumul Incidence")$R
+  native <- data.frame(address = "B8", row = 8L, col = 2L, value = "body")
+  footer <- data.frame(address = "B9", row = 9L, col = 2L, value = note,
+    bold = FALSE, italic = TRUE, font = "Times New Roman", size = 10,
+    number_format = "General", font_color = "", halign = "left", valign = "center", wrap = TRUE,
+    border_top = NA_character_, border_bottom = NA_character_, border_left = NA_character_,
+    border_right = NA_character_, fill = "")
+  layout <- list(merges = "B9:E9", heights = data.frame(row = integer(), height = numeric()))
+  native_layout <- list(merges = character(), heights = layout$heights)
+  contract <- list(sheet_end = 8L, paragraphs = note, native_footers = list(xlsx = character()))
+  result <- golden_demo_reverse_styles(footer, native, layout, native_layout, contract)
+  expect_identical(result$g, footer[FALSE, , drop = FALSE])
+  bad <- footer; bad$size <- 9
+  golden_expect_detected(golden_demo_reverse_styles(bad, native, layout, native_layout, contract))
+  bad <- layout; bad$merges <- "B9:F9"
+  golden_expect_detected(golden_demo_reverse_styles(footer, native, bad, native_layout, contract))
+  bad <- footer; bad$value <- "truncated warning"
+  golden_expect_detected(golden_demo_reverse_styles(bad, native, layout, native_layout, contract))
+})

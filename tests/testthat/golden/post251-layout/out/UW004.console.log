@@ -1,0 +1,45 @@
+-------------------------------------------------------------------------------
+      name:  case
+       log:  /tmp/tabtools-native-256-4st4nwoo/out/UW004.console.log
+  log type:  text
+ opened on:   7 Oct 2026, 15:46:55
+
+. table1_tc, by(g) vars(x contn) smd excel(`"`book'"') sheet(UW004) frame(uw004
+> , replace) csv(`"`output'/UW004.csv"') markdown(`"`output'/UW004.md"')
+Note: SMD compares 東 vs B only (the first two of 3 groups).
+  +-------------------------------------------------------+
+  |           東    B      C      p-value   SMD (東 vs B) |
+  |-------------------------------------------------------|
+  | Mean±SD   N=6   N=6    N=6                            |
+  |-------------------------------------------------------|
+  | x         4±2   10±2   16±2   <0.001    3.207         |
+  +-------------------------------------------------------+
+CSV exported to /tmp/tabtools-native-256-4st4nwoo/out/UW004.csv
+Markdown exported to /tmp/tabtools-native-256-4st4nwoo/out/UW004.md
+
+. return list
+
+scalars:
+      r(markdown_cols) =  6
+      r(markdown_rows) =  1
+
+macros:
+           r(markdown) : "/tmp/tabtools-native-256-4st4nwoo/out/UW004.md"
+              r(sheet) : "UW004"
+               r(xlsx) : "/tmp/tabtools-native-256-4st4nwoo/out/upstream256.."
+              r(frame) : "uw004"
+            r(smdnote) : "SMD compares 東 vs B only (the first two of 3 gro.."
+            r(smdtype) : "pair"
+            r(varlist) : "x"
+            r(methods) : "Baseline characteristics were compared between gr.."
+               r(Dapa) : "Data are presented as mean±SD."
+
+matrices:
+              r(table) :  1 x 2
+
+. log close case
+      name:  case
+       log:  /tmp/tabtools-native-256-4st4nwoo/out/UW004.console.log
+  log type:  text
+ closed on:   7 Oct 2026, 15:46:55
+-------------------------------------------------------------------------------

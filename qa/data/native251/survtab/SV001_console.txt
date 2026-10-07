@@ -1,0 +1,18 @@
+  +-------------------------------------------------------------------------------------------------------------------+
+  |                                                      1 (N=2)             2 (N=2)       Difference (1 - 2)       p |
+  |                      Median survival, yr                 1.0                  NR                            0.090 |
+  |                                 (90% CI)                                                                          |
+  |                               Events / N               2 / 2               0 / 2                                  |
+  |                     Survival probability                                                                          |
+  |                                     1 yr               50.0%              100.0%      -50.0 (-108.2, 8.2)         |
+  |                                  2 years                0.0%              100.0%   -100.0 (-158.2, -41.8)         |
+  |                 RMST (2-yr), yr (90% CI)   1.50 (0.92, 2.08)   2.00 (2.00, 2.00)      -0.50 (-1.08, 0.08)         |
+  |                           Number at risk                                                                          |
+  |                                     1 yr                   2                   2                                  |
+  |                                  2 years                   1                   2                                  |
+  | Log-rank test: chi2(1) = 2.88, p = 0.090                                                                          |
+  +-------------------------------------------------------------------------------------------------------------------+
+
+CSV exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV001.csv
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/SV001.md
+Exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-6c/native-sv-v2/survtab.xlsx, sheet SV001

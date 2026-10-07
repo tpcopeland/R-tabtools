@@ -51,6 +51,8 @@ golden_demo_publication_contract <- function(id, native_spec = NULL) {
     col_names = FALSE, skip_empty_rows = FALSE, skip_empty_cols = FALSE))
   grid[is.na(grid)] <- ""
   styles <- golden_cell_styles(spec$book, spec$sheet)
+  phase7 <- golden_demo_phase7_publication(row, grid, styles, spec)
+  if (!is.null(phase7)) return(phase7)
   user <- if (nzchar(row$user_footnote)) row$user_footnote else NULL
   native_note <- golden_fn_paragraphs(user)
   automatic <- list()
@@ -105,6 +107,7 @@ golden_demo_run <- function() {
   out <- tempfile("tabtools-demo-")
   dir.create(out)
   tables <- new.env(parent = emptyenv())
+  leaves <- new.env(parent = emptyenv())
   env <- new.env(parent = globalenv())
   ns <- asNamespace("tabtools")
   sink_state <- get(".tt_sink_state", ns)
@@ -117,7 +120,7 @@ golden_demo_run <- function() {
     for (key in names(old_sinks)) assign(key, old_sinks[[key]], sink_state)
   }, add = TRUE)
   for (fn in c("table1_tc", "desctab", "regtab", "puttab", "stacktab", "stratetab", "effecttab",
-              "comptab", "hrcomptab")) {
+              "comptab", "hrcomptab", "ratetab", "outtab", "crosstab", "corrtab", "survtab")) {
     local({
       name <- fn
       f <- getExportedValue("tabtools", name)
@@ -137,11 +140,19 @@ golden_demo_run <- function() {
       }, envir = env)
     })
   }
+  # Cells are scalar/vector publication leaves, never fabricated tt_tables.
+  leaf_function <- getExportedValue("tabtools", "tabcell")
+  env$tabcell <- function(...) {
+    result <- withVisible(leaf_function(...))
+    key <- sprintf("L%02d", length(ls(leaves, all.names = TRUE)) + 1L)
+    assign(key, result$value, envir = leaves)
+    if (result$visible) result$value else invisible(result$value)
+  }
   env$out_dir <- out
   env$demo_data_file <- normalizePath(golden_demo_script("demo_tabtools.rds"))
   printed <- utils::capture.output(
     suppressMessages(sys.source(script, envir = env, keep.source = FALSE)))
-  golden_demo_state$run <- list(out_dir = out, tables = as.list(tables), printed = printed)
+  golden_demo_state$run <- list(out_dir = out, tables = as.list(tables), leaves = as.list(leaves), printed = printed)
   golden_demo_state$run
 }
 
@@ -298,4 +309,110 @@ golden_demo_report_tables <- function(lines) {
   if (!length(at)) return(list())
   ends <- c(at[-1L] - 1L, length(lines))
   stats::setNames(lapply(seq_along(at), function(k) lines[at[k]:ends[k]]), sub("^### ", "", lines[at]))
+}
+
+# Independent complete literals: pinned corrtab/crosstab/desctab annotations,
+# and the reviewed R-only survtab reverse publication boundary. No production
+# note helper or observed R paragraph supplies expected text.
+golden_demo_phase7_notes <- function(command, item) {
+  empty <- list(R = character(), native = character())
+  if (command == "corrtab" && item != "Correlation Spear") {
+    note <- "* p<0.05, ** p<0.01, *** p<0.001"
+    return(list(R = note, native = note))
+  }
+  if (command == "crosstab" && item %in% c("Small Cells Primary", "Small Cells Complement")) {
+    native <- "Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent exact reconstruction."
+    return(list(native = native, R = paste0(native,
+      " Percentages are withheld when their count or selected denominator is suppressed. ",
+      "Tests and association estimates are withheld when primary counts are protected.")))
+  }
+  if (command == "crosstab" && item == "Small Cells Primary Mode") {
+    return(list(native = paste0("Counts from 1 to 4 are shown as <5 without a percentage (primary suppression only: ",
+      "no complementary cells are masked, and totals and tests are shown as computed). This protects printed counts only."),
+      R = paste0("Counts from 1 to 4 are shown as <5. Dependent percentages are withheld. ",
+        "Primary protection masks no complementary counts; released totals and computed tests or association estimates may permit reconstruction.")))
+  }
+  if (command == "desctab" && item == "Small Cells Primary Mode") {
+    notes <- golden_demo_primary_notes()
+    return(list(R = notes$r, native = notes$native))
+  }
+  if (command == "survtab" && item == "Cumul Incidence") {
+    return(list(native = character(), R = paste0("reverse reports 1 - Kaplan-Meier, which equals cumulative incidence only with a single event type ",
+      "(no competing risks). With competing events, use a competing-risks estimator (Aalen-Johansen).")))
+  }
+  empty
+}
+
+golden_demo_phase7_publication <- function(row, grid, styles, spec) {
+  if (!row$command %in% c("corrtab", "crosstab", "survtab") &&
+      !(row$command == "desctab" && row$item == "Small Cells Primary Mode")) return(NULL)
+  notes <- golden_demo_phase7_notes(row$command, row$item)
+  user <- golden_fn_paragraphs(if (nzchar(row$user_footnote)) row$user_footnote else NULL)
+  paragraphs <- if (row$command == "corrtab") c(notes$R, user) else c(user, notes$R)
+  native <- if (row$command == "corrtab") c(notes$native, user) else c(user, notes$native)
+  end <- max(styles$row) - length(native)
+  actual <- if (length(native)) styles$value[match(paste0("B", seq.int(end + 1L,
+    length.out = length(native))), styles$address)] else character()
+  if (!identical(unname(actual), native)) stop("Native demo footer differs from complete independently declared paragraphs.")
+  reverse <- row$command == "survtab" && row$item == "Cumul Incidence"
+  if (reverse && (any(grepl("reverse reports", grid, fixed = TRUE)) ||
+      !identical(dim(grid), c(8L, 5L)))) stop("Native reverse demo must have its exact eight-row grid and no warning footer.")
+  list(paragraphs = paragraphs, user_paragraphs = user, stars = character(),
+    provenance = "Independent full demo literals; native pin712044f8 and reviewed P7 R publication boundary",
+    native_footers = list(csv = native, markdown = golden_fn_md(native), console = native, xlsx = native),
+    command = row$command, native_grid = grid, native_styles = styles,
+    native_layout = golden_sheet_layout(spec$book, spec$sheet),
+    grid_end = nrow(grid) - length(native), sheet_end = end, R_only_reverse = reverse)
+}
+
+golden_demo_phase7_console <- function(got, want, item) {
+  mapping <- list(C18 = c("corrtab", "Correlation"), C52 = c("corrtab", "Correlation"),
+    C22 = c("crosstab", "Small Cells Primary"), C25 = c("crosstab", "Small Cells Complement"))
+  selected <- mapping[[item]]
+  notes <- if (is.null(selected)) list(R = character(), native = character()) else
+    golden_demo_phase7_notes(selected[1L], selected[2L])
+  if (identical(item, "C41")) {
+    # Native ratetab prints its cluster-count diagnostic after the box.
+    # R retains diagnostics in the table ledger; require each complete surface.
+    notes <- list(R = character(), native = "(ratetab: treated: 6 clusters of region)")
+  }
+  split <- function(lines) {
+    edge <- which(grepl("^\\s*\\+-+\\+\\s*$", lines))
+    if (length(edge) < 2L) stop("New demo console boundary requires its complete boxed listing.")
+    end <- tail(edge, 1L)
+    tail <- lines[golden_footer_rows(length(lines), end)]
+    list(body = lines[seq_len(end)], tail = tail[nzchar(trimws(tail))])
+  }
+  g <- split(got); w <- split(want)
+  testthat::expect_identical(unname(g$tail), notes$R, info = paste(item, "complete R annotations"))
+  testthat::expect_identical(unname(w$tail), notes$native, info = paste(item, "complete native annotations"))
+  list(got = g$body, want = w$body)
+}
+
+golden_demo_leaf_contract <- function(item) {
+  ids <- sprintf("C%02d", 33:39)
+  i <- match(item, ids)
+  if (is.na(i)) stop("Unknown demo scalar leaf identity.")
+  list(text = c("1.09 (1.02, 1.17)", "1.091 (1.017 to 1.171)", "1.10 (1.00, 1.22)",
+    "<0.001", "<5", "2,149/6,066 (35.4)", "3,452 (2,032, 5,018)")[i],
+    form = c("est", "est", "est", "p", "np", "enp", "iqr")[i],
+    source = c("model", "model", "contrast", rep("explicit", 4L))[i],
+    native_source = c("e()", "e()", "lincom", rep(NA_character_, 4L))[i],
+    key = sprintf("L%02d", i))
+}
+
+golden_demo_leaf_console <- function(got, want, item, leaves) {
+  c <- golden_demo_leaf_contract(item)
+  leaf <- leaves[[c$key]]
+  testthat::expect_s3_class(leaf, "tt_cell")
+  testthat::expect_identical(as.character(leaf), c$text, info = item)
+  p <- attr(leaf, "provenance", exact = TRUE)
+  testthat::expect_identical(p$rows$form, c$form, info = item)
+  testthat::expect_identical(p$rows$source, c$source, info = item)
+  testthat::expect_identical(p$rows$native_source, c$native_source, info = item)
+  # R's public character print wraps the same cell in [1] and quotes. Assert
+  # that full wrapper before comparing the actual publication value itself.
+  testthat::expect_identical(got[nzchar(trimws(got))], paste0("[1] ", encodeString(c$text, quote = '"')), info = item)
+  testthat::expect_identical(want[nzchar(trimws(want))], c$text, info = item)
+  list(got = as.character(leaf), want = want[nzchar(trimws(want))])
 }

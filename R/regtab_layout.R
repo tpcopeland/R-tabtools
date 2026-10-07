@@ -429,9 +429,10 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
 # ---------------------------------------------------------------------------
 # Cell text (task 4.5)
 
-# Estimate text: Stata pre-rounds with round(x, 10^-digits) and formats with
-# %32.<digits>f (`regtab.ado:1983-1989`, `:2079-2085`); CI bounds are
-# formatted without the pre-round (`:2146`).
+# Estimates use Stata round(x, 10^-digits) before fixed formatting.
+# From Stata tabtools 2.5.2, default CI bounds use the same rounding,
+# preserving original text for bounds that round to zero. Explicit cformat
+# remains unrounded (regtab.ado at 4eecca4d, coef_round/_ci_lo_r/_ci_hi_r).
 .rt_est_text <- function(x, digits, numeric_format = NULL) {
   if (!is.null(numeric_format$cformat)) {
     out <- rep("", length(x))
@@ -447,8 +448,14 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
   fmt <- paste0("%32.", digits, "f")
   ok <- is.finite(lo) & is.finite(hi)
   out <- rep("", length(lo))
-  render <- function(x) if (is.null(numeric_format$cformat)) stata_fmt(x, fmt) else
-    .tt_format_numeric(x, numeric_format)
+  render <- function(x) {
+    if (!is.null(numeric_format$cformat)) return(.tt_format_numeric(x, numeric_format))
+    rounded <- stata_round(x, 10^-digits)
+    # Keep -0.00 for a negative bound that rounds to zero: crossing zero
+    # remains visible, exactly as in the native cond(round(...) == 0, x, ...).
+    rounded[rounded == 0] <- x[rounded == 0]
+    stata_fmt(rounded, fmt)
+  }
   out[ok] <- paste0("(", render(lo[ok]), sep, render(hi[ok]), ")")
   out
 }

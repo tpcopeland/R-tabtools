@@ -1,0 +1,20 @@
+
+. capture noisily crosstab row column [fw=frequency], `opts' `destination' sheet(`id') ///
+>     csv("`out'/`id'.csv") markdown("`out'/`id'.md")
+cochran requires a binary row (outcome) variable; row has 3 levels
+
+. local rc = _rc
+
+. local nr .
+
+. local nc .
+
+. if !`rc' {
+.     mata: golden_dump_r("`out'/`id'_stored.csv", "`id'")
+.     tempname xttable
+.     matrix `xttable' = r(table)
+.     local nr = rowsof(`xttable')
+.     local nc = colsof(`xttable')
+. }
+
+. log close xt

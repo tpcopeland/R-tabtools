@@ -1,0 +1,14 @@
+name,kind,row,col,value
+_golden_id,meta,,,TC001_rate
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+per,scalar,,,1000
+level,scalar,,,90
+ub,scalar,,,19.775377526618577
+lb,scalar,,,7.6505758558459984
+rate,scalar,,,12.300123001230013
+missing,scalar,,,0
+citype,macro,,,poisson
+form,macro,,,rate
+cell,macro,,,"12.30 (7.65, 19.78)"

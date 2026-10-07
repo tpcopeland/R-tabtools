@@ -1,4 +1,27 @@
-# tabtools (development version)
+# tabtools 0.2.0
+
+* Selected Stata tabtools 2.5.2–2.5.6 repairs are ported from pinned source
+  `4eecca4d`: strict Table 1 denominator/continuous-summary guards, huge-weight
+  recovery, CI/rate rounding, fractional and exponent rate units, unmerged
+  puttab panel headings and SMD column widths. The reference baseline remains
+  2.5.1; targeted later-source cases have separate provenance and do not
+  establish complete 2.5.6 equivalence. The finite-SD boundary remains the
+  documented R choice.
+* Table 1 also retains finite SMDs at accepted weights near `8e307` where
+  Stata 2.5.6 returns missing values, separately from the existing finite SD
+  choice.
+
+* The package catalog and Stata migration guide now target pinned tabtools
+  2.5.1, including `tabcell()`, `ratetab()`, `outtab()`, `crosstab()`,
+  `corrtab()` and `survtab()`. Statistical, estimator and numerical boundaries
+  are described explicitly rather than claiming universal native equivalence.
+* Regression workflows add fit-count records and explicit failed columns,
+  fit-owned cell states, mincount reporting masks, richer statistics,
+  reference placement, literal overrides and transposed specification tables.
+  Raw analytical returns remain separate from eligible publication/forest values.
+* Composite rate/model workflows add multiple models per outcome, keyed
+  placement, rates-only/model-only rows and authenticated numeric companions.
+  Plain publication exports do not fabricate regression keys or model states.
 
 * `outtab()` adds binary outcome counts and ordered crude/adjusted ratios,
   separately verified sample populations, per-fit diagnostics and primary

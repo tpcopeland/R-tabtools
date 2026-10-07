@@ -218,7 +218,7 @@
       rules <- add(rules, "bottom", xr, xr, 2L, xK, code = code)
       if (x$style$headershade) rules <- add(rules, "fill", xr, xr, 2L, xK, color = x$style$headercolor)
     }
-    if (r %in% panels$heading && K > 1L) rules <- add(rules, "merge", xr, xr, 2L, xK)
+    # Native 2.5.6 panel headings occupy only the label cell, unmerged.
   }
   if (length(x$meta$puttab_spans)) {
     rules <- add(rules, "bold", 2L, 2L, 2L, xK, code = 1L)
