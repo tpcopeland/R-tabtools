@@ -15,6 +15,7 @@ effecttab(
   method = NULL,
   level = NULL,
   digits = NULL,
+  cformat = NULL,
   pdp = 3,
   highpdp = 2,
   sep = ", ",
@@ -77,6 +78,15 @@ attribute, or what a \code{glm_weightit()} fit shows).}
 
 \item{digits}{Decimals for estimates and bounds, 0 to 6 (default from
 \code{\link[=tabtools_options]{tabtools_options()}}, else 2).}
+
+\item{cformat}{Full numeric Stata format for estimates and both bounds,
+as in \code{\link[=regtab]{regtab()}}. Explicit \code{digits} conflicts with \code{cformat}
+(\code{tabtools_error_format_conflict}). Decimal-comma formats require a
+separator without commas (\code{tabtools_error_format_separator}). Supported
+formats are fixed (\code{f}), general (\code{g}), or exponential (\code{e}), with optional
+\code{c} for thousands separators on \code{f} and \code{g}. General formats with 13 or
+more significant digits can differ from Stata's native rounding.
+Use \code{\link[=tt_flat]{tt_flat()}} for editable body-only output.}
 
 \item{pdp, highpdp}{Decimals for p-values below 0.10 and from 0.10 on (1 to
 10; defaults 3 and 2).}

@@ -73,6 +73,7 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   # by their heading, so headings merge with headings and never cross-join
   # with data rows (CAT P1-12). The scope is removed from the result.
   orig_keys <- lapply(tabs, function(t) t$rows$key)
+  .tt_flat_check_sources(tabs)
   tabs <- lapply(tabs, .tt_scope_group_keys)
   scoped_to_orig <- unlist(unname(Map(function(t, o) if (length(o) == length(t$rows$key)) stats::setNames(o, t$rows$key),
                                tabs, orig_keys)))
@@ -206,6 +207,7 @@ tt_merge <- function(..., spanners = NULL, title = NULL, footnote = NULL) {
   meta <- first$meta
   meta$pvals <- pv
   meta$regtab_rows <- NULL
+  meta$flat <- .tt_flat_merge_metadata(tabs, keys, rows, head_pos, orig_keys)
   meta$stack_group_rows <- if (length(head_pos)) head_pos
   meta$stars_notes <- unique(unlist(lapply(tabs, .tt_stars_note), use.names = FALSE))
   meta$xlsx_footnote <- .tt_compose_xlsx_footnote(tabs, footnote)
@@ -266,6 +268,7 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
     cli::cli_abort("{.arg groups} must be one label per table ({length(tabs)}).", call = NULL)
   }
   .tt_compose_same_command(tabs, "tt_stack")
+  .tt_flat_check_sources(tabs)
   first <- tabs[[1]]
   htext <- function(t) lapply(t$header, `[[`, "text")
   for (k in seq_along(tabs)[-1]) {
@@ -323,6 +326,7 @@ tt_stack <- function(..., groups = NULL, title = NULL, footnote = NULL) {
   meta <- first$meta
   meta$pvals <- pv
   meta$regtab_rows <- NULL
+  meta$flat <- .tt_flat_stack_metadata(tabs, groups)
   meta$stack_group_rows <- if (length(head_rows)) head_rows
   meta$stars_notes <- unique(unlist(lapply(tabs, .tt_stars_note), use.names = FALSE))
   meta$xlsx_footnote <- .tt_compose_xlsx_footnote(tabs, footnote)

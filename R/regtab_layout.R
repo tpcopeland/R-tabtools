@@ -408,16 +408,24 @@ tt_match_rows <- function(keys, terms, rterms = rep(NA_character_, length(keys))
 # Estimate text: Stata pre-rounds with round(x, 10^-digits) and formats with
 # %32.<digits>f (`regtab.ado:1983-1989`, `:2079-2085`); CI bounds are
 # formatted without the pre-round (`:2146`).
-.rt_est_text <- function(x, digits) {
+.rt_est_text <- function(x, digits, numeric_format = NULL) {
+  if (!is.null(numeric_format$cformat)) {
+    out <- rep("", length(x))
+    ok <- is.finite(x)
+    out[ok] <- .tt_format_numeric(x[ok], numeric_format)
+    return(out)
+  }
   fmt <- paste0("%32.", digits, "f")
   ifelse(is.finite(x), stata_fmt(stata_round(x, 10^-digits), fmt), "")
 }
 
-.rt_ci_text <- function(lo, hi, digits, sep) {
+.rt_ci_text <- function(lo, hi, digits, sep, numeric_format = NULL) {
   fmt <- paste0("%32.", digits, "f")
   ok <- is.finite(lo) & is.finite(hi)
   out <- rep("", length(lo))
-  out[ok] <- paste0("(", stata_fmt(lo[ok], fmt), sep, stata_fmt(hi[ok], fmt), ")")
+  render <- function(x) if (is.null(numeric_format$cformat)) stata_fmt(x, fmt) else
+    .tt_format_numeric(x, numeric_format)
+  out[ok] <- paste0("(", render(lo[ok]), sep, render(hi[ok]), ")")
   out
 }
 
@@ -976,12 +984,12 @@ tt_regtab_build <- function(fits, infos, o) {
     e <- rep("", nr)
     st <- c$status
     is_est <- st %in% "est"
-    e[is_est] <- .rt_est_text(c$estimate[is_est], o$digits)
+    e[is_est] <- .rt_est_text(c$estimate[is_est], o$digits, o$numeric_format)
     e[st %in% "base"] <- o$refcat
     e[st %in% "omit"] <- o$omitlabel
     e[st %in% "empty"] <- o$emptylabel
     ci <- rep("", nr)
-    ci[is_est] <- .rt_ci_text(c$conf.low[is_est], c$conf.high[is_est], o$digits, o$sep)
+    ci[is_est] <- .rt_ci_text(c$conf.low[is_est], c$conf.high[is_est], o$digits, o$sep, o$numeric_format)
     p <- rep("", nr)
     p[is_est] <- format_p(c$p.value[is_est], o$pdp, o$highpdp)
     est_text[[m]] <- e
@@ -1076,7 +1084,7 @@ tt_regtab_build <- function(fits, infos, o) {
 
   # Headers.
   ci_level <- round(o$level * 100, 8)
-  ci_head <- paste0(.rt_pct_text(o$level), "% CI")
+  ci_head <- o$cilabel %||% paste0(.rt_pct_text(o$level), "% CI")
   model_labels <- o$models
   est_head <- scale$headers
 
@@ -1105,7 +1113,7 @@ tt_regtab_build <- function(fits, infos, o) {
     if (!o$nopvalue) {
       body <- c(body, list(p_text[[m]]))
       h1 <- c(h1, "")
-      h2 <- c(h2, "p-value")
+      h2 <- c(h2, o$plabel %||% "p-value")
       role <- c(role, "pval")
       model_ix <- c(model_ix, m)
     }
@@ -1191,6 +1199,7 @@ tt_regtab_build <- function(fits, infos, o) {
   })
   samples <- lapply(seq_len(M), function(m) .tt_sample_model_reported(samples[[m]], st_all[[m]]))
   meta$sample_accounting <- .tt_sample_bind(samples, prefixes = paste0("model", seq_len(M)))
+  meta$flat <- .tt_flat_metadata(u$cells, rows, M)
   tt_table(body, list(list(text = h1), list(text = h2)), rows = rows, cols = cols,
            title = o$title, footnote = o$footnote, style = o$style, stored = stored,
            command = "regtab", meta = meta)

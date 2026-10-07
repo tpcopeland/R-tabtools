@@ -81,25 +81,34 @@ format_p <- function(p, pdp = 3L, highpdp = 2L) {
 # ---------------------------------------------------------------------------
 # Stata display formats (task 1.1)
 
-# Parse a Stata numeric display format: %[-][0]w.d{f|g}[c]. Stata's
+# Parse a Stata numeric display format: %[-][0]w.d{f|g}[c] or %[-][0]w.de.
 # string() returns "" for a format whose decimals d > 0 are not fewer than
 # its width w (%5.5g, %3.3f, %05.5f; probed in Stata 17, audit A03,
 # 2026-09-29), so such a format is refused.
 .parse_stata_fmt <- function(fmt) {
-  m <- regmatches(fmt, regexec("^%(-?)(0?)([0-9]+)\\.([0-9]+)([fg])(c?)$", fmt))[[1]]
+  if (!is.character(fmt) || length(fmt) != 1L || is.na(fmt)) {
+    cli::cli_abort("{.arg fmt} must be one Stata numeric format string.",
+                   class = "tabtools_error_fmt", call = NULL)
+  }
+  m <- regmatches(fmt, regexec("^%(-?)(0?)([0-9]+)\\.([0-9]+)([fge])(c?)$", fmt))[[1]]
   if (!length(m)) {
-    cli::cli_abort("Unsupported Stata display format {.val {fmt}}.", call = NULL)
+    cli::cli_abort("Unsupported Stata display format {.val {fmt}}.", class = "tabtools_error_fmt", call = NULL)
   }
   sizes <- as.double(m[4:5])
   if (any(!is.finite(sizes) | sizes > .Machine$integer.max)) {
-    cli::cli_abort("Unsupported Stata display format {.val {fmt}}.", call = NULL)
+    cli::cli_abort("Unsupported Stata display format {.val {fmt}}.", class = "tabtools_error_fmt", call = NULL)
   }
   p <- list(left = nzchar(m[2]), zero = nzchar(m[3]), w = as.integer(sizes[1]),
             d = as.integer(sizes[2]), type = m[6], comma = nzchar(m[7]))
+  # Native string(x, "%9.2ec") is empty: the c suffix is not an e format.
+  if (p$type == "e" && p$comma) {
+    cli::cli_abort("Exponential Stata formats do not support the {.val c} suffix.",
+                   class = "tabtools_error_fmt", call = NULL)
+  }
   if (p$d > 0L && p$d >= p$w) {
     cli::cli_abort(c("Unsupported Stata display format {.val {fmt}}.",
                      "i" = "Its decimals must be fewer than its width; Stata's {.fn string} gives empty text for it."),
-                   call = NULL)
+                   class = "tabtools_error_fmt", call = NULL)
   }
   p
 }
@@ -319,9 +328,12 @@ format_p <- function(p, pdp = 3L, highpdp = 2L) {
 #' Render numbers with a Stata display format
 #'
 #' Reproduces Stata's `string(x, fmt)` for `%w.df`, `%w.dfc`, `%-w.df[c]`,
-#' `%0w.df`, `%w.0g`, `%w.dg`, and `%w.dgc`: no leading padding (zeros for `%0w.df`), trailing padding for left-justified
+#' `%0w.df`, `%w.0g`, `%w.dg`, `%w.dgc`, and `%w.de`: no leading padding (zeros for `%0w.df`), trailing padding for left-justified
 #' formats, the literal `-0` printed as `"0"` (Stata has no negative zero),
 #' and Stata's e-notation fallback. Verified against `golden/stata_fmt.csv`.
+#' General formats with 13 or more significant digits use the native
+#' formatter's digit generation and can differ in the last digits from
+#' Stata's additional rounding; exact parity is not claimed there.
 #'
 #' @param x Numeric vector.
 #' @param fmt A single Stata format string, e.g. `"%5.1f"` or `"%12.0fc"`.
@@ -339,6 +351,11 @@ stata_fmt <- function(x, fmt) {
   if (length(v)) {
     out[ok] <- if (p$type == "f") {
       .stata_fmt_f(v, p)
+    } else if (p$type == "e") {
+      # Native e uses the same width-limited 18-decimal mantissa as the
+      # existing f/g fallback; zero d fills the available width. Pinned
+      # Stata 17 probes include three-digit exponents and decimal comma.
+      .stata_efmt(v, p$w, p$d)
     } else if (p$comma) {
       .stata_fmt_gc(v, p)
     } else if (p$d > 0L) {

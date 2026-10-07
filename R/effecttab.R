@@ -214,6 +214,14 @@
 #'   (`90`); see Confidence level.
 #' @param digits Decimals for estimates and bounds, 0 to 6 (default from
 #'   [tabtools_options()], else 2).
+#' @param cformat Full numeric Stata format for estimates and both bounds,
+#'   as in [regtab()]. Explicit `digits` conflicts with `cformat`
+#'   (`tabtools_error_format_conflict`). Decimal-comma formats require a
+#'   separator without commas (`tabtools_error_format_separator`). Supported
+#'   formats are fixed (`f`), general (`g`), or exponential (`e`), with optional
+#'   `c` for thousands separators on `f` and `g`. General formats with 13 or
+#'   more significant digits can differ from Stata's native rounding.
+#'   Use [tt_flat()] for editable body-only output.
 #' @param pdp,highpdp Decimals for p-values below 0.10 and from 0.10 on (1 to
 #'   10; defaults 3 and 2).
 #' @param sep Separator between the interval bounds (default `", "`).
@@ -300,7 +308,7 @@
 #' @export
 effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NULL, models = NULL,
                       clean = FALSE, tlabels = NULL, data = NULL, method = NULL, level = NULL,
-                      digits = NULL, pdp = 3, highpdp = 2, sep = ", ", refcat = "Reference",
+                      digits = NULL, cformat = NULL, pdp = 3, highpdp = 2, sep = ", ", refcat = "Reference",
                       omitlabel = "Omitted", emptylabel = "Empty", addrow = NULL, labelwidth = 45,
                       title = NULL, footnote = NULL, xlsx = NULL, sheet = "Effects", open = FALSE,
                       borderstyle = NULL, font = NULL, fontsize = NULL, boldp = NULL, highlight = NULL,
@@ -323,12 +331,14 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
     cli::cli_abort("{.arg refcat}, {.arg omitlabel}, and {.arg emptylabel} must differ from each other.", call = NULL)
   }
   sheet <- .check_sheet(sheet)
-  if (is.null(digits)) digits <- getOption("tabtools.digits") %||% 2
-  digits <- .check_int_range(digits, "digits", 0, 6)
+  # Stata 2.5.1 effecttab.ado:224-237, :384-417.
+  numeric_format <- .tt_resolve_numeric_format(cformat, digits,
+                                               digits_given = !missing(digits),
+                                               sep = sep, max_digits = 6L)
+  digits <- numeric_format$digits
+  sep <- numeric_format$sep
   pdp <- .check_dp(pdp, "pdp")
   highpdp <- .check_dp(highpdp, "highpdp")
-  if (!is.character(sep) || length(sep) != 1L || is.na(sep)) cli::cli_abort("{.arg sep} must be a single string.", call = NULL)
-  if (!nzchar(sep)) sep <- ", "
   level_pct <- .et_check_level(level)
   if (!is.numeric(labelwidth) || length(labelwidth) != 1L || is.na(labelwidth)) {
     cli::cli_abort("{.arg labelwidth} must be a number.", call = NULL)
@@ -434,7 +444,8 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
   # non-zero null) join the footnote, in every sink.
   footnote <- .et_add_notes(footnote %||% "", .et_model_notes(notes, labels))
   o <- list(type = type, from_matrix = from_matrix, effect = effect, models = labels, clean = clean,
-            tlabels = tlabels, digits = digits, pdp = pdp, highpdp = highpdp, sep = sep, refcat = refcat,
+            tlabels = tlabels, digits = digits, numeric_format = numeric_format,
+            pdp = pdp, highpdp = highpdp, sep = sep, refcat = refcat,
             omitlabel = omitlabel, emptylabel = emptylabel, addrow = addrow, labelwidth = labelwidth,
             ci_level = ci_level, estimator = if (is.null(method)) estimator else tolower(method),
             estimand = estimand_given %||% estimand, source = source[1], model_id = model_id, additive = additive,
