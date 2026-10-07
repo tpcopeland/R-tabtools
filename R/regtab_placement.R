@@ -208,8 +208,9 @@
 .rt_place_extra <- function(u, text, labels, keys, type, dim, stats, addrow) {
   n <- nrow(u$rows); M <- length(u$cells)
   anchors <- vapply(addrow, function(r) if (is.null(r$after)) n + length(stats) else .rt_after_row(u$rows, r$after), 0L)
+  add_keys <- make.unique(vapply(addrow, function(r) paste0("addrow:", r$label), ""), sep = ":")
   all <- c(stats, lapply(seq_along(addrow), function(i) {
-    r <- addrow[[i]]; r$key <- paste0("addrow:", i); r$type <- "addrow"; r$inserted <- !is.null(r$after); r
+    r <- addrow[[i]]; r$key <- add_keys[i]; r$type <- "addrow"; r$inserted <- !is.null(r$after); r
   }))
   original <- seq_len(n + length(stats))
   map <- source <- integer()

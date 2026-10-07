@@ -39,6 +39,12 @@ test_that("tt_stack() accepts a 0-row table (AUD BUG-7)", {
   for (field in c("states", "source_blocks")) {
     t0$meta$flat[[field]] <- t0$meta$flat[[field]][0, , drop = FALSE]
   }
+  # Publication overrides have the same row/model axes as states.
+  expect_error(tt_flat(t0), class = "tabtools_error_flat")
+  t0$meta$flat$publication_overrides <- lapply(t0$meta$flat$publication_overrides,
+    function(value) value[0, , drop = FALSE])
+  expect_identical(dim(t0$meta$flat$publication_overrides$origin), c(0L, 1L))
+  expect_identical(dim(t0$meta$flat$publication_overrides$text), c(0L, 1L))
   expect_identical(nrow(tt_flat(t0)), 0L)
   s <- tt_stack(t1, t0)
   expect_identical(nrow(s$body), nrow(t1$body))

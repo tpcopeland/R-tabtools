@@ -54,7 +54,8 @@ test_that("D03: rownames_exact works in vertical mode and defaults to Stata's su
   expect_error(comptab(m, rows = 4, rownames_exact = TRUE), "rownames")
   # Name-only: the Stata-order positional arguments are unchanged.
   expect_identical(names(formals(hrcomptab))[1:7], names(formals(comptab))[1:7])
-  expect_identical(utils::tail(names(formals(comptab)), 1), "rownames_exact")
+  expect_identical(utils::tail(names(formals(comptab)), 6),
+                   c("rownames_exact", "cformat", "cisep", "allmodels", "keyed", "modelonly"))
   expect_identical(utils::tail(names(formals(hrcomptab)), 1), "rownames_exact")
 })
 

@@ -124,6 +124,16 @@ golden_publication_contract <- function(id) {
       sc$command == "hrcomptab" || sc$command == "comptab" && grepl("golden_strate_blocks", sc$r_call, fixed = TRUE))) {
     console_note <- native_note
   }
+  if (identical(id, "T18")) {
+    # Native desctab prints this literal note before the box, not in its tail.
+    lines <- native_sources$console
+    edge <- which(grepl("^[ ]*\\+-+\\+[ ]*$", lines))
+    testthat::expect_true(length(edge) >= 2L, label = "T18 native console boundaries")
+    before <- lines[seq_len(edge[1L] - 1L)]
+    testthat::expect_identical(before[nzchar(trimws(before))], paste("Note:", note),
+      label = "T18 complete authentic native annotation before the box")
+    console_note <- character()
+  }
   c$native_footers <- list(csv = native_note, markdown = golden_fn_md(native_note),
                            console = console_note, xlsx = xnote)
   c$native_grid <- native_grid

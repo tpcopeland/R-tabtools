@@ -126,7 +126,7 @@ test_that("a factor level lost to missing outcomes stays blank only in its own m
   expect_identical(tt$body[[5]][2], "Reference")
   rows <- tt$meta$regtab_rows
   expect_equal(rows$estimate[rows$model == 2L & rows$key == "3.g"], 12, tolerance = 1e-12)
-  expect_true(is.na(rows$status[rows$model == 1L & rows$key == "3.g"]))
+  expect_identical(rows$status[rows$model == 1L & rows$key == "3.g"], "absent")
   expect_identical(c(tt$stored$n_1, tt$stored$n_2), c(6, 8))
 })
 

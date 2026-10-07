@@ -81,7 +81,11 @@ Rate, outcome, group-summary and publication-composite frames require
 \code{keyed = FALSE}. They return a plain character body data frame with
 \code{header}, \code{command}, \code{frame}, \code{sample_accounting} and \code{composition_export}
 attributes; absent sample metadata remains absent. These editing products
-cannot be reused as authenticated composition inputs.
+cannot be reused as authenticated composition inputs. Composite exports
+use \code{rowlabel}, \code{c1}, ... and retain full printed block/column headers
+as column labels, so \code{puttab(flat, varlabels = TRUE)} publishes them.
+R labels retain the full text; the native frame keeps that text in a
+characteristic while its variable labels are limited to 80 bytes.
 }
 \examples{
 tab <- regtab(lm(mpg ~ wt + factor(cyl), mtcars), stats = "n")

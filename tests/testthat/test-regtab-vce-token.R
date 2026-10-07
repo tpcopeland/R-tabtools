@@ -59,6 +59,8 @@ test_that("vce token: the variance a robust survival fit or a geeglm uses under 
 test_that("vce token: blank for a data frame, shared for tt_mi and regtab_uv models", {
   d <- mtcars
   df <- data.frame(term = c("wt", "(Intercept)"), estimate = c(-5, 37), std.error = c(0.5, 2))
+  attr(df, "effect_scale") <- "Coef."
+  attr(df, "inference_reference") <- "normal"
   t1 <- regtab(lm(mpg ~ wt, d), df, stats = "vce", vce = list("robust", "stata"))
   expect_identical(vt_cells(t1), c("robust", ""))
   # A data frame alone: no model reports it, so no row.
