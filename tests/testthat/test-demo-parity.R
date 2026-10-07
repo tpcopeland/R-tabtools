@@ -70,12 +70,19 @@ for (i in seq_len(nrow(sheet_rows))) {
     row <- sheet_rows[i, ]
     test_that(paste0(row$artefact, " sheet '", row$item, "' matches ", row$golden), {
       want <- golden_demo_golden(row$golden)
+      if (nzchar(row$scenario)) {
+        want$book <- golden_book(row$scenario)
+      } else if (row$golden %in% c("K01.xlsx:Block Primary", "K01.xlsx:Block Dose")) {
+        # Routing context only: setup sheets have no composite publication ID.
+        want$book <- golden_book("K01")
+      }
       got <- file.path(run$out_dir, row$artefact)
       tt <- run$tables[[paste(row$artefact, row$item)]]
       expect_s3_class(tt, "tt_table")
       p_rows <- if (!is.null(tt$rows$vtype)) golden_p_masked_rows(tt)
       why <- golden_compare_styles(got, row$item, want$book, want$sheet, mask = row$mask,
-                                   got_width_offset = golden_r_width_offset, p_rows = p_rows)
+                                   got_width_offset = golden_r_width_offset, p_rows = p_rows,
+                                   publication_id = if (nzchar(row$scenario)) row$scenario else NULL)
       # effecttab's tolerance scenario compares its body values in the
       # cells (golden_effect_style_filter(), as run_golden_effecttab_scenario()).
       if (identical(tt$command, "effecttab")) why <- golden_effect_style_filter(why, row$mode)
