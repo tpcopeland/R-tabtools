@@ -16,6 +16,13 @@
   General formats with 13 or more significant digits retain the documented
   native rounding difference from Stata.
 
+* `puttab()` consumes validated `tt_flat()` records, omits only their
+  technical keys by default, and exports explicitly selected keys. Model
+  spans under `blockheader` retain original identities after projection or
+  reordering. Source metadata survives publication layout; lost or malformed
+  semantics are refused before writing. Omitted-key and no-model-span notes
+  appear as separate publication paragraphs in every sink.
+
 * Footnotes accept character paragraph vectors or Stata's spaced-backslash
   separator. Console, CSV, Markdown, Excel and presentation converters show
   separate paragraphs, including automatic notes and significance legends;
