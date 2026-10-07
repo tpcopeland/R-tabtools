@@ -28,6 +28,12 @@ a \code{|}, as in \verb{=HYPERLINK(...)} or \code{+cmd|...}) is written with a l
 labels such as \code{"+ Comorbidities"} are written as they are. Stata's
 \verb{export delimited} does not do this.
 }
+\section{Session destinations}{
+
+Writes only the explicitly named path; session defaults never add another
+sink. CSV has no session destination. See \code{\link[=tabtools_options]{tabtools_options()}}.
+}
+
 \examples{
 d <- data.frame(arm = rep(c("A", "B"), each = 10), x = 1:20)
 tab <- table1_tc(d, by = "arm", vars = c(x = "contn"))

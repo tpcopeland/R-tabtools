@@ -334,6 +334,16 @@ carry no such names, so for them, as in Stata, the defaults are
 }
 }
 
+\section{Session destinations}{
+
+An explicitly supplied non-NULL \code{sheet} enables inherited workbook and
+Markdown destinations from \code{\link[=tabtools_options]{tabtools_options()}}. Default or NULL sheet does
+not request inherited output. Explicit paths still export, and explicit NULL
+destinations opt out. A requested sheet without a workbook gives
+\code{tabtools_warning_sheet_without_workbook} before output; \code{options(warn = 2)}
+interrupts the call. See \code{\link[=tabtools_options]{tabtools_options()}} for append/history behavior.
+}
+
 \examples{
 # Rates per 1,000 person-years from time and event data: one tt_rates()
 # block per outcome, the arms as the categories

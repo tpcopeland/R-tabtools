@@ -363,7 +363,7 @@ large values give Stata's cells: a mean in Stata's e-notation
 (\code{2.e+200}), a missing SD (\code{.}) when the squares overflow, and a blank
 cell, p-value, or SMD when a sum overflows.
 
-As in Stata, \code{sheet} and \code{open} need \code{xlsx}, and \code{mdappend} needs
+\code{open} needs a resolved workbook, and \code{mdappend} needs
 \code{markdown}. Unlike Stata, \code{title}, \code{footnote}, and \code{borderstyle} work
 without a file: the table keeps them for its later destinations
 (\code{\link[flextable:as_flextable]{flextable::as_flextable()}}, \code{\link[=tt_as_gt]{tt_as_gt()}}, \code{\link[=tt_write_xlsx]{tt_write_xlsx()}},
@@ -415,6 +415,16 @@ larger frequency-weighted blocks are refused with \code{smallcells}.
 \code{vars}, \code{by}, and the rest passed on through \code{...}) and returns the
 same table.
 }
+\section{Session destinations}{
+
+An explicitly supplied non-NULL \code{sheet} enables inherited workbook and
+Markdown destinations from \code{\link[=tabtools_options]{tabtools_options()}}. Default or NULL sheet does
+not request inherited output. Explicit paths still export, and explicit NULL
+destinations opt out. A requested sheet without a workbook gives
+\code{tabtools_warning_sheet_without_workbook} before output; \code{options(warn = 2)}
+interrupts the call. See \code{\link[=tabtools_options]{tabtools_options()}} for append/history behavior.
+}
+
 \examples{
 d <- data.frame(arm = rep(c("A", "B"), each = 25),
                 age = c(seq(40, 64), seq(45, 69)),

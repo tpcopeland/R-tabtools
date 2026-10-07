@@ -307,6 +307,14 @@
 #'             c(0.00462, 0.00549), c(0.00652, 0.00781))
 #' stratetab(list(cv_m, cv_f), outcomes = 1, outlabels = "CV events",
 #'           explabels = c("Male", "Female"), rateratio = TRUE)
+#' @section Session destinations:
+#' An explicitly supplied non-NULL `sheet` enables inherited workbook and
+#' Markdown destinations from [tabtools_options()]. Default or NULL sheet does
+#' not request inherited output. Explicit paths still export, and explicit NULL
+#' destinations opt out. A requested sheet without a workbook gives
+#' `tabtools_warning_sheet_without_workbook` before output; `options(warn = 2)`
+#' interrupts the call. See [tabtools_options()] for append/history behavior.
+#'
 #' @export
 stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title = NULL,
                       outlabels = NULL, outcomeids = NULL, explabels = NULL,
@@ -318,12 +326,23 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
                       mdappend = FALSE, open = FALSE, cformat = NULL, sep = ", ",
                       smallcells = NULL, nosmallcells = FALSE, masktext = NULL,
                       zeroexact = FALSE, zerocells = NULL, zerocells_persontime = FALSE) {
+  sinks <- .tt_resolve_sinks(
+    list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
+         sheet = sheet, headershade = headershade, smallcells = smallcells,
+         nosmallcells = nosmallcells, masktext = masktext),
+    list(xlsx = !missing(xlsx), markdown = !missing(markdown),
+         mdappend = !missing(mdappend), sheet = !missing(sheet),
+         headershade = !missing(headershade), smallcells = !missing(smallcells),
+         nosmallcells = !missing(nosmallcells), masktext = !missing(masktext)),
+    policy = "sheet", mask = "rates")
+  xlsx <- sinks$values$xlsx
+  markdown <- sinks$values$markdown
+  mdappend <- sinks$values$mdappend
   format <- .tt_resolve_numeric_format(cformat, if (missing(digits)) NULL else digits,
                                        digits_given = !missing(digits), sep = sep,
                                        default_digits = 1L)
   digits <- format$digits
-  mask <- .st_resolve_mask(smallcells, !missing(smallcells), nosmallcells,
-                           masktext, !missing(masktext))
+  mask <- sinks$mask
   for (a in c("zeroexact", "zerocells_persontime")) {
     v <- get(a)
     if (!is.logical(v) || length(v) != 1L || is.na(v)) {
@@ -346,7 +365,6 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
     if (!is.logical(v) || length(v) != 1L || is.na(v)) cli::cli_abort("{.arg {a}} must be TRUE or FALSE.", call = NULL)
   }
   has_xlsx <- !is.null(xlsx)
-  .tt_check_sheet_xlsx(sheet_given, has_xlsx)
   has_md <- !is.null(markdown)
   # stratetab.ado:84-176, in Stata's order.
   if (open && !has_xlsx) cli::cli_abort("{.arg open} requires {.arg xlsx}.", call = NULL)
@@ -466,7 +484,7 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
 
 # ---------------------------------------------------------------------------
 # P.4 primary publication masks; raw numerical companions remain analytical.
-.st_resolve_mask <- function(smallcells, threshold_given, nosmallcells, masktext, text_given) {
+.st_resolve_mask <- function(smallcells, threshold_given, nosmallcells, masktext, text_given, resolved = NULL) {
   if (!is.logical(nosmallcells) || length(nosmallcells) != 1L || is.na(nosmallcells)) {
     cli::cli_abort("{.arg nosmallcells} must be TRUE or FALSE.", call = NULL)
   }
@@ -475,9 +493,9 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
                    class = "tabtools_error_smallcells_conflict", call = NULL)
   }
   threshold <- if (nosmallcells) 0L else if (threshold_given) smallcells %||% 0L else
-    getOption("tabtools.smallcells") %||% 0L
+    (if (is.null(resolved)) getOption("tabtools.smallcells") else resolved$smallcells) %||% 0L
   threshold <- .check_int_range(threshold, "smallcells", 0, .Machine$integer.max)
-  text <- if (text_given) masktext else getOption("tabtools.masktext")
+  text <- if (text_given) masktext else if (is.null(resolved)) getOption("tabtools.masktext") else resolved$masktext
   if (!is.null(text)) {
     .tt_check_text_arg(text, "masktext")
     if (text_given && threshold == 0L) cli::cli_abort("{.arg masktext} requires a small-cell threshold.",

@@ -227,6 +227,12 @@
 #' flat <- tt_flat(regtab(fit, stats = "n"))
 #' flat[[2]][flat$`_term` == "wt"] <- "See text"
 #' puttab(flat, blockheader = TRUE, footnote = "Edited display cells")
+#' @section Session destinations:
+#' Omitted destinations inherit [tabtools_options()] workbook/Markdown values;
+#' explicit NULL opts out of each sink. Header shading inherits only for puttab
+#' and stacktab frames mode. Stacktab still requires an output sheet with a
+#' workbook. See [tabtools_options()] for append/history and warning behavior.
+#'
 #' @export
 puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
                    title = NULL, footnote = NULL, font = NULL, fontsize = NULL,
@@ -237,6 +243,17 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
                    hlines = NULL, vlines = NULL, boldrows = NULL, panel = NULL,
                    panelheader = NULL, panelinline = FALSE, noindent = FALSE,
                    spanheader = NULL, nformat = NULL, blockheader = FALSE) {
+  sinks <- .tt_resolve_sinks(
+    list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
+         sheet = sheet, headershade = headershade),
+    list(xlsx = !missing(xlsx), markdown = !missing(markdown),
+         mdappend = !missing(mdappend), sheet = !missing(sheet),
+         headershade = !missing(headershade)),
+    policy = "omitted", shade = TRUE)
+  xlsx <- sinks$values$xlsx
+  markdown <- sinks$values$markdown
+  mdappend <- sinks$values$mdappend
+  headershade <- sinks$values$headershade
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Table"
@@ -258,7 +275,6 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
     .puttab_abort("nformat does not apply to a tt_table source, whose cells are text.")
   }
   has_xlsx <- !is.null(xlsx)
-  .tt_check_sheet_xlsx(sheet_given, has_xlsx)
   has_md <- !is.null(markdown)
   # puttab.ado:147-189, in Stata's order.
   if (open && !has_xlsx) cli::cli_abort("{.arg open} requires {.arg xlsx}.", call = NULL)
@@ -276,7 +292,7 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   for (a in c("title", "footnote")) .tt_check_text_arg(get(a), a)
   footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   style <- tt_resolve_style(font = font, fontsize = fontsize, borderstyle = borderstyle,
-                            headershade = if (missing(headershade)) getOption("tabtools.headershade") %||% FALSE else headershade, zebra = zebra,
+                            headershade = headershade, zebra = zebra,
                             headercolor = headercolor, zebracolor = zebracolor)
   src <- .puttab_source(x, vars = vars, subset = subset, digits = digits,
                         varlabels = varlabels, noheader = noheader, noembedheader = noembedheader,
@@ -309,7 +325,6 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
   .puttab_check_flag(open, "open")
   has_xlsx <- !is.null(xlsx)
   has_md <- !is.null(markdown)
-  .tt_check_sheet_xlsx(sheet_given, has_xlsx)
   if (open && !has_xlsx) .puttab_abort("open requires xlsx.")
   if (mdappend && !has_md) .puttab_abort("mdappend requires markdown.")
   if (has_xlsx) .tt_check_path(xlsx, "\\.xlsx$", "xlsx", "a .xlsx file")

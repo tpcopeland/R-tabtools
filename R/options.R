@@ -6,19 +6,43 @@
 # same seven keys as session options (`tabtools.<key>`), persisted to a DCF
 # file only on request.
 
-.tt_option_keys <- c("font", "fontsize", "borderstyle", "digits", "boldp",
-                     "headercolor", "zebracolor")
+.tt_persisted_option_keys <- c("font", "fontsize", "borderstyle", "digits", "boldp",
+                               "headercolor", "zebracolor")
+.tt_session_option_keys <- c("workbook", "markdown", "headershade", "smallcells",
+                             "smallcells_mode", "masktext")
+.tt_option_keys <- c(.tt_persisted_option_keys, .tt_session_option_keys)
 
 .tt_defaults_file <- function() {
   file.path(tools::R_user_dir("tabtools", "config"), "defaults.dcf")
 }
 
-#' Persistent formatting defaults
+#' Formatting defaults and session publication destinations
 #'
-#' Session-wide house-style defaults: a value set here is used whenever the
-#' corresponding argument of a tabtools command ([table1_tc()],
+#' Session-wide house-style formatting defaults are used whenever the
+#' corresponding formatting argument of a tabtools command ([table1_tc()],
 #' [regtab()], [stratetab()], ...) is left `NULL`. Called with no arguments,
 #' returns the current defaults. The analogue of Stata's `tabtools set`.
+#' An omitted setting is preserved; explicitly supplying `NULL` clears that
+#' individual setting. Session destinations and masking settings are never
+#' persisted. Paths are stored absolute, so changing the working directory
+#' does not move them.
+#'
+#' Ordinary table commands use the session workbook and Markdown only when
+#' `sheet` is explicitly supplied and non-NULL. Their default sheet names do
+#' not request export. [puttab()] and [stacktab()] inherit omitted destinations;
+#' explicitly supplying `xlsx = NULL` or `markdown = NULL` opts out. Explicit
+#' paths win. A requested sheet without a workbook gives
+#' `tabtools_warning_sheet_without_workbook`; under `options(warn = 2)` this
+#' interrupts before any output. Explicit path writers export only their named
+#' destination. Workbooks retain existing unrelated sheets, including on the
+#' first session write (a deliberate difference from native Stata replacement).
+#'
+#' The first inherited Markdown write replaces/creates the document; subsequent
+#' successful writes append. Explicit `mdappend` wins. Explicit Markdown paths
+#' retain replace-by-default behavior. Successful explicit writes to the active
+#' session path also count. Previously written paths remain remembered across
+#' destination changes, repeated setting, and clearing, so A/B/A keeps A's
+#' content on the next inherited write. Failed writes do not advance history.
 #'
 #' @param ... Not used; any unnamed or unknown argument is an error. Query a
 #'   default with `tabtools_options()$digits`.
@@ -35,10 +59,24 @@
 #' @param boldp P-value threshold for bold p cells, in (0, 1).
 #' @param headercolor,zebracolor Colours: a Stata colour name (`"navy"`), an
 #'   `"R G B"` triplet, or a hex code (`"#DBE5F1"`).
-#' @param persist Also write the current defaults to
+#' @param workbook,markdown Session-only `.xlsx` workbook or Markdown destination
+#'   (`.md`, `.markdown`, `.qmd`, `.rmd`), or NULL to clear it.
+#' @param headershade Session-only logical header-shading default for [puttab()]
+#'   and [stacktab()] frames mode, or NULL to clear it.
+#' @param smallcells Session-only integer threshold of at least 3, or NULL to
+#'   clear it. Commands with existing small-cell support inherit it when omitted;
+#'   explicit NULL/0 disables it for one call without changing the session.
+#' @param smallcells_mode Session-only `"strict"` or `"primary"` mode transport,
+#'   or NULL to clear it. Currently [table1_tc()] retains strict protection and
+#'   [stratetab()] primary-only publication masking; setting this key does not
+#'   change either command's supported masking behavior.
+#' @param masktext Session-only literal replacement text for existing [stratetab()]
+#'   masks, or NULL to clear it. An explicit command argument wins.
+#' @param persist Also write the current formatting defaults to
 #'   `tools::R_user_dir("tabtools", "config")`, reloaded when the package
 #'   loads (Stata's `permanent`). The file is written first: if it cannot
 #'   be written, the call fails and the session defaults stay as they were.
+#'   Cannot accompany explicit changes to session-only keys.
 #' @param clear Remove every default (and the persisted file when `persist`;
 #'   a file that cannot be deleted gives a warning).
 #' @return The defaults in effect, invisibly when any were changed.
@@ -52,7 +90,9 @@
 #' @export
 tabtools_options <- function(..., font = NULL, fontsize = NULL, borderstyle = NULL,
                              digits = NULL, boldp = NULL, headercolor = NULL,
-                             zebracolor = NULL, persist = FALSE, clear = FALSE) {
+                             zebracolor = NULL, persist = FALSE, clear = FALSE,
+                             workbook = NULL, markdown = NULL, headershade = NULL,
+                             smallcells = NULL, smallcells_mode = NULL, masktext = NULL) {
   dots <- list(...)
   if (length(dots)) {
     nms <- names(dots)
@@ -71,8 +111,17 @@ tabtools_options <- function(..., font = NULL, fontsize = NULL, borderstyle = NU
   }
   new <- list(font = font, fontsize = fontsize, borderstyle = borderstyle,
               digits = digits, boldp = boldp, headercolor = headercolor,
-              zebracolor = zebracolor)
-  new <- new[!vapply(new, is.null, TRUE)]
+              zebracolor = zebracolor, workbook = workbook, markdown = markdown,
+              headershade = headershade, smallcells = smallcells,
+              smallcells_mode = smallcells_mode, masktext = masktext)
+  supplied <- c(font = !missing(font), fontsize = !missing(fontsize),
+                borderstyle = !missing(borderstyle), digits = !missing(digits),
+                boldp = !missing(boldp), headercolor = !missing(headercolor),
+                zebracolor = !missing(zebracolor), workbook = !missing(workbook),
+                markdown = !missing(markdown), headershade = !missing(headershade),
+                smallcells = !missing(smallcells), smallcells_mode = !missing(smallcells_mode),
+                masktext = !missing(masktext))
+  new <- new[supplied]
   for (a in c("persist", "clear")) {
     v <- get(a)
     if (!is.logical(v) || length(v) != 1L || is.na(v)) cli::cli_abort("{.arg {a}} must be TRUE or FALSE.", call = NULL)
@@ -82,9 +131,14 @@ tabtools_options <- function(..., font = NULL, fontsize = NULL, borderstyle = NU
                      "i" = "Call {.code tabtools_options(clear = TRUE)} first, then set the new defaults."),
                    call = NULL)
   }
+  if (persist && any(names(new) %in% .tt_session_option_keys)) {
+    cli::cli_abort("Session-only settings cannot be combined with {.arg persist}.",
+                   class = "tabtools_error_session_persist", call = NULL)
+  }
   if (clear) {
     options(stats::setNames(rep(list(NULL), length(.tt_option_keys)),
                             paste0("tabtools.", .tt_option_keys)))
+    .tt_set_sink_state()
     if (persist) .tt_remove_defaults_file()
     return(invisible(.tt_current_options()))
   }
@@ -96,14 +150,21 @@ tabtools_options <- function(..., font = NULL, fontsize = NULL, borderstyle = NU
   if (!is.null(new[["boldp"]])) .check_threshold(new[["boldp"]], "boldp")
   if (!is.null(new[["headercolor"]])) tt_parse_color(new[["headercolor"]], "headercolor")
   if (!is.null(new[["zebracolor"]])) tt_parse_color(new[["zebracolor"]], "zebracolor")
+  for (key in intersect(names(new), .tt_session_option_keys)) {
+    new[key] <- list(.tt_check_session_option(key, new[[key]]))
+  }
   cur <- .tt_current_options()
   cur[names(new)] <- new
   cur <- cur[intersect(.tt_option_keys, names(cur))]
+  cur <- cur[!vapply(cur, is.null, TRUE)]
   # persist: the file is written first and the session changed only when it
   # was (Milestone H, H20; finding F33), so a failed write leaves both as
   # they were.
-  if (persist) .tt_write_defaults_file(cur)
-  if (length(new)) options(stats::setNames(new, paste0("tabtools.", names(new))))
+  if (persist) .tt_write_defaults_file(cur[intersect(names(cur), .tt_persisted_option_keys)])
+  if (length(new)) {
+    options(stats::setNames(new, paste0("tabtools.", names(new))))
+    .tt_set_sink_state()
+  }
   invisible(.tt_current_options())
 }
 
@@ -181,7 +242,7 @@ tabtools_options <- function(..., font = NULL, fontsize = NULL, borderstyle = NU
   if (!file.exists(f)) return(invisible())
   d <- tryCatch(read.dcf(f), error = function(e) NULL)
   if (is.null(d) || !nrow(d)) return(invisible())
-  for (k in intersect(colnames(d), .tt_option_keys)) {
+  for (k in intersect(colnames(d), .tt_persisted_option_keys)) {
     opt <- paste0("tabtools.", k)
     if (is.null(getOption(opt))) {
       v <- .tt_check_persisted(k, unname(d[1, k]), f)

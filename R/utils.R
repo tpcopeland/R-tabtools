@@ -46,16 +46,6 @@
 }
 
 # Excel's worksheet-name rules (_tabtools_common.ado:435-468).
-# `sheet` names a worksheet, so it needs `xlsx`: refused without it in
-# every command (desctab.ado:186-189 refuses it; Stata's other commands
-# ignore it; audit D04).
-.tt_check_sheet_xlsx <- function(sheet_given, has_xlsx) {
-  if (sheet_given && !has_xlsx) {
-    cli::cli_abort("{.arg sheet} is only available when using {.arg xlsx}.", call = NULL)
-  }
-  invisible(NULL)
-}
-
 .check_sheet <- function(sheet, arg = "sheet") {
   if (!is.character(sheet) || length(sheet) != 1L || is.na(sheet) || !nzchar(sheet)) {
     cli::cli_abort("{.arg {arg}}: sheet name may not be blank.", call = NULL)

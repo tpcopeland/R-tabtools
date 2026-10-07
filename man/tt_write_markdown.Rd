@@ -45,6 +45,14 @@ literally instead of interpreting a pair as mathematics.
 An existing file is replaced unless \code{append = TRUE}, as in Stata
 tabtools 2.1.12 (2.1.11 stopped with r(602)).
 }
+\section{Session destinations}{
+
+Writes only the explicitly named path; session defaults never add another
+sink. A successful write to an active session destination records its history
+for later inherited writes. Omitted \code{append} retains replacement behavior.
+See \code{\link[=tabtools_options]{tabtools_options()}}.
+}
+
 \examples{
 d <- data.frame(arm = rep(c("A", "B"), each = 10), x = 1:20,
                 g = factor(rep(c("u", "v"), 10)))

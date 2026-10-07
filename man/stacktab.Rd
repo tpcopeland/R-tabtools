@@ -208,6 +208,14 @@ CSV and Markdown targets.
 }
 }
 
+\section{Session destinations}{
+
+Omitted destinations inherit \code{\link[=tabtools_options]{tabtools_options()}} workbook/Markdown values;
+explicit NULL opts out of each sink. Header shading inherits only for puttab
+and stacktab frames mode. Stacktab still requires an output sheet with a
+workbook. See \code{\link[=tabtools_options]{tabtools_options()}} for append/history and warning behavior.
+}
+
 \examples{
 primary <- data.frame(term = c("Any HRT", "Former smoker"),
                       ahr = c("0.82", "1.14"),

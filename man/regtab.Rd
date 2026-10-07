@@ -960,6 +960,16 @@ coefficients (\verb{mi estimate, eform: glm ..., family(gaussian)}: \code{exp(b)
 in Stata; coefficients in R).
 }
 
+\section{Session destinations}{
+
+An explicitly supplied non-NULL \code{sheet} enables inherited workbook and
+Markdown destinations from \code{\link[=tabtools_options]{tabtools_options()}}. Default or NULL sheet does
+not request inherited output. Explicit paths still export, and explicit NULL
+destinations opt out. A requested sheet without a workbook gives
+\code{tabtools_warning_sheet_without_workbook} before output; \code{options(warn = 2)}
+interrupts the call. See \code{\link[=tabtools_options]{tabtools_options()}} for append/history behavior.
+}
+
 \section{Data-frame input}{
 
 A model regtab does not support can be passed as a data frame shaped

@@ -265,6 +265,14 @@
 #' path <- tempfile(fileext = ".xlsx")
 #' wttab(pp, "sw", period = "period", by = "A", trunc = c(0.01, 0.99),
 #'       digits = 3, xlsx = path, title = "Time-varying stabilized weights")
+#' @section Session destinations:
+#' An explicitly supplied non-NULL `sheet` enables inherited workbook and
+#' Markdown destinations from [tabtools_options()]. Default or NULL sheet does
+#' not request inherited output. Explicit paths still export, and explicit NULL
+#' destinations opt out. A requested sheet without a workbook gives
+#' `tabtools_warning_sheet_without_workbook` before output; `options(warn = 2)`
+#' interrupts the call. See [tabtools_options()] for append/history behavior.
+#'
 #' @export
 wttab <- function(x, weights = NULL, by = NULL, period = NULL, trunc = NULL, data = NULL,
                   overall = TRUE, by_labels = NULL, trunc_by = c("pooled", "period"),
@@ -273,6 +281,16 @@ wttab <- function(x, weights = NULL, by = NULL, period = NULL, trunc = NULL, dat
                   font = NULL, fontsize = NULL, borderstyle = NULL, headercolor = NULL,
                   zebracolor = NULL, zebra = FALSE, headershade = FALSE, csv = NULL,
                   markdown = NULL, mdappend = FALSE, open = FALSE) {
+  sinks <- .tt_resolve_sinks(
+    list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
+         sheet = sheet, headershade = headershade),
+    list(xlsx = !missing(xlsx), markdown = !missing(markdown),
+         mdappend = !missing(mdappend), sheet = !missing(sheet),
+         headershade = !missing(headershade)),
+    policy = "sheet")
+  xlsx <- sinks$values$xlsx
+  markdown <- sinks$values$markdown
+  mdappend <- sinks$values$mdappend
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Weights"
@@ -290,7 +308,6 @@ wttab <- function(x, weights = NULL, by = NULL, period = NULL, trunc = NULL, dat
                    call = NULL)
   }
   has_xlsx <- !is.null(xlsx)
-  .tt_check_sheet_xlsx(sheet_given, has_xlsx)
   has_md <- !is.null(markdown)
   if (open && !has_xlsx) cli::cli_abort("{.arg open} requires {.arg xlsx}.", call = NULL)
   if (has_xlsx && (!is.character(xlsx) || length(xlsx) != 1L || is.na(xlsx) || !grepl("\\.xlsx$", tolower(xlsx)))) {

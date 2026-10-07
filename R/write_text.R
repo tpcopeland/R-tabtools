@@ -81,10 +81,15 @@
 #' path <- tempfile(fileext = ".csv")
 #' tt_write_csv(tab, path)
 #' readLines(path)
+#' @section Session destinations:
+#' Writes only the explicitly named path; session defaults never add another
+#' sink. CSV has no session destination. See [tabtools_options()].
+#'
 #' @export
 tt_write_csv <- function(x, path) {
   .tt_check_table(x)
   .tt_check_csv_path(path, arg = "path")
+  .tt_resolve_sinks(list(csv = path), list(csv = TRUE), policy = "writer")
   x <- .tt_blank_text(x)
   g <- .tt_grid(x)
   lines <- apply(g, 1L, function(r) paste(.csv_field(r), collapse = ","))
@@ -237,6 +242,12 @@ tt_write_csv <- function(x, path) {
 #' tt_write_markdown(tab, path)
 #' tt_write_markdown(tab, path, append = TRUE)
 #' cat(readLines(path), sep = "\n")
+#' @section Session destinations:
+#' Writes only the explicitly named path; session defaults never add another
+#' sink. A successful write to an active session destination records its history
+#' for later inherited writes. Omitted `append` retains replacement behavior.
+#' See [tabtools_options()].
+#'
 #' @export
 tt_write_markdown <- function(x, path, append = FALSE) {
   .tt_check_table(x)
@@ -244,6 +255,8 @@ tt_write_markdown <- function(x, path, append = FALSE) {
   view <- .puttab_md_view(x)
   x <- view$table
   .tt_check_path(path, "\\.(md|markdown|qmd|rmd)$", "markdown", "a .md, .markdown, .qmd, or .rmd file")
+  .tt_resolve_sinks(list(markdown = path, mdappend = append),
+                    list(markdown = TRUE, mdappend = !missing(append)), policy = "writer")
   existing <- append && file.exists(path)
   # Pandoc reads a .qmd/.rmd file with tex_math_dollars, so a "$" pair there
   # is typeset as math: those targets escape "$" as "\\$" (R only; a .md
@@ -280,6 +293,7 @@ tt_write_markdown <- function(x, path, append = FALSE) {
     lines <- c(lines, "", paste0("*", .md_escape(para, dollar), "*"))
   }
   .write_lines_lf(lines, path, append = existing, arg = "path")
+  .tt_mark_sink(path, "markdown")
   invisible(structure(path, n_rows = n_body, n_cols = length(hdr)))
 }
 

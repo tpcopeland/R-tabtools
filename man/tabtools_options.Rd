@@ -2,7 +2,7 @@
 % Please edit documentation in R/options.R
 \name{tabtools_options}
 \alias{tabtools_options}
-\title{Persistent formatting defaults}
+\title{Formatting defaults and session publication destinations}
 \usage{
 tabtools_options(
   ...,
@@ -14,7 +14,13 @@ tabtools_options(
   headercolor = NULL,
   zebracolor = NULL,
   persist = FALSE,
-  clear = FALSE
+  clear = FALSE,
+  workbook = NULL,
+  markdown = NULL,
+  headershade = NULL,
+  smallcells = NULL,
+  smallcells_mode = NULL,
+  masktext = NULL
 )
 }
 \arguments{
@@ -40,22 +46,63 @@ use 2.}
 \item{headercolor, zebracolor}{Colours: a Stata colour name (\code{"navy"}), an
 \code{"R G B"} triplet, or a hex code (\code{"#DBE5F1"}).}
 
-\item{persist}{Also write the current defaults to
+\item{persist}{Also write the current formatting defaults to
 \code{tools::R_user_dir("tabtools", "config")}, reloaded when the package
 loads (Stata's \code{permanent}). The file is written first: if it cannot
-be written, the call fails and the session defaults stay as they were.}
+be written, the call fails and the session defaults stay as they were.
+Cannot accompany explicit changes to session-only keys.}
 
 \item{clear}{Remove every default (and the persisted file when \code{persist};
 a file that cannot be deleted gives a warning).}
+
+\item{workbook, markdown}{Session-only \code{.xlsx} workbook or Markdown destination
+(\code{.md}, \code{.markdown}, \code{.qmd}, \code{.rmd}), or NULL to clear it.}
+
+\item{headershade}{Session-only logical header-shading default for \code{\link[=puttab]{puttab()}}
+and \code{\link[=stacktab]{stacktab()}} frames mode, or NULL to clear it.}
+
+\item{smallcells}{Session-only integer threshold of at least 3, or NULL to
+clear it. Commands with existing small-cell support inherit it when omitted;
+explicit NULL/0 disables it for one call without changing the session.}
+
+\item{smallcells_mode}{Session-only \code{"strict"} or \code{"primary"} mode transport,
+or NULL to clear it. Currently \code{\link[=table1_tc]{table1_tc()}} retains strict protection and
+\code{\link[=stratetab]{stratetab()}} primary-only publication masking; setting this key does not
+change either command's supported masking behavior.}
+
+\item{masktext}{Session-only literal replacement text for existing \code{\link[=stratetab]{stratetab()}}
+masks, or NULL to clear it. An explicit command argument wins.}
 }
 \value{
 The defaults in effect, invisibly when any were changed.
 }
 \description{
-Session-wide house-style defaults: a value set here is used whenever the
-corresponding argument of a tabtools command (\code{\link[=table1_tc]{table1_tc()}},
+Session-wide house-style formatting defaults are used whenever the
+corresponding formatting argument of a tabtools command (\code{\link[=table1_tc]{table1_tc()}},
 \code{\link[=regtab]{regtab()}}, \code{\link[=stratetab]{stratetab()}}, ...) is left \code{NULL}. Called with no arguments,
 returns the current defaults. The analogue of Stata's \verb{tabtools set}.
+An omitted setting is preserved; explicitly supplying \code{NULL} clears that
+individual setting. Session destinations and masking settings are never
+persisted. Paths are stored absolute, so changing the working directory
+does not move them.
+}
+\details{
+Ordinary table commands use the session workbook and Markdown only when
+\code{sheet} is explicitly supplied and non-NULL. Their default sheet names do
+not request export. \code{\link[=puttab]{puttab()}} and \code{\link[=stacktab]{stacktab()}} inherit omitted destinations;
+explicitly supplying \code{xlsx = NULL} or \code{markdown = NULL} opts out. Explicit
+paths win. A requested sheet without a workbook gives
+\code{tabtools_warning_sheet_without_workbook}; under \code{options(warn = 2)} this
+interrupts before any output. Explicit path writers export only their named
+destination. Workbooks retain existing unrelated sheets, including on the
+first session write (a deliberate difference from native Stata replacement).
+
+The first inherited Markdown write replaces/creates the document; subsequent
+successful writes append. Explicit \code{mdappend} wins. Explicit Markdown paths
+retain replace-by-default behavior. Successful explicit writes to the active
+session path also count. Previously written paths remain remembered across
+destination changes, repeated setting, and clearing, so A/B/A keeps A's
+content on the next inherited write. Failed writes do not advance history.
 }
 \examples{
 tabtools_options()

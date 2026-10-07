@@ -41,7 +41,7 @@
 #' (`2.e+200`), a missing SD (`.`) when the squares overflow, and a blank
 #' cell, p-value, or SMD when a sum overflows.
 #'
-#' As in Stata, `sheet` and `open` need `xlsx`, and `mdappend` needs
+#' `open` needs a resolved workbook, and `mdappend` needs
 #' `markdown`. Unlike Stata, `title`, `footnote`, and `borderstyle` work
 #' without a file: the table keeps them for its later destinations
 #' ([flextable::as_flextable()], [tt_as_gt()], [tt_write_xlsx()],
@@ -351,6 +351,14 @@
 #' # desctab() is the same command
 #' desctab(d, by = "arm", vars = c("age", "sex"))
 #' @order 1
+#' @section Session destinations:
+#' An explicitly supplied non-NULL `sheet` enables inherited workbook and
+#' Markdown destinations from [tabtools_options()]. Default or NULL sheet does
+#' not request inherited output. Explicit paths still export, and explicit NULL
+#' destinations opt out. A requested sheet without a workbook gives
+#' `tabtools_warning_sheet_without_workbook` before output; `options(warn = 2)`
+#' interrupts the call. See [tabtools_options()] for append/history behavior.
+#'
 #' @export
 table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
                       labels = NULL,
@@ -375,6 +383,17 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
                       headercolor = NULL, zebracolor = NULL,
                       csv = NULL, markdown = NULL, mdappend = FALSE,
                       test_args = NULL, dots = FALSE, excel = NULL, nosmdhighlight = FALSE) {
+  sinks <- .tt_resolve_sinks(
+    list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
+         sheet = sheet, headershade = headershade, excel = excel, smallcells = smallcells),
+    list(xlsx = !missing(xlsx), markdown = !missing(markdown),
+         mdappend = !missing(mdappend), sheet = !missing(sheet),
+         headershade = !missing(headershade), excel = !missing(excel), smallcells = !missing(smallcells)),
+    policy = "sheet", mask = "table1")
+  xlsx <- sinks$values$xlsx
+  markdown <- sinks$values$markdown
+  mdappend <- sinks$values$mdappend
+  smallcells <- sinks$values$smallcells
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Table 1"
@@ -418,7 +437,6 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   labels <- .check_label_overrides(labels)
   # desctab.ado:88: excel() is the original name, xlsx() its synonym; excel
   # wins when both are given.
-  if (!is.null(excel)) xlsx <- excel
   for (a in c("title", "footnote")) .tt_check_text_arg(get(a), a)
   footnote <- if (is.null(footnote)) NULL else .tt_footnote_text(footnote)
   # desctab.ado:167: title("") is no title.
@@ -467,7 +485,6 @@ table1_tc <- function(data, vars = NULL, by = NULL, fweight = NULL, wt = NULL,
   has_xlsx <- !is.null(xlsx)
   has_md <- !is.null(markdown)
   if (has_xlsx || sheet_given) sheet <- .check_sheet(sheet)
-  .tt_check_sheet_xlsx(sheet_given, has_xlsx)
   if (open && !has_xlsx) cli::cli_abort("{.arg open} requires {.arg xlsx}.", call = NULL)
   if (has_xlsx && (!is.character(xlsx) || length(xlsx) != 1L || !grepl("\\.xlsx$", tolower(xlsx)))) {
     cli::cli_abort("{.arg xlsx} must specify a .xlsx file.", call = NULL)
