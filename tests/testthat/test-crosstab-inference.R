@@ -61,3 +61,14 @@ test_that("zero risk ratio retains its point and both unavailable log-Wald limit
   expect_identical(c(x$stored$rr_lo, x$stored$rr_hi), c(NA_real_, NA_real_))
   expect_error(xt_table(f[, 2:1], rr = TRUE), class = "tabtools_error_crosstab_association")
 })
+
+test_that("review 2026-10-07 B1: level accepts a proportion like ratetab and survtab", {
+  xt_no_session()
+  f <- matrix(c(40, 10, 20, 30), 2)
+  pct <- xt_table(f, rr = TRUE, level = 95)
+  prop <- xt_table(f, rr = TRUE, level = 0.95)
+  expect_identical(prop$stored, pct$stored)
+  expect_identical(prop$stored$ci_level, 95)
+  expect_identical(xt_table(f, rr = TRUE, level = 0.9)$stored$rr_lo, xt_table(f, rr = TRUE, level = 90)$stored$rr_lo)
+  expect_error(xt_table(f, level = 1), class = "tabtools_error_crosstab_input")
+})

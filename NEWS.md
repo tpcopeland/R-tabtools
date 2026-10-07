@@ -191,6 +191,9 @@
   first outcome in `puttab(varlabels = TRUE)`.
 * `outtab()` refuses model formulas in which the exposure enters another term
   (for example `I(exposed * z)`), not only explicit interactions.
+* `crosstab(level = )` accepts a proportion or a percentage, as `ratetab()`,
+  `survtab()` and `stratetab()` do; `level = 0.95` previously gave a 0.95%
+  interval.
 
 # tabtools 0.1.1
 

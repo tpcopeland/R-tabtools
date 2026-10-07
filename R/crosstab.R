@@ -29,7 +29,8 @@
 #'   labels are used as descriptors independently of this switch.
 #' @param missing Include ordinary and tagged missing categories. Both trend
 #'   options refuse missing=TRUE, even if no missing values occur.
-#' @param level Confidence level in percent, strictly between 0 and 100.
+#' @param level Confidence level as a proportion in (0, 1) or a percentage in
+#'   (1, 100), as in [ratetab()] and [survtab()]; `0.95` and `95` agree.
 #' @param digits Decimal places 0 to 6; NULL uses the session default, else 1.
 #' @param smallcells NULL or 0 disables inherited masking; an integer at least
 #'   3 enables count protection. Omission inherits the session threshold.
@@ -132,9 +133,11 @@ crosstab <- function(data, rowvar, colvar, weights = NULL, subset = NULL,
   if (trend && cochran) .xt_abort("trend and cochran are mutually exclusive.", "trend")
   if ((trend || cochran) && missing) .xt_abort("Trend options cannot include missing categories.", "trend")
   if (!is.numeric(level) || is.complex(level) || !is.null(dim(level)) ||
-      length(level) != 1L || !is.finite(level) || level <= 0 || level >= 100) {
-    .xt_abort("level must be a confidence percentage strictly between 0 and 100.")
+      length(level) != 1L || !is.finite(level) || level <= 0 || level >= 100 || level == 1) {
+    .xt_abort("level must be a proportion in (0, 1) or a percentage in (1, 100).")
   }
+  # The ratetab/survtab/stratetab convention: a proportion is a percentage/100.
+  level <- .st_check_level(level)
   digits <- digits %||% getOption("tabtools.digits") %||% 1L
   if (!is.numeric(digits) || is.complex(digits) || !is.null(dim(digits)) ||
       length(digits) != 1L || !is.finite(digits) || digits != floor(digits) || digits < 0 || digits > 6) {
