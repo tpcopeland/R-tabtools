@@ -115,7 +115,9 @@ raise \code{tabtools_error_layout}. For block mode, \verb{$stored} holds Stata's
 \code{r()} results: \code{blocks_loaded}, \code{rows_written}, \code{cols_out}, \code{layout},
 and, with \code{xlsx}, \code{rows_out}, \code{append_start}, \code{note_row}, \code{sheet},
 \code{book}, \code{table_start}, \code{title_cell}; \code{csv}, \code{markdown},
-\code{markdown_rows}, \code{markdown_cols} for those files.
+\code{markdown_rows}, \code{markdown_cols} for those files. \code{rows_out} is the
+last worksheet row of the table; \code{note_row} is the first footnote
+paragraph row. Later note paragraphs do not change either scalar.
 
 \verb{$meta$sample_accounting} carries the source ledger described in
 \code{\link[=tt_table]{tt_table()}}; unavailable record counts remain explicit.

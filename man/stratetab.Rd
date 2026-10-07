@@ -137,12 +137,13 @@ so the outcome and statistic headers are joined as \code{outcome: statistic} (fo
 \item{open}{Open the workbook after writing (interactive sessions).}
 
 \item{cformat}{Stata numeric display format for each rate and its limits,
-using supported \verb{\%w.df}, \verb{\%w.dg} and \code{c} suffix formats (also with a
+using supported \verb{\%w.df}, \verb{\%w.dg}, \verb{\%w.de} and f/g \code{c} suffix formats (also with a
 comma decimal mark). Explicit \code{digits} with \code{cformat} raises
 \code{tabtools_error_format_conflict}; omitted digits use the session default,
 then 1. \verb{\%g} uses the existing package formatter, whose significant-digit
 formatting can differ from Stata at high precision; fixed \verb{\%f} formats
-are recommended for exact decimal display parity.}
+are recommended for exact decimal display parity. Rate ratios use
+\code{ratiodigits}, independently of \code{cformat}, as in native stratetab.}
 
 \item{sep}{Literal interval separator for rates and rate ratios. Default
 \code{", "}; an empty string also selects this default. Whitespace and
@@ -306,7 +307,13 @@ missing rates and count in \verb{$stored$N_nopt}. Events without person-time,
 or a table without any positive person-time, raise
 \code{tabtools_error_rate_no_time}. \code{N_nopt} counts zero source exposure; a
 positive source exposure that underflows after \code{pyscale} can render empty
-without increasing this source diagnostic.
+without increasing this source diagnostic. Supplied finite rate statistics
+remain authoritative even when their event totals are missing; missing
+totals propagate through ratio bounds as in native Stata. Scaled or
+generated interval overflow becomes missing rather than an error.
+Computed \code{\link[=tt_rates]{tt_rates()}} results retain missing character/factor groups as
+\code{"."} labels; a collision with an existing category label is refused.
+Supplied strate blocks still reject blank category labels.
 }
 
 \section{Differences from Stata}{

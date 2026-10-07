@@ -138,7 +138,9 @@
 #'   `r()` results: `blocks_loaded`, `rows_written`, `cols_out`, `layout`,
 #'   and, with `xlsx`, `rows_out`, `append_start`, `note_row`, `sheet`,
 #'   `book`, `table_start`, `title_cell`; `csv`, `markdown`,
-#'   `markdown_rows`, `markdown_cols` for those files.
+#'   `markdown_rows`, `markdown_cols` for those files. `rows_out` is the
+#'   last worksheet row of the table; `note_row` is the first footnote
+#'   paragraph row. Later note paragraphs do not change either scalar.
 #'
 #'   `$meta$sample_accounting` carries the source ledger described in
 #'   [tt_table()]; unavailable record counts remain explicit.
@@ -1086,7 +1088,9 @@ stacktab <- function(blocks = NULL, xlsx = NULL, sheet = NULL, layout = "vstack"
   done <- integer()
   for (i in seq_along(dests)) {
     ok <- .tt_file_copy(staged[[i]], dests[i], overwrite = TRUE)
-    if (!isTRUE(ok)) {
+    if (!isTRUE(ok) || !.tt_same_file(staged[[i]], dests[i])) {
+      # A reported successful copy may still be truncated. Verify bytes
+      # before advancing successful-target/history state.
       # The failed target too: a partial copy may have overwritten it.
       restore <- function(j) {
         if (had[j]) return(.tt_file_copy(saved[j], dests[j], overwrite = TRUE) && .tt_same_file(saved[j], dests[j]))

@@ -582,7 +582,7 @@ tt_effecttab_build <- function(mrows, o) {
   addrow <- rep(FALSE, nr)
   for (r in o$addrow) {
     labels <- c(labels, r$label)
-    type <- c(type, "var")
+    type <- c(type, "addrow")
     addrow <- c(addrow, TRUE)
     vals <- c(r$values, rep("", M))[seq_len(M)]
     for (m in seq_len(M)) {
