@@ -300,6 +300,9 @@ not request inherited output. Explicit paths still export, and explicit NULL
 destinations opt out. A requested sheet without a workbook gives
 \code{tabtools_warning_sheet_without_workbook} before output; \code{options(warn = 2)}
 interrupts the call. See \code{\link[=tabtools_options]{tabtools_options()}} for append/history behavior.
+wttab has no small-cell suppression: with a session \code{smallcells} threshold
+its group N is printed unmasked, with a
+\code{tabtools_warning_smallcells_unsupported} warning.
 }
 
 \examples{

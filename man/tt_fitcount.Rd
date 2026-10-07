@@ -50,6 +50,12 @@ not a weighted event statistic or an inference/disclosure guarantee.
 Invalid count inputs, ambiguous sample/capability evidence and stale records
 signal \code{tabtools_error_fitcount}. Frozen formula environments are not a
 historical-source claim; field availability and source origin are explicit.
+
+lme4 \code{lmerMod}/\code{glmerMod} fits (and lmerTest fits, counted as the
+\code{lmerMod} that \code{\link[=regtab]{regtab()}} shows) are counted from the fitting frame they
+retain; they keep no source data, so the event, people and exposure columns
+come from an explicit \code{data}, which must agree with that frame. Survey
+designs, multiply imputed models and \code{\link[=regtab_uv]{regtab_uv()}} stacks are refused.
 }
 \examples{
 d <- data.frame(y = c(1, 3, 2, 5, 4, 7), x = 1:6,

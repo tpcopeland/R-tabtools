@@ -84,7 +84,8 @@ labels are used as descriptors independently of this switch.}
 \item{missing}{Include ordinary and tagged missing categories. Both trend
 options refuse missing=TRUE, even if no missing values occur.}
 
-\item{level}{Confidence level in percent, strictly between 0 and 100.}
+\item{level}{Confidence level as a proportion in (0, 1) or a percentage in
+(1, 100), as in \code{\link[=ratetab]{ratetab()}} and \code{\link[=survtab]{survtab()}}; \code{0.95} and \code{95} agree.}
 
 \item{digits}{Decimal places 0 to 6; NULL uses the session default, else 1.}
 
@@ -124,7 +125,11 @@ activates ordinary session workbook/Markdown inheritance.}
 \value{
 A tt_table with stored$table (redacted count matrix), N, chi2, p,
 optional or/rr/rd and \emph{_lo/}_hi, optional trend statistics, ci_level and
-methods. stored$smallcells is a typed list with threshold, mode, n_masked
+methods. stored$test_available is FALSE (with
+stored$test_unavailable_reason, p = NA, a footnote and a
+\code{tabtools_warning_crosstab_inference} warning) when an exact Fisher test
+cannot be computed, for example on a large sparse r by c table; no
+chi-squared approximation is substituted. stored$smallcells is a typed list with threshold, mode, n_masked
 and n_linked. Active masks also return native full/primary mode and
 N_primary_suppressed, N_secondary_suppressed, N_derived_suppressed.
 meta$publication contains redacted margins/percentages and linked flags;

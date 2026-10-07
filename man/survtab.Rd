@@ -150,6 +150,11 @@ flags/notes; RMST extrapolation refuses before export. The log-rank test
 uses the full included follow-up, native hypergeometric covariance and
 group-count-minus-one degrees of freedom. Only no included failures gives
 missing grouped test results and the exact diagnostic body row.
+
+survtab has no small-cell suppression. When a session threshold is set
+with \code{\link[=tabtools_options]{tabtools_options()}} \code{smallcells}, its group N, event and at-risk
+counts are still printed unmasked, with one
+\code{tabtools_warning_smallcells_unsupported} warning per call.
 }
 \examples{
 d <- data.frame(exit = 1:4, event = c(1, 1, 0, 0))

@@ -63,7 +63,9 @@ and \code{\link[=stacktab]{stacktab()}} frames mode, or NULL to clear it.}
 
 \item{smallcells}{Session-only integer threshold of at least 3, or NULL to
 clear it. Commands with existing small-cell support inherit it when omitted;
-explicit NULL/0 disables it for one call without changing the session.}
+explicit NULL/0 disables it for one call without changing the session.
+\code{\link[=survtab]{survtab()}} and \code{\link[=wttab]{wttab()}}, which print counts but have no small-cell
+support, warn (\code{tabtools_warning_smallcells_unsupported}) instead.}
 
 \item{smallcells_mode}{Session-only \code{"strict"} or \code{"primary"} Table 1 mode,
 or NULL to clear it. An omitted Table 1 threshold inherits this mode;
