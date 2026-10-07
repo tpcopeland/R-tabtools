@@ -198,6 +198,12 @@
 #' # Frames are panels with one common header
 #' stacktab(frames = list(primary = list(data = primary, label = "Primary"),
 #'                        dose = list(data = dose, label = "Dose")))
+#' @section Session destinations:
+#' Omitted destinations inherit [tabtools_options()] workbook/Markdown values;
+#' explicit NULL opts out of each sink. Header shading inherits only for puttab
+#' and stacktab frames mode. Stacktab still requires an output sheet with a
+#' workbook. See [tabtools_options()] for append/history and warning behavior.
+#'
 #' @export
 stacktab <- function(blocks = NULL, xlsx = NULL, sheet = NULL, layout = "vstack", title = NULL,
                      note = NULL, footnote = NULL, columnmerge = NULL, style = NULL,
@@ -206,6 +212,18 @@ stacktab <- function(blocks = NULL, xlsx = NULL, sheet = NULL, layout = "vstack"
                      sheetreplace = FALSE, frames = NULL, noindent = FALSE,
                      headershade = FALSE, borderstyle = NULL, font = NULL,
                      fontsize = NULL, zebra = FALSE, digits = NULL, open = FALSE) {
+  sinks <- .tt_resolve_sinks(
+    list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
+         sheet = sheet, headershade = headershade, append = append,
+         sheetreplace = sheetreplace),
+    list(xlsx = !missing(xlsx), markdown = !missing(markdown),
+         mdappend = !missing(mdappend), sheet = !missing(sheet),
+         headershade = !missing(headershade), append = !missing(append),
+         sheetreplace = !missing(sheetreplace)),
+    policy = "omitted", shade = !is.null(frames))
+  xlsx <- sinks$values$xlsx
+  markdown <- sinks$values$markdown
+  mdappend <- sinks$values$mdappend
   if (!is.null(frames)) {
     forbidden <- c(blocks = !is.null(blocks), layout = !missing(layout),
                    columnmerge = !is.null(columnmerge), style = !is.null(style),
@@ -221,7 +239,7 @@ stacktab <- function(blocks = NULL, xlsx = NULL, sheet = NULL, layout = "vstack"
                  font = font, fontsize = fontsize, zebra = zebra, digits = digits, open = open,
                  noindent = noindent)
     if (!is.null(note) && !is.null(footnote)) .puttab_abort("note and footnote may not be combined.")
-    if (!missing(headershade)) args$headershade <- headershade
+    args$headershade <- sinks$values$headershade
     if (!is.null(sheet)) args$sheet <- sheet
     return(.stacktab_frames(frames, args))
   }
@@ -236,7 +254,6 @@ stacktab <- function(blocks = NULL, xlsx = NULL, sheet = NULL, layout = "vstack"
     if (!is.logical(v) || length(v) != 1L || is.na(v)) cli::cli_abort("{.arg {a}} must be TRUE or FALSE.", call = NULL)
   }
   has_xlsx <- !is.null(xlsx)
-  .tt_check_sheet_xlsx(sheet_given, has_xlsx)
   has_md <- !is.null(markdown)
   # stacktab.ado:66-121, in Stata's order.
   if (has_xlsx) {
@@ -375,6 +392,8 @@ stacktab <- function(blocks = NULL, xlsx = NULL, sheet = NULL, layout = "vstack"
     if (nzchar(title)) tt$stored$title_cell <- paste0("A", title_row)
   }
   .stacktab_commit(staged)
+  if (has_md) .tt_mark_sink(markdown, "markdown")
+  if (has_xlsx) .tt_mark_sink(xlsx, "workbook")
   if (has_xlsx) {
     message(sprintf("stacktab: %d blocks -> %d rows written -> sheet %s", length(bspecs), nrow(cells), sheet))
   }

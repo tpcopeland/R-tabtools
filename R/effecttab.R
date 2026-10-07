@@ -305,6 +305,14 @@
 #'               -0.03, -0.08, 0.02, 0.25), 2, byrow = TRUE,
 #'             dimnames = list(c("Treated_vs_control", "Dose_high"), NULL))
 #' effecttab(m, effect = "RD")
+#' @section Session destinations:
+#' An explicitly supplied non-NULL `sheet` enables inherited workbook and
+#' Markdown destinations from [tabtools_options()]. Default or NULL sheet does
+#' not request inherited output. Explicit paths still export, and explicit NULL
+#' destinations opt out. A requested sheet without a workbook gives
+#' `tabtools_warning_sheet_without_workbook` before output; `options(warn = 2)`
+#' interrupts the call. See [tabtools_options()] for append/history behavior.
+#'
 #' @export
 effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NULL, models = NULL,
                       clean = FALSE, tlabels = NULL, data = NULL, method = NULL, level = NULL,
@@ -314,6 +322,16 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
                       borderstyle = NULL, font = NULL, fontsize = NULL, boldp = NULL, highlight = NULL,
                       zebra = FALSE, headershade = FALSE, headercolor = NULL, zebracolor = NULL,
                       csv = NULL, markdown = NULL, mdappend = FALSE, estimand = NULL) {
+  sinks <- .tt_resolve_sinks(
+    list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
+         sheet = sheet, headershade = headershade),
+    list(xlsx = !missing(xlsx), markdown = !missing(markdown),
+         mdappend = !missing(mdappend), sheet = !missing(sheet),
+         headershade = !missing(headershade)),
+    policy = "sheet")
+  xlsx <- sinks$values$xlsx
+  markdown <- sinks$values$markdown
+  mdappend <- sinks$values$mdappend
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Effects"
@@ -357,7 +375,6 @@ effecttab <- function(..., type = c("auto", "teffects", "margins"), effect = NUL
   tlabels <- .et_parse_tlabels(tlabels)
   if (!is.null(tlabels)) clean <- TRUE
   has_xlsx <- !is.null(xlsx)
-  .tt_check_sheet_xlsx(sheet_given, has_xlsx)
   has_md <- !is.null(markdown)
   if (has_xlsx && (!is.character(xlsx) || length(xlsx) != 1L || is.na(xlsx) || !grepl("\\.xlsx$", tolower(xlsx)))) {
     cli::cli_abort("{.arg xlsx} must have a .xlsx extension.", call = NULL)

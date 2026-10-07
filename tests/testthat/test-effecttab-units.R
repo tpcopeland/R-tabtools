@@ -645,8 +645,8 @@ test_that("mutation survivors: 32-byte names, r#vs# keys, factor labels, p-only 
   expect_identical(effecttab(o, level = 95)$body$c2, c("", "Reference", "Omitted", "1.00"))
 })
 
-test_that("D04: sheet without xlsx is an error, as in table1_tc", {
-  expect_error(effecttab(te_df(), sheet = "Zed"), "`sheet` is only available when using `xlsx`")
+test_that("W01: explicit sheet without workbook gives a classed warning", {
+  expect_warning(effecttab(te_df(), sheet = "Zed"), class = "tabtools_warning_sheet_without_workbook")
 })
 
 test_that("P2-2: sheet = NULL means the default sheet", {

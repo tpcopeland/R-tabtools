@@ -239,6 +239,14 @@
 #' # Vertical composite: the sex rows of both models, stacked
 #' comptab(list(crude, adj), rownames = list("female", "female"),
 #'         section = c("Crude", "Adjusted for age and ECOG"), compact = TRUE)
+#' @section Session destinations:
+#' An explicitly supplied non-NULL `sheet` enables inherited workbook and
+#' Markdown destinations from [tabtools_options()]. Default or NULL sheet does
+#' not request inherited output. Explicit paths still export, and explicit NULL
+#' destinations opt out. A requested sheet without a workbook gives
+#' `tabtools_warning_sheet_without_workbook` before output; `options(warn = 2)`
+#' interrupts the call. See [tabtools_options()] for append/history behavior.
+#'
 #' @export
 comptab <- function(ratetable = NULL, modeltables = NULL, rows = NULL, rownames = NULL,
                     effect = NULL, reflabel = NULL, outcomemap = NULL,
@@ -249,8 +257,17 @@ comptab <- function(ratetable = NULL, modeltables = NULL, rows = NULL, rownames 
                     headercolor = NULL, zebra = FALSE, zebracolor = NULL,
                     csv = NULL, markdown = NULL, mdappend = FALSE, open = FALSE,
                     rownames_exact = FALSE) {
+  .ct_check_xlsx(xlsx)
+  sinks <- .tt_resolve_sinks(
+    list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
+         sheet = sheet, headershade = headershade),
+    list(xlsx = !missing(xlsx), markdown = !missing(markdown),
+         mdappend = !missing(mdappend), sheet = !missing(sheet),
+         headershade = !missing(headershade)), policy = "sheet")
+  xlsx <- sinks$values$xlsx
+  markdown <- sinks$values$markdown
+  mdappend <- sinks$values$mdappend
   # sheet = NULL is no sheet: the default (review P2-2).
-  .tt_check_sheet_xlsx(!base::missing(sheet) && !is.null(sheet), !is.null(xlsx))
   if (is.null(sheet)) sheet <- "Composite"
   rate_label <- .ct_arg_label(substitute(ratetable))
   model_label <- .ct_arg_label(substitute(modeltables))
@@ -344,7 +361,11 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   }
   unknown <- setdiff(names(dots), names(formals(comptab)))
   if (length(unknown)) cli::cli_abort("Unknown argument{?s} {.arg {unknown}} to {.fn hrcomptab}.", call = NULL)
-  .tt_check_sheet_xlsx(!is.null(dots$sheet), !is.null(args$xlsx))
+  .ct_check_xlsx(args$xlsx)
+  sinks <- .tt_resolve_sinks(args,
+    stats::setNames(as.list(c("xlsx", "markdown", "mdappend", "sheet", "headershade") %in% names(dots)),
+                    c("xlsx", "markdown", "mdappend", "sheet", "headershade")), policy = "sheet")
+  args <- sinks$values
   if (is.null(args$sheet)) args$sheet <- "Composite"
   for (a in c("rownames_exact", "headershade", "zebra", "mdappend", "open")) {
     v <- args[[a]]
@@ -654,6 +675,15 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
                  class = "tabtools_error_rownames_count", call = NULL)
 }
 
+# Preserve the composite boundary diagnostic before shared sink preflight.
+.ct_check_xlsx <- function(xlsx) {
+  if (!is.null(xlsx) && (!is.character(xlsx) || length(xlsx) != 1L || is.na(xlsx) ||
+                        !grepl("\\.xlsx$", tolower(xlsx)))) {
+    cli::cli_abort("{.arg xlsx} must have a .xlsx extension.", call = NULL)
+  }
+  invisible(NULL)
+}
+
 .ct_check_common <- function(a) {
   if (is.null(a$rows) && is.null(a$rownames)) cli::cli_abort("One of {.arg rows} or {.arg rownames} is required.", call = NULL)
   if (isTRUE(a$rownames_exact) && is.null(a$rownames)) {
@@ -662,9 +692,7 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   if (!is.null(a$rows) && !is.null(a$rownames)) cli::cli_abort("{.arg rows} and {.arg rownames} may not be combined.", call = NULL)
   has_xlsx <- !is.null(a$xlsx)
   if (a$open && !has_xlsx) cli::cli_abort("{.arg open} requires {.arg xlsx}.", call = NULL)
-  if (has_xlsx && (!is.character(a$xlsx) || length(a$xlsx) != 1L || is.na(a$xlsx) || !grepl("\\.xlsx$", tolower(a$xlsx)))) {
-    cli::cli_abort("{.arg xlsx} must have a .xlsx extension.", call = NULL)
-  }
+  .ct_check_xlsx(a$xlsx)
   if (!is.null(a$csv)) .tt_check_csv_path(a$csv)
   if (a$mdappend && is.null(a$markdown)) cli::cli_abort("{.arg mdappend} requires {.arg markdown}.", call = NULL)
   if (!is.null(a$markdown) && (!is.character(a$markdown) || length(a$markdown) != 1L || is.na(a$markdown) ||

@@ -15,7 +15,8 @@ test_that("option errors mirror Stata's conditions", {
   expect_error(f(xlsx = "out.xls"), ".xlsx file")                   # r(198)
   expect_error(f(mdappend = TRUE), "requires")                      # r(198) mdappend requires markdown()
   expect_error(f(markdown = "out.txt"), ".md")                      # r(198)
-  expect_error(f(sheet = "S"), "only available")                    # r(498) sheet() only with excel()
+  # W01 classed warning replaces the historical r(498) contract.
+  expect_warning(f(sheet = "S"), class = "tabtools_warning_sheet_without_workbook")
   expect_no_error(f(title = "T", markdown = md))
   expect_error(f(borderstyle = "dotted", xlsx = xl), "borderstyle")  # r(498)
   expect_error(f(sheet = "a/b", xlsx = xl), "not allowed")

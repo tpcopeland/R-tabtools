@@ -68,7 +68,8 @@
   args$varlabels <- TRUE
   args$noembedheader <- TRUE
   compute_args <- args
-  compute_args[c("xlsx", "csv", "markdown", "sheet")] <- NULL
+  # Keep the names: omission would reactivate the session destinations.
+  compute_args[c("xlsx", "csv", "markdown", "sheet")] <- rep(list(NULL), 4L)
   compute_args$mdappend <- FALSE
   compute_args$open <- FALSE
   tt <- do.call(puttab, compute_args)

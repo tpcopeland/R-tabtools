@@ -279,8 +279,8 @@ test_that("returned visibly without files, invisibly with them; sinks and conver
   expect_s3_class(g, "gt_tbl")
 })
 
-test_that("D04: sheet without xlsx is an error, as in table1_tc", {
-  expect_error(stratetab(st_block(), sheet = "Zed"), "`sheet` is only available when using `xlsx`")
+test_that("W01: explicit sheet without workbook gives a classed warning", {
+  expect_warning(stratetab(st_block(), sheet = "Zed"), class = "tabtools_warning_sheet_without_workbook")
 })
 
 test_that("P2-2: sheet = NULL means the default sheet", {

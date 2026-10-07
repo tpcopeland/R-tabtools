@@ -481,11 +481,11 @@ test_that("review P3-5: hrcomptab() takes effect, reflabel, outcomemap in compta
   expect_identical(body_cell(x, "No", 5), "Ref.")
 })
 
-test_that("D04: sheet without xlsx is an error in comptab() and hrcomptab()", {
+test_that("W01: explicit sheet without workbook gives a classed warning", {
   r <- ct_rates()
   m <- ct_models()
-  expect_error(comptab(r, list(m, m), rows = list(1, 4:5), sheet = "Zed"), "`sheet` is only available when using `xlsx`")
-  expect_error(hrcomptab(r, list(m, m), rows = list(1, 4:5), sheet = "Zed"), "`sheet` is only available when using `xlsx`")
+  expect_warning(comptab(r, list(m, m), rows = list(1, 4:5), sheet = "Zed"), class = "tabtools_warning_sheet_without_workbook")
+  expect_warning(hrcomptab(r, list(m, m), rows = list(1, 4:5), sheet = "Zed"), class = "tabtools_warning_sheet_without_workbook")
 })
 
 test_that("P2-2: sheet = NULL means the default sheet in comptab() and hrcomptab()", {

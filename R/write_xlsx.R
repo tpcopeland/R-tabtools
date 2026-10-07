@@ -45,11 +45,17 @@
 #' tt_write_xlsx(tab, path, sheet = "Table 1")
 #' tab$title <- "Table 1. Characteristics"
 #' tt_write_xlsx(tab, path, sheet = "Table 1b")
+#' @section Session destinations:
+#' Writes only the explicitly named path; session defaults never add another
+#' sink. A successful write to an active session destination records its history
+#' for later inherited writes. See [tabtools_options()].
+#'
 #' @export
 tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
   .tt_check_table(x)
   x <- .tt_blank_text(x)
   .tt_check_path(path, "\\.xlsx$", "xlsx", "a .xlsx file")
+  .tt_resolve_sinks(list(xlsx = path), list(xlsx = TRUE), policy = "writer")
   if (identical(x$layout$xlsx_rules, "none")) {
     cli::cli_abort(c("No Excel layout exists yet for {.val {x$command}} tables.",
                      "i" = "Set {.code layout$xlsx_rules} to {.val descriptive}, {.val regression}, {.val puttab}, {.val stacktab}, {.val stratetab}, {.val comptab}, or {.val hrcomptab}."),
@@ -89,6 +95,7 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
                      parent = e, call = NULL)
     })
   for (w in warn) warning(w, call. = FALSE)
+  .tt_mark_sink(path, "workbook")
   if (open && interactive()) utils::browseURL(path)
   invisible(path)
 }

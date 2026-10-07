@@ -336,8 +336,8 @@ test_that("as_forest_data mirrors eplotframe()", {
   expect_error(as_forest_data(table1_tc(a, vars = "mpg")), "regtab")
 })
 
-test_that("D04: sheet without xlsx is an error, as in table1_tc", {
-  expect_error(regtab(lm(mpg ~ wt, mtcars), sheet = "Zed"), "`sheet` is only available when using `xlsx`")
+test_that("W01: explicit sheet without workbook gives a classed warning", {
+  expect_warning(regtab(lm(mpg ~ wt, mtcars), sheet = "Zed"), class = "tabtools_warning_sheet_without_workbook")
 })
 
 test_that("P2-2: sheet = NULL means the default sheet", {

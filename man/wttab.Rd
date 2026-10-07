@@ -292,6 +292,16 @@ counterpart to check them against. Like \code{puttab()}, \code{wttab()} emits a
 \verb{Markdown exported to ...} message when it writes a Markdown file.
 }
 
+\section{Session destinations}{
+
+An explicitly supplied non-NULL \code{sheet} enables inherited workbook and
+Markdown destinations from \code{\link[=tabtools_options]{tabtools_options()}}. Default or NULL sheet does
+not request inherited output. Explicit paths still export, and explicit NULL
+destinations opt out. A requested sheet without a workbook gives
+\code{tabtools_warning_sheet_without_workbook} before output; \code{options(warn = 2)}
+interrupts the call. See \code{\link[=tabtools_options]{tabtools_options()}} for append/history behavior.
+}
+
 \examples{
 # IPTW for a point treatment: stabilized weights from a propensity score
 set.seed(1)

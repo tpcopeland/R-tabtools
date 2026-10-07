@@ -64,3 +64,65 @@ test_that("H14: the documented fontsize ranges hold (persistent 6-72, per table 
   expect_identical(regtab(stats::lm(mpg ~ wt, mtcars), fontsize = 1)$style$fontsize, 1L)
   expect_error(table1_tc(d, by = "g", vars = c(x = "contn"), fontsize = 73), "between 1 and 72")
 })
+
+test_that("session options query, individual clearing and validation are atomic", {
+  directory <- ss_local()
+  book <- file.path(directory, "book.xlsx")
+  md <- file.path(directory, "report.md")
+  tabtools_options(font = "Calibri", borderstyle = "academic", workbook = book,
+                   markdown = md, headershade = TRUE, smallcells = 3,
+                   smallcells_mode = "primary", masktext = "")
+  query <- tabtools_options()
+  expect_identical(query$workbook, tabtools:::.tt_path_key(book))
+  expect_identical(query$markdown, tabtools:::.tt_path_key(md))
+  expect_identical(query$smallcells, 3L)
+  expect_identical(query$masktext, "")
+  before <- tabtools_options()
+  state <- as.list(tabtools:::.tt_sink_state)
+  expect_error(tabtools_options(font = "Arial", workbook = "bad.txt"), "workbook")
+  expect_identical(tabtools_options(), before)
+  expect_identical(as.list(tabtools:::.tt_sink_state), state)
+  expect_error(tabtools_options(headershade = 1), class = "tabtools_error_session_option")
+  expect_error(tabtools_options(smallcells = 2), "smallcells")
+  expect_error(tabtools_options(smallcells_mode = "full"), class = "tabtools_error_session_option")
+  expect_error(tabtools_options(masktext = NA_character_), "masktext")
+  for (key in names(query)) {
+    tabtools_options(clear = TRUE)
+    do.call(tabtools_options, query)
+    do.call(tabtools_options, stats::setNames(list(NULL), key))
+    expect_null(tabtools_options()[[key]])
+    expect_identical(tabtools_options(), query[setdiff(names(query), key)])
+  }
+  tabtools_options(clear = TRUE)
+  withr::local_dir(directory)
+  tabtools_options(workbook = "./book.xlsx", markdown = "./report.md")
+  withr::local_dir(dirname(directory))
+  expect_identical(tabtools_options()$workbook, tabtools:::.tt_path_key(book))
+  expect_identical(tabtools_options()$markdown, tabtools:::.tt_path_key(md))
+})
+
+test_that("persist saves only formatting and rejects explicit session changes", {
+  directory <- ss_local()
+  withr::local_envvar(R_USER_CONFIG_DIR = file.path(directory, "config"))
+  tabtools_options(borderstyle = "academic", markdown = file.path(directory, "report.md"),
+                   smallcells = 3, masktext = "SECRET")
+  before <- tabtools_options()
+  for (key in tabtools:::.tt_session_option_keys) {
+    expect_error(do.call(tabtools_options, c(stats::setNames(list(NULL), key), list(persist = TRUE))),
+                 class = "tabtools_error_session_persist")
+  }
+  expect_identical(tabtools_options(), before)
+  tabtools_options(persist = TRUE)
+  file <- tabtools:::.tt_defaults_file()
+  expect_identical(colnames(read.dcf(file)), "borderstyle")
+  expect_identical(unname(read.dcf(file)[1, "borderstyle"]), "academic")
+  tabtools_options(borderstyle = NULL, persist = TRUE)
+  expect_false("borderstyle" %in% colnames(read.dcf(file)))
+  # Even a hand-edited DCF cannot restore session-only keys.
+  write.dcf(data.frame(borderstyle = "medium", markdown = "unwanted.md"), file)
+  tabtools_options(clear = TRUE)
+  tabtools:::.tt_load_persisted()
+  expect_identical(tabtools_options(), list(borderstyle = "medium"))
+  tabtools_options(clear = TRUE, persist = TRUE)
+  expect_false(file.exists(file))
+})

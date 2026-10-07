@@ -1,5 +1,19 @@
 # tabtools (development version)
 
+* `tabtools_options()` adds session workbook/Markdown destinations, puttab/frame
+  header shading, and supported masking defaults. Explicit NULL clears one key;
+  omitted keys remain unchanged. Session keys are excluded from persistence.
+* Ordinary commands inherit both destinations only for an explicit non-NULL
+  sheet; puttab/stacktab inherit omitted destinations. Explicit NULL opts out
+  per sink, and Table 1 retains native non-NULL `excel` alias priority. Missing
+  workbooks give a classed sheet warning before output. Explicit writers remain
+  single-sink APIs; workbooks preserve unrelated sheets.
+* Inherited Markdown replaces on its first successful write, then appends;
+  explicit destinations retain replacement defaults and explicit append wins.
+  Successful active-path history survives A/B/A, repeated setting and clearing.
+  Failed writes and stacktab staging never advance history; stacktab records
+  destinations after its atomic commit.
+
 * `regtab()` and `effecttab()` accept full numeric `cformat` formats for
   estimates and both confidence limits, including exponential formats.
   Explicit `digits` conflicts with `cformat`; decimal-comma formats require

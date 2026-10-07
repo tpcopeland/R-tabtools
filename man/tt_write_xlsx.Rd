@@ -29,6 +29,13 @@ Replaces a same-named sheet (case-insensitive, keeping its position) in
 an existing workbook, or adds one; creates the workbook if needed
 (\verb{_tabtools_xlsx_write.ado}).
 }
+\section{Session destinations}{
+
+Writes only the explicitly named path; session defaults never add another
+sink. A successful write to an active session destination records its history
+for later inherited writes. See \code{\link[=tabtools_options]{tabtools_options()}}.
+}
+
 \examples{
 d <- data.frame(arm = rep(c("A", "B"), each = 10), x = 1:20)
 tab <- table1_tc(d, by = "arm", vars = c(x = "contn"))

@@ -680,12 +680,12 @@ test_that("C7: stacktab's blocks() grammar follows Stata since 68c37a90", {
   expect_error(bl("SHEET(A) Rows(2/3)"), NA)
 })
 
-test_that("D04: puttab and stacktab refuse sheet without xlsx, as table1_tc does", {
+test_that("W01: explicit sheet without workbook gives a classed warning", {
   d <- data.frame(t = c("A", "B"), v = c("1", "2"))
-  expect_error(puttab(d, sheet = "Zed"), "`sheet` is only available when using `xlsx`")
-  expect_error(stacktab(list(puttab(d)), sheet = "Zed"), "`sheet` is only available when using `xlsx`")
-  expect_error(table1_tc(data.frame(g = rep(1:2, 5), x = 1:10), by = "g", vars = "x", sheet = "Z"),
-               "`sheet` is only available when using `xlsx`")
+  expect_warning(puttab(d, sheet = "Zed"), class = "tabtools_warning_sheet_without_workbook")
+  expect_warning(stacktab(list(puttab(d)), sheet = "Zed"), class = "tabtools_warning_sheet_without_workbook")
+  expect_warning(table1_tc(data.frame(g = rep(1:2, 5), x = 1:10), by = "g", vars = "x", sheet = "Z"),
+               class = "tabtools_warning_sheet_without_workbook")
 })
 
 test_that("P2-2: an explicit sheet = NULL means no sheet (the default) in puttab, stacktab and table1_tc", {

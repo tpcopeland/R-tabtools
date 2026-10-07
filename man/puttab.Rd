@@ -269,6 +269,14 @@ and variable characteristics. R uses \code{vars} and validated model metadata.
 }
 }
 
+\section{Session destinations}{
+
+Omitted destinations inherit \code{\link[=tabtools_options]{tabtools_options()}} workbook/Markdown values;
+explicit NULL opts out of each sink. Header shading inherits only for puttab
+and stacktab frames mode. Stacktab still requires an output sheet with a
+workbook. See \code{\link[=tabtools_options]{tabtools_options()}} for append/history and warning behavior.
+}
+
 \examples{
 # A matrix: the row names become the label column
 fit <- lm(mpg ~ wt + hp, data = mtcars)
