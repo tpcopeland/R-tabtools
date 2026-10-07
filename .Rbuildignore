@@ -30,4 +30,3 @@
 ^tests/testthat/golden/P0[29](\.|_)
 ^demo$
 ^trailer$
-^tests/testthat/golden/phase2-2\.5\.1/P0[29](\.|_)

@@ -237,7 +237,11 @@
   tt$meta$sample_codes <- sample_codes
   tt$meta$derived_rows <- derived
   tt$meta$linked_cells <- linked
-  tt$meta$header_linked <- isTRUE(o$headerperc) && any(sample_codes > 0)
+  # Header percentages depend on the displayed Total, when present, or on
+  # every group count otherwise. A masked unrelated group must not protect
+  # a visible descriptor whose percentage has a visible Total denominator.
+  denominator_masked <- if (total_present) tail(sample_codes, 1L) > 0L else any(sample_codes > 0L)
+  tt$meta$header_linked <- rep(isTRUE(o$headerperc) && denominator_masked, length(sample_codes))
   tt
 }
 

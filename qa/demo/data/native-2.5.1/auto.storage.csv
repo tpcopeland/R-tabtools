@@ -1,0 +1,13 @@
+variable,storage
+make,str18
+price,int
+mpg,int
+rep78,int
+headroom,float
+trunk,int
+weight,int
+length,int
+turn,int
+displacement,int
+gear_ratio,float
+foreign,byte

@@ -15,6 +15,12 @@
 **# Console: corrtab display
 **# Console: crosstab display
 **# Console: smallcells() disclosure control
+**# Console: smallcells(#, primary) and cellreplace()
+**# Console: tabtools session settings
+**# Console: tabcell single cells
+**# Console: ratetab incidence rates
+**# Console: outtab binary outcomes by exposure
+**# Console: regtab 2.3 layout options
 **# Console: puttab + stacktab export pipeline
 **# Console: Markdown export report
 **# Verify Markdown report content
@@ -83,5 +89,15 @@
 **## Complementary suppression prevents reconstruction
 **## Binary variable suppression
 **## Verify primary and complementary markers in every workbook
+**# Sheets: regtab 2.3 options -- cformat, flat frame + reftop, transpose, cellnote, fit counts
+**# Sheet: effecttab cformat()
+**# Sheets: comptab cformat(), cisep(), and a flat frame
+**# Sheets: ratetab -- rates from stset data, then rates + models with comptab
+**# Sheets: outtab -- binary outcomes by exposure
+**# Sheet: tabcell columns, written to a tabtools session workbook
+**# Sheets: puttab 2.2/2.3 layout options -- hlines/boldrows, panels, spans
+**# Sheet: stacktab frames() -- stack table1_tc frames as panels
+**# Sheets: table1_tc/desctab/crosstab smallcells(#, primary) and cellreplace()
+**# Verify 2.3 workbook content
 **# Convert console output to markdown
 **# Cleanup

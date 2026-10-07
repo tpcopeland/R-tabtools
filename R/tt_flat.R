@@ -152,6 +152,11 @@
 #'   even when `_block` is projected away). Source/state matrices retain all
 #'   original model columns;
 #'   projected visible and state columns keep their original model indices.
+#' @details Rate, outcome, group-summary and publication-composite frames require
+#'   `keyed = FALSE`. They return a plain character body data frame with
+#'   `header`, `command`, `frame`, `sample_accounting` and `composition_export`
+#'   attributes; absent sample metadata remains absent. These editing products
+#'   cannot be reused as authenticated composition inputs.
 #' @seealso [as.data.frame.tt_table()], [puttab()]
 #' @examples
 #' tab <- regtab(lm(mpg ~ wt + factor(cyl), mtcars), stats = "n")
@@ -161,9 +166,18 @@
 #' tt_flat(tab, keyed = FALSE)
 #' @export
 tt_flat <- function(x, keyed = TRUE) {
+  if (inherits(x, "tt_cell")) {
+    cli::cli_abort("A cell vector has no fitted-model flat schema; publish it with {.fn puttab}.",
+                   class = c("tabtools_error_flat", "tabtools_error_cell"), call = NULL)
+  }
   validate_tt_table(x)
   if (!is.logical(keyed) || length(keyed) != 1L || is.na(keyed)) {
     cli::cli_abort("{.arg keyed} must be TRUE or FALSE.", class = "tabtools_error_flat", call = NULL)
+  }
+  if (x$command %in% c("comptab", "hrcomptab", "ratetab", "outtab", "crosstab", "corrtab", "survtab")) {
+    if (keyed) cli::cli_abort("This publication frame has no fitted-model keyed schema; use keyed = FALSE.",
+      class = "tabtools_error_flat", call = NULL)
+    return(.tt_unkeyed_export(x))
   }
   if (!x$command %in% c("regtab", "effecttab")) {
     cli::cli_abort("{.fn tt_flat} requires a regression or effect table.",

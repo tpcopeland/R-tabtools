@@ -1,0 +1,7 @@
+label,estimate,ll,ul,pvalue,model,model_label,rowtype,section,source_row,source_frame
+g,,,,,,,section,g,,_co_tworates
+   A,,,,,,,reference,g,,_co_tworates
+  B,2.999999496760773,.605505477228972,14.86360952794741,.1784574813824139,1,First outcome,effect,g,3,_co_paired
+  B,1.666666666675325,.398308004952385,6.973944141892664,.4842541113298984,2,Second outcome,effect,g,3,_co_paired
+  C,4.49999924348184,.9722940565814365,20.82702558373713,.0543518023619425,1,First outcome,effect,g,4,_co_paired
+  C,2.666666666662021,.7074610972718525,10.05159313848997,.1473988012397792,2,Second outcome,effect,g,4,_co_paired

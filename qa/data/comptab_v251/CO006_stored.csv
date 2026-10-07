@@ -1,0 +1,16 @@
+name,kind,row,col,value
+_golden_id,meta,,,CO006
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,not_used
+_golden_stata_version,meta,,,17
+ci_level,scalar,,,95
+N_frames,scalar,,,1
+N_models,scalar,,,1
+N_cols,scalar,,,5
+N_rows,scalar,,,5
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,3
+methods,macro,,,Composite table assembled from 1 source frame(s) with 1 model column(s). The final table contains 5 rows and 5 columns.
+sheet,macro,,,CO006
+xlsx,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/native-co-v2/comptab.xlsx
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/native-co-v2/CO006.md

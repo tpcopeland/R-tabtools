@@ -76,9 +76,12 @@ Descriptive Statistics
 Model Results
   regtab       - Regression results from any estimation command
   effecttab    - Treatment-effect style tables from supported results
+  tabcell      - One publication cell from a fit, lincom, matrix, or numbers
+  outtab       - Binary outcomes by exposure: counts plus model ratios
 
 Incidence Rates
   stratetab    - Incidence rates from strate output
+  ratetab      - Events, person-time, and rates with exact/robust CIs
 
 Survival Analysis
   survtab      - Kaplan-Meier estimates, medians, and RMST
@@ -96,7 +99,7 @@ General Purpose
   tabtools_tips - Quick reference and worked recipes
 
 ----------------------------------------------------------------------
-Total commands: 14
+Total commands: 17
 
 Help:     help tabtools for overview
           tabtools_tips for quick reference and recipes
@@ -148,12 +151,23 @@ Model Results
                Formats effect estimates, confidence intervals,
                and p-values for publication output.
 
+  tabcell      Format one estimate (CI), p-value, n (%),
+               e/n (%), or median (Q1, Q3) cell from a fit,
+               lincom/nlcom, a matrix row, or numbers.
+
+  outtab       Tabulate binary outcomes by exposure with
+               events/N (%) and one ratio column per model.
+
 Incidence Rates
   ------------------------------------------------------------
   stratetab    Export stratified incidence rates from strate
                command output. Formats person-time, events,
                rates, and confidence intervals. Supports
                rate ratios and stratified analyses.
+
+  ratetab      Compute events, person-time, and rates by group
+               from stset or event/exposure data, with exact,
+               Poisson, or cluster-robust intervals.
 
 Survival Analysis
   ------------------------------------------------------------
@@ -208,39 +222,39 @@ General Purpose
   +------------------------------------------------------------------+
   |                                SSRI         SNRI         p-value |
   |------------------------------------------------------------------|
-  | No. (Column %) or Mean±SD      N=8,934      N=6,066              |
+  | No. (Column %) or Mean±SD      N=8,929      N=6,071              |
   |------------------------------------------------------------------|
-  | Age at cohort entry (years)    58.3±13.4    58.5±13.3    0.24    |
+  | Age at cohort entry (years)    55.9±13.4    62.0±12.4    <0.001  |
   |------------------------------------------------------------------|
-  | Female sex                     5,351 (60)   3,621 (60)   0.80    |
+  | Female sex                     5,530 (62)   3,442 (57)   <0.001  |
   |------------------------------------------------------------------|
-  | Education level                                          0.11    |
-  |    Primary                     2,333 (26)   1,527 (25)           |
-  |    Secondary                   3,530 (40)   2,354 (39)           |
-  |    Tertiary                    3,071 (34)   2,185 (36)           |
+  | Education level                                          0.71    |
+  |    Primary                     2,280 (26)   1,580 (26)           |
+  |    Secondary                   3,524 (39)   2,360 (39)           |
+  |    Tertiary                    3,125 (35)   2,131 (35)           |
   |------------------------------------------------------------------|
-  | Disposable income quintile                               0.73    |
-  |    1                           1,778 (20)   1,175 (19)           |
-  |    2                           1,783 (20)   1,249 (21)           |
-  |    3                           1,769 (20)   1,228 (20)           |
-  |    4                           1,786 (20)   1,209 (20)           |
-  |    5                           1,818 (20)   1,205 (20)           |
+  | Disposable income quintile                               0.22    |
+  |    1                           1,727 (19)   1,226 (20)           |
+  |    2                           1,853 (21)   1,179 (19)           |
+  |    3                           1,776 (20)   1,221 (20)           |
+  |    4                           1,758 (20)   1,237 (20)           |
+  |    5                           1,815 (20)   1,208 (20)           |
   |------------------------------------------------------------------|
-  | Born outside Sweden            1,362 (15)   897 (15)     0.44    |
+  | Born outside Sweden            1,359 (15)   900 (15)     0.51    |
   |------------------------------------------------------------------|
-  | Marital status                                           0.34    |
-  |    Single                      2,764 (31)   1,804 (30)           |
-  |    Married                     3,074 (34)   2,162 (36)           |
-  |    Divorced                    1,763 (20)   1,188 (20)           |
-  |    Widowed                     1,333 (15)   912 (15)             |
+  | Marital status                                           0.41    |
+  |    Single                      2,755 (31)   1,813 (30)           |
+  |    Married                     3,072 (34)   2,164 (36)           |
+  |    Divorced                    1,758 (20)   1,193 (20)           |
+  |    Widowed                     1,344 (15)   901 (15)             |
   |------------------------------------------------------------------|
-  | Diabetes                       4,107 (46)   2,818 (46)   0.56    |
+  | Diabetes                       2,566 (29)   4,359 (72)   <0.001  |
   |------------------------------------------------------------------|
-  | Hypertension                   4,112 (46)   2,935 (48)   0.005   |
+  | Hypertension                   2,765 (31)   4,282 (71)   <0.001  |
   |------------------------------------------------------------------|
-  | Anxiety disorder               6,079 (68)   4,148 (68)   0.66    |
+  | Anxiety disorder               5,748 (64)   4,479 (74)   <0.001  |
   |------------------------------------------------------------------|
-  | Prior cardiovascular disease   5,002 (56)   3,390 (56)   0.90    |
+  | Prior cardiovascular disease   4,629 (52)   3,763 (62)   <0.001  |
   +------------------------------------------------------------------+
 ```
 
@@ -260,29 +274,29 @@ General Purpose
   +-----------------------------------------------------------------+
   |                               SSRI         SNRI         SMD     |
   |-----------------------------------------------------------------|
-  | No. (Column %) or Mean±SD     N=8,934      N=6,066              |
+  | No. (Column %) or Mean±SD     N=8,929      N=6,071              |
   |-----------------------------------------------------------------|
-  | Age at cohort entry (years)   58.3±13.4    58.5±13.3    0.019   |
+  | Age at cohort entry (years)   55.9±13.4    62.0±12.4    0.477   |
   |-----------------------------------------------------------------|
-  | Female sex                    5,351 (60)   3,621 (60)   0.004   |
+  | Female sex                    5,530 (62)   3,442 (57)   0.107   |
   |-----------------------------------------------------------------|
-  | Education level                                         0.035   |
-  |    Primary                    2,333 (26)   1,527 (25)           |
-  |    Secondary                  3,530 (40)   2,354 (39)           |
-  |    Tertiary                   3,071 (34)   2,185 (36)           |
+  | Education level                                         0.014   |
+  |    Primary                    2,280 (26)   1,580 (26)           |
+  |    Secondary                  3,524 (39)   2,360 (39)           |
+  |    Tertiary                   3,125 (35)   2,131 (35)           |
   |-----------------------------------------------------------------|
-  | Disposable income quintile                              0.024   |
-  |    1                          1,778 (20)   1,175 (19)           |
-  |    2                          1,783 (20)   1,249 (21)           |
-  |    3                          1,769 (20)   1,228 (20)           |
-  |    4                          1,786 (20)   1,209 (20)           |
-  |    5                          1,818 (20)   1,205 (20)           |
+  | Disposable income quintile                              0.040   |
+  |    1                          1,727 (19)   1,226 (20)           |
+  |    2                          1,853 (21)   1,179 (19)           |
+  |    3                          1,776 (20)   1,221 (20)           |
+  |    4                          1,758 (20)   1,237 (20)           |
+  |    5                          1,815 (20)   1,208 (20)           |
   |-----------------------------------------------------------------|
-  | Born outside Sweden           1,362 (15)   897 (15)     0.013   |
+  | Born outside Sweden           1,359 (15)   900 (15)     0.011   |
   |-----------------------------------------------------------------|
-  | Diabetes                      4,107 (46)   2,818 (46)   0.010   |
+  | Diabetes                      2,566 (29)   4,359 (72)   0.954   |
   |-----------------------------------------------------------------|
-  | Hypertension                  4,112 (46)   2,935 (48)   0.047   |
+  | Hypertension                  2,765 (31)   4,282 (71)   0.862   |
   +-----------------------------------------------------------------+
 ```
 
@@ -321,29 +335,29 @@ General Purpose
 
 ```
   +---------------------------------------------------------------------------------------------------------------------
-> ------------------+
-  |                                                         SSRI (N=8934)                SNRI (N=6066)   Difference (SSR
-> I - SNRI)       p |
-  |                       Median survival, d                       5699.0                       5660.0                  
->      39.0   0.094 |
-  |                                 (95% CI)             (5617.0, 5760.0)             (5574.0, 5729.0)                  
->                   |
-  |                     Survival probability                                                                            
->                   |
-  |                                 365 days                        99.9%                        99.8%            0.1 (-
-> 0.1, 0.2)         |
-  |                                 730 days                        99.5%                        99.5%           -0.1 (-
-> 0.3, 0.2)         |
-  |                                1095 days                        99.0%                        99.1%           -0.1 (-
-> 0.4, 0.2)         |
-  |                                1460 days                        97.3%                        97.5%           -0.2 (-
-> 0.8, 0.3)         |
-  |                RMST (1460-d), d (95% CI)   1448.87 (1447.02, 1450.72)   1449.75 (1447.55, 1451.96)        -0.88 (-3.
-> 76, 1.99)         |
-  | Log-rank test: chi2(1) = 2.80, p = 0.094                                                                            
->                   |
+> ---------------------+
+  |                                                           SSRI (N=8929)                SNRI (N=6071)   Difference (S
+> SRI - SNRI)        p |
+  |                         Median survival, d                       5862.0                       5212.0                
+>       650.0   <0.001 |
+  |                                   (95% CI)             (5814.0, 5914.0)             (5116.0, 5338.0)                
+>                      |
+  |                       Survival probability                                                                          
+>                      |
+  |                                   365 days                        99.9%                        99.7%             0.2
+>  (0.1, 0.4)          |
+  |                                   730 days                        99.7%                        99.1%             0.6
+>  (0.3, 0.8)          |
+  |                                  1095 days                        99.3%                        98.6%             0.7
+>  (0.3, 1.0)          |
+  |                                  1460 days                        98.0%                        96.3%             1.7
+>  (1.1, 2.2)          |
+  |                  RMST (1460-d), d (95% CI)   1452.56 (1451.11, 1454.01)   1444.17 (1441.38, 1446.97)         8.38 (5
+> .24, 11.53)          |
+  | Log-rank test: chi2(1) = 196.10, p < 0.001                                                                          
+>                      |
   +---------------------------------------------------------------------------------------------------------------------
-> ------------------+
+> ---------------------+
 
 ```
 
@@ -359,16 +373,16 @@ General Purpose
   +-------------------------------------------------------------------+
   |                                    Model                          |
   |                                       OR         95% CI   p-value |
-  |  Age at cohort entry (years)        1.00   (1.00, 1.00)      0.27 |
-  |                   Female sex        0.99   (0.93, 1.06)      0.84 |
+  |  Age at cohort entry (years)        1.05   (1.05, 1.05)    <0.001 |
+  |                   Female sex        0.75   (0.69, 0.81)    <0.001 |
   |              Education level                                      |
   |                      Primary   Reference                          |
-  |                    Secondary        1.02   (0.94, 1.11)      0.66 |
-  |                     Tertiary        1.09   (1.00, 1.18)     0.053 |
-  |                     Diabetes        1.01   (0.94, 1.08)      0.78 |
-  |                 Hypertension        1.10   (1.03, 1.17)     0.005 |
-  |             Anxiety disorder        1.00   (0.93, 1.08)      0.96 |
-  | Prior cardiovascular disease        0.98   (0.92, 1.05)      0.63 |
+  |                    Secondary        0.95   (0.86, 1.06)      0.35 |
+  |                     Tertiary        0.95   (0.86, 1.06)      0.37 |
+  |                     Diabetes        8.27   (7.59, 9.03)    <0.001 |
+  |                 Hypertension        7.07   (6.48, 7.71)    <0.001 |
+  |             Anxiety disorder        1.02   (0.93, 1.12)      0.68 |
+  | Prior cardiovascular disease        1.13   (1.04, 1.22)     0.005 |
   +-------------------------------------------------------------------+
 
 ```
@@ -385,16 +399,16 @@ General Purpose
   +------------------------------------------------------------+
   |                                            Model           |
   |                                        OR 95% CI   p-value |
-  |  Age at cohort entry (years)   1.00 (1.00, 1.00)      0.27 |
-  |                   Female sex   0.99 (0.93, 1.06)      0.84 |
+  |  Age at cohort entry (years)   1.05 (1.05, 1.05)    <0.001 |
+  |                   Female sex   0.75 (0.69, 0.81)    <0.001 |
   |              Education level                               |
   |                      Primary           Reference           |
-  |                    Secondary   1.02 (0.94, 1.11)      0.66 |
-  |                     Tertiary   1.09 (1.00, 1.18)     0.053 |
-  |                     Diabetes   1.01 (0.94, 1.08)      0.78 |
-  |                 Hypertension   1.10 (1.03, 1.17)     0.005 |
-  |             Anxiety disorder   1.00 (0.93, 1.08)      0.96 |
-  | Prior cardiovascular disease   0.98 (0.92, 1.05)      0.63 |
+  |                    Secondary   0.95 (0.86, 1.06)      0.35 |
+  |                     Tertiary   0.95 (0.86, 1.06)      0.37 |
+  |                     Diabetes   8.27 (7.59, 9.03)    <0.001 |
+  |                 Hypertension   7.07 (6.48, 7.71)    <0.001 |
+  |             Anxiety disorder   1.02 (0.93, 1.12)      0.68 |
+  | Prior cardiovascular disease   1.13 (1.04, 1.22)     0.005 |
   +------------------------------------------------------------+
 
 ```
@@ -411,16 +425,16 @@ General Purpose
   +---------------------------------------------------------+
   |                                    Model                |
   |                                       OR         95% CI |
-  |  Age at cohort entry (years)        1.00   (1.00, 1.00) |
-  |                   Female sex        0.99   (0.93, 1.06) |
+  |  Age at cohort entry (years)        1.05   (1.05, 1.05) |
+  |                   Female sex        0.75   (0.69, 0.81) |
   |              Education level                            |
   |                      Primary   Reference                |
-  |                    Secondary        1.02   (0.94, 1.11) |
-  |                     Tertiary        1.09   (1.00, 1.18) |
-  |                     Diabetes        1.01   (0.94, 1.08) |
-  |                 Hypertension        1.10   (1.03, 1.17) |
-  |             Anxiety disorder        1.00   (0.93, 1.08) |
-  | Prior cardiovascular disease        0.98   (0.92, 1.05) |
+  |                    Secondary        0.95   (0.86, 1.06) |
+  |                     Tertiary        0.95   (0.86, 1.06) |
+  |                     Diabetes        8.27   (7.59, 9.03) |
+  |                 Hypertension        7.07   (6.48, 7.71) |
+  |             Anxiety disorder        1.02   (0.93, 1.12) |
+  | Prior cardiovascular disease        1.13   (1.04, 1.22) |
   +---------------------------------------------------------+
 
 ```
@@ -545,14 +559,14 @@ General Purpose
 ```
 
 ```
-  +---------------------------------------------------------------------------------------------+
-  |                                    Treatment group            Male          Female    Total |
-  |                                               SSRI   3,583 (59.4%)   5,351 (59.6%)    8,934 |
-  |                                               SNRI   2,445 (40.6%)   3,621 (40.4%)    6,066 |
-  |                                              Total           6,028           8,972   15,000 |
-  | Pearson's chi-squared test: chi2 = 0.06, p = 0.805                                          |
-  |                        OR = 1.0 (95% CI: 0.9, 1.1)                                          |
-  +---------------------------------------------------------------------------------------------+
+  +----------------------------------------------------------------------------------------------+
+  |                                     Treatment group            Male          Female    Total |
+  |                                                SSRI   3,399 (56.4%)   5,530 (61.6%)    8,929 |
+  |                                                SNRI   2,629 (43.6%)   3,442 (38.4%)    6,071 |
+  |                                               Total           6,028           8,972   15,000 |
+  | Pearson's chi-squared test: chi2 = 41.24, p < 0.001                                          |
+  |                         OR = 0.8 (95% CI: 0.8, 0.9)                                          |
+  +----------------------------------------------------------------------------------------------+
 
 ```
 
@@ -732,14 +746,337 @@ Counts below 5 are shown as <5; complementary cells are shown as ≥5 to prevent
 . log off demo
 ```
 
+### Primary-only suppression: table1_tc smallcells(5, primary)
+
+```stata
+. noisily table1_tc category, by(group) vars(category cat)
+>     total(after) smallcells(5, primary)
+```
+
+```
+  +----------------------------------------------------------+
+  |                  Control   Treatment   Total     p-value |
+  |----------------------------------------------------------|
+  | No. (Column %)   N=10      N=10        N=20              |
+  |----------------------------------------------------------|
+  | Characteristic                                   0.068   |
+  |    Absent        <5        6 (60)      8 (40)            |
+  |    Present       8 (80)    <5          12 (60)           |
+  +----------------------------------------------------------+
+Counts from 1 to 4 are shown as <5 without a percentage (primary suppression only: no complementary cells are masked, an
+> d other cells, totals and tests are shown as computed). This protects printed counts only.
+```
+
+```stata
+. log off demo
+```
+
+### cellreplace(): overwrite one structurally non-reportable cell
+
+```stata
+. noisily table1_tc, by(treated) vars(education cat \ civil_status cat)
+>     cellreplace("Widowed" "SNRI" "Not reported")
+```
+
+```
+  +-------------------------------------------------------+
+  |                   SSRI         SNRI           p-value |
+  |-------------------------------------------------------|
+  | No. (Column %)    N=8,929      N=6,071                |
+  |-------------------------------------------------------|
+  | Education level                               0.71    |
+  |    Primary        2,280 (26)   1,580 (26)             |
+  |    Secondary      3,524 (39)   2,360 (39)             |
+  |    Tertiary       3,125 (35)   2,131 (35)             |
+  |-------------------------------------------------------|
+  | Marital status                                0.41    |
+  |    Single         2,755 (31)   1,813 (30)             |
+  |    Married        3,072 (34)   2,164 (36)             |
+  |    Divorced       1,758 (20)   1,193 (20)             |
+  |    Widowed        1,344 (15)   Not reported           |
+  +-------------------------------------------------------+
+```
+
+```stata
+. log off demo
+```
+
+## Session destinations and defaults
+
+```stata
+. noisily tabtools set smallcells 5 primary
+```
+
+```
+tabtools: session smallcells 5 (primary; desctab, table1_tc, crosstab; nosmallcells skips it)
+```
+
+```stata
+. noisily tabtools query
+```
+
+```
+tabtools session settings
+  Workbook:    (not set)
+  Markdown:    (not set)
+  Headershade: (not set)
+  Smallcells:  5 (primary)
+  Borderstyle: (not set)
+```
+
+```stata
+. noisily tabtools set smallcells clear
+```
+
+```
+tabtools: session smallcells cleared
+```
+
+```stata
+. log off demo
+```
+
+## tabcell: one publication cell at a time
+
+```stata
+. noisily tabcell est treated, eform
+```
+
+```
+1.09 (1.02, 1.17)
+```
+
+```stata
+. noisily tabcell est treated, eform format(%5.3f) sep(" to ")
+```
+
+```
+1.091 (1.017 to 1.171)
+```
+
+```stata
+. quietly lincom treated + female
+```
+
+```stata
+. noisily tabcell est, lincom
+```
+
+```
+1.10 (1.00, 1.22)
+```
+
+```stata
+. noisily tabcell p, p(0.0004)
+```
+
+```
+<0.001
+```
+
+```stata
+. noisily tabcell np, n(3) d(40) mincell(5)
+```
+
+```
+<5
+```
+
+```stata
+. noisily tabcell enp, e(2149) n(6066)
+```
+
+```
+2,149/6,066 (35.4)
+```
+
+```stata
+. quietly summarize follow_up, detail
+```
+
+```stata
+. noisily tabcell iqr, median(`r(p50)') q1(`r(p25)') q3(`r(p75)') format(%6.0fc)
+```
+
+```
+3,452 (2,032, 5,018)
+```
+
+```stata
+. log off demo
+```
+
+## ratetab: events, person-years, and rates from stset data
+
+```stata
+. noisily ratetab treated education, outlabels("CV events")
+>     explabels("Treatment" \ "Education")
+```
+
+```
+  +----------------------------------------------------------------------+
+  |     Exposure   CV events                                             |
+  |                   Events   Person-Years (PY)   Per 1,000 PY (95% CI) |
+  |    Treatment                                                         |
+  |         SSRI       3,042              90,955       33.4 (32.3, 34.7) |
+  |         SNRI       2,207              52,978       41.7 (39.9, 43.4) |
+  |    Education                                                         |
+  |      Primary       1,317              37,344       35.3 (33.4, 37.2) |
+  |    Secondary       2,077              56,356       36.9 (35.3, 38.5) |
+  |     Tertiary       1,855              50,233       36.9 (35.3, 38.6) |
+  +----------------------------------------------------------------------+
+
+```
+
+```stata
+. noisily ratetab treated, ci(cluster(region)) outlabels("CV events")
+>     cformat(%5.2f) sep(" to ")
+```
+
+```
+  +--------------------------------------------------------------------------+
+  |        Exposure   CV events                                              |
+  |                      Events   Person-Years (PY)    Per 1,000 PY (95% CI) |
+  | Treatment group                                                          |
+  |            SSRI       3,042              90,955   33.44 (32.50 to 34.42) |
+  |            SNRI       2,207              52,978   41.66 (40.14 to 43.23) |
+  +--------------------------------------------------------------------------+
+
+(ratetab: treated: 6 clusters of region)
+```
+
+```stata
+. log off demo
+```
+
+## outtab: events/N by exposure plus one ratio column per model
+
+```stata
+. noisily outtab cv_event selfharm fracture gi_bleed, exposure(treated)
+>     models("" \ "index_age female i.education diabetes hypertension")
+>     modellabels("Crude" \ "Adjusted")
+>     estimator(poisson, irr vce(robust)) ratiolabel("RR")
+```
+
+```
+  +-------------------------------------------------------------------------------------------------------------+
+  |                        SNRI, events/N (%)   SSRI, events/N (%)   Crude, RR (95% CI)   Adjusted, RR (95% CI) |
+  |-------------------------------------------------------------------------------------------------------------|
+  | Cardiovascular event   2,207/6,071 (36.4)   3,042/8,929 (34.1)    1.07 (1.02, 1.12)       1.03 (0.98, 1.09) |
+  |            Self-harm   1,234/6,071 (20.3)   1,837/8,929 (20.6)    0.99 (0.93, 1.05)       0.97 (0.89, 1.05) |
+  |             Fracture   1,214/6,071 (20.0)   1,717/8,929 (19.2)    1.04 (0.97, 1.11)       1.00 (0.92, 1.08) |
+  |          GI bleeding   1,261/6,071 (20.8)   1,723/8,929 (19.3)    1.08 (1.01, 1.15)       1.02 (0.94, 1.11) |
+  +-------------------------------------------------------------------------------------------------------------+
+```
+
+```stata
+. log off demo
+```
+
+## regtab: cformat(), transpose, and cellnote()
+
+```stata
+. noisily regtab, cformat(%5.3f) sep(" to ") noint models("Crude \ Adjusted")
+```
+
+```
+  +-----------------------------------------------------------------------------------------------------------+
+  |                               Crude                                 Adjusted                              |
+  |                                  OR             95% CI   p-value          OR             95% CI   p-value |
+  |             Treatment group   1.105   (1.032 to 1.183)     0.004       1.050   (0.966 to 1.143)      0.25 |
+  | Age at cohort entry (years)                                            1.002   (1.000 to 1.005)     0.072 |
+  |                  Female sex                                            1.010   (0.943 to 1.081)      0.79 |
+  |             Education level                                                                               |
+  |                     Primary                                        Reference                              |
+  |                   Secondary                                            1.053   (0.967 to 1.147)      0.23 |
+  |                    Tertiary                                            1.053   (0.965 to 1.149)      0.25 |
+  |                    Diabetes                                            1.095   (1.016 to 1.180)     0.018 |
+  |                Hypertension                                            0.995   (0.925 to 1.071)      0.90 |
+  +-----------------------------------------------------------------------------------------------------------+
+
+```
+
+```stata
+. noisily regtab, transpose keep(treated) stats(n) nopvalue
+>     models("Crude \ Adjusted")
+```
+
+```
+  +---------------------------------------------+
+  |            Observations     Treatment group |
+  |                                 OR (95% CI) |
+  |    Crude         15,000   1.11 (1.03, 1.18) |
+  | Adjusted         15,000   1.05 (0.97, 1.14) |
+  +---------------------------------------------+
+
+```
+
+```stata
+. noisily regtab, cellnote("Diabetes" 1 "Not in model") nopvalue noint
+>     models("Crude \ Adjusted")
+```
+
+```
+  +--------------------------------------------------------------------------------------+
+  |                                      Crude                   Adjusted                |
+  |                                         OR         95% CI          OR         95% CI |
+  |             Treatment group           1.11   (1.03, 1.18)        1.05   (0.97, 1.14) |
+  | Age at cohort entry (years)                                      1.00   (1.00, 1.01) |
+  |                  Female sex                                      1.01   (0.94, 1.08) |
+  |             Education level                                                          |
+  |                     Primary                                 Reference                |
+  |                   Secondary                                      1.05   (0.97, 1.15) |
+  |                    Tertiary                                      1.05   (0.96, 1.15) |
+  |                    Diabetes   Not in model                       1.09   (1.02, 1.18) |
+  |                Hypertension                                      1.00   (0.92, 1.07) |
+  +--------------------------------------------------------------------------------------+
+
+```
+
+```stata
+. log off demo
+```
+
+### regtab: stats(events people exposure) from tabtools fitcount, mincount()
+
+```stata
+. noisily regtab, stats(events people exposure) exposurelabel("Person-years")
+>     mincount(15) models("Crude \ Adjusted")
+```
+
+```
+  +---------------------------------------------------------------------------------------------+
+  |                         Crude                             Adjusted                          |
+  |                            HR         95% CI   p-value          HR         95% CI   p-value |
+  | Healthcare region                                                                           |
+  |         Stockholm   Reference                            Reference                          |
+  |    Uppsala/Orebro        1.44   (0.68, 3.03)      0.34        1.50   (0.70, 3.20)      0.30 |
+  |         Southeast        1.14   (0.55, 2.38)      0.72        1.21   (0.58, 2.53)      0.61 |
+  |             South           –                                    –                          |
+  |              West        1.18   (0.57, 2.46)      0.65        1.24   (0.59, 2.59)      0.57 |
+  |             North           –                                    –                          |
+  |   Treatment group                                             1.22   (0.77, 1.92)      0.39 |
+  |        Female sex                                             1.23   (0.79, 1.91)      0.36 |
+  |            Events          86                                   86                          |
+  |            People         450                                  450                          |
+  |      Person-years       4,102                                4,102                          |
+  +---------------------------------------------------------------------------------------------+
+
+```
+
+```stata
+. log off demo
+```
+
 ```stata
 . noisily puttab term ahr ci using "`_pipe_xlsx'", sheet("Block Primary")
 >     title("Source block: Primary HRT exposure model") varlabels
 ```
 
 ```
-puttab: wrote 3 data rows x 3 cols (data source) to sheet Block Primary in /tmp/RtmpMDyewy/tabtools-demo-stata/export/ta
-> btools/demo/_pipeline_parts.xlsx
+puttab: wrote 3 data rows x 3 cols (data source) to sheet Block Primary in /tmp/tabtools-3g-update-5u5x6zdp/r-tmp/RtmpHQ
+> EGmA/tabtools-installed-update-24ad2eaeb7875/tabtools-demo-stata-24ae7590618b2/export/tabtools/demo/_pipeline_parts.xl
+> sx
 ```
 
 ```stata
@@ -752,8 +1089,8 @@ puttab: wrote 3 data rows x 3 cols (data source) to sheet Block Primary in /tmp/
 ```
 
 ```
-puttab: wrote 2 data rows x 3 cols (data source) to sheet Block Dose in /tmp/RtmpMDyewy/tabtools-demo-stata/export/tabto
-> ols/demo/_pipeline_parts.xlsx
+puttab: wrote 2 data rows x 3 cols (data source) to sheet Block Dose in /tmp/tabtools-3g-update-5u5x6zdp/r-tmp/RtmpHQEGm
+> A/tabtools-installed-update-24ad2eaeb7875/tabtools-demo-stata-24ae7590618b2/export/tabtools/demo/_pipeline_parts.xlsx
 ```
 
 ```stata
@@ -799,15 +1136,15 @@ stacktab: 2 blocks -> 7 rows written -> sheet Composite
   +-----------------------------------------------------------------+
   |                               SSRI         SNRI         p-value |
   |-----------------------------------------------------------------|
-  | No. (Column %) or Mean±SD     N=8,934      N=6,066              |
+  | No. (Column %) or Mean±SD     N=8,929      N=6,071              |
   |-----------------------------------------------------------------|
-  | Age at cohort entry (years)   58.3±13.4    58.5±13.3    0.24    |
+  | Age at cohort entry (years)   55.9±13.4    62.0±12.4    <0.001  |
   |-----------------------------------------------------------------|
-  | Female sex                    5,351 (60)   3,621 (60)   0.80    |
+  | Female sex                    5,530 (62)   3,442 (57)   <0.001  |
   |-----------------------------------------------------------------|
-  | Diabetes                      4,107 (46)   2,818 (46)   0.56    |
+  | Diabetes                      2,566 (29)   4,359 (72)   <0.001  |
   |-----------------------------------------------------------------|
-  | Hypertension                  4,112 (46)   2,935 (48)   0.005   |
+  | Hypertension                  2,765 (31)   4,282 (71)   <0.001  |
   +-----------------------------------------------------------------+
 Markdown exported to tabtools/demo/demo_markdown_report.md
 ```
@@ -820,14 +1157,14 @@ Markdown exported to tabtools/demo/demo_markdown_report.md
 
 ```
 Table 2. Treatment by Sex
-  +---------------------------------------------------------------------------------------------+
-  |                                    Treatment group            Male          Female    Total |
-  |                                               SSRI   3,583 (59.4%)   5,351 (59.6%)    8,934 |
-  |                                               SNRI   2,445 (40.6%)   3,621 (40.4%)    6,066 |
-  |                                              Total           6,028           8,972   15,000 |
-  | Pearson's chi-squared test: chi2 = 0.06, p = 0.805                                          |
-  |                        OR = 1.0 (95% CI: 0.9, 1.1)                                          |
-  +---------------------------------------------------------------------------------------------+
+  +----------------------------------------------------------------------------------------------+
+  |                                     Treatment group            Male          Female    Total |
+  |                                                SSRI   3,399 (56.4%)   5,530 (61.6%)    8,929 |
+  |                                                SNRI   2,629 (43.6%)   3,442 (38.4%)    6,071 |
+  |                                               Total           6,028           8,972   15,000 |
+  | Pearson's chi-squared test: chi2 = 41.24, p < 0.001                                          |
+  |                         OR = 0.8 (95% CI: 0.8, 0.9)                                          |
+  +----------------------------------------------------------------------------------------------+
 
 Markdown exported to tabtools/demo/demo_markdown_report.md
 ```
@@ -906,22 +1243,22 @@ The file contains multiple GitHub-Flavored Markdown tables appended in one repor
 ```
 ### Table 1. Baseline Characteristics
 
-| No. (Column %) or Mean±SD | SSRI (N=8,934) | SNRI (N=6,066) | p-value |
+| No. (Column %) or Mean±SD | SSRI (N=8,929) | SNRI (N=6,071) | p-value |
 | --- | --- | --- | --- |
-| Age at cohort entry (years) | 58.3±13.4 | 58.5±13.3 | 0.24 |
-| Female sex | 5,351 (60) | 3,621 (60) | 0.80 |
-| Diabetes | 4,107 (46) | 2,818 (46) | 0.56 |
-| Hypertension | 4,112 (46) | 2,935 (48) | 0.005 |
+| Age at cohort entry (years) | 55.9±13.4 | 62.0±12.4 | \<0.001 |
+| Female sex | 5,530 (62) | 3,442 (57) | \<0.001 |
+| Diabetes | 2,566 (29) | 4,359 (72) | \<0.001 |
+| Hypertension | 2,765 (31) | 4,282 (71) | \<0.001 |
 
 ### Table 2. Treatment by Sex
 
 | Treatment group | Male | Female | Total |
 | --- | --- | --- | --- |
-| SSRI | 3,583 (59.4%) | 5,351 (59.6%) | 8,934 |
-| SNRI | 2,445 (40.6%) | 3,621 (40.4%) | 6,066 |
+| SSRI | 3,399 (56.4%) | 5,530 (61.6%) | 8,929 |
+| SNRI | 2,629 (43.6%) | 3,442 (38.4%) | 6,071 |
 | Total | 6,028 | 8,972 | 15,000 |
-| Pearson's chi-squared test: chi2 = 0.06, p = 0.805 |  |  |  |
-| OR = 1.0 (95% CI: 0.9, 1.1) |  |  |  |
+| Pearson's chi-squared test: chi2 = 41.24, p \< 0.001 |  |  |  |
+| OR = 0.8 (95% CI: 0.8, 0.9) |  |  |  |
 
 ### Table 3. Correlation Matrix
 
@@ -941,8 +1278,8 @@ The file contains multiple GitHub-Flavored Markdown tables appended in one repor
 | 2 | 61.80 | SSRI | Female | No |
 | 3 | 46.22 | SSRI | Female | No |
 | 4 | 51.62 | SNRI | Female | Yes |
-| 5 | 54.89 | SSRI | Female | Yes |
-| 6 | 75.15 | SSRI | Male | No |
+| 5 | 54.89 | SNRI | Female | Yes |
+| 6 | 75.15 | SNRI | Male | No |
 ```
 
 ```stata

@@ -1,11 +1,11 @@
 name,kind,row,col,value
 _golden_id,meta,,,MI06
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
 markdown_cols,scalar,,,4
 markdown_rows,scalar,,,11
-fmi_1,scalar,,,.29669277452142678
+fmi_1,scalar,,,.29669277452142617
 mi_m_1,scalar,,,5
 n_1,scalar,,,400
 ci_level,scalar,,,95

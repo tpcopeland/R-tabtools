@@ -1,7 +1,7 @@
 name,kind,row,col,value
 _golden_id,meta,,,T29
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
 markdown_cols,scalar,,,7
 markdown_rows,scalar,,,3
@@ -12,6 +12,7 @@ smallcells,scalar,,,5
 markdown,macro,,,T29.md
 sheet,macro,,,T29
 xlsx,macro,,,table1_tc.xlsx
+smallcells_mode,macro,,,full
 varlist,macro,,,price mpg foreign
 methods,macro,,,"Baseline characteristics were compared between groups defined by Repair record 1978. Data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures. P-values were calculated using one-way ANOVA, Kruskal-Wallis test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
 Dapa,macro,,,"Data are presented as mean±SD or median (Q1, Q3) for continuous measures, and No. (%) for categorical measures."

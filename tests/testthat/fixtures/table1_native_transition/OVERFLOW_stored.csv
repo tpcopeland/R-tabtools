@@ -1,0 +1,15 @@
+name,kind,row,col,value
+_golden_id,meta,,,OVERFLOW
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,4
+markdown_rows,scalar,,,3
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-3g/native-transition-v1/outputs/OVERFLOW.md
+sheet,macro,,,OVERFLOW
+xlsx,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-3g/native-transition-v1/outputs/native.xlsx
+smdtype,macro,,,pair
+varlist,macro,,,x b
+Dapa,macro,,,"Weighted data are presented as mean±SD for continuous measures, and % for categorical measures. P-values suppressed. SMD reflects weighted comparison."
+table,matrix,x,smd,3.302891295379081
+table,matrix,b,smd,0

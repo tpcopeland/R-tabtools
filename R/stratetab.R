@@ -118,12 +118,13 @@
 #'   column, `"Exposure 1"`, `"Exposure 2"`, ..., as in Stata.
 #' @param digits Decimals for rates and their bounds, 0 to 10 (default 1).
 #' @param cformat Stata numeric display format for each rate and its limits,
-#'   using supported `%w.df`, `%w.dg` and `c` suffix formats (also with a
+#'   using supported `%w.df`, `%w.dg`, `%w.de` and f/g `c` suffix formats (also with a
 #'   comma decimal mark). Explicit `digits` with `cformat` raises
 #'   `tabtools_error_format_conflict`; omitted digits use the session default,
 #'   then 1. `%g` uses the existing package formatter, whose significant-digit
 #'   formatting can differ from Stata at high precision; fixed `%f` formats
-#'   are recommended for exact decimal display parity.
+#'   are recommended for exact decimal display parity. Rate ratios use
+#'   `ratiodigits`, independently of `cformat`, as in native stratetab.
 #' @param sep Literal interval separator for rates and rate ratios. Default
 #'   `", "`; an empty string also selects this default. Whitespace and
 #'   macro-looking text are retained. A decimal-comma `cformat` with a comma
@@ -192,7 +193,13 @@
 #' or a table without any positive person-time, raise
 #' `tabtools_error_rate_no_time`. `N_nopt` counts zero source exposure; a
 #' positive source exposure that underflows after `pyscale` can render empty
-#' without increasing this source diagnostic.
+#' without increasing this source diagnostic. Supplied finite rate statistics
+#' remain authoritative even when their event totals are missing; missing
+#' totals propagate through ratio bounds as in native Stata. Scaled or
+#' generated interval overflow becomes missing rather than an error.
+#' Computed [tt_rates()] results retain missing character/factor groups as
+#' `"."` labels; a collision with an existing category label is refused.
+#' Supplied strate blocks still reject blank category labels.
 #' @references StataCorp (2025). Stata 19 Base Reference Manual, R ci,
 #'   Methods and formulas: Poisson mean; Technical note on zero counts.
 #'   Stata 19 Survival Analysis Reference Manual, ST strate, Remarks.
@@ -708,6 +715,11 @@ stratetab <- function(x, outcomes = NULL, xlsx = NULL, sheet = "Results", title 
 .st_block_cats <- function(s, k) {
   other <- setdiff(names(s), c("D", "Y", "Rate", "Lower", "Upper"))
   cats <- if (length(other)) .st_category_text(s[[other[1]]]) else rep("Overall", nrow(s))
+  # R-generated rates can retain missing character/factor groups. Stata
+  # supplied string categories still obey its blank-label refusal.
+  computed_event <- attr(s, "event", exact = TRUE)
+  computed_missing <- length(other) && is.character(computed_event) && length(computed_event) == 1L
+  if (computed_missing) cats[is.na(s[[other[1]]])] <- "."
   cats <- trimws(cats, whitespace = "[ ]")
   if (any(!nzchar(cats))) cli::cli_abort("Blank category labels are not allowed in block {k}.", call = NULL)
   if (anyDuplicated(cats)) {

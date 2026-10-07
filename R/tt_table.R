@@ -509,7 +509,10 @@ print.tt_table <- function(x, ...) {
 #'   `n_models`, `statistic_ids`, and per-model `model_id`, `outcome_id`,
 #'   `effect_scale`, `model_label`) return them as attributes.
 #'   When present, the source ledger documented in [tt_table()] is returned
-#'   as a separate `sample_accounting` attribute.
+#'   as a separate `sample_accounting` attribute. Producer-owned publication
+#'   snapshots, when available, remain in `composition` for exact source reuse
+#'   and numeric companion formatting; changing text or identity invalidates
+#'   their use by [comptab()].
 #' @examples
 #' fit <- glm(am ~ wt + factor(cyl), family = binomial, data = mtcars)
 #' df <- as.data.frame(regtab(fit))
@@ -523,6 +526,7 @@ as.data.frame.tt_table <- function(x, row.names = NULL, optional = FALSE, ...) {
   names(out) <- names(x$body)
   rownames(out) <- NULL
   for (a in names(x$meta$frame)) attr(out, a) <- x$meta$frame[[a]]
+  if (!is.null(x$meta$composition)) attr(out, "composition") <- x$meta$composition
   sample <- x$meta[["sample_accounting", exact = TRUE]]
   if (!is.null(sample)) {
     .tt_validate_sample_accounting(sample)

@@ -1,0 +1,7 @@
+variable,storage
+region,int
+age,double
+female,byte
+bmi,double
+u0,double
+y,double

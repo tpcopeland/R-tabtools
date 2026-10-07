@@ -101,6 +101,15 @@ format_p <- function(p, pdp = 3L, highpdp = 2L) {
   p <- list(left = nzchar(m[2]), zero = nzchar(m[3]), w = as.integer(sizes[1]),
             d = as.integer(sizes[2]), type = m[6], comma = nzchar(m[7]))
   # Native string(x, "%9.2ec") is empty: the c suffix is not an e format.
+  # The C formatter supports at most 400 decimals. General format with
+  # zero decimals requests w-2 significant digits, so it has a tighter
+  # width limit. Other widths have a bounded allocation ceiling in R.
+  if (p$w < 1L || p$w > 10000L || p$d > 400L ||
+      (p$type == "g" && p$d == 0L && p$w > 402L)) {
+    cli::cli_abort(c("Unsupported Stata display format {.val {fmt}}.",
+                     "i" = "R supports widths 1–10000 and decimals 0–400; zero-decimal g formats have width at most 402."),
+                   class = "tabtools_error_fmt", call = NULL)
+  }
   if (p$type == "e" && p$comma) {
     cli::cli_abort("Exponential Stata formats do not support the {.val c} suffix.",
                    class = "tabtools_error_fmt", call = NULL)
@@ -337,6 +346,8 @@ format_p <- function(p, pdp = 3L, highpdp = 2L) {
 #'
 #' @param x Numeric vector.
 #' @param fmt A single Stata format string, e.g. `"%5.1f"` or `"%12.0fc"`.
+#'   R supports widths 1–10000 and decimals 0–400; zero-decimal g formats
+#'   have width at most 402. Unsupported bounds raise `tabtools_error_fmt`.
 #' @return Character vector; missing and non-finite values become `"."`
 #'   (Stata has no infinities).
 #' @keywords internal

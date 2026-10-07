@@ -582,7 +582,7 @@ tt_effecttab_build <- function(mrows, o) {
   addrow <- rep(FALSE, nr)
   for (r in o$addrow) {
     labels <- c(labels, r$label)
-    type <- c(type, "var")
+    type <- c(type, "addrow")
     addrow <- c(addrow, TRUE)
     vals <- c(r$values, rep("", M))[seq_len(M)]
     for (m in seq_len(M)) {
@@ -649,7 +649,7 @@ tt_effecttab_build <- function(mrows, o) {
                sample_accounting = o$sample_accounting,
                forest_model_label = ifelse(nzchar(o$models), o$models, paste("Model", seq_len(M))))
   meta$flat <- .tt_flat_metadata(u$cells, rows, M)
-  tt_table(body, list(list(text = h1), list(text = h2)), rows = rows, cols = cols,
+  .ct_stamp(tt_table(body, list(list(text = h1), list(text = h2)), rows = rows, cols = cols,
            title = o$title, footnote = o$footnote, style = o$style, stored = stored,
-           command = "effecttab", meta = meta)
+           command = "effecttab", meta = meta))
 }

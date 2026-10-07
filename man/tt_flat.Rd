@@ -76,6 +76,12 @@ plain data frame with \code{data.frame(lapply(flat, identity), check.names = FAL
 Column names must be unique. Underscore-prefixed names are reserved for
 \verb{_order}, \verb{_term}, \verb{_rowtype}, \verb{_block} and \verb{_state_<model-index>};
 other reserved names raise \code{tabtools_error_flat}.
+
+Rate, outcome, group-summary and publication-composite frames require
+\code{keyed = FALSE}. They return a plain character body data frame with
+\code{header}, \code{command}, \code{frame}, \code{sample_accounting} and \code{composition_export}
+attributes; absent sample metadata remains absent. These editing products
+cannot be reused as authenticated composition inputs.
 }
 \examples{
 tab <- regtab(lm(mpg ~ wt + factor(cyl), mtcars), stats = "n")

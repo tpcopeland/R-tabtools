@@ -35,7 +35,12 @@ comptab(
   markdown = NULL,
   mdappend = FALSE,
   open = FALSE,
-  rownames_exact = FALSE
+  rownames_exact = FALSE,
+  cformat = NULL,
+  cisep = NULL,
+  allmodels = FALSE,
+  keyed = FALSE,
+  modelonly = FALSE
 )
 
 hrcomptab(
@@ -66,16 +71,18 @@ case-insensitive patterns matched anywhere in the displayed labels, so
 \code{Untreated}. When a pattern is part of another label, use \code{rows}, a
 pattern only the wanted label contains, or \code{rownames_exact = TRUE}.}
 
-\item{effect}{Rate mode: the effect header, \code{"aHR"} (default), \code{"HR"},
+\item{effect}{Rate mode: the effect header, \code{"aHR"} (HR default), \code{"HR"},
 \code{"hazard ratio"} or \code{"adjusted hazard ratio"} (case, blanks and
-\verb{-_./} ignored); other scales are refused.}
+\verb{-_./} ignored), or an IRR/rate-ratio label (\code{"IRR"} default for IRR
+sources). Other scales and mixed HR/IRR families are refused.}
 
 \item{reflabel}{Rate mode: the text of the reference rows (default
 \code{"Reference"}).}
 
-\item{outcomemap}{Rate mode: one model identity per outcome of the rate
+\item{outcomemap}{Rate mode: one model identity or group per outcome of the rate
 table (see Matching rates to models); a character vector or Stata's
-\code{"a \\\\ b"}.}
+\code{"a \\\\ b"}, with \code{|} separating model identities inside a group,
+or a list of character vectors.}
 
 \item{compact}{Vertical mode: merge each model's estimate and interval
 into one column (the sources' header text joined by a space).}
@@ -138,6 +145,21 @@ whole displayed label (case-insensitive, \code{*} and \verb{?} wildcards kept)
 rather than any part of one. Default \code{FALSE}, Stata's substring match.
 R only.}
 
+\item{cformat}{Full Stata numeric format for estimates and interval limits,
+using authenticated publication numeric companions; \code{NULL} keeps text.}
+
+\item{cisep}{Literal interval separator. With no \code{cformat}, source
+intervals must use canonical \verb{(a, b)} text. \code{NULL} keeps the separator.}
+
+\item{allmodels}{Rate mode: use every model block for one rate outcome.
+Requires one outcome and no \code{outcomemap}. Default \code{FALSE}.}
+
+\item{keyed}{Rate mode: exact section/level placement ignoring case;
+factor levels only. Default \code{FALSE}.}
+
+\item{modelonly}{Rate mode: append unmatched selected model rows with
+blank rate columns; implies \code{keyed}. Default \code{FALSE}.}
+
 \item{...}{Further arguments of \code{\link[=comptab]{comptab()}} (the output, content and
 formatting arguments; the vertical-mode ones are refused, as in rate
 mode).}
@@ -150,7 +172,10 @@ mode), returned invisibly when \code{xlsx}, \code{csv} or \code{markdown} writes
 the body), \code{N_cols} (the worksheet columns), \code{N_models}, \code{N_frames},
 \code{ci_level}, \code{methods}. Rate mode: \code{N_rows}, \code{N_outcomes},
 \code{N_sections}, \code{N_modelrows} (the selected model rows),
-\code{N_modelframes}, \code{ci_level}, \code{effect}, \code{rateframe}, \code{modelframes}.
+\code{N_modelframes}, \code{N_models_per_outcome} (integer scalar for equal model
+counts; per-outcome vector for unequal groups), \code{N_modelonly}
+(appended estimates, excluding inserted headings), \code{ci_level}, \code{effect},
+\code{rateframe}, \code{modelframes}.
 Both: for the files written, \code{xlsx}, \code{sheet}, \code{csv}, \code{markdown},
 \code{markdown_rows} and \code{markdown_cols}.
 
@@ -180,8 +205,9 @@ one (vertical mode). R implementation of the Stata \code{comptab} and
 \item \strong{Rate mode} (\code{ratetable} given; \code{\link[=hrcomptab]{hrcomptab()}} always): the rows of
 a \code{\link[=stratetab]{stratetab()}} rate table -- events, person-years and the rate with
 its interval, per outcome and exposure category -- with two columns
-added per outcome, the hazard ratio (with its interval) and its
-p-value, taken from selected rows of one or more \code{\link[=regtab]{regtab()}} tables:
+added per model of each outcome, the hazard or incidence-rate ratio
+(with its interval) and its p-value, taken from selected rows of one
+or more \code{\link[=regtab]{regtab()}} tables:
 the cohort-study "Table 2". The first category of each exposure block
 that no model row fills is the reference and shows \code{reflabel}.
 \item \strong{Vertical mode} (no \code{ratetable}): selected rows of several
@@ -238,7 +264,7 @@ reference category that is not the model's base level.
 
 \section{Matching rates to models}{
 
-Each model table must hold one model per outcome of the rate table, and
+By default each model table holds one model per outcome of the rate table, and
 they are matched by identity, never by position: the rate table's
 \code{outcomeids} against each model's outcome identity (for a
 \code{survival::coxph()} fit, the event variable of \code{Surv()}), both
@@ -246,10 +272,46 @@ lower-cased and trimmed. \code{outcomemap} names, in the rate table's outcome
 order, the model to use for each outcome instead: a model identity,
 outcome identity or model label (as \verb{models =} gave it) that must match
 exactly one model in every model table. The models must be on the
-hazard-ratio scale (the estimate header \code{HR}, \code{aHR}, \verb{Hazard ratio} or
-\verb{Adjusted hazard ratio}, as \verb{coef =} sets it) and at the rate table's
+hazard-ratio or incidence-rate-ratio scale (as \verb{coef =} sets it) and at the rate table's
 confidence level; rate tables with \code{rateratio = TRUE} are refused, as in
 Stata.
+
+\code{allmodels = TRUE} uses every model block for a single rate outcome.
+Otherwise \code{outcomemap = list(c("Crude", "Adjusted"), "Second")}
+assigns one or several blocks to each rate outcome. Blocks cannot be reused.
+In these new modes, and for IRR sources, machine model/outcome IDs match
+exactly with case preserved; human model labels match ignoring case.
+Implicit mapping matches only outcome IDs. The older one-model HR path
+retains its existing lower-cased identity matching.
+
+\code{keyed = TRUE} places only factor-level rows using exact displayed
+section and level labels, trimmed and compared ignoring case. Plain
+continuous/indicator rows cannot fill rate categories. Rates-only sections
+remain unchanged. \code{modelonly = TRUE} implies keyed placement and appends
+unmatched estimates in source order, with factor headings and blank rate
+columns. Headings do not count as model-only estimates.
+}
+
+\section{Numeric companions and exports}{
+
+\code{cformat} re-renders estimates and intervals from producer-owned publication
+numeric companions, preserving stars and p-values. Text, frame identity and
+companions must match the producer snapshot; an imported table can retain
+that snapshot through \code{\link[=as.data.frame]{as.data.frame()}}, but plain text cannot establish it.
+Unavailable publication bounds retain the original text; protected or
+replaced values are never reconstructed from raw analytical backups.
+\code{cisep} alone rewrites canonical \verb{(a, b)} intervals and refuses another
+source separator. Both settings apply to every output sink.
+
+\code{\link[=tt_flat]{tt_flat()}} with \code{keyed = FALSE} returns a plain body data frame carrying
+\code{header}, \code{command}, \code{frame}, \code{sample_accounting} and
+\code{composition_export = TRUE} attributes. It is an editing/export product,
+cannot be reused as a composition source, and has no fitted-model row keys.
+Keyed composite exports are refused. Forest data remain available for the
+existing unkeyed one-model-per-outcome rate layout; keyed, model-only and
+multiple-model rate layouts refuse \code{\link[=as_forest_data]{as_forest_data()}}.
+New mapping, companion and unsupported forest/source boundaries raise
+\code{tabtools_error_composition} before publication.
 
 In vertical mode the model columns of every table are aligned to the
 first table's: by outcome identity when those are unique and non-blank,
@@ -292,6 +354,21 @@ keeps that index in \code{source_model}.
 vectors and lists as well as Stata's strings.
 \item \code{rownames_exact} is R only: Stata's \code{rownames()} always matches
 substrings.
+\item Structured rate mappings can contain different numbers of models per
+outcome. Pinned Stata 2.5.1 requires the same number for every outcome.
+R records a per-outcome vector in \code{N_models_per_outcome} for unequal
+groups; equal groups retain the native scalar.
+\item Ratio sources choose \code{"IRR"} automatically when \code{effect} is omitted;
+the existing HR default remains \code{"aHR"}. HR and IRR families cannot mix.
+\item Model source layouts still require p-value columns: three columns
+(estimate, CI, p-value) or two (estimate with CI, p-value). Pinned Stata
+additionally accepts sources with no p-value column.
+\item Authenticated sources identify references from their canonical per-model
+\code{ref}/\code{base} publication states. Custom reference labels, omitted/empty
+labels and coefficient text overrides cannot turn an estimate into a
+reference. Stale state companions refuse; stamped sources without usable
+state companions cannot supply reference identity. Unstamped legacy
+sources retain their existing literal-label compatibility boundary.
 }
 }
 

@@ -41,7 +41,8 @@ imi_capture_call <- function(expr) {
 imi_flat_source <- function(table) {
   f <- table$meta$flat
   nr <- nrow(table$body)
-  fields <- c("block_id", "row_keys", "row_types", "row_blocks", "states", "source_blocks", "composite")
+  fields <- c("block_id", "row_keys", "row_types", "row_blocks", "states",
+              "publication_overrides", "source_blocks", "composite")
   character_vector <- function(x, n) is.character(x) && !is.object(x) &&
     is.null(dim(x)) && length(x) == n && !anyNA(x)
   character_matrix <- function(x) is.matrix(x) && is.character(x) &&
@@ -52,7 +53,13 @@ imi_flat_source <- function(table) {
     character_vector(f$row_keys, nr) && identical(f$row_keys, table$rows$key) &&
     character_vector(f$row_types, nr) && identical(f$row_types, table$rows$type) &&
     all(f$row_types %in% c("var", "level", "ref", "omitted", "empty", "re", "cat_header", "stat", "addrow", "header")) &&
-    character_matrix(f$states) && character_matrix(f$source_blocks)
+    character_matrix(f$states) && character_matrix(f$source_blocks) &&
+    is.list(f$publication_overrides) &&
+    identical(names(f$publication_overrides), c("origin", "text")) &&
+    character_matrix(f$publication_overrides$origin) &&
+    character_matrix(f$publication_overrides$text) &&
+    all(f$publication_overrides$origin == "") &&
+    all(f$publication_overrides$text == "")
   if (!valid) stop("Invalid single-source flat identity schema or row transport.", call. = FALSE)
   structural <- f$row_types %in% c("cat_header", "stat", "addrow", "header")
   required <- f$states != "" & f$states != "absent"

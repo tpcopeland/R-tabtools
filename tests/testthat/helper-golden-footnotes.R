@@ -59,7 +59,19 @@ golden_expect_detected <- function(expr) {
   invisible(failures)
 }
 
+# Independent literal contract authenticated by native T18 csv/md/console/xlsx.
+golden_assert_current_smd <- function(tt) {
+  note <- "SMD compares Primary vs Secondary only (the first two of 3 groups)."
+  col <- which(tt$cols$role == "smd")
+  testthat::expect_length(col, 1L)
+  testthat::expect_identical(unname(tt$header[[1L]]$text[col]), "SMD (Primary vs Secondary)")
+  testthat::expect_identical(tt$meta$console_before, paste("Note:", note))
+  testthat::expect_identical(golden_fn_paragraphs(tt$footnote), note)
+  invisible(tt)
+}
+
 golden_publication_contract <- function(id) {
+  if (startsWith(id, "demo/")) return(golden_demo_publication_contract(id))
   sc <- golden_scenario(id)
   user_raw <- golden_fn_user(sc)
   user <- golden_fn_paragraphs(user_raw)
@@ -88,6 +100,11 @@ golden_publication_contract <- function(id) {
     automatic <- lapply(texts, function(text) list(text = text, native = text,
       source = "literal native reference constants; qa/stata/golden_wttab.do"))
     native_note <- paste(texts, collapse = " ")
+  }
+  if (identical(id, "T18")) {
+    note <- "SMD compares Primary vs Secondary only (the first two of 3 groups)."
+    automatic <- list(list(text = note, native = note, source = "native 2.5.1 T18 csv/md/console/xlsx, c215afdb"))
+    native_note <- note
   }
   native_sources <- list(csv = as.vector(native_grid), xlsx = native_styles$value,
     console = golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt"))))
@@ -224,10 +241,32 @@ golden_publication_sink <- function(path, id, ext, mask, tt = NULL) {
 # separately; any visible formatting on an omitted child refuses equivalence.
 golden_footer_style_templates <- function(contract, id) {
   native <- contract$native_styles[contract$native_styles$row == contract$sheet_end + 1L, , drop = FALSE]
-  command <- golden_scenario(id)$command
-  sparse <- command %in% c("table1_tc", "regtab", "stratetab", "effecttab", "comptab", "hrcomptab")
+  command <- if (!is.null(contract$command)) contract$command else golden_scenario(id)$command
+  # A first-row template is valid only after every native paragraph proves
+  # the same immutable anchor style, merge shape and explicit row height.
+  footers <- contract$native_styles[contract$native_styles$row > contract$sheet_end, , drop = FALSE]
+  rows <- sort(unique(footers$row))
+  anchors <- footers[match(paste0("B", rows), footers$address), , drop = FALSE]
+  testthat::expect_false(anyNA(anchors$address), label = paste(id, "every native footer anchor"))
+  for (attr in setdiff(c(golden_style_attrs, "number_format", "format_id"), "value")) {
+    testthat::expect_identical(anchors[[attr]], rep(anchors[[attr]][1L], length(rows)),
+      label = paste(id, "uniform native paragraph anchor", attr))
+  }
+  merge_end <- as.integer(sub("^.*[A-Z]+([0-9]+)$", "\\1", contract$native_layout$merges))
+  merges <- contract$native_layout$merges[merge_end > contract$sheet_end]
+  expected_merges <- if (length(merges)) vapply(rows, function(row)
+    gsub("[0-9]+", as.character(row), merges[1L]), "") else character()
+  testthat::expect_identical(sort(merges), sort(expected_merges),
+    label = paste(id, "uniform native paragraph merge geometry"))
+  heights <- contract$native_layout$heights[contract$native_layout$heights$row > contract$sheet_end, , drop = FALSE]
+  testthat::expect_identical(heights$row, if (nrow(heights)) rows else integer(),
+    label = paste(id, "complete native paragraph height rows"))
+  testthat::expect_identical(heights$height, if (nrow(heights)) rep(heights$height[1L], length(rows)) else numeric(),
+    label = paste(id, "uniform native paragraph heights"))
+  sparse <- command %in% c("table1_tc", "desctab", "regtab", "stratetab", "effecttab", "comptab", "hrcomptab")
   if (sparse) {
-    children <- native[native$col != 2L, , drop = FALSE]
+    footers <- contract$native_styles[contract$native_styles$row > contract$sheet_end, , drop = FALSE]
+    children <- footers[footers$col != 2L, , drop = FALSE]
     default <- list(value = "", bold = FALSE, italic = FALSE, font = "Calibri", size = 11,
       number_format = "General", format_id = 1L, font_color = "", halign = "general", valign = "bottom", wrap = FALSE,
       border_top = NA_character_, border_bottom = NA_character_,
@@ -236,12 +275,12 @@ golden_footer_style_templates <- function(contract, id) {
       testthat::expect_identical(children[[attr]], rep(default[[attr]], nrow(children)),
                                  label = paste(id, "lossless native merged child", attr))
     }
-    row <- contract$sheet_end + 1L
-    expected_merge <- if (nrow(children)) paste0("B", row, ":", golden_col_letters(max(native$col)), row) else character()
+    rows <- sort(unique(footers$row))
+    expected_merge <- if (nrow(children)) paste0("B", rows, ":", golden_col_letters(max(native$col)), rows) else character()
     merge_end <- as.integer(sub("^.*[A-Z]+([0-9]+)$", "\\1", contract$native_layout$merges))
     footer_merges <- contract$native_layout$merges[merge_end > contract$sheet_end]
-    testthat::expect_identical(footer_merges, expected_merge,
-                               label = paste(id, "one correctly bounded native footer merge"))
+    testthat::expect_identical(sort(footer_merges), sort(expected_merge),
+                               label = paste(id, "complete correctly bounded native footer merges"))
     testthat::expect_true(all(children$address %in% golden_merge_nonanchors(footer_merges)),
                            label = paste(id, "native default children wholly within merges"))
   }
@@ -306,8 +345,7 @@ golden_publication_styles <- function(g, w, gl, wl, id) {
                                 label = paste("independent footer", attr))
     }
     expected_merges <- if (length(wm)) {
-      stopifnot(length(wm) == 1L)
-      vapply(gr, function(row) gsub("[0-9]+", as.character(row), wm), "")
+      vapply(gr, function(row) gsub("[0-9]+", as.character(row), wm[1L]), "")
     } else character()
     testthat::expect_identical(sort(gm), sort(expected_merges), label = "complete footer merges")
   } else testthat::expect_identical(gm, character(), label = "no undeclared footer merges")
@@ -317,7 +355,7 @@ golden_publication_styles <- function(g, w, gl, wl, id) {
   testthat::expect_identical(supplied_native_height$height, wh$height, label = "authenticated native footer heights")
   gh <- gl$heights[gl$heights$row > end, , drop = FALSE]
   testthat::expect_identical(gh$row, if (nrow(wh)) gr else integer(), label = "complete footer custom-height rows")
-  testthat::expect_identical(gh$height, if (nrow(wh)) rep(wh$height, length(gr)) else numeric(),
+  testthat::expect_identical(gh$height, if (nrow(wh)) rep(wh$height[1L], length(gr)) else numeric(),
                              label = "exact footer heights")
   # All footer text, counts, cells, styles, merges and custom heights above
   # are asserted. Only these declared rows leave the strict native comparator.

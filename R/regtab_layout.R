@@ -1228,7 +1228,7 @@ tt_regtab_build <- function(fits, infos, o) {
            title = o$title, footnote = o$footnote, style = o$style, stored = stored,
            command = "regtab", meta = meta)
   if (isTRUE(o$transpose)) tt <- .rt_transpose_table(tt, u, publication$text, statistic_rows, o, scale)
-  tt
+  .ct_stamp(tt)
 }
 
 # A confidence level (a proportion) as the percentage text of the CI header

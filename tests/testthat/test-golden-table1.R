@@ -6,6 +6,6 @@ core <- c("T01", "T04", "T13", "T33")
 for (id in sc$id[sc$command == "table1_tc"]) {
   test_that(paste(id, golden_scenario(id)$description, sep = ": "), {
     if (!id %in% core) skip_on_cran()
-    run_golden_scenario(id, patch = golden_strip_smd_note)
+    run_golden_scenario(id)
   })
 }

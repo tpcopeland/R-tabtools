@@ -1,14 +1,3 @@
-(16 real changes made)
-  (1 observation in frame __000006 unmatched)
-(3 missing values generated)
-(9 missing values generated)
-(4 missing values generated)
-(4 missing values generated)
-(3 missing values generated)
-(9 missing values generated)
-(4 missing values generated)
-(4 missing values generated)
-  (8 variables copied from linked frame)
   +--------------------------------------------------------------------------------------------------+
   |                                Crude SSRI   Crude SNRI   Weighted SSRI   Weighted SNRI   SMD     |
   |--------------------------------------------------------------------------------------------------|

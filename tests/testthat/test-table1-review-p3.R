@@ -17,7 +17,7 @@ rw_expect <- function(tt, id, mask = "p,test,statistic") {
   expect_identical(why, character(), label = paste(id, "console"))
   stored <- utils::read.csv(file.path(rw_dir(), paste0(id, "_stored.csv")), colClasses = "character",
                             na.strings = character(), encoding = "UTF-8")
-  fields <- unique(stored$name[stored$kind != "meta"])
+  fields <- setdiff(unique(stored$name[stored$kind != "meta"]), c("xlsx", "sheet", "csv", "markdown", "markdown_rows", "markdown_cols"))
   expect_true(all(c("Dapa", "varlist") %in% fields), label = paste(id, "stored fixture holds r()"))
   why <- golden_compare_stored(tt$stored, stored, fields = fields, mask = "p", p_table = golden_table_p_rows(tt))
   expect_identical(why, character(), label = paste(id, "stored"))
@@ -62,9 +62,8 @@ test_that("percsign and empty delimiters under wt(), wtn, wtcompare, and smallce
                   wtcompare = TRUE, smd = TRUE, percsign = " %", iqrmiddle = "", sdleft = "", gsdleft = "",
                   gsdright = "", varlabplus = TRUE)
   rw_expect(tt, "RW06")
-  # RW07's cells and suppression map come from tabtools 2.5.1 (Stata-Tools
-  # 712044f8, derivable-count protection); the rest stays 2.1.14 (_stored.csv
-  # meta row `_cells_from`).
+  # RW07 is refreshed entirely from pinned 2.5.1 by the narrow transition
+  # producer; historical mixed presentation remains explicitly versioned.
   rw_expect(table1_tc(rw_agg(), by = "trt", vars = "stage cat \\ female bin", percsign = " %", headerperc = TRUE,
                       missingsummary = TRUE, smallcells = 3, fweight = "fw"), "RW07")
 })

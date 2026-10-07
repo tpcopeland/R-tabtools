@@ -1,0 +1,12 @@
+name,kind,row,col,value
+_golden_id,meta,,,NUMBY
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,
+_golden_stata_version,meta,,,17
+markdown_cols,scalar,,,3
+markdown_rows,scalar,,,1
+markdown,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-3g/native-transition-v1/outputs/NUMBY.md
+sheet,macro,,,NUMBY
+xlsx,macro,,,/home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-3g/native-transition-v1/outputs/native.xlsx
+varlist,macro,,,x
+Dapa,macro,,,Data are presented as mean±SD. P-values suppressed.

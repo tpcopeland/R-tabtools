@@ -1,0 +1,9 @@
+variable,storage
+treatment,byte
+age_z,double
+female,byte
+zero_risk,double
+log_mu,double
+mu,double
+structural_zero,byte
+event_count,byte

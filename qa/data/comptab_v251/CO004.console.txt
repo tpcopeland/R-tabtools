@@ -1,0 +1,58 @@
+-------------------------------------------------------------------------------
+      name:  co_case
+       log:  /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/nat
+> ive-co-v2/CO004.console.txt
+  log type:  text
+ opened on:   7 Oct 2026, 12:43:29
+
+. hrcomptab _co_tworates, modelframes(_co_paired) rows(3/4) outcomemap(Second \
+>  First) effect("IRR") eplotframe(_co_forest, replace) csv("`out'/CO004.csv") 
+> markdown("`out'/CO004.md") xlsx("`out'/comptab.xlsx") sheet(CO004)
+  +----------------------------------------------------------------------------
+> -----------------------------------------------------------------------------
+> ------------------------------------+
+  | Exposure   First outcome                                                   
+>                          Second outcome                                      
+>                                     |
+  |                   Events   Person-Years (PY)   Per 100 PY (95% CI)         
+> IRR (95% CI)   p-value           Events   Person-Years (PY)   Per 100 PY (95%
+>  CI)         IRR (95% CI)   p-value |
+  |        g                                                                   
+>                                                                              
+>                                     |
+  |        A               3                 120        2.5 (0.8, 7.8)         
+>    Reference                          2                 120        1.7 (0.4, 
+> 6.7)            Reference           |
+  |        B               5                 120       4.2 (1.7, 10.0)   3.00 (
+> 0.61, 14.86)      0.18                6                 120       5.0 (2.2, 1
+> 1.1)    1.67 (0.40, 6.97)      0.48 |
+  |        C               8                 120       6.7 (3.3, 13.3)   4.50 (
+> 0.97, 20.83)     0.054                9                 120       7.5 (3.9, 1
+> 4.4)   2.67 (0.71, 10.05)      0.15 |
+  +----------------------------------------------------------------------------
+> -----------------------------------------------------------------------------
+> ------------------------------------+
+
+Markdown exported to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/w
+> p-5d/native-co-v2/CO004.md
+Exported 7 rows × 11 cols to /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026
+> -10-06/wp-5d/native-co-v2/comptab.xlsx, sheet CO004
+
+. mata: golden_dump_r("`out'/CO004_stored.csv", "CO004")
+
+. frame _co_forest: format estimate ll ul pvalue %21.17g
+
+. frame _co_forest: export delimited using "`out'/CO004_forest.csv", replace
+(file
+    /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/native-co-
+    > v2/CO004_forest.csv not found)
+file /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/native-co-v
+> 2/CO004_forest.csv saved
+
+. log close co_case
+      name:  co_case
+       log:  /home/tpcopeland/R-Dev/_notes/tabtools-parity-2026-10-06/wp-5d/nat
+> ive-co-v2/CO004.console.txt
+  log type:  text
+ closed on:   7 Oct 2026, 12:43:29
+-------------------------------------------------------------------------------

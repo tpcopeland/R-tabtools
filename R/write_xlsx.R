@@ -301,9 +301,16 @@ tt_write_xlsx <- function(x, path, sheet = NULL, open = FALSE) {
   if (!file.exists(tmp) || !isTRUE(file.size(tmp) > 0)) {
     cli::cli_abort("Could not write the workbook {.file {path}}.", call = NULL)
   }
-  if (!suppressWarnings(file.rename(tmp, path)) &&
-      !isTRUE(suppressWarnings(file.copy(tmp, path, overwrite = TRUE)))) {
-    cli::cli_abort("Could not replace the workbook {.file {path}}.", call = NULL)
+  expected_size <- file.size(tmp)
+  expected_hash <- unname(tools::md5sum(tmp))
+  if (!isTRUE(suppressWarnings(file.rename(tmp, path)))) {
+    # The fallback may overwrite before reporting failure, or report TRUE
+    # after a truncated copy. Use the checked multi-target rollback path.
+    .stacktab_commit(stats::setNames(tmp, path))
+  }
+  if (!identical(file.size(path), expected_size) || is.na(expected_hash) ||
+      !identical(unname(tools::md5sum(path)), expected_hash)) {
+    cli::cli_abort("Could not verify the saved workbook {.file {path}}.", call = NULL)
   }
   invisible(path)
 }

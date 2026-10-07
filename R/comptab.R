@@ -24,8 +24,9 @@
 #' * **Rate mode** (`ratetable` given; [hrcomptab()] always): the rows of
 #'   a [stratetab()] rate table -- events, person-years and the rate with
 #'   its interval, per outcome and exposure category -- with two columns
-#'   added per outcome, the hazard ratio (with its interval) and its
-#'   p-value, taken from selected rows of one or more [regtab()] tables:
+#'   added per model of each outcome, the hazard or incidence-rate ratio
+#'   (with its interval) and its p-value, taken from selected rows of one
+#'   or more [regtab()] tables:
 #'   the cohort-study "Table 2". The first category of each exposure block
 #'   that no model row fills is the reference and shows `reflabel`.
 #' * **Vertical mode** (no `ratetable`): selected rows of several
@@ -73,7 +74,7 @@
 #' reference category that is not the model's base level.
 #'
 #' @section Matching rates to models:
-#' Each model table must hold one model per outcome of the rate table, and
+#' By default each model table holds one model per outcome of the rate table, and
 #' they are matched by identity, never by position: the rate table's
 #' `outcomeids` against each model's outcome identity (for a
 #' `survival::coxph()` fit, the event variable of `Surv()`), both
@@ -81,10 +82,44 @@
 #' order, the model to use for each outcome instead: a model identity,
 #' outcome identity or model label (as `models =` gave it) that must match
 #' exactly one model in every model table. The models must be on the
-#' hazard-ratio scale (the estimate header `HR`, `aHR`, `Hazard ratio` or
-#' `Adjusted hazard ratio`, as `coef =` sets it) and at the rate table's
+#' hazard-ratio or incidence-rate-ratio scale (as `coef =` sets it) and at the rate table's
 #' confidence level; rate tables with `rateratio = TRUE` are refused, as in
 #' Stata.
+#'
+#' `allmodels = TRUE` uses every model block for a single rate outcome.
+#' Otherwise `outcomemap = list(c("Crude", "Adjusted"), "Second")`
+#' assigns one or several blocks to each rate outcome. Blocks cannot be reused.
+#' In these new modes, and for IRR sources, machine model/outcome IDs match
+#' exactly with case preserved; human model labels match ignoring case.
+#' Implicit mapping matches only outcome IDs. The older one-model HR path
+#' retains its existing lower-cased identity matching.
+#'
+#' `keyed = TRUE` places only factor-level rows using exact displayed
+#' section and level labels, trimmed and compared ignoring case. Plain
+#' continuous/indicator rows cannot fill rate categories. Rates-only sections
+#' remain unchanged. `modelonly = TRUE` implies keyed placement and appends
+#' unmatched estimates in source order, with factor headings and blank rate
+#' columns. Headings do not count as model-only estimates.
+#'
+#' @section Numeric companions and exports:
+#' `cformat` re-renders estimates and intervals from producer-owned publication
+#' numeric companions, preserving stars and p-values. Text, frame identity and
+#' companions must match the producer snapshot; an imported table can retain
+#' that snapshot through [as.data.frame()], but plain text cannot establish it.
+#' Unavailable publication bounds retain the original text; protected or
+#' replaced values are never reconstructed from raw analytical backups.
+#' `cisep` alone rewrites canonical `(a, b)` intervals and refuses another
+#' source separator. Both settings apply to every output sink.
+#'
+#' [tt_flat()] with `keyed = FALSE` returns a plain body data frame carrying
+#' `header`, `command`, `frame`, `sample_accounting` and
+#' `composition_export = TRUE` attributes. It is an editing/export product,
+#' cannot be reused as a composition source, and has no fitted-model row keys.
+#' Keyed composite exports are refused. Forest data remain available for the
+#' existing unkeyed one-model-per-outcome rate layout; keyed, model-only and
+#' multiple-model rate layouts refuse [as_forest_data()].
+#' New mapping, companion and unsupported forest/source boundaries raise
+#' `tabtools_error_composition` before publication.
 #'
 #' In vertical mode the model columns of every table are aligned to the
 #' first table's: by outcome identity when those are unique and non-blank,
@@ -126,6 +161,21 @@
 #'   vectors and lists as well as Stata's strings.
 #' * `rownames_exact` is R only: Stata's `rownames()` always matches
 #'   substrings.
+#' * Structured rate mappings can contain different numbers of models per
+#'   outcome. Pinned Stata 2.5.1 requires the same number for every outcome.
+#'   R records a per-outcome vector in `N_models_per_outcome` for unequal
+#'   groups; equal groups retain the native scalar.
+#' * Ratio sources choose `"IRR"` automatically when `effect` is omitted;
+#'   the existing HR default remains `"aHR"`. HR and IRR families cannot mix.
+#' * Model source layouts still require p-value columns: three columns
+#'   (estimate, CI, p-value) or two (estimate with CI, p-value). Pinned Stata
+#'   additionally accepts sources with no p-value column.
+#' * Authenticated sources identify references from their canonical per-model
+#'   `ref`/`base` publication states. Custom reference labels, omitted/empty
+#'   labels and coefficient text overrides cannot turn an estimate into a
+#'   reference. Stale state companions refuse; stamped sources without usable
+#'   state companions cannot supply reference identity. Unstamped legacy
+#'   sources retain their existing literal-label compatibility boundary.
 #'
 #' @param ratetable A [stratetab()] table (or [as.data.frame()] of one)
 #'   for rate mode; `NULL` for vertical mode. When `modeltables` is not
@@ -143,14 +193,26 @@
 #'   whole displayed label (case-insensitive, `*` and `?` wildcards kept)
 #'   rather than any part of one. Default `FALSE`, Stata's substring match.
 #'   R only.
-#' @param effect Rate mode: the effect header, `"aHR"` (default), `"HR"`,
+#' @param effect Rate mode: the effect header, `"aHR"` (HR default), `"HR"`,
 #'   `"hazard ratio"` or `"adjusted hazard ratio"` (case, blanks and
-#'   `-_./` ignored); other scales are refused.
+#'   `-_./` ignored), or an IRR/rate-ratio label (`"IRR"` default for IRR
+#'   sources). Other scales and mixed HR/IRR families are refused.
 #' @param reflabel Rate mode: the text of the reference rows (default
 #'   `"Reference"`).
-#' @param outcomemap Rate mode: one model identity per outcome of the rate
+#' @param outcomemap Rate mode: one model identity or group per outcome of the rate
 #'   table (see Matching rates to models); a character vector or Stata's
-#'   `"a \\ b"`.
+#'   `"a \\ b"`, with `|` separating model identities inside a group,
+#'   or a list of character vectors.
+#' @param allmodels Rate mode: use every model block for one rate outcome.
+#'   Requires one outcome and no `outcomemap`. Default `FALSE`.
+#' @param keyed Rate mode: exact section/level placement ignoring case;
+#'   factor levels only. Default `FALSE`.
+#' @param modelonly Rate mode: append unmatched selected model rows with
+#'   blank rate columns; implies `keyed`. Default `FALSE`.
+#' @param cformat Full Stata numeric format for estimates and interval limits,
+#'   using authenticated publication numeric companions; `NULL` keeps text.
+#' @param cisep Literal interval separator. With no `cformat`, source
+#'   intervals must use canonical `(a, b)` text. `NULL` keeps the separator.
 #' @param compact Vertical mode: merge each model's estimate and interval
 #'   into one column (the sources' header text joined by a space).
 #' @param separator Vertical mode: body row numbers (sections included)
@@ -195,7 +257,10 @@
 #'   the body), `N_cols` (the worksheet columns), `N_models`, `N_frames`,
 #'   `ci_level`, `methods`. Rate mode: `N_rows`, `N_outcomes`,
 #'   `N_sections`, `N_modelrows` (the selected model rows),
-#'   `N_modelframes`, `ci_level`, `effect`, `rateframe`, `modelframes`.
+#'   `N_modelframes`, `N_models_per_outcome` (integer scalar for equal model
+#'   counts; per-outcome vector for unequal groups), `N_modelonly`
+#'   (appended estimates, excluding inserted headings), `ci_level`, `effect`,
+#'   `rateframe`, `modelframes`.
 #'   Both: for the files written, `xlsx`, `sheet`, `csv`, `markdown`,
 #'   `markdown_rows` and `markdown_cols`.
 #'
@@ -256,7 +321,8 @@ comptab <- function(ratetable = NULL, modeltables = NULL, rows = NULL, rownames 
                     font = NULL, fontsize = NULL, borderstyle = NULL, headershade = FALSE,
                     headercolor = NULL, zebra = FALSE, zebracolor = NULL,
                     csv = NULL, markdown = NULL, mdappend = FALSE, open = FALSE,
-                    rownames_exact = FALSE) {
+                    rownames_exact = FALSE, cformat = NULL, cisep = NULL,
+                    allmodels = FALSE, keyed = FALSE, modelonly = FALSE) {
   .ct_check_xlsx(xlsx)
   sinks <- .tt_resolve_sinks(
     list(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend,
@@ -267,6 +333,8 @@ comptab <- function(ratetable = NULL, modeltables = NULL, rows = NULL, rownames 
   xlsx <- sinks$values$xlsx
   markdown <- sinks$values$markdown
   mdappend <- sinks$values$mdappend
+  sheet <- sinks$values$sheet
+  headershade <- sinks$values$headershade
   # sheet = NULL is no sheet: the default (review P2-2).
   if (is.null(sheet)) sheet <- "Composite"
   rate_label <- .ct_arg_label(substitute(ratetable))
@@ -286,14 +354,16 @@ comptab <- function(ratetable = NULL, modeltables = NULL, rows = NULL, rownames 
     ratetable <- NULL
   }
   args <- list(rows = rows, rownames = rownames, rownames_exact = rownames_exact,
+               cformat = cformat, cisep = cisep, allmodels = allmodels, keyed = keyed, modelonly = modelonly,
                effect = effect, reflabel = reflabel, outcomemap = outcomemap, compact = compact, separator = separator, section = section,
                relabel = relabel, highlight = highlight, boldp = boldp, labelwidth = labelwidth,
                xlsx = xlsx, sheet = sheet, title = title, footnote = footnote, font = font,
                fontsize = fontsize, borderstyle = borderstyle, headershade = headershade,
                headercolor = headercolor, zebra = zebra, zebracolor = zebracolor, csv = csv,
                markdown = markdown, mdappend = mdappend, open = open)
-  for (a in c("rownames_exact", "compact", "headershade", "zebra", "mdappend", "open")) {
+  for (a in c("allmodels", "keyed", "modelonly", "rownames_exact", "compact", "headershade", "zebra", "mdappend", "open")) {
     v <- args[[a]]
+    if (a %in% c("allmodels", "keyed", "modelonly") && (!is.logical(v) || length(v) != 1L || is.na(v))) .ct_v251_abort(paste0(a, " must be TRUE or FALSE."))
     if (!is.logical(v) || length(v) != 1L || is.na(v)) cli::cli_abort("{.arg {a}} must be TRUE or FALSE.", call = NULL)
   }
   models <- .ct_model_list(modeltables)
@@ -309,6 +379,7 @@ comptab <- function(ratetable = NULL, modeltables = NULL, rows = NULL, rownames 
     if (!length(models)) cli::cli_abort("{.arg modeltables} requires at least one model table.", call = NULL)
     return(.ct_rates(ratetable, models, args, rate_label, .ct_model_names(modeltables, models, model_label)))
   }
+  if (allmodels || keyed || modelonly) .ct_v251_abort("allmodels, keyed and modelonly require a rate table.")
   if (!is.null(effect) || !is.null(reflabel) || !is.null(outcomemap)) {
     cli::cli_abort("{.arg effect}, {.arg reflabel} and {.arg outcomemap} require a rate table ({.arg ratetable}).",
                    call = NULL)
@@ -350,7 +421,8 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   }
   args <- utils::modifyList(list(rows = rows, rownames = rownames, rownames_exact = rownames_exact,
                                  effect = effect, reflabel = reflabel,
-                                 outcomemap = outcomemap, compact = FALSE, xlsx = NULL, sheet = "Composite",
+                                 outcomemap = outcomemap, compact = FALSE, cformat = NULL, cisep = NULL,
+                                 allmodels = FALSE, keyed = FALSE, modelonly = FALSE, xlsx = NULL, sheet = "Composite",
                                  title = NULL, footnote = NULL, font = NULL, fontsize = NULL,
                                  borderstyle = NULL, headershade = FALSE, headercolor = NULL, zebra = FALSE,
                                  zebracolor = NULL, csv = NULL, markdown = NULL, mdappend = FALSE,
@@ -367,8 +439,9 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
                     c("xlsx", "markdown", "mdappend", "sheet", "headershade")), policy = "sheet")
   args <- sinks$values
   if (is.null(args$sheet)) args$sheet <- "Composite"
-  for (a in c("rownames_exact", "headershade", "zebra", "mdappend", "open")) {
+  for (a in c("allmodels", "keyed", "modelonly", "rownames_exact", "headershade", "zebra", "mdappend", "open")) {
     v <- args[[a]]
+    if (a %in% c("allmodels", "keyed", "modelonly") && (!is.logical(v) || length(v) != 1L || is.na(v))) .ct_v251_abort(paste0(a, " must be TRUE or FALSE."))
     if (!is.logical(v) || length(v) != 1L || is.na(v)) cli::cli_abort("{.arg {a}} must be TRUE or FALSE.", call = NULL)
   }
   models <- .ct_model_list(modeltables)
@@ -431,9 +504,34 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
 # A model table as comptab reads a regtab/effecttab frame: the label
 # column, the value cells c1..cK, the two header rows (label column
 # first), the frame characteristics, and how its reference rows are known
-# (comptab.ado:1074-1085: regtab's numeric ref<k> variable, flagging the
-# refcat/omitlabel/emptylabel text; without it, the text "reference").
-.ct_source <- function(x, k) {
+# Authenticated sources use canonical state companions, not label text.
+# Native comptab.ado:1165-1176 reads per-model ref<k> flags, with literal
+# "reference" as a fallback for frames lacking those numeric flags.
+.ct_source <- function(x, k, cformat = NULL, cisep = NULL) {
+  orientation <- if (inherits(x, "tt_table")) x$meta$frame$orientation %||% x$meta$regtab_orientation else
+    attr(x, "orientation", exact = TRUE)
+  if (identical(orientation, "transpose")) {
+    cli::cli_abort("Transposed regression tables cannot supply fitted-model composition rows.",
+      class = "tabtools_error_regtab_orientation", call = NULL)
+  }
+  if (inherits(x, "tt_flat") || isTRUE(attr(x, "composition_export", exact = TRUE))) .ct_v251_abort("Flat editing/export frames cannot be reused as composition sources.")
+  .ct_check_companion_source(x)
+  source <- .ct_source_raw(x, k)
+  stamp <- if (inherits(x, "tt_table")) x$meta$composition else
+    if (is.data.frame(x)) attr(x, "composition", exact = TRUE) else NULL
+  if (!is.null(stamp)) {
+    source$rows <- stamp$companion
+    source$types <- stamp$rows$type
+    source$keys <- stamp$rows$key
+  }
+  source$authenticated <- !is.null(stamp)
+  if (!is.null(cformat) && is.null(stamp)) {
+    .ct_v251_abort("cformat requires an authenticated producer-owned numeric companion snapshot.")
+  }
+  .ct_reformat_source(source, cformat, cisep)
+}
+
+.ct_source_raw <- function(x, k) {
   if (inherits(x, "tt_table")) {
     fm <- x$meta$frame
     if (is.null(fm) || is.null(fm$n_models)) {
@@ -477,6 +575,28 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
 
 # Reference flags of body rows `r` in the value column `col`.
 .ct_is_ref <- function(s, r, col) {
+  if (isTRUE(s$authenticated)) {
+    layout <- .ct_layout(s, 1L)
+    records <- s$rows
+    fields <- c("row", "model", "status")
+    if (!is.data.frame(records) || any(!fields %in% names(records)) ||
+        anyDuplicated(records[c("row", "model")]) || !is.character(records$status)) {
+      .ct_v251_abort("Reference identity requires unique canonical row/model state companions.")
+    }
+    for (field in c("row", "model")) {
+      value <- records[[field]]
+      limit <- if (field == "row") length(s$labels) else layout$n_models
+      if (!is.numeric(value) || anyNA(value) || any(!is.finite(value)) ||
+          any(value != trunc(value) | value < 1L | value > limit)) {
+        .ct_v251_abort("Reference state companions have invalid row/model positions.")
+      }
+    }
+    model <- (col - 1L) %/% layout$cpm + 1L
+    if (!is.null(s$model_map)) model <- s$model_map[model]
+    hit <- records[records$row == r & records$model == model, , drop = FALSE]
+    if (nrow(hit) != 1L) .ct_v251_abort("Reference identity has no unique canonical state for this row and model.")
+    return(hit$status %in% c("ref", "base"))
+  }
   v <- s$cells[r, col]
   if (!is.null(s$refset)) v %in% s$refset else .ct_key(v) == "reference"
 }
@@ -750,7 +870,7 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
     cli::cli_abort("{.arg separator} must be positive whole row numbers.", call = NULL)
   }
   n_frames <- length(models)
-  srcs <- lapply(seq_len(n_frames), function(f) .ct_source(models[[f]], f))
+  srcs <- lapply(seq_len(n_frames), function(f) .ct_source(models[[f]], f, a$cformat, a$cisep))
 
   use_names <- !is.null(a$rownames)
   sel <- .ct_selection_list(if (use_names) a$rownames else a$rows, n_frames, if (use_names) "rownames" else "rows")
@@ -954,11 +1074,12 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
                  meta = list(sheet = sheet, frame = frame, labelwidth = labelwidth, cpm = cpm_out,
                              n_models = n_models, compact = compact_out, separator = a$separator,
                              forest = forest$data, forest_error = forest$error,
+                             regtab_rows = .ct_vertical_companion(srcs, picked, body_at, lab),
                              sample_accounting = .tt_sample_bind(
                                lapply(srcs, `[[`, "sample_accounting"),
                                prefixes = paste0("modeltable", seq_along(srcs)),
                                commands = vapply(srcs, function(s) s$frame$source %||% "unknown", ""))))
-  .ct_write(tt, a)
+  .ct_write(.ct_stamp(tt), a)
 }
 
 # relabel(): a character vector named by row number, a list of
@@ -1009,7 +1130,7 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   for (f in seq_along(srcs)) {
     s <- srcs[[f]]
     r <- s$rows
-    r <- r[r$status %in% c("est", "base"), , drop = FALSE]
+    r <- r[.ct_forest_record(r), , drop = FALSE]
     r <- r[r$row %in% picked[[f]], , drop = FALSE]
     map <- s$model_map %||% seq_len(n_models)
     pos <- match(as.integer(r$model), map)
@@ -1050,6 +1171,9 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
                source_row = integer(), source_model = integer(), source_frame = character(),
                stringsAsFactors = FALSE)
   rownames(d) <- NULL
+  if (!nrow(d) || all(d$rowtype == "section")) {
+    return(list(data = NULL, error = "Selected rows have no eligible publication estimates or references for forest data."))
+  }
   attr(d, "source") <- "comptab"
   attr(d, "ci_level") <- frame$ci_level
   attr(d, "n_models") <- n_models
@@ -1061,6 +1185,7 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
 # Rate mode (comptab.ado:258-1775)
 
 .ct_rate_source <- function(x) {
+  if (inherits(x, "tt_flat") || isTRUE(attr(x, "composition_export", exact = TRUE))) .ct_v251_abort("Flat editing/export frames cannot be reused as rate composition sources.")
   if (inherits(x, "tt_table")) {
     fm <- x$meta$frame
     body <- as.matrix(x$body)
@@ -1090,6 +1215,17 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
 .ct_hr_scales <- c("hr", "ahr", "hazardratio", "adjustedhazardratio")
 
 .ct_rates <- function(ratetable, models, a, rate_label, model_names) {
+  if (isTRUE(a$allmodels) || isTRUE(a$keyed) || isTRUE(a$modelonly) || is.list(a$outcomemap) ||
+      (is.character(a$outcomemap) && any(grepl("|", a$outcomemap, fixed = TRUE))) ||
+      .ct_effect_norm(a$effect %||% "") %in% .ct_ratio_scales$IRR ||
+      any(vapply(models, function(x) {
+        frame <- if (inherits(x, "tt_table")) x$meta$frame else attributes(x)
+        n <- suppressWarnings(as.integer(frame$n_models))
+        length(n) == 1L && !is.na(n) && n > 0L &&
+          any(vapply(seq_len(n), function(m) .ct_effect_norm(.ct_meta(frame, "effect_scale", m)) %in% .ct_ratio_scales$IRR, TRUE))
+      }, TRUE))) {
+    return(.ct_rates_v251(ratetable, models, a, rate_label, model_names))
+  }
   .ct_check_common(a)
   effect <- a$effect %||% "aHR"
   reflabel <- a$reflabel %||% "Reference"
@@ -1150,7 +1286,7 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
 
   # Model tables (comptab.ado:493-752).
   n_frames <- length(models)
-  srcs <- lapply(seq_len(n_frames), function(f) .ct_source(models[[f]], f))
+  srcs <- lapply(seq_len(n_frames), function(f) .ct_source(models[[f]], f, a$cformat, a$cisep))
   lay <- .ct_layout(srcs[[1]], 1L)
   n_models <- lay$n_models
   cpm <- lay$cpm
@@ -1429,7 +1565,8 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
                 model_id = out_model_id, outcome_id = rate_ids, effect_scale = rep("HR", outcomes),
                 outcome_label = rate_display)
   stored <- list(N_rows = nb + 3L, N_outcomes = outcomes, N_sections = n_sections, N_modelrows = n_sel,
-                 N_modelframes = n_frames, ci_level = ci_level, rateframe = rate_label,
+                 N_modelframes = n_frames, N_models_per_outcome = 1L, N_modelonly = 0L,
+                 ci_level = ci_level, rateframe = rate_label,
                  modelframes = paste(model_names, collapse = " "), effect = effect)
   forest <- .ct_forest_rates(rs, srcs, secs, sec_rows, ref_rows, rowmap, picks, model_map, outcomes,
                              rate_display, frame, rate_label, model_names)
@@ -1495,7 +1632,7 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
     r <- picks$r[p]
     rr <- srcs[[f]]$rows
     for (o in seq_len(outcomes)) {
-      hit <- rr[rr$row == r & rr$model == model_map[f, o] & rr$status %in% c("est", "base"), , drop = FALSE]
+      hit <- rr[rr$row == r & rr$model == model_map[f, o] & .ct_forest_record(rr), , drop = FALSE]
       if (nrow(hit) != 1L) {
         return(list(data = NULL, error = paste0("Model table ", f, " holds no estimate for row ", r, " of outcome ", o,
                                                  ", so the forest data cannot be built.")))
@@ -1681,7 +1818,8 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   last <- nb + 3L
   foot <- nzchar(x$footnote)
   nr <- last + as.integer(foot)
-  outcomes <- (nc - 1L) %/% 5L
+  spans <- x$meta$outcome_spans %||% x$header[[1L]]$spans
+  outcomes <- nrow(spans)
   style <- x$style
   grid <- matrix("", nr, total)
   grid[1, 1] <- x$title
@@ -1699,8 +1837,10 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   for (c in seq.int(2L, length.out = nc - 1L)) {
     j <- c + 1L
     mx <- max(lens(j, 3L))
-    pos <- (c - 2L) %% 5L
-    cw[j] <- switch(pos + 1L,
+    block <- which(c >= spans$from & c <= spans$to)
+    pos <- c - spans$from[block]
+    slot <- if (pos < 3L) pos else 3L + (pos - 3L) %% 2L
+    cw[j] <- switch(slot + 1L,
                     min(max(ceiling(mx), 7), 10),
                     min(max(ceiling(mx * 0.90), 12), 18),
                     min(max(ceiling(mx * 0.88), 14), 22),
@@ -1726,7 +1866,8 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
   add("bottom", 3, 3, 2, total, code = hb)
   col <- 3L
   for (o in seq_len(outcomes)) {
-    end <- col + 4L
+    col <- spans$from[o] + 1L
+    end <- spans$to[o] + 1L
     add("merge", 2, 2, col, end)
     add("bold", 2, 2, col, col, code = 1)
     add("halign", 2, 2, col, col, code = 2)
@@ -1752,7 +1893,8 @@ hrcomptab <- function(ratetable, modeltables, rows = NULL, rownames = NULL, effe
     add("right", 2, last, 2, 2, code = vb)
     col <- 3L
     for (o in seq_len(outcomes)) {
-      end <- col + 4L
+      col <- spans$from[o] + 1L
+      end <- spans$to[o] + 1L
       add("right", 2, last, end, end, code = vb)
       col <- col + 5L
     }

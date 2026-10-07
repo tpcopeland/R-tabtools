@@ -1,5 +1,36 @@
 # tabtools (development version)
 
+* `outtab()` adds binary outcome counts and ordered crude/adjusted ratios,
+  separately verified sample populations, per-fit diagnostics and primary
+  publication masks that preserve raw analytical returns.
+
+* `ratetab()` adds separate grouping sections, common multi-outcome samples,
+  recurrent event counts, exact/log Poisson and saturated clustered intervals,
+  frequency replication, primary masks, all publication sinks, and raw
+  analytical saving with preserved grouping labels and collision mapping.
+  Zero-event exact upper limits apply under every method. Cluster correction
+  uses the full fitted sample; a single event-contributing cluster can retain
+  an interval when other clusters contribute exposure.
+
+* `tabcell()` formats seven scalar/vector cell forms with aligned source,
+  inference, state and masking provenance. Exact binomial/Poisson limits and
+  log-rate intervals follow the pinned native rules. Protected leaf inputs
+  and reconstructive interval companions are redacted. Cell columns publish
+  through `puttab()` and retain selected-row provenance in parent tables.
+
+
+* `comptab()` and `hrcomptab()` support several model blocks per rate
+  outcome, explicit structured mappings, keyed factor section/level placement,
+  rates-only sections and model-only appendices. HR and IRR scales remain
+  distinct. Outcome spans follow actual model counts; legacy HR layouts remain.
+* Composite `cformat` uses producer-owned publication numeric companions,
+  retaining stars and unavailable intervals; `cisep` alone rewrites canonical
+  intervals. Stale companions refuse. Plain unkeyed composite exports retain
+  headers, frame identity and sample accounting and cannot become sources.
+* Authenticated composite sources classify references by canonical model state,
+  preserving real estimates when custom reference text has the same value.
+  Imported companion mutations refuse before publication.
+
 * `tt_fitcount()` freezes unweighted observation/event/person/exposure and
   term counts with exact fit/record reuse checks. `regtab()` adds `mincount`,
   explicit failed columns, no-test/absent/constraint labels, and separate raw
@@ -25,6 +56,23 @@
   df/df.error or declared normal reference. Survival command declarations
   require compatible distribution/metric metadata. Explicit non-estimated and
   fixed states carry evidence; zero SE and labels never manufacture a base.
+* Retained missing character/factor groups in computed rates now have explicit
+  category labels; computed event/no-time errors use a consistent class.
+* Verify copied export bytes before success/history, and retain original files
+  when a staged copy reports success with incomplete contents.
+* Limit Table 1 header replacement protection to its actual denominator
+  dependencies; style effecttab added rows as added rows.
+
+* The 272-scenario native baseline now comes directly from the authenticated
+  tabtools 2.5.1 Git objects, with complete artifact and unchanged-input
+  inventories. Named 2.1.14 publication cases retain their original bytes.
+  The native demo has separate authenticated snapshots and an actual runtime
+  catalog; fresh reconstruction and R comparison remain required before its
+  generated output is promoted.
+
+* Native demo staging now separates its source snapshots from scenario inputs,
+  records native storage metadata and full schema/data hashes, and preserves
+  authentic stage artifacts and failed-run diagnostics before scratch cleanup.
 
 * Table 1 and `desctab()` add primary-only printed-count masking,
   `nosmallcells`, literal mask text and native-consistent session mode

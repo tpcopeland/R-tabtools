@@ -1,13 +1,14 @@
 name,kind,row,col,value
 _golden_id,meta,,,T30j
-_golden_tabtools_version,meta,,,2.1.14
-_golden_fvgen_version,meta,,,1.2.5
+_golden_tabtools_version,meta,,,2.5.1
+_golden_fvgen_version,meta,,,1.2.7
 _golden_stata_version,meta,,,17
 markdown_cols,scalar,,,5
 markdown_rows,scalar,,,10
 markdown,macro,,,T30j.md
 sheet,macro,,,T30j
 xlsx,macro,,,table1_tc.xlsx
+smdtype,macro,,,pair
 varlist,macro,,,index_age female education diabetes hypertension anxiety prior_cvd
 methods,macro,,,"Baseline characteristics were compared between groups defined by Treatment group. Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures. P-values were calculated using independent t-test, Pearson's chi-squared test. A two-sided p-value < 0.05 was considered statistically significant. Analysis performed in Stata 17 (StataCorp, College Station, TX)."
 Dapa,macro,,,"Data are presented as mean±SD for continuous measures, and No. (%) for categorical measures."

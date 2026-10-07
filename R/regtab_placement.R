@@ -264,7 +264,8 @@
   parent <- .rt_placement_parent(rows)
   rows$parent_label <- rep("", nrow(rows))
   if (!any(nzchar(parent))) return(rows)
-  frame <- if (is.data.frame(fit)) NULL else .rt_frame(fit)$mf
+  frame <- NULL
+  frame_loaded <- FALSE
   for (i in which(nzchar(parent))) {
     key <- .rt_match_key(parent[i])
     h <- which(rows$kind %in% c("cat_header", "int_header") & rows$key == parent[i])
@@ -275,6 +276,10 @@
       available <- unique(label[valid])
       rows$parent_label[i] <- if (length(available) == 1L) available else key
     } else {
+      if (!frame_loaded) {
+        frame <- .rt_frame(fit)$mf
+        frame_loaded <- TRUE
+      }
       rows$parent_label[i] <- .rt_var_label(frame, key)
     }
   }

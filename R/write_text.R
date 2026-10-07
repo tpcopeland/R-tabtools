@@ -43,6 +43,10 @@
   fail <- function(e) {
     cli::cli_abort("Could not write the {.arg {arg}} target {.file {path}}.", parent = e, call = NULL)
   }
+  # Verify the exact bytes before a caller records successful sink history.
+  previous <- if (append && file.exists(path)) tryCatch(readBin(path, "raw", file.size(path)), error = fail) else raw()
+  expected <- c(previous, charToRaw(paste0(paste(enc2utf8(lines), collapse = "\n"),
+    if (length(lines)) "\n" else "")))
   con <- tryCatch(suppressWarnings(file(path, if (append) "ab" else "wb")), error = fail)
   is_open <- TRUE
   on.exit(if (is_open) try(close(con), silent = TRUE))
@@ -55,6 +59,10 @@
     NULL
   }, warning = function(w) w, error = function(e) e)
   if (!is.null(cond)) fail(cond)
+  actual <- tryCatch(readBin(path, "raw", file.size(path)), error = fail)
+  if (!identical(actual, expected)) {
+    cli::cli_abort("Could not verify the {.arg {arg}} target {.file {path}}.", call = NULL)
+  }
   invisible(path)
 }
 
@@ -310,7 +318,7 @@ tt_write_markdown <- function(x, path, append = FALSE) {
   if (is.na(n) || n == 0) return(FALSE)
   last <- tryCatch({
     con <- suppressWarnings(file(path, "rb"))
-    on.exit(close(con))
+    on.exit(try(close(con), silent = TRUE), add = TRUE)
     seek(con, n - 1)
     readBin(con, "raw", 1L)
   }, error = function(e) as.raw(10L))
@@ -330,7 +338,7 @@ tt_console_lines <- function(x) {
   lay <- x$layout
   # stratetab.ado:879-886 blanks the lower console header's first cell
   # while retaining both Exposure labels in the frame and workbook.
-  if (identical(x$command, "stratetab") && nh == 2L) g[2L, 1L] <- ""
+  if (x$command %in% c("stratetab", "ratetab") && nh == 2L) g[2L, 1L] <- ""
   # layout$console_skip_blank_header (effecttab): a header row blank in
   # every column is not listed.
   if (isTRUE(lay$console_skip_blank_header) && nh) {

@@ -1,2 +1,0 @@
-Markdown exported to W19.md
-wttab: wrote 6 rows x 15 cols to sheet W19 in wttab.xlsx

@@ -40,19 +40,10 @@ golden_scenario_live <- function(id, phase) {
 golden_dir <- function() test_path("golden")
 golden_path <- function(...) file.path(golden_dir(), ...)
 
-# Transitional Phase 2 routing, removed when WP-3G promotes the full baseline.
-# Only inventoried Phase 2 scenarios use the authentic c215afd artifacts.
-# Scenario input datasets and the legacy baseline remain untouched.
-golden_phase2_ids <- c(sprintf("P%02d", 1:15), sprintf("K%02d", 1:9),
-                       sprintf("S%02d", 1:8), "W15", sprintf("W%02d", 17:22))
-golden_phase2_dir <- function() golden_path("phase2-2.5.1")
+# Every ordinary scenario uses the authenticated full native 2.5.1 baseline.
 golden_baseline <- function(id) {
-  golden_scenario(id)  # reject unknown IDs rather than silently falling back
-  if (id %in% golden_phase2_ids) {
-    list(dir = golden_phase2_dir(), tabtools = "2.5.1", fvgen = "1.2.7")
-  } else {
-    list(dir = golden_dir(), tabtools = "2.1.14", fvgen = "1.2.5")
-  }
+  golden_scenario(id)  # unknown IDs are errors
+  list(dir = golden_dir(), tabtools = "2.5.1", fvgen = "1.2.7")
 }
 golden_artifact_path <- function(id, file) file.path(golden_baseline(id)$dir, file)
 
@@ -1209,7 +1200,7 @@ run_golden_scenario <- function(id, patch = NULL) {
   expect_identical(golden_check_derived(tt), character(), label = paste(id, "derived suppression cells"))
   # A documented, individually asserted divergence (test-golden-regtab.R)
   # may replace a cell before the comparators run.
-  if (!is.null(patch)) tt <- if (identical(patch, golden_strip_smd_note)) patch(tt, id = id) else patch(tt)
+  if (!is.null(patch)) tt <- patch(tt)
   expect_cells_match(tt, id)
   expect_console_match(tt, id)
   # Sink paths and Markdown row counts exist only when a sink is written, and
@@ -1254,56 +1245,4 @@ run_golden_scenario <- function(id, patch = NULL) {
     }
     expect_sink_match(path, id, ext, tt = tt)
   }
-}
-
-# Pending golden regeneration (2026-10-05): Stata tabtools 2.4.0 names the
-# pair of a 3+ group SMD in the header ("SMD (A vs B)"), the console note
-# and the footnote. R follows 2.4.0; the goldens are still 2.1.14's (bare
-# "SMD" header, "Note: SMD computed for first two groups only (A vs B)",
-# no footnote). The new form must appear exactly when 2.1.14 printed its
-# note; it is then turned back into 2.1.14's so the rest of the table is
-# compared. Delete this once the goldens come from 2.4.0
-# (~/Stata-Dev/_take_action/2026-10-05-tabtools-smd-multigroup.md).
-golden_strip_smd_note <- function(tt, id = NULL, native_grid = NULL, native_console = NULL) {
-  if (!is.null(id)) {
-    native_grid <- golden_read_cells(id)
-    native_console <- golden_read_lines(golden_artifact_path(id, paste0(id, "_console.txt")))
-  }
-  if (is.null(native_grid) || is.null(native_console)) {
-    stop("Legacy SMD translation requires explicit authentic native inputs.", call. = FALSE)
-  }
-  rx_old <- "^Note: SMD computed for first two groups only \\((.*) vs (.*)\\)$"
-  old <- grep(rx_old, native_console, value = TRUE)
-  actual_pre <- tt$meta$console_before %||% character()
-  smd_col <- which(tt$cols$role == "smd")
-  actual_new <- grep("^Note: SMD compares ", actual_pre, value = TRUE)
-  if (!length(old)) {
-    testthat::expect_identical(actual_new, character(), label = "no undeclared new SMD console note")
-    if (length(smd_col)) testthat::expect_false(grepl("^SMD \\(", tt$header[[1]]$text[smd_col]))
-    testthat::expect_false(any(startsWith(golden_fn_paragraphs(tt$footnote), "SMD compares ")))
-    return(tt)
-  }
-  testthat::expect_length(old, 1L)
-  pair <- sub(rx_old, "\\1 vs \\2", old)
-  hdr <- which(apply(native_grid, 1L, function(row) any(trimws(row) == "SMD")))[1L]
-  if (is.na(hdr)) stop("Native SMD note has no SMD header.", call. = FALSE)
-  groups <- trimws(native_grid[hdr, -1L])
-  groups <- sub("^(Crude|Weighted) ", "", groups)
-  groups <- unique(setdiff(groups, c("", "Total", "SMD", "p-value", "Test", "Statistic")))
-  note <- sprintf("SMD compares %s only (the first two of %d groups).", pair, length(groups))
-  expected_pre <- paste("Note:", note)
-  testthat::expect_identical(actual_new, expected_pre, label = "exact source-derived SMD console note")
-  testthat::expect_length(smd_col, 1L)
-  testthat::expect_identical(unname(tt$header[[1]]$text[smd_col]), paste0("SMD (", pair, ")"),
-                             label = "exact source-derived SMD pair header")
-  prior <- if (!is.null(id)) golden_publication_contract(id)$paragraphs else {
-    tail <- native_grid[nrow(native_grid), 1L]
-    if (startsWith(tail, "Counts below ")) tail else character()
-  }
-  testthat::expect_identical(golden_fn_paragraphs(tt$footnote), c(prior, note),
-                             label = "complete independently expected footer before SMD translation")
-  tt$meta$console_before[actual_pre == expected_pre] <- old
-  tt$header[[1]]$text[smd_col] <- "SMD"
-  tt$footnote <- paste(prior, collapse = " \\ ")
-  tt
 }
