@@ -3,3 +3,8 @@ tests/testthat/golden/** -text
 *.dta binary
 *.xlsx binary
 *.rds binary
+# Hash-pinned native fixtures and QA evidence are byte-exact too (Windows
+# checkouts would otherwise rewrite them with CRLF line endings).
+tests/testthat/fixtures/** -text
+qa/data/** -text
+qa/demo/data/** -text
