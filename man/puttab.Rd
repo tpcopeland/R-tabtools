@@ -35,14 +35,16 @@ puttab(
   panelinline = FALSE,
   noindent = FALSE,
   spanheader = NULL,
-  nformat = NULL
+  nformat = NULL,
+  blockheader = FALSE
 )
 }
 \arguments{
 \item{x}{A data frame, a numeric matrix, or a \code{tt_table}.}
 
 \item{vars}{Data frames only: character vector of the columns to export,
-in this order (Stata's varlist). Default: every column.}
+in this order (Stata's varlist). Default: every column, except technical
+keys of a validated \code{tt_flat} source and panel helper columns.}
 
 \item{subset}{Data frames only, Stata's \code{if} and \verb{in}: a logical vector
 with one value per row of \code{x} (\code{NA} counts as \code{FALSE}), or the row
@@ -85,7 +87,8 @@ the first column with a right rule.}
 numbers, 0 to 6 (default from \code{\link[=tabtools_options]{tabtools_options()}}, else 2).}
 
 \item{varlabels}{Use variable labels (the \code{"label"} attribute) as the
-header; a column without one keeps its name.}
+header; a column without one keeps its name. For \code{tt_flat}, use the
+last source header row for visible columns; technical keys keep names.}
 
 \item{noheader}{Write no header row in Excel or CSV. In Markdown the
 first body row supplies the required GFM header when it is a panel
@@ -144,6 +147,17 @@ Default \code{NULL} uses whole numbers. Width is widened to 32; decimals
 must be fewer than 32. Fractional columns retain \code{digits}. Imported
 Stata formats ending in \code{fc} retain grouping, whereas \code{gc} does not
 request grouping. Value labels and dates retain their display.}
+
+\item{blockheader}{Build a spanning model-name row from validated
+\code{tt_flat} metadata (default \code{FALSE}). Implies \code{varlabels}; statistic
+headers come from the last source header row, while spans use
+\code{model_names} and original \code{column_model} indices, including projected
+CI/p-only or reordered statistics. Adjacent columns of the same model
+form a span; equal labels of different models remain separate. Explicit
+technical columns have no model span. Compatible with panels; refuses
+\code{noheader}, \code{spanheader}, matrix and \code{tt_table} sources. A plain data
+frame, or a flat selection without named model statistics, receives an
+automatic no-effect note and no spanning row.}
 }
 \value{
 A \code{tt_table} (\code{command = "puttab"}), returned invisibly when
@@ -157,6 +171,14 @@ including inline headings), \code{n_spans}, and, for the files written,
 
 \verb{$meta$sample_accounting} carries the source ledger described in
 \code{\link[=tt_table]{tt_table()}}; unavailable record counts remain explicit.
+For a flat source, \verb{$meta$flat_source} retains validated call/source IDs,
+model names, projected headers and original column-model indices, plus
+row types, row source identities, and all original model-state/source
+matrices for selected source rows. \code{selected_columns}, \code{source_rows},
+\code{omitted_keys} and \code{body_rows} identify the exported columns, original
+input rows, omitted keys and corresponding publication body positions
+(excluding synthetic panel rows). \code{keys} retains only technical columns
+available in the input; absent raw keys or order are never inferred.
 For \code{puttab()}, omitted \code{headershade} uses the session setting and an
 explicit \code{FALSE} disables ordinary, spanning and panel header shading.
 Invalid layout arguments raise \code{tabtools_error_layout} before writing.
@@ -196,6 +218,21 @@ row merely repeats them (a table that was already header-shaped), that
 row is dropped rather than shown twice (Stata's rule: at least two
 rows, every exported column character, every first-row cell equal to
 its column's label, the first column optionally blank).
+\item \strong{tt_flat} from \code{\link[=tt_flat]{tt_flat()}}: editable regression/effect body records.
+The complete schema is validated before selection or writing.
+Technical columns (\verb{_order}, \verb{_term}, \verb{_rowtype}, \verb{_block}, and
+\verb{_state_<original model index>}) are omitted by default; explicitly
+naming them in \code{vars} exports them. Ordinary data-frame columns whose
+names start with an underscore remain visible. Only present technical
+columns actually omitted by default receive an automatic note; panel
+helper columns are excluded separately. Flat body records are never
+consumed as an embedded header. Edited visible cells remain literal;
+their analytical identity and state remain source provenance.
+Row/column \code{[} projections preserve validated metadata. Lost class
+with remaining semantic attributes, or malformed metadata, raises
+\code{tabtools_error_flat} before any output changes. To deliberately discard
+semantics, use \code{data.frame(lapply(flat, identity), check.names = FALSE)}.
+Empty row or exported-column selections are refused.
 \item \strong{Matrix} (Stata's \code{matrix()}): the row names become the first
 (label) column and the column names the header; the label column's
 header is blank. Names of the form \code{eq:name} are kept as they are
@@ -225,6 +262,10 @@ line (with \code{xlsx}) and \verb{Markdown exported to ...} line (with
 \item A \code{Date} or \code{POSIXct} column whose Stata format uses a code R does
 not render (or an R column without a Stata format) shows the default
 \verb{\%td}/\verb{\%tc} display.
+\item Flat omitted-key and no-model-span notices are automatic publication
+paragraphs after user footnotes in every R sink, and count in \code{n_rows}.
+Stata emits these diagnostics only to the console and names its varlist
+and variable characteristics. R uses \code{vars} and validated model metadata.
 }
 }
 
@@ -249,6 +290,11 @@ panels <- data.frame(group = c("A", "A", "B"),
                      term = c("Age", "Female", "Age"), n = c(1500, 800, 900))
 puttab(panels, panel = "group", panelinline = TRUE,
        panelheader = list(text = c("", "Count")), nformat = "\%12.0fc")
+
+# Edit display cells while retaining model/row identities
+flat <- tt_flat(regtab(fit, stats = "n"))
+flat[[2]][flat$`_term` == "wt"] <- "See text"
+puttab(flat, blockheader = TRUE, footnote = "Edited display cells")
 }
 \seealso{
 \code{\link[=stacktab]{stacktab()}} to assemble puttab sheets into one composite.

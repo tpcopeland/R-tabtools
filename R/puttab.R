@@ -44,6 +44,21 @@
 #'   row is dropped rather than shown twice (Stata's rule: at least two
 #'   rows, every exported column character, every first-row cell equal to
 #'   its column's label, the first column optionally blank).
+#' * **tt_flat** from [tt_flat()]: editable regression/effect body records.
+#'   The complete schema is validated before selection or writing.
+#'   Technical columns (`_order`, `_term`, `_rowtype`, `_block`, and
+#'   `_state_<original model index>`) are omitted by default; explicitly
+#'   naming them in `vars` exports them. Ordinary data-frame columns whose
+#'   names start with an underscore remain visible. Only present technical
+#'   columns actually omitted by default receive an automatic note; panel
+#'   helper columns are excluded separately. Flat body records are never
+#'   consumed as an embedded header. Edited visible cells remain literal;
+#'   their analytical identity and state remain source provenance.
+#'   Row/column `[` projections preserve validated metadata. Lost class
+#'   with remaining semantic attributes, or malformed metadata, raises
+#'   `tabtools_error_flat` before any output changes. To deliberately discard
+#'   semantics, use `data.frame(lapply(flat, identity), check.names = FALSE)`.
+#'   Empty row or exported-column selections are refused.
 #' * **Matrix** (Stata's `matrix()`): the row names become the first
 #'   (label) column and the column names the header; the label column's
 #'   header is blank. Names of the form `eq:name` are kept as they are
@@ -59,7 +74,8 @@
 #'
 #' @param x A data frame, a numeric matrix, or a `tt_table`.
 #' @param vars Data frames only: character vector of the columns to export,
-#'   in this order (Stata's varlist). Default: every column.
+#'   in this order (Stata's varlist). Default: every column, except technical
+#'   keys of a validated `tt_flat` source and panel helper columns.
 #' @param subset Data frames only, Stata's `if` and `in`: a logical vector
 #'   with one value per row of `x` (`NA` counts as `FALSE`), or the row
 #'   numbers to keep. Both refer to the rows of `x` before a repeated-label
@@ -121,8 +137,19 @@
 #'   `first`. Labels are literal. Empty labels, overlaps, invalid ranges
 #'   and `noheader` are refused. Markdown prefixes every covered header
 #'   with the span label; CSV retains a separate span row.
+#' @param blockheader Build a spanning model-name row from validated
+#'   `tt_flat` metadata (default `FALSE`). Implies `varlabels`; statistic
+#'   headers come from the last source header row, while spans use
+#'   `model_names` and original `column_model` indices, including projected
+#'   CI/p-only or reordered statistics. Adjacent columns of the same model
+#'   form a span; equal labels of different models remain separate. Explicit
+#'   technical columns have no model span. Compatible with panels; refuses
+#'   `noheader`, `spanheader`, matrix and `tt_table` sources. A plain data
+#'   frame, or a flat selection without named model statistics, receives an
+#'   automatic no-effect note and no spanning row.
 #' @param varlabels Use variable labels (the `"label"` attribute) as the
-#'   header; a column without one keeps its name.
+#'   header; a column without one keeps its name. For `tt_flat`, use the
+#'   last source header row for visible columns; technical keys keep names.
 #' @param noheader Write no header row in Excel or CSV. In Markdown the
 #'   first body row supplies the required GFM header when it is a panel
 #'   heading or panel header (including inline); otherwise use a blank
@@ -146,6 +173,14 @@
 #'
 #'   `$meta$sample_accounting` carries the source ledger described in
 #'   [tt_table()]; unavailable record counts remain explicit.
+#'   For a flat source, `$meta$flat_source` retains validated call/source IDs,
+#'   model names, projected headers and original column-model indices, plus
+#'   row types, row source identities, and all original model-state/source
+#'   matrices for selected source rows. `selected_columns`, `source_rows`,
+#'   `omitted_keys` and `body_rows` identify the exported columns, original
+#'   input rows, omitted keys and corresponding publication body positions
+#'   (excluding synthetic panel rows). `keys` retains only technical columns
+#'   available in the input; absent raw keys or order are never inferred.
 #' For `puttab()`, omitted `headershade` uses the session setting and an
 #' explicit `FALSE` disables ordinary, spanning and panel header shading.
 #' Invalid layout arguments raise `tabtools_error_layout` before writing.
@@ -161,6 +196,10 @@
 #' * A `Date` or `POSIXct` column whose Stata format uses a code R does
 #'   not render (or an R column without a Stata format) shows the default
 #'   `%td`/`%tc` display.
+#' * Flat omitted-key and no-model-span notices are automatic publication
+#'   paragraphs after user footnotes in every R sink, and count in `n_rows`.
+#'   Stata emits these diagnostics only to the console and names its varlist
+#'   and variable characteristics. R uses `vars` and validated model metadata.
 #' @seealso [stacktab()] to assemble puttab sheets into one composite.
 #' @examples
 #' # A matrix: the row names become the label column
@@ -183,6 +222,11 @@
 #'                      term = c("Age", "Female", "Age"), n = c(1500, 800, 900))
 #' puttab(panels, panel = "group", panelinline = TRUE,
 #'        panelheader = list(text = c("", "Count")), nformat = "%12.0fc")
+#'
+#' # Edit display cells while retaining model/row identities
+#' flat <- tt_flat(regtab(fit, stats = "n"))
+#' flat[[2]][flat$`_term` == "wt"] <- "See text"
+#' puttab(flat, blockheader = TRUE, footnote = "Edited display cells")
 #' @export
 puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
                    title = NULL, footnote = NULL, font = NULL, fontsize = NULL,
@@ -192,7 +236,7 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
                    markdown = NULL, mdappend = FALSE, open = FALSE,
                    hlines = NULL, vlines = NULL, boldrows = NULL, panel = NULL,
                    panelheader = NULL, panelinline = FALSE, noindent = FALSE,
-                   spanheader = NULL, nformat = NULL) {
+                   spanheader = NULL, nformat = NULL, blockheader = FALSE) {
   # sheet = NULL is no sheet: the default (review P2-2).
   sheet_given <- !base::missing(sheet) && !is.null(sheet)
   if (is.null(sheet)) sheet <- "Table"
@@ -200,7 +244,14 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
     v <- get(a)
     if (!is.logical(v) || length(v) != 1L || is.na(v)) cli::cli_abort("{.arg {a}} must be TRUE or FALSE.", call = NULL)
   }
-  for (a in c("panelinline", "noindent")) .puttab_check_flag(get(a), a)
+  for (a in c("panelinline", "noindent", "blockheader")) .puttab_check_flag(get(a), a)
+  .puttab_check_flat(x)
+  if (blockheader) {
+    if (noheader) .puttab_abort("blockheader requires a header row; remove noheader.")
+    if (!is.null(spanheader)) .puttab_abort("blockheader and spanheader may not be combined.")
+    if (!is.data.frame(x)) .puttab_abort("blockheader requires a data frame source; it is not allowed with a matrix or tt_table.")
+    varlabels <- TRUE
+  }
   nformat <- .puttab_nformat(nformat)
   ph <- .puttab_panel_spec(x, panel, panelheader, panelinline, noindent)
   if (inherits(x, "tt_table") && !is.null(nformat)) {
@@ -231,16 +282,21 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
                         varlabels = varlabels, noheader = noheader, noembedheader = noembedheader,
                         nformat = nformat, panel_spec = ph)
   if (!is.null(ph)) src <- .puttab_panelize_source(src, x, ph, panelinline, noindent, digits)
-  spans <- .puttab_spans(spanheader, ncol(src$body), noheader)
+  spans <- if (blockheader) .puttab_block_spans(src) else .puttab_spans(spanheader, ncol(src$body), noheader)
+  if (blockheader && !length(spans)) {
+    src$notes <- c(src$notes, "(puttab: no selected statistic columns have model labels; blockheader has no effect)")
+  }
   rules <- list(hlines = .puttab_coordinates(hlines, nrow(src$body), "hlines"),
                 vlines = .puttab_coordinates(vlines, ncol(src$body), "vlines"),
                 boldrows = .puttab_coordinates(boldrows, nrow(src$body), "boldrows"))
   .tt_preflight_targets(xlsx = xlsx, csv = csv, markdown = markdown, mdappend = mdappend)
   title <- title %||% src$title %||% ""
   footnote <- footnote %||% src$footnote %||% ""
+  footnote <- .tt_append_footnotes(footnote, src$notes)
   tt <- .puttab_table(src$header, src$body, title = title, footnote = footnote, style = style,
                       sheet = sheet, source = src$source, sample = src$sample,
                       panels = src$panels, spans = spans, rules = rules)
+  tt$meta$flat_source <- .puttab_flat_metadata(src)
 
   .puttab_export(tt, xlsx = xlsx, csv = csv, markdown = markdown,
                  sheet = sheet, sheet_given = sheet_given, mdappend = mdappend, open = open)
@@ -339,6 +395,9 @@ puttab <- function(x, vars = NULL, subset = NULL, xlsx = NULL, sheet = "Table",
 
 .puttab_source <- function(x, vars, subset, digits, varlabels, noheader, noembedheader = FALSE,
                            nformat = NULL, panel_spec = NULL) {
+  if (.puttab_check_flat(x)) {
+    return(.puttab_from_flat(x, vars, subset, digits, varlabels, noheader, nformat, panel_spec))
+  }
   if (inherits(x, "tt_table")) {
     if (!is.null(vars) || !is.null(subset)) {
       cli::cli_abort("{.arg vars} and {.arg subset} apply to a data frame source only.", call = NULL)
